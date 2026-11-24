@@ -24,6 +24,15 @@ return {
 	HeavyMass = 80,
 	MinSpeedMultiplier = 0.55,
 
+	-- Pulling a piece out of someone else's fort.
+	PrySeconds = 3,
+	PryGrace = 0.25, -- seconds of network slack when the client says the pry finished
+	PryNoiseInterval = 1, -- loud noise and a creak at the piece this often while prying
+	PrySounds = { "cabinet_creak", "scrape", "wardrobe_creak" },
+	PryOwnerWarning = "Someone is pulling apart your fort",
+	PryOwnerWarningCooldown = 10,
+	PryHint = "[Hold F] Pry loose",
+
 	SpawnTestProps = true,
 	TestPropsOrigin = Vector3.new(20, 0, 20),
 }

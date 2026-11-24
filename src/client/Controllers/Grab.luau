@@ -1,5 +1,6 @@
 -- Grab and build controls. Reads keyboard, mouse and gamepad directly, asks the server to
 -- grab or drop, streams aim and rotation while carrying, and draws the ghost and axis arrow.
+-- Someone else's placed piece needs the key held while a pry bar fills; the server times it too.
 local CollectionService = game:GetService("CollectionService")
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
@@ -9,6 +10,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local GrabMath = require(ReplicatedStorage.Shared.Logic.GrabMath)
+local GrabPry = require(ReplicatedStorage.Shared.Logic.GrabPry)
 local Net = require(ReplicatedStorage.Shared.Net)
 
 local Settings = Config.Grab
@@ -35,6 +37,7 @@ local dropRemote: RemoteEvent
 local stateRemote: RemoteEvent
 local aimRemote: UnreliableRemoteEvent
 local ghostRemote: UnreliableRemoteEvent
+local pryRemote: RemoteEvent
 
 local holding: PVInstance? = nil
 local angles = { Tip = 0, Turn = 0, Roll = 0 }
@@ -43,9 +46,12 @@ local holdDistance = Settings.DefaultHoldDistance
 local freeRotate = false
 local rotateHeld: { [Enum.KeyCode]: number } = {}
 local lastAim = 0
+local prying: { prop: PVInstance, startedAt: number }? = nil
 
 local ghost: BoxHandleAdornment
 local arrow: ConeHandleAdornment
+local pryBar: Frame
+local pryFill: Frame
 
 local function boxOf(prop: PVInstance): (CFrame, Vector3)
 	if prop:IsA("BasePart") then
@@ -62,6 +68,22 @@ local function grabbableFrom(instance: Instance?): PVInstance?
 		instance = instance.Parent
 	end
 	return nil
+end
+
+local function needsPry(prop: PVInstance): boolean
+	local placedBy = prop:GetAttribute("PlacedBy")
+	return GrabPry.needsPry(if type(placedBy) == "number" then placedBy else nil, player.UserId)
+end
+
+local function stopPry(tellServer: boolean)
+	if not prying then
+		return
+	end
+	prying = nil
+	pryBar.Visible = false
+	if tellServer then
+		pryRemote:FireServer(nil)
+	end
 end
 
 local function tryGrab(input: InputObject)
@@ -83,12 +105,24 @@ local function tryGrab(input: InputObject)
 	local range = Settings.GrabReach + (camera.CFrame.Position - root.Position).Magnitude
 	local hit = workspace:Raycast(ray.Origin, ray.Direction * range, params)
 	local prop = grabbableFrom(hit and hit.Instance)
-	if prop then
+	if not prop then
+		return
+	end
+	if needsPry(prop) then
+		prying = { prop = prop, startedAt = os.clock() }
+		pryFill.Size = UDim2.fromScale(0, 1)
+		pryBar.Visible = true
+		pryRemote:FireServer(prop)
+	else
 		requestRemote:FireServer(prop)
 	end
 end
 
 local function onToggle(_, inputState: Enum.UserInputState, input: InputObject)
+	if inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
+		stopPry(true)
+		return Enum.ContextActionResult.Sink
+	end
 	if inputState ~= Enum.UserInputState.Begin then
 		return Enum.ContextActionResult.Sink
 	end
@@ -186,6 +220,7 @@ end
 
 local function onState(prop: PVInstance?)
 	holding = prop
+	stopPry(false)
 	if prop then
 		local boxCFrame = boxOf(prop)
 		local tip, turn, roll = boxCFrame:ToEulerAnglesYXZ()
@@ -235,7 +270,24 @@ local function lookForGrabbable(camera: Camera?, head: BasePart?)
 	local result =
 		workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * Settings.GrabReach, params)
 	local target = result and grabbableFrom(result.Instance)
-	Hints.set("grabTarget", if target then Hints.text("GrabTargetHint") else nil, 3)
+	local text = if not target
+		then nil
+		elseif needsPry(target) then Settings.PryHint
+		else Hints.text("GrabTargetHint")
+	Hints.set("grabTarget", text, 3)
+end
+
+local function stepPry()
+	local pry = prying
+	if not pry then
+		return
+	end
+	local progress = GrabPry.progress(os.clock() - pry.startedAt, Settings.PrySeconds)
+	pryFill.Size = UDim2.fromScale(progress, 1)
+	if progress >= 1 then
+		stopPry(false)
+		requestRemote:FireServer(pry.prop)
+	end
 end
 
 local function onRender(dt: number)
@@ -245,6 +297,7 @@ local function onRender(dt: number)
 	local head = character and character:FindFirstChild("Head") :: BasePart?
 	if not prop then
 		lookForGrabbable(camera, head)
+		stepPry()
 		return
 	end
 	if not camera or not head then
@@ -292,6 +345,29 @@ local function makeAdornments()
 	arrow.ZIndex = 1
 	arrow.Visible = false
 	arrow.Parent = gui
+
+	local screen = Instance.new("ScreenGui")
+	screen.Name = "GrabPry"
+	screen.IgnoreGuiInset = true
+	screen.ResetOnSpawn = false
+	screen.Parent = gui
+
+	-- Sits just under the crosshair, above the hint lines.
+	pryBar = Instance.new("Frame")
+	pryBar.AnchorPoint = Vector2.new(0.5, 0.5)
+	pryBar.Position = UDim2.new(0.5, 0, 0.5, 26)
+	pryBar.Size = UDim2.fromOffset(120, 6)
+	pryBar.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
+	pryBar.BackgroundTransparency = 0.3
+	pryBar.BorderSizePixel = 0
+	pryBar.Visible = false
+	pryBar.Parent = screen
+
+	pryFill = Instance.new("Frame")
+	pryFill.Size = UDim2.fromScale(0, 1)
+	pryFill.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
+	pryFill.BorderSizePixel = 0
+	pryFill.Parent = pryBar
 end
 
 -- Remotes are fetched in Start because the client waits for them and Init may not yield.
@@ -301,10 +377,14 @@ function Grab:Start()
 	stateRemote = Net.event("GrabState")
 	aimRemote = Net.unreliable("GrabAim")
 	ghostRemote = Net.unreliable("GrabGhost")
+	pryRemote = Net.event("GrabPry")
 	makeAdornments()
 
 	stateRemote.OnClientEvent:Connect(onState)
 	ghostRemote.OnClientEvent:Connect(onGhost)
+	pryRemote.OnClientEvent:Connect(function()
+		stopPry(false)
+	end)
 	RunService.RenderStepped:Connect(onRender)
 	ContextActionService:BindAction("GrabToggle", onToggle, false, Enum.KeyCode.F, Enum.KeyCode.ButtonR1)
 end

@@ -1,5 +1,6 @@
 -- Grab and build. The server owns every carried prop: clients send aim and rotation,
 -- the server moves the prop, finds where it lands, and freezes it there on drop.
+-- Dropped props remember their placer in "PlacedBy"; anyone else has to pry them loose first.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7,13 +8,19 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local GrabMath = require(ReplicatedStorage.Shared.Logic.GrabMath)
+local GrabPry = require(ReplicatedStorage.Shared.Logic.GrabPry)
 local GrabRules = require(ReplicatedStorage.Shared.Logic.GrabRules)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
+
+local Loudness = require(script.Parent.Loudness)
 
 local Settings = Config.Grab
 
 -- Casts use a slightly smaller box so props can sit flush against walls and each other.
 local CAST_SHRINK = 0.98
+-- A finished pry the client never claims (lost remote, lag spike) stops making noise after this.
+local PRY_ABANDON_AFTER = 2
 
 type Carry = {
 	prop: PVInstance,
@@ -29,16 +36,27 @@ type Carry = {
 	lastGhost: number,
 }
 
+type Pry = {
+	prop: PVInstance,
+	startedAt: number,
+	lastNoise: number?,
+	soundIndex: number,
+}
+
 local Grab = {}
 
 local carriers: { [Player]: Carry } = {}
 local carriedBy: { [PVInstance]: Player } = {}
+local pries: { [Player]: Pry } = {}
+local ownerWarnedAt: { [number]: number } = {}
 
 local requestRemote: RemoteEvent
 local dropRemote: RemoteEvent
 local stateRemote: RemoteEvent
 local aimRemote: UnreliableRemoteEvent
 local ghostRemote: UnreliableRemoteEvent
+local pryRemote: RemoteEvent
+local feedbackRemote: RemoteEvent
 
 local function boxOf(prop: PVInstance): (CFrame, Vector3)
 	if prop:IsA("BasePart") then
@@ -143,9 +161,18 @@ local function findLanding(carry: Carry, root: BasePart, humanoid: Humanoid): (C
 	return landed, ok, reason
 end
 
-local function release(player: Player, carry: Carry, pivot: CFrame?)
+local function placedByOf(prop: Instance): number?
+	local placedBy = prop:GetAttribute("PlacedBy")
+	return if type(placedBy) == "number" then placedBy else nil
+end
+
+-- placed: the carrier set it down somewhere new, so it becomes theirs.
+local function release(player: Player, carry: Carry, pivot: CFrame?, placed: boolean)
 	if pivot and carry.prop:IsDescendantOf(workspace) then
 		carry.prop:PivotTo(pivot)
+	end
+	if placed then
+		carry.prop:SetAttribute("PlacedBy", player.UserId)
 	end
 	for _, part in carry.parts do
 		part.Anchored = true -- frozen where it lands until the server resets
@@ -166,36 +193,130 @@ local function forceDrop(player: Player, carry: Carry)
 	if root and humanoid then
 		local landed, ok = findLanding(carry, root, humanoid)
 		if landed and ok then
-			release(player, carry, landed * carry.pivotOffset)
+			release(player, carry, landed * carry.pivotOffset, true)
 			return
 		end
 	end
-	release(player, carry, carry.pickupPivot)
+	release(player, carry, carry.pickupPivot, false)
 end
 
-local function onGrabRequest(player: Player, prop: any)
-	if typeof(prop) ~= "Instance" or not prop:IsA("PVInstance") then
-		return
-	end
-	if not CollectionService:HasTag(prop, Settings.Tag) or not prop:IsDescendantOf(workspace) then
-		return
-	end
-	local root, humanoid = bodyOf(player)
-	local boxCFrame, size = boxOf(prop)
-	local distance = if root
-		then (boxCFrame.Position - root.Position).Magnitude - size.Magnitude / 2
-		else math.huge
+local function isGrabbable(prop: any): boolean
+	return typeof(prop) == "Instance"
+		and prop:IsA("PVInstance")
+		and CollectionService:HasTag(prop, Settings.Tag)
+		and prop:IsDescendantOf(workspace)
+end
 
+-- Gap between the player and the prop's edge, roughly.
+local function distanceTo(root: BasePart?, prop: PVInstance): number
+	if not root then
+		return math.huge
+	end
+	local boxCFrame, size = boxOf(prop)
+	return math.max((boxCFrame.Position - root.Position).Magnitude - size.Magnitude / 2, 0)
+end
+
+local function canGrabNow(player: Player, prop: PVInstance): (boolean, BasePart?, Humanoid?)
+	local root, humanoid = bodyOf(player)
 	local ok = GrabRules.canGrab({
 		alive = root ~= nil,
 		alreadyCarrying = carriers[player] ~= nil,
 		carriedByOther = carriedBy[prop] ~= nil,
-		distance = math.max(distance, 0),
+		distance = distanceTo(root, prop),
 		reach = Settings.GrabReach,
 	})
+	return ok and humanoid ~= nil, root, humanoid
+end
+
+local function cancelPry(player: Player)
+	if not pries[player] then
+		return
+	end
+	pries[player] = nil
+	if player.Parent then
+		pryRemote:FireClient(player, nil)
+	end
+end
+
+local function warnOwner(prop: PVInstance, raider: Player)
+	local ownerId = placedByOf(prop)
+	local owner = ownerId and Players:GetPlayerByUserId(ownerId)
+	if not owner or owner == raider then
+		return
+	end
+	local now = os.clock()
+	if GrabPry.due(ownerWarnedAt[owner.UserId], now, Settings.PryOwnerWarningCooldown) then
+		ownerWarnedAt[owner.UserId] = now
+		feedbackRemote:FireClient(owner, Settings.PryOwnerWarning)
+	end
+end
+
+local function pryNoise(player: Player, pry: Pry)
+	local parts = partsOf(pry.prop)
+	local holder = parts[1]
+	if not holder then
+		return
+	end
+	Loudness.emit(holder.Position, "loud", player)
+	pry.soundIndex = pry.soundIndex % #Settings.PrySounds + 1
+	local id = ModelLibrary.soundId(Settings.PrySounds[pry.soundIndex])
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.RollOffMinDistance, sound.RollOffMaxDistance = Loudness.rollOff("loud")
+	sound.Parent = holder
+	sound:Play()
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+end
+
+-- prop starts a pry, nil means the player let go.
+local function onPry(player: Player, prop: any)
+	if prop == nil then
+		pries[player] = nil
+		return
+	end
+	local valid = isGrabbable(prop)
+		and GrabPry.needsPry(placedByOf(prop), player.UserId)
+		and canGrabNow(player, prop)
+	if not valid then
+		pries[player] = nil
+		pryRemote:FireClient(player, nil)
+		return
+	end
+	pries[player] = { prop = prop, startedAt = os.clock(), lastNoise = nil, soundIndex = 0 }
+	warnOwner(prop, player)
+end
+
+local function onGrabRequest(player: Player, prop: any)
+	if not isGrabbable(prop) then
+		return
+	end
+	local ok, root, humanoid = canGrabNow(player, prop)
 	if not ok or not humanoid then
 		return
 	end
+	if GrabPry.needsPry(placedByOf(prop), player.UserId) then
+		local pry = pries[player]
+		local finished = GrabPry.canFinish({
+			started = pry ~= nil,
+			samePiece = pry ~= nil and pry.prop == prop,
+			elapsed = if pry then os.clock() - pry.startedAt else 0,
+			duration = Settings.PrySeconds,
+			grace = Settings.PryGrace,
+			distance = distanceTo(root, prop),
+			reach = Settings.GrabReach,
+		})
+		if not finished then
+			cancelPry(player)
+			return
+		end
+	end
+	pries[player] = nil
+	local boxCFrame, size = boxOf(prop)
 
 	local parts = partsOf(prop)
 	local collide = {}
@@ -248,7 +369,7 @@ local function onDrop(player: Player)
 	end
 	local landed, ok = findLanding(carry, root, humanoid)
 	if landed and ok then
-		release(player, carry, landed * carry.pivotOffset)
+		release(player, carry, landed * carry.pivotOffset, true)
 	else
 		ghostRemote:FireClient(player, landed, carry.size, false)
 	end
@@ -269,12 +390,26 @@ local function onAim(player: Player, position: any, tip: any, turn: any, roll: a
 	carry.angles = Vector3.new(GrabMath.wrapAngle(tip), GrabMath.wrapAngle(turn), GrabMath.wrapAngle(roll))
 end
 
+local function stepPries(now: number)
+	for player, pry in pries do
+		local stillOk = isGrabbable(pry.prop) and canGrabNow(player, pry.prop)
+		local abandoned = now - pry.startedAt > Settings.PrySeconds + PRY_ABANDON_AFTER
+		if not stillOk or abandoned then
+			cancelPry(player)
+		elseif GrabPry.due(pry.lastNoise, now, Settings.PryNoiseInterval) then
+			pry.lastNoise = now
+			pryNoise(player, pry)
+		end
+	end
+end
+
 local function step(dt: number)
 	local now = os.clock()
+	stepPries(now)
 	local alpha = 1 - math.exp(-dt * Settings.CarrySmoothing)
 	for player, carry in carriers do
 		if not carry.prop:IsDescendantOf(workspace) then
-			release(player, carry, nil)
+			release(player, carry, nil, false)
 			continue
 		end
 		local root, humanoid = bodyOf(player)
@@ -342,13 +477,18 @@ function Grab:Init()
 	stateRemote = Net.event("GrabState")
 	aimRemote = Net.unreliable("GrabAim")
 	ghostRemote = Net.unreliable("GrabGhost")
+	pryRemote = Net.event("GrabPry")
+	feedbackRemote = Net.event("SupplyFeedback")
 end
 
 function Grab:Start()
 	requestRemote.OnServerEvent:Connect(onGrabRequest)
 	dropRemote.OnServerEvent:Connect(onDrop)
 	aimRemote.OnServerEvent:Connect(onAim)
+	pryRemote.OnServerEvent:Connect(onPry)
 	Players.PlayerRemoving:Connect(function(player)
+		pries[player] = nil
+		ownerWarnedAt[player.UserId] = nil
 		local carry = carriers[player]
 		if carry then
 			forceDrop(player, carry)
