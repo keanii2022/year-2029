@@ -28,6 +28,17 @@ return {
 		expect(LifeSchedule.pick(EVENTS, "Night", rolls({ 0.9 }))).toBe("box")
 		expect(LifeSchedule.pick(EVENTS, "Siren", rolls({ 0.5 }))).toBe(nil)
 	end,
+	["pick scales weight by a number phase"] = function()
+		local events = {
+			figure = { weight = 2, phases = { Day = 0.1, Night = true } },
+			drip = { weight = 2, phases = { Day = true, Night = true } },
+		}
+		expect(LifeSchedule.pick(events, "Night", rolls({ 0.4 }))).toBe("drip")
+		expect(LifeSchedule.pick(events, "Night", rolls({ 0.6 }))).toBe("figure")
+		expect(LifeSchedule.pick(events, "Day", rolls({ 0.9 }))).toBe("drip")
+		expect(LifeSchedule.pick(events, "Day", rolls({ 0.96 }))).toBe("figure")
+		expect(LifeSchedule.pick(events, "Siren", rolls({ 0.5 }))).toBe(nil)
+	end,
 	["bag gives every line once before repeating, never twice in a row"] = function()
 		local bag = LifeSchedule.newBag()
 		local roll = rolls({ 0.7, 0.2, 0.95, 0.4, 0.05 })
