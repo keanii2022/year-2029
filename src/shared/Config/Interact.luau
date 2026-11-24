@@ -57,6 +57,17 @@ return {
 		sound = "phone_message",
 		text = "Hello! Thank you for calling. Your call is very important to us. Please stay on the line. We know where you are. Please hold.",
 	},
+	-- Answered at night: no voice, just this on the line. loop plays until the call ends, sound plays
+	-- once after soundDelay. "phone_giggle" isn't in the sound pack yet and stays silent until it is.
+	NightPhoneLines = {
+		{
+			loop = "breath_heavy_loop",
+			sound = "phone_giggle",
+			soundDelay = 5,
+			text = "...you hear breathing. Then a giggle.",
+		},
+		{ sound = "store_jingle", speed = 0.6, text = "...the store jingle, slow and wrong." },
+	},
 	ScreenLine = "Are you still there?",
 	SoldOutLine = "SOLD OUT. Thank you for shopping!",
 
