@@ -12,3 +12,4 @@ Packages/*
 sourcemap.json
 roblox.yml
 .claude/worktrees/
+.claude/launch.json

@@ -275,13 +275,13 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Cuff, rob, break free, cooldown. Done when getting cuffed feels bad but not unfair.
 
 ### 11. The dog
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 4, 8, 9
 - **Scope:** `src/server/Systems/Dog.luau`, `src/shared/Config/Dog.luau`, `src/shared/Logic/Dog*.luau`, `tests/Dog*.spec.luau`
 - Spawn, trust over visits with food, follow, guard, bark, bite. Done when finding one feels like a big deal.
 
 ### 12. Night tricks
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 6, 7, 8
 - **Scope:** `src/server/Systems/NightTricks.luau`, `src/client/Controllers/NightTricks.luau`, `src/shared/Config/NightTricks.luau`, `src/shared/Logic/NightTricks*.luau`, `tests/NightTricks*.spec.luau`
 - Store rearranging, hiding inside furniture with breath holding, room sound, rain and lightning, PA lines, phones, flashlight battery, generators with fuel, lore. Done when a night alone has a plan, not just hiding.
@@ -337,6 +337,16 @@ The Blender run is done. Every model lives in `art/` with its FBX, texture, prev
 - Robbing can feel mean. Cuff and kill cooldowns, and robot-only rewards, keep it fun.
 - Moving hundreds of physics props with many players can lag. Props snap to a grid and freeze when dropped.
 - Giant maps can be slow on phones and consoles. Streaming and simple greybox art first.
+
+## Before playtesting (Keani)
+
+- Open the Year 2029 place in Studio (never another game's place), then connect the Rojo plugin to `rojo serve`. Or just open `build/Year2029.rbxl` after `./scripts/check.sh`.
+- Upload the art: `ROBLOX_API_KEY=... ROBLOX_CREATOR_ID=<your user id> python3 tools/upload_assets.py --upload` (key needs asset read + write; rerun if audio limits stop it). Until then every model is a grey stand-in and sounds are silent.
+- Game Settings > Security > Enable Studio Access to API Services, to test real saves.
+- Pick the music: `Config.DayNight.DayMusicId` and `Config.Interact.BoomboxMusicId`.
+- Import the animation clips from `art/**/anim/` with the Animation Editor (Open Cloud can't upload them); motion is procedural until then.
+- Record the lines in `art/sounds/VOICE_LINES.md`. The dog has no sounds yet (dog_bark, dog_growl, dog_whine, dog_bite, dog_yelp, dog_eat).
+- Quick test loop: `Config.DayNight.ShortCycle = true`, `Config.Warehouse.UseTestRoom = true`, `Config.Cuffs` debug flag for free cuffs.
 
 ## Calls to review
 
@@ -420,3 +430,18 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 14: Cosmetics are earned only, never sold: hats (Hard Hat at 1 night, Foil Cap at 5, Salvaged Antenna at 1 robot), colours (Concrete, Hazard Yellow, Oil Black, Spray Red, Exit Green), trails (Dust at a 20-minute life, Sparks at 10 robots, Oil Drip at 25 nights).
 - Step 14: A night only counts if you were alive before it started and still alive at dawn.
 - Step 14: If a save can't load or is open on another server, you play a no-save session with a message and the locker stays locked. Your real save is never overwritten.
+- Step 12: A spare battery goes in automatically when you switch on a dead flashlight (no reload key). Full battery on respawn. A slim battery bar at bottom center turns red under 20.
+- Step 12: Hold Jump (Space / Cross) while hidden to hold your breath, about 7s max. Running out = a loud gasp robots hear. Holding cuts a hunter's chance of finding you to a quarter. Peek view is 7 dark slats.
+- Step 12: 6 generators, each broken at first: 4s hold to fix, pull start catches 30/50/75/100%, starts at 35% fuel, a full tank is about 4 min. Lights 4 warm lamps around it; the hum is a loud noise every 7s.
+- Step 12: 10 fuel cans restocked every morning; carry 2, each adds 50% fuel, lost if you go down. Kept off the bag so they don't take slots.
+- Step 12: Night PA every 70-150s: chime + subtitle. 35% of the time it names the aisle sign nearest a real player. Only "aisle 32" has a voice line; other numbers are subtitle only unless you record more.
+- Step 12: Lightning every 25-70s as a double flash; 12% of near strikes show a robot shape down your aisle in the first flash, gone by the second.
+- Step 12: Room sound: big echo in aisles, tight in rooms, muffled while hidden. 6 original survivor journal pages (paper panels, typewriter font).
+- Step 12: Skipped: the night phone messages and the store rearranging itself (it would mean rebuilding the warehouse every morning).
+- Step 11: A stray turns up each morning in a room 15-60% of the way in, with a dog bowl beside it as a clue. If nobody's started earning its trust, it wanders off overnight and a new one appears.
+- Step 11: Trust: eats while you watch at 20, wags at 45, follows at 75. A visit adds at most 24 and a day at most 40, so it follows on day 2. It takes your cheapest food first; better food builds more trust.
+- Step 11: The first player to reach "follows" owns it; if the owner leaves, it goes back to being a stray. Others see only their own hearts (4 muted red hearts).
+- Step 11: One prompt cycles Follow me / Guard here / Stay for the owner; everyone else sees "Feed".
+- Step 11: Bite does 18 damage every 2.5s; a bitten robot is stunned 3s. Guards within 14 studs, chases raiders up to 25 studs out. Strays hide at night; an owned dog stays near you and whimpers.
+- Step 11: Lines: "It snatches the food and backs off, growling." / "It eats while you watch." / "Its tail wags." / "It trusts you now. It's yours." / "It needs time. Come back tomorrow." / "It likes you, but it already has someone."
+- Step 11: Trust resets when the server restarts. The grey stand-in is tinted warm tan until the model's uploaded.
