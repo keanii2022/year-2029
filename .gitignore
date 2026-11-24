@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.pyc
+art/_kit/.blender.lock
+art/**/anim/_frames/
+*.blend1
+*.rbxl.lock
+*.rbxlx.lock
