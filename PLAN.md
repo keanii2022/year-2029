@@ -227,28 +227,28 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Grab, carry, drop, rotate, stack, grid snap and freeze on drop, with the placing controls above. Server decides every move. Spawns a few greybox props for testing. Done when a kid builds a walled fort in a few minutes and a friend can tear it down.
 
 ### 4. Guns
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 1, 3
 - **Scope:** `src/server/Systems/Combat.luau`, `src/server/Systems/Inventory.luau`, `src/client/Controllers/Gun.luau`, `src/client/Controllers/Hud.luau`, `src/shared/Config/Guns.luau`, `src/shared/Logic/Combat*.luau`, `src/shared/Logic/Inventory*.luau`, `tests/Combat*.spec.luau`, `tests/Inventory*.spec.luau`
 - **Out of scope:** robots, handcuffs, supplies beyond ammo.
 - Basic blaster (sparks, no blood), ammo, health, going down drops everything as a loot pile, respawn. Server-side hits. Done when a 1 v 1 over a fort is fair and fun. (First playable.)
 
 ### 5. The giant warehouse
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 1, 2
 - **Scope:** `src/server/Systems/Warehouse.luau`, `src/shared/Config/Warehouse.luau`, `src/shared/Logic/WarehouseGen*.luau`, `tests/WarehouseGen*.spec.luau`
 - **Out of scope:** lighting changes (step 6), robots.
 - Code-built aisles, junk stacks and randomly placed robot rooms (seeded), tall ceiling lost in haze, streaming on. Spawns move into it; the test room stays reachable by a Config flag. Done when walking two minutes one way still feels endless.
 
 ### 6. Lights on, siren, lights out
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 1, 2
 - **Scope:** `src/server/Systems/DayNight.luau`, `src/client/Controllers/Lighting.luau`, `src/client/Controllers/Flashlight.luau`, `src/client/Controllers/Music.luau`, `src/shared/Config/DayNight.luau`, `src/shared/Logic/Clock*.luau`, `tests/Clock*.spec.luau`
 - **Out of scope:** robots, generators (step 12).
 - Server clock, day and night phases, lighting flip, siren, music and voice line hooks (sound ids from the manifest), flashlights. Done when the mood flips hard.
 
 ### 7. Objects come to life and sound
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 2, 3
 - **Scope:** `src/server/Systems/Interact.luau`, `src/server/Systems/Loudness.luau`, `src/client/Controllers/Interact.luau`, `src/shared/Config/Interact.luau`, `src/shared/Logic/Loudness*.luau`, `tests/Loudness*.spec.luau`
 - **Out of scope:** robots reacting to sound (step 8 reads the loudness system).
@@ -269,7 +269,7 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Hunger, energy, food, ammo boxes, bandages, loot by depth. Done when day has a clear shopping list.
 
 ### 10. Handcuffs
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 4
 - **Scope:** `src/server/Systems/Cuffs.luau`, `src/client/Controllers/Cuffs.luau`, `src/shared/Config/Cuffs.luau`, `src/shared/Logic/Cuffs*.luau`, `tests/Cuffs*.spec.luau`
 - Cuff, rob, break free, cooldown. Done when getting cuffed feels bad but not unfair.
@@ -355,3 +355,21 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 2: Demo motion is on: every moving part opens and closes on a 4-second loop (doors 100°, slides 80%, levers 30°). Lets you check the hinges at a glance.
 - Step 2: Stand-ins before upload are grey blocks, with Glow in warm orange and Screen near-black. You can still read what's what.
 - Step 2: Images upload as Decals and sounds as Audio; the two sampler mp3s go in a "misc" group.
+- Step 6: Cycle is Day 6 min, Siren 1 min, Night 4 min (`ShortCycle = true` for a 40/15/30s test loop). Long enough days to loot and build; nights short enough to stay scary.
+- Step 6: Day is dim greenish fluorescent, the siren pulses red, lights out flickers to near-black cold blue, morning snaps back on. The hard flip the step asked for.
+- Step 6: Flashlight is L / D-pad up. A free key that's easy to reach in the dark.
+- Step 6: Announcer welcome lines play in the morning and as random daytime PA, countdown 11s before lights out, a lights-out line at lights out. Night PA lines left for step 12.
+- Step 6: `DayMusicId` is empty for you to fill in with your pick.
+- Step 4: "Starter Blaster" firing "Blaster Cells" straight from your bag (60 per stack, no magazines or reload). Simple first playable.
+- Step 4: Spawn kit is 1 blaster + 36 cells. 100 health, 22 damage out to 40 studs dropping to 11 at 140, one shot per 0.22s: 5 hits to down someone up close. Leaves time to react and hide behind a fort.
+- Step 4: No health regen (healing comes from supplies). Respawn after 6s. 10-slot bag.
+- Step 4: Loot pile is a dark fabric bag with a "Take" prompt (hold 0.6s) listing what's inside.
+- Step 4: Sparks are orange-white and the tracer is a thin red-orange line. Aim zooms to 72%.
+- Step 4: HUD: off-white health bar bottom-left (red under 30%), ammo bottom-right ("EMPTY" in red marker), small crosshair, X hit marker that turns red when you down someone. Down screen: tilted red "YOU WENT DOWN", "Your stuff is where you fell.", "Back in N".
+- Step 5: Warehouse is 8000x8000 studs (about 9.5 min wall to wall at walk speed), roof at 600 lost in haze, at (0,0,-6000). Players spawn there; set `Config.Warehouse.UseTestRoom = true` to spawn in the test room instead. "Huge" was your call.
+- Step 5: Seed 0 = a new layout every server. Keeps it fresh every round.
+- Step 5: Floor mix: 40% shelving blocks, 35% open junk and loose furniture, 25% nearly empty, giant pillars every 400 studs. 40 spawns at least 600 studs apart so you start alone.
+- Step 5: 90 robot rooms (kitchen, living, bedroom, kids, office, bathroom, arcade, store), each with a rug, a lamp and 4-7 furniture pieces. "Store" rooms are the old store from before AI.
+- Step 5: Aisle sign numbers are random 1-99 so they can't be used to navigate. Adds to the lost feeling.
+- Step 5: About 1400 wall marks: spray 40% (RUN, HIDE, LIGHTS LIE, EXIT?, DON'T SLEEP, tallies, >>>), oil 35%, claws 10%, old posters 15%.
+- Step 5: Haze is dusty grey-tan (density 0.42).
