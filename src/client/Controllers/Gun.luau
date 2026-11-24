@@ -5,10 +5,12 @@ local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local Config = require(ReplicatedStorage.Shared.Config)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Input = require(script.Parent.Input)
@@ -117,6 +119,33 @@ local function drawShot(from: Vector3, to: Vector3, normal: Vector3?, hitPlayer:
 	end
 end
 
+-- Plays a gun sound: flat in your own ears when position is nil, otherwise out in the world so
+-- others hear it from where it happened. Silent until the sound is uploaded.
+local function playSound(name: string, position: Vector3?, volume: number?, pitch: number?)
+	local id = ModelLibrary.soundId(name)
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = volume or 1
+	sound.PlaybackSpeed = (pitch or 1) * (1 + (math.random() - 0.5) * settings.SoundPitchJitter)
+	if not position then
+		-- A sound under SoundService plays flat, with no position
+		sound.Parent = SoundService
+		sound:Play()
+		Debris:AddItem(sound, 3)
+		return
+	end
+	local emitter = effectPart(position)
+	emitter.Transparency = 1
+	sound.RollOffMinDistance = settings.SoundRollOff[1]
+	sound.RollOffMaxDistance = settings.SoundRollOff[2]
+	sound.Parent = emitter
+	sound:Play()
+	Debris:AddItem(emitter, 4)
+end
+
 local function fireOnce(): boolean
 	local camera = workspace.CurrentCamera
 	local character = player.Character
@@ -135,9 +164,14 @@ local function fireOnce(): boolean
 		minInterval = gun.fireInterval,
 	})
 	if not ok then
+		if (carried[gun.ammo] or 0) <= 0 and os.clock() - lastShotAt >= gun.fireInterval then
+			lastShotAt = os.clock()
+			playSound(settings.Sounds.Empty, nil, 0.7)
+		end
 		return false
 	end
 	lastShotAt = os.clock()
+	playSound(settings.Sounds.Fire, nil, settings.Sounds.FireVolume, settings.Sounds.FirePitch)
 	-- Spend the cell now so the HUD and the next shot don't wait on the server's reply.
 	carried[gun.ammo] -= 1
 	notifyChanged()
@@ -160,6 +194,7 @@ local function fireOnce(): boolean
 		result and result.Normal,
 		hitPlayer
 	)
+	playSound(settings.Sounds.Impact, hitPosition, settings.Sounds.ImpactVolume, settings.Sounds.ImpactPitch)
 	fireRemote:FireServer(origin, direction)
 	return true
 end
@@ -226,6 +261,13 @@ function Gun.Start()
 		function(shooter: Player, origin: Vector3, hitPosition: Vector3, normal: Vector3?, hitPlayer: boolean)
 			if shooter ~= player then
 				drawShot(origin, hitPosition, normal, hitPlayer)
+				playSound(settings.Sounds.Fire, origin, settings.Sounds.FireVolume, settings.Sounds.FirePitch)
+				playSound(
+					settings.Sounds.Impact,
+					hitPosition,
+					settings.Sounds.ImpactVolume,
+					settings.Sounds.ImpactPitch
+				)
 			end
 		end
 	)

@@ -28,6 +28,9 @@ return {
 	CushionChance = 0.35,
 	CushionAmmo = { Min = 2, Max = 6 },
 	CushionCooldown = 300, -- seconds before the same couch can pay out again
+	CushionFoundLine = "You dig through the cushions... + %d Blaster Cells",
+	CushionNothingLine = "You dig through the cushions. Crumbs. Nothing.",
+	CushionEmptyLine = "Someone already searched this one.",
 	SitSpinTime = 1.2,
 
 	-- Vending machine. Step 9 adds the snack item; until then the machine plays but drops nothing.

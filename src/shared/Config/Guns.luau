@@ -46,4 +46,18 @@ return {
 	LootPileTag = "LootPile",
 	LootPickupRange = 8,
 	LootPickupHold = 0.6,
+
+	-- Sound names from the manifest. Fire is the zap, Impact lands where the shot hits, Empty is
+	-- the dry click with no cells. Others hear shots out to SoundRollOff[2] studs (guns are loud).
+	Sounds = {
+		Fire = "blaster_thump",
+		FireVolume = 1,
+		FirePitch = 0.72, -- below 1 is deeper
+		Impact = "emp_thump",
+		ImpactVolume = 0.35,
+		ImpactPitch = 1.3,
+		Empty = "flashlight_click",
+	},
+	SoundRollOff = { 8, 120 },
+	SoundPitchJitter = 0.12,
 }

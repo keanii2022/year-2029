@@ -85,7 +85,7 @@ function Interact.verb(behaviour: Behaviour, on: boolean, hidden: boolean): stri
 	elseif kind == "vend" then
 		return "Buy a snack"
 	elseif kind == "sit" then
-		return if behaviour.search then "Sit and search" else "Sit"
+		return if behaviour.search then "Search the cushions" else "Sit"
 	elseif kind == "phone" then
 		return if on then "Answer" else "Dial"
 	end

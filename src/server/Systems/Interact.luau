@@ -519,8 +519,10 @@ end
 
 local function searchCushions(player: Player, model: Model)
 	local now = os.clock()
+	local feedback = Net.event("SupplyFeedback")
 	local last = cushionSearched[model]
 	if last and now - last < Settings.CushionCooldown then
+		feedback:FireClient(player, Settings.CushionEmptyLine)
 		return
 	end
 	cushionSearched[model] = now
@@ -533,6 +535,9 @@ local function searchCushions(player: Player, model: Model)
 	)
 	if amount > 0 and InventoryItems[Settings.CushionItem] then
 		Inventory.add(player, Settings.CushionItem, amount)
+		feedback:FireClient(player, string.format(Settings.CushionFoundLine, amount))
+	else
+		feedback:FireClient(player, Settings.CushionNothingLine)
 	end
 end
 

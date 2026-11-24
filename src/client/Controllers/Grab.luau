@@ -12,6 +12,7 @@ local GrabMath = require(ReplicatedStorage.Shared.Logic.GrabMath)
 local Net = require(ReplicatedStorage.Shared.Net)
 
 local Settings = Config.Grab
+local Hints = require(script.Parent.Hints)
 local player = Players.LocalPlayer
 
 local GHOST_OK = Color3.fromRGB(120, 220, 140)
@@ -195,10 +196,13 @@ local function onState(prop: PVInstance?)
 		holdDistance = Settings.DefaultHoldDistance
 		bindCarryControls()
 		arrow.Visible = true
+		Hints.set("grabTarget", nil)
+		Hints.set("carry", Hints.text("CarryHint"), 2)
 	else
 		unbindCarryControls()
 		ghost.Visible = false
 		arrow.Visible = false
+		Hints.set("carry", nil)
 	end
 end
 
@@ -213,12 +217,37 @@ local function onGhost(landed: CFrame?, size: Vector3, ok: boolean)
 	ghost.Visible = true
 end
 
+-- "[F] Grab" under the crosshair when something grabbable is in reach, checked a few times a second
+local lastLook = 0
+local function lookForGrabbable(camera: Camera?, head: BasePart?)
+	local now = os.clock()
+	if now - lastLook < 0.2 then
+		return
+	end
+	lastLook = now
+	if not camera or not head then
+		Hints.set("grabTarget", nil)
+		return
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { player.Character :: Instance }
+	local result =
+		workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * Settings.GrabReach, params)
+	local target = result and grabbableFrom(result.Instance)
+	Hints.set("grabTarget", if target then Hints.text("GrabTargetHint") else nil, 3)
+end
+
 local function onRender(dt: number)
 	local prop = holding
 	local camera = workspace.CurrentCamera
 	local character = player.Character
 	local head = character and character:FindFirstChild("Head") :: BasePart?
-	if not prop or not camera or not head then
+	if not prop then
+		lookForGrabbable(camera, head)
+		return
+	end
+	if not camera or not head then
 		return
 	end
 

@@ -8,6 +8,7 @@ local SoundService = game:GetService("SoundService")
 local ClockEffects = require(ReplicatedStorage.Shared.Logic.ClockEffects)
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
+local Hints = require(script.Parent.Hints)
 local Net = require(ReplicatedStorage.Shared.Net)
 
 local Settings = Config.DayNight
@@ -91,10 +92,26 @@ local function scheduleAnnouncement()
 	end)
 end
 
+-- The siren comes in blasts with quiet between, not one endless wail
+local function sirenBursts(token: number)
+	task.spawn(function()
+		while phaseToken == token do
+			setPlaying(sirenLoop, true)
+			task.wait(Settings.SirenBurst.On)
+			setPlaying(sirenLoop, false)
+			if phaseToken ~= token then
+				break
+			end
+			task.wait(Settings.SirenBurst.Off)
+		end
+		setPlaying(sirenLoop, false)
+	end)
+end
+
 local function show(phase: string, endsAt: number, animate: boolean)
 	phaseToken += 1
 	setPlaying(dayMusic, phase == "Day")
-	setPlaying(sirenLoop, phase == "Siren")
+	setPlaying(sirenLoop, false)
 	setPlaying(nightHum, phase == "Night")
 	setPlaying(nightAmbience, phase == "Night")
 
@@ -107,6 +124,8 @@ local function show(phase: string, endsAt: number, animate: boolean)
 		end
 		scheduleAnnouncement()
 	elseif phase == "Siren" then
+		Hints.flash("siren", Settings.SirenHint, 8)
+		sirenBursts(phaseToken)
 		local timeLeft = endsAt - workspace:GetServerTimeNow()
 		local countdownIn = ClockEffects.countdownDelay(timeLeft, Settings.CountdownLead)
 		if countdownIn then
