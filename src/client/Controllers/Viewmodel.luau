@@ -183,7 +183,10 @@ local function update(dt: number)
 		return
 	end
 	local alive = humanoid ~= nil and root ~= nil and humanoid.Health > 0
-	local lowered = not alive or not armed or player:GetAttribute("CarrySpeedMultiplier") ~= nil
+	local lowered = not alive
+		or not armed
+		or player:GetAttribute("CarrySpeedMultiplier") ~= nil
+		or player:GetAttribute("HandsBusy") == true
 	lowerBlend = MovementLogic.smooth(lowerBlend, if lowered then 1 else 0, settings.ViewmodelLowerEase, dt)
 	if lowered and lowerBlend > 0.98 then
 		model.Parent = nil

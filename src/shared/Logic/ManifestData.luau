@@ -6327,6 +6327,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 98173047978671,
+			textureId = 92314042702249,
 		},
 		{
 			name = "checkout_lane_lit",
