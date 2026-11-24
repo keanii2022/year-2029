@@ -1,42 +1,55 @@
 return {
 	-- Seconds per phase. Morning is instant: Night ends straight into Day.
-	Lengths = { Day = 360, Siren = 60, Night = 240 },
+	Lengths = { Day = 360, Siren = 45, Night = 240 },
 	-- Debug: flip on for quick playtest loops.
 	ShortCycle = false,
 	ShortLengths = { Day = 40, Siren = 15, Night = 30 },
 
-	-- Lighting per phase. Day is a dim old fluorescent store, night is near black and cold.
+	-- Lighting per phase. Inside a closed warehouse, so the ambient does the work and the haze
+	-- swallows the distance. Day is a dim old fluorescent store; night is dark and cold but never
+	-- pitch black: emergency strips glow red, exit signs glow green, and the flashlight matters.
 	-- Haze settings go on the Atmosphere named "Haze" in Lighting when it exists.
 	Lighting = {
 		Day = {
-			Ambient = Color3.fromRGB(112, 116, 104),
-			OutdoorAmbient = Color3.fromRGB(118, 122, 110),
-			Brightness = 1.4,
+			Ambient = Color3.fromRGB(92, 98, 102),
+			OutdoorAmbient = Color3.fromRGB(92, 98, 102),
+			Brightness = 0.6,
 			ClockTime = 14,
-			ColorShift_Top = Color3.fromRGB(205, 215, 195),
-			ColorShift_Bottom = Color3.fromRGB(40, 42, 38),
-			FogColor = Color3.fromRGB(150, 152, 140),
+			ColorShift_Top = Color3.fromRGB(190, 205, 210),
+			ColorShift_Bottom = Color3.fromRGB(30, 32, 34),
+			FogColor = Color3.fromRGB(120, 124, 128),
 			FogStart = 0,
-			FogEnd = 800,
-			Haze = { Density = 0.35, Color = Color3.fromRGB(190, 195, 180), Haze = 1.5 },
+			FogEnd = 400,
+			Haze = { Density = 0.48, Color = Color3.fromRGB(124, 130, 134), Haze = 2.8 },
 		},
 		Night = {
-			Ambient = Color3.fromRGB(7, 9, 15),
-			OutdoorAmbient = Color3.fromRGB(5, 7, 13),
+			Ambient = Color3.fromRGB(24, 28, 40),
+			OutdoorAmbient = Color3.fromRGB(24, 28, 40),
 			Brightness = 0,
 			ClockTime = 0,
-			ColorShift_Top = Color3.fromRGB(20, 30, 50),
+			ColorShift_Top = Color3.fromRGB(30, 40, 60),
 			ColorShift_Bottom = Color3.fromRGB(0, 0, 0),
-			FogColor = Color3.fromRGB(4, 5, 9),
+			FogColor = Color3.fromRGB(10, 12, 18),
 			FogStart = 0,
-			FogEnd = 180,
-			Haze = { Density = 0.55, Color = Color3.fromRGB(18, 22, 32), Haze = 2.5 },
+			FogEnd = 200,
+			Haze = { Density = 0.55, Color = Color3.fromRGB(16, 20, 30), Haze = 2.4 },
 		},
 	},
+	-- Strip lights at night: most go dark, emergency ones glow a dim red
+	Emergency = {
+		Glow = Color3.fromRGB(150, 24, 20),
+		Light = Color3.fromRGB(255, 50, 40),
+		Brightness = 0.7,
+		Range = 26,
+	},
+	DeadStripColor = Color3.fromRGB(60, 62, 64),
+	FlickerRange = 160, -- only strips this close to the camera flicker
 	-- Siren keeps the day lights and pulses the ambient toward red.
 	SirenColor = Color3.fromRGB(170, 18, 18),
 	SirenStrength = 0.6,
 	SirenFlashRate = 1.2, -- flashes per second
+	SirenBurst = { On = 4, Off = 6 }, -- seconds of wail, then seconds of quiet, until lights out
+	SirenHint = "NIGHT IS COMING. Get somewhere safe before the lights go out.",
 	-- Lights out flicker: alternating off/on seconds, starting off. Ends dark.
 	FlickerPattern = { 0.08, 0.1, 0.06, 0.25, 0.1, 0.06, 0.35 },
 
