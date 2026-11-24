@@ -51,6 +51,8 @@ return {
 		expect(reason).toBe("down")
 		_, reason = fire({ carrying = true })
 		expect(reason).toBe("hands full")
+		_, reason = fire({ cuffed = true })
+		expect(reason).toBe("cuffed")
 		_, reason = fire({ hasGun = false })
 		expect(reason).toBe("no gun")
 		_, reason = fire({ ammo = 0 })

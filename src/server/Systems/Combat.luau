@@ -63,6 +63,7 @@ local function onFire(player: Player, origin: any, direction: any)
 	local ok = CombatLogic.canFire({
 		alive = humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
+		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = gun ~= nil,
 		ammo = if gun then Inventory.count(player, gun.ammo) else 0,
 		sinceLastShot = now - (lastShotAt[player] or 0),

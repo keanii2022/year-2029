@@ -4,6 +4,7 @@ export type ItemDef = { id: string, name: string, value: number, stackSize: numb
 local items: { [string]: ItemDef } = {
 	StarterBlaster = { id = "StarterBlaster", name = "Starter Blaster", value = 20, stackSize = 1 },
 	BlasterCells = { id = "BlasterCells", name = "Blaster Cells", value = 1, stackSize = 60 },
+	Handcuffs = { id = "Handcuffs", name = "Handcuffs", value = 30, stackSize = 1 },
 }
 
 return table.freeze(items)

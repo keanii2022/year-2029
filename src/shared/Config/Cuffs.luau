@@ -1,5 +1,5 @@
 return {
-	ItemId = "handcuffs",
+	ItemId = "Handcuffs",
 
 	-- Who can be cuffed: from behind, or anyone this low on health.
 	Range = 6, -- studs between root parts

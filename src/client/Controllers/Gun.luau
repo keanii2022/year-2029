@@ -128,6 +128,7 @@ local function fireOnce(): boolean
 	local ok = CombatLogic.canFire({
 		alive = humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
+		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = true,
 		ammo = carried[gun.ammo] or 0,
 		sinceLastShot = os.clock() - lastShotAt,
