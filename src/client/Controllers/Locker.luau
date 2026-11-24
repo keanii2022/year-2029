@@ -11,6 +11,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ScoresLogic = require(ReplicatedStorage.Shared.Logic.Scores)
+local Input = require(script.Parent.Input)
 
 local Settings = Config.Saves
 local Cosmetics = Settings.Cosmetics :: any
@@ -525,11 +526,8 @@ local function update()
 	end
 end
 
-local function onInput(input: InputObject, gameProcessed: boolean)
-	if gameProcessed then
-		return
-	end
-	if input.KeyCode == Settings.RecordKey or input.KeyCode == Settings.RecordPad then
+local function onRecord(began: boolean)
+	if began then
 		show(if view == "record" then nil else "record")
 	end
 end
@@ -593,7 +591,7 @@ function Locker.Start()
 			show(nil)
 		end
 	end)
-	UserInputService.InputBegan:Connect(onInput)
+	Input.bind("Record", onRecord)
 	RunService.RenderStepped:Connect(update)
 end
 

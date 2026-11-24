@@ -1,7 +1,7 @@
--- Flashlights. L (D-pad up on gamepad) asks the server to toggle; the server sets the player's
+-- Flashlights. The Flashlight action (Input) asks the server to toggle; the server sets the player's
 -- FlashlightOn attribute and every client draws the beams from that. Your own beam follows the
--- camera so it points where you look; other players' beams shine from their heads.
-local ContextActionService = game:GetService("ContextActionService")
+-- camera so it points where you look, leaving from the held flashlight's Lens when it's in hand;
+-- other players' beams shine from their heads. The hotbar's flashlight and battery slots toggle it too.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -10,6 +10,9 @@ local SoundService = game:GetService("SoundService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Hands = require(script.Parent.Hands)
+local Hotbar = require(script.Parent.Hotbar)
+local Input = require(script.Parent.Input)
 
 local Settings = Config.DayNight.Flashlight
 local player = Players.LocalPlayer
@@ -98,17 +101,16 @@ local function watch(other: Player)
 	updateOther(other)
 end
 
-local function onToggle(_, inputState: Enum.UserInputState)
-	if inputState == Enum.UserInputState.Begin then
+local function onToggle(began: boolean)
+	if began then
 		toggleRemote:FireServer(player:GetAttribute("FlashlightOn") ~= true)
 	end
-	return Enum.ContextActionResult.Sink
 end
 
 function Flashlight.Start()
 	toggleRemote = Net.event("FlashlightToggle")
-	-- Grab binds D-pad up later while carrying, so carrying wins it and the flashlight waits.
-	ContextActionService:BindAction("Flashlight", onToggle, false, Enum.KeyCode.L, Enum.KeyCode.DPadUp)
+	Input.bind("Flashlight", onToggle)
+	Hotbar.onUse("Flashlight", onToggle)
 
 	Players.PlayerAdded:Connect(watch)
 	for _, other in Players:GetPlayers() do
@@ -118,9 +120,10 @@ function Flashlight.Start()
 		otherBeams[other] = nil
 	end)
 
-	RunService:BindToRenderStep("FlashlightBeam", Enum.RenderPriority.Camera.Value + 1, function()
+	-- After Hands (Camera + 4) so the beam leaves the lens where it is this frame.
+	RunService:BindToRenderStep("FlashlightBeam", Enum.RenderPriority.Camera.Value + 5, function()
 		if ownBeam then
-			ownBeam.CFrame = workspace.CurrentCamera.CFrame
+			ownBeam.CFrame = Hands.lensFrame() or workspace.CurrentCamera.CFrame
 		end
 	end)
 end

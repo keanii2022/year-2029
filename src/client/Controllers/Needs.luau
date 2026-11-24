@@ -1,5 +1,6 @@
--- Hunger and energy bars above the health bar, the supplies shopping list, quick-use keys
--- (1 eat, 2 drink, 3 bandage; D-pad on gamepad) and short feedback text. Same look as Hud.
+-- Hunger and energy bars above the health bar, the supplies shopping list, the quick-use actions
+-- (gamepad D-pad, or the hotbar's food, drink and bandage slots) and short feedback text. Same
+-- look as Hud.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -8,6 +9,8 @@ local UserInputService = game:GetService("UserInputService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Net = require(ReplicatedStorage.Shared.Net)
 local NeedsLogic = require(ReplicatedStorage.Shared.Logic.Needs)
+local Hotbar = require(script.Parent.Hotbar)
+local Input = require(script.Parent.Input)
 
 local settings = Config.Supplies
 local needSettings = settings.Needs
@@ -35,7 +38,7 @@ local feedbackLabel: TextLabel
 local feedbackUntil = 0
 local bag: { NeedsLogic.Stack } = {}
 local useRemote: RemoteEvent
-local usingGamepad = false
+local device: Input.Device = "Keyboard"
 
 local function frame(props: { [string]: any }, parent: Instance): Frame
 	local f = Instance.new("Frame")
@@ -129,7 +132,7 @@ end
 local function buildFeedback()
 	feedbackLabel = label({
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -110),
+		Position = UDim2.new(0.5, 0, 1, -150),
 		Size = UDim2.fromOffset(400, 18),
 		Text = "",
 		TextSize = 14, -- the hands show what's happening; this is just a quiet caption
@@ -141,8 +144,10 @@ end
 
 local function refreshHint()
 	local parts = {}
-	for _, entry in settings.QuickUse do
-		table.insert(parts, `[{entry.hints[if usingGamepad then 2 else 1]}] {entry.label}`)
+	if device == "Gamepad" then
+		for _, entry in settings.QuickUse do
+			table.insert(parts, `[{entry.hint}] {entry.label}`)
+		end
 	end
 	hintLabel.Text = table.concat(parts, "   ")
 end
@@ -197,28 +202,10 @@ local function showFeedback(text: unknown)
 	end
 end
 
-local function onInput(input: InputObject, gameProcessed: boolean)
-	if gameProcessed then
-		return
-	end
-	local isPad = string.match(input.UserInputType.Name, "^Gamepad") ~= nil
-	for _, entry in settings.QuickUse do
-		if (isPad and input.KeyCode == entry.pad) or (not isPad and input.KeyCode == entry.key) then
-			-- Grab turns held props with the D-pad, so it only means quick-use while empty-handed
-			if isPad and player:GetAttribute("CarrySpeedMultiplier") ~= nil then
-				return
-			end
-			useRemote:FireServer(entry.kind)
-			return
-		end
-	end
-end
-
-local function onLastInput(inputType: Enum.UserInputType)
-	local isPad = string.match(inputType.Name, "^Gamepad") ~= nil
-	local isKeys = inputType == Enum.UserInputType.Keyboard or string.match(inputType.Name, "^Mouse") ~= nil
-	if (isPad or isKeys) and isPad ~= usingGamepad then
-		usingGamepad = isPad
+local function onLastInput()
+	local now = Input.lastDevice()
+	if now ~= device then
+		device = now
 		refreshHint()
 	end
 end
@@ -246,10 +233,18 @@ function Needs.Start()
 	end)
 	Net.event("InventorySync"):FireServer()
 
-	usingGamepad = string.match(UserInputService:GetLastInputType().Name, "^Gamepad") ~= nil
+	for _, entry in settings.QuickUse do
+		local function use(began: boolean)
+			if began then
+				useRemote:FireServer(entry.kind)
+			end
+		end
+		Input.bind(entry.action, use)
+		Hotbar.onUse(entry.action, use)
+	end
+	device = Input.lastDevice()
 	refreshHint()
 	UserInputService.LastInputTypeChanged:Connect(onLastInput)
-	UserInputService.InputBegan:Connect(onInput)
 	RunService.RenderStepped:Connect(update)
 end
 

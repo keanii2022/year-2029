@@ -1,4 +1,5 @@
--- Grab and build controls. Reads keyboard, mouse and gamepad directly, asks the server to
+-- Grab and build controls. Grab/drop is the Grab action (Input); carry controls read keyboard,
+-- mouse, gamepad and phone buttons directly while carrying. Asks the server to
 -- grab or drop, streams aim and rotation while carrying, and draws the ghost and axis arrow.
 -- Someone else's placed piece needs the key held while a pry bar fills; the server times it too.
 local CollectionService = game:GetService("CollectionService")
@@ -15,6 +16,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 
 local Settings = Config.Grab
 local Hints = require(script.Parent.Hints)
+local Input = require(script.Parent.Input)
 local player = Players.LocalPlayer
 
 local GHOST_OK = Color3.fromRGB(120, 220, 140)
@@ -86,7 +88,7 @@ local function stopPry(tellServer: boolean)
 	end
 end
 
-local function tryGrab(input: InputObject)
+local function tryGrab(device: Input.Device)
 	local camera = workspace.CurrentCamera
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
@@ -94,8 +96,7 @@ local function tryGrab(input: InputObject)
 		return
 	end
 
-	local usesMouse = input.UserInputType == Enum.UserInputType.Keyboard
-		and UserInputService.MouseBehavior == Enum.MouseBehavior.Default
+	local usesMouse = device == "Keyboard" and UserInputService.MouseBehavior == Enum.MouseBehavior.Default
 	local screenPoint = if usesMouse then UserInputService:GetMouseLocation() else camera.ViewportSize / 2
 	local ray = camera:ViewportPointToRay(screenPoint.X, screenPoint.Y)
 
@@ -118,20 +119,14 @@ local function tryGrab(input: InputObject)
 	end
 end
 
-local function onToggle(_, inputState: Enum.UserInputState, input: InputObject)
-	if inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
+local function onToggle(began: boolean, device: Input.Device)
+	if not began then
 		stopPry(true)
-		return Enum.ContextActionResult.Sink
-	end
-	if inputState ~= Enum.UserInputState.Begin then
-		return Enum.ContextActionResult.Sink
-	end
-	if holding then
+	elseif holding then
 		dropRemote:FireServer()
 	else
-		tryGrab(input)
+		tryGrab(device)
 	end
-	return Enum.ContextActionResult.Sink
 end
 
 local function onRotate(_, inputState: Enum.UserInputState, input: InputObject)
@@ -151,7 +146,7 @@ local function onAxis(_, inputState: Enum.UserInputState, input: InputObject)
 	if inputState ~= Enum.UserInputState.Begin then
 		return Enum.ContextActionResult.Sink
 	end
-	if input.KeyCode == Enum.KeyCode.T then
+	if input.KeyCode == Enum.KeyCode.T or input.UserInputType == Enum.UserInputType.Touch then
 		axis = GrabMath.nextAxis(axis)
 	elseif input.KeyCode == Enum.KeyCode.DPadDown then
 		angles.Tip, angles.Turn, angles.Roll = 0, 0, 0
@@ -187,11 +182,12 @@ local function axisDirection(): Vector3
 	return Vector3.yAxis
 end
 
+-- On a phone, CAS draws TURN and AXIS buttons beside the jump button while carrying.
 local function bindCarryControls()
 	ContextActionService:BindAction(
 		"GrabRotate",
 		onRotate,
-		false,
+		true,
 		Enum.KeyCode.R,
 		Enum.KeyCode.ButtonR2,
 		Enum.KeyCode.ButtonL2
@@ -199,7 +195,7 @@ local function bindCarryControls()
 	ContextActionService:BindAction(
 		"GrabAxis",
 		onAxis,
-		false,
+		true,
 		Enum.KeyCode.T,
 		Enum.KeyCode.DPadLeft,
 		Enum.KeyCode.DPadUp,
@@ -208,6 +204,10 @@ local function bindCarryControls()
 	)
 	ContextActionService:BindAction("GrabFree", onFree, false, Enum.KeyCode.ButtonL1, Enum.KeyCode.LeftAlt)
 	ContextActionService:BindAction("GrabDistance", onDistance, false, Enum.UserInputType.MouseWheel)
+	ContextActionService:SetTitle("GrabRotate", "TURN")
+	ContextActionService:SetTitle("GrabAxis", "AXIS")
+	ContextActionService:SetPosition("GrabRotate", UDim2.new(1, -250, 1, -150))
+	ContextActionService:SetPosition("GrabAxis", UDim2.new(1, -250, 1, -230))
 end
 
 local function unbindCarryControls()
@@ -386,7 +386,7 @@ function Grab:Start()
 		stopPry(false)
 	end)
 	RunService.RenderStepped:Connect(onRender)
-	ContextActionService:BindAction("GrabToggle", onToggle, false, Enum.KeyCode.F, Enum.KeyCode.ButtonR1)
+	Input.bind("Grab", onToggle)
 end
 
 return Grab

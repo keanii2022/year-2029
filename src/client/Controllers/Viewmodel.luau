@@ -1,7 +1,7 @@
--- The blaster in your hands: a client-only model on the camera that bobs with your steps, kicks
--- back on each shot, and drops out of view while carrying a prop or holding no blaster.
--- Uses the uploaded viewmodel_blaster once the server copies it into ReplicatedStorage.Viewmodels,
--- otherwise a stand-in built from plain parts.
+-- The gun in your hands: a client-only model on the camera that bobs with your steps, kicks back
+-- on each shot, and drops out of view while carrying a prop or when no gun is selected.
+-- Uses the gun's uploaded viewmodel once the server copies it into ReplicatedStorage.Viewmodels,
+-- otherwise a stand-in built from plain parts. Hands puts the gloves on its Grip and Foregrip.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -16,8 +16,14 @@ local player = Players.LocalPlayer
 
 local Viewmodel = {}
 
+local MARKERS = { "Muzzle", "Grip", "Foregrip", "Lens" }
+
 local model: Model? = nil
+local modelName: string? = nil -- uploaded template in use, nil for the stand-in
+local wantedName: string? = nil
 local muzzle: BasePart? = nil
+local gripMarker: BasePart? = nil
+local foregripMarker: BasePart? = nil
 -- Turns the model's own pivot into "barrel along -Z, centred on the body".
 local alignment = CFrame.identity
 local armed = false
@@ -87,17 +93,26 @@ local function buildStandIn(): Model
 	return blaster
 end
 
-local function use(newModel: Model, newAlignment: CFrame)
+local function findPart(parent: Instance, name: string): BasePart?
+	local found = parent:FindFirstChild(name, true)
+	return if found and found:IsA("BasePart") then found else nil
+end
+
+local function use(newModel: Model, newAlignment: CFrame, name: string?)
 	if model then
 		model:Destroy()
 	end
 	model = newModel
+	modelName = name
 	alignment = newAlignment
-	local found = newModel:FindFirstChild("Muzzle", true)
-	muzzle = if found and found:IsA("BasePart") then found else nil -- The kit's marker cubes (bright magenta) only say where things attach
-	for _, markerName in { "Muzzle", "Grip" } do
-		local marker = newModel:FindFirstChild(markerName, true)
-		if marker and marker:IsA("BasePart") then
+	muzzle = findPart(newModel, "Muzzle")
+	gripMarker = findPart(newModel, "Grip")
+	foregripMarker = findPart(newModel, "Foregrip")
+	-- The kit's marker cubes (bright magenta) only say where things attach. The stand-in's grip is
+	-- a real part, so only uploaded models hide theirs.
+	for _, markerName in MARKERS do
+		local marker = findPart(newModel, markerName)
+		if marker and (name or markerName ~= "Grip") then
 			marker.Transparency = 1
 			marker.CanCollide = false
 			marker.CanQuery = false
@@ -111,45 +126,58 @@ local function use(newModel: Model, newAlignment: CFrame)
 end
 
 -- The uploaded model's facing depends on how it was exported, so point it from the body's
--- centre toward the muzzle instead of trusting its pivot.
+-- centre (or the model's middle without a Body part) toward the muzzle instead of trusting its pivot.
 local function useUploaded(template: Instance)
 	if not template:IsA("Model") then
 		return
 	end
 	local copy = template:Clone()
 	local pivot = copy:GetPivot()
-	local body = copy:FindFirstChild("Body", true)
-	local tip = copy:FindFirstChild("Muzzle", true)
+	local body = findPart(copy, "Body")
+	local tip = findPart(copy, "Muzzle")
 	local newAlignment = CFrame.identity
-	if body and body:IsA("BasePart") and tip and tip:IsA("BasePart") then
-		local centre = pivot:PointToObjectSpace(body.Position)
+	if tip then
+		local middle = if body then body.Position else (copy:GetBoundingBox()).Position
+		local centre = pivot:PointToObjectSpace(middle)
 		local forward = pivot:PointToObjectSpace(tip.Position) - centre
 		if forward.Magnitude > 0.01 then
 			newAlignment = CFrame.lookAt(centre, centre + forward):Inverse()
 		end
 	end
-	use(copy, newAlignment)
+	use(copy, newAlignment, template.Name)
 end
 
-local function watchForUploaded()
-	local folder = ReplicatedStorage:WaitForChild("Viewmodels")
-	local existing = folder:FindFirstChild("viewmodel_blaster")
-	if existing then
-		useUploaded(existing)
+-- Swaps to the wanted gun's uploaded model, or the stand-in until it has been published.
+local function refreshModel()
+	local name = wantedName
+	if not name or name == modelName then
 		return
 	end
-	local connection
-	connection = folder.ChildAdded:Connect(function(child)
-		if child.Name == "viewmodel_blaster" then
-			connection:Disconnect()
-			useUploaded(child)
-		end
-	end)
+	local templates = ReplicatedStorage:FindFirstChild("Viewmodels")
+	local template = templates and templates:FindFirstChild(name)
+	if template then
+		useUploaded(template)
+	elseif modelName ~= nil then
+		use(buildStandIn(), CFrame.identity, nil)
+	end
 end
 
--- Gun calls this whenever what you carry changes.
-function Viewmodel.setArmed(hasBlaster: boolean)
-	armed = hasBlaster
+-- Gun calls this whenever the gun in hand changes: its viewmodel template name, or nil for none.
+function Viewmodel.setArmed(name: string?)
+	armed = name ~= nil
+	if name then
+		wantedName = name
+		refreshModel()
+	end
+end
+
+-- Where the gloves go on the gun right now: the Grip and, on two-handed guns, the Foregrip.
+-- Both nil while the gun is out of view.
+function Viewmodel.grips(): (CFrame?, CFrame?)
+	if not model or model.Parent == nil then
+		return nil, nil
+	end
+	return gripMarker and gripMarker.CFrame, foregripMarker and foregripMarker.CFrame
 end
 
 -- 0 at the hip, 1 fully aimed.
@@ -223,11 +251,14 @@ local function update(dt: number)
 end
 
 function Viewmodel.Init()
-	use(buildStandIn(), CFrame.identity)
+	use(buildStandIn(), CFrame.identity, nil)
 end
 
 function Viewmodel.Start()
-	task.spawn(watchForUploaded)
+	task.spawn(function()
+		ReplicatedStorage:WaitForChild("Viewmodels").ChildAdded:Connect(refreshModel)
+		refreshModel()
+	end)
 	-- After Gun's aim step (Camera + 2) so the blaster follows the final camera for the frame.
 	RunService:BindToRenderStep("Viewmodel", Enum.RenderPriority.Camera.Value + 3, update)
 end

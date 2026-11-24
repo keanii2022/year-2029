@@ -200,9 +200,11 @@ function Combat.Start()
 		for _, name in Config.Hands.Arms do
 			publishViewmodel(name)
 		end
-		for _, item in Config.Hands.Items do
-			if item.model then
-				publishViewmodel(item.model)
+		for _, items in { Config.Hands.Items, Config.Hotbar.Held, Config.Hotbar.Guns } do
+			for _, item in items do
+				if item.model then
+					publishViewmodel(item.model)
+				end
 			end
 		end
 	end)

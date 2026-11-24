@@ -1,4 +1,4 @@
--- Client side of handcuffs: the "Cuff" hint and Use key when carrying cuffs, the CUFFED overlay
+-- Client side of handcuffs: the "Cuff" hint and Use / Fire when cuffs are selected on the hotbar, the CUFFED overlay
 -- and mash prompt for the victim, and the rob panel for the cuffer. The server decides everything.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
@@ -9,6 +9,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local CuffsLogic = require(ReplicatedStorage.Shared.Logic.Cuffs)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 
 local settings = Config.Cuffs
@@ -34,7 +35,6 @@ local doneButton: TextButton
 local requestRemote: RemoteEvent
 local mashRemote: RemoteEvent
 local takeRemote: RemoteEvent
-local hasCuffs = false
 local aimedTarget: Player? = nil
 local lastDevice: Input.Device = "Keyboard"
 
@@ -245,8 +245,9 @@ local function findTarget(): Player?
 end
 
 local function update()
-	aimedTarget = if hasCuffs then findTarget() else nil
-	local key = if lastDevice == "Gamepad" then "Square" else "E"
+	local slot = Hotbar.selected()
+	aimedTarget = if slot and slot.item == settings.ItemId then findTarget() else nil
+	local key = if lastDevice == "Gamepad" then "Square" elseif lastDevice == "Touch" then "USE" else "E"
 	hintLabel.Visible = aimedTarget ~= nil
 	if aimedTarget then
 		hintLabel.Text = `[{key}] Cuff {aimedTarget.DisplayName}`
@@ -289,22 +290,14 @@ function Cuffs.Start()
 	mashRemote = Net.event("CuffsMash")
 	takeRemote = Net.event("CuffsTake")
 	Net.event("CuffsRob").OnClientEvent:Connect(showRobList)
-	Net.event("InventoryChanged").OnClientEvent:Connect(function(list: { { id: string, count: number } })
-		hasCuffs = false
-		for _, stack in list do
-			if stack.id == settings.ItemId and stack.count > 0 then
-				hasCuffs = true
-			end
-		end
-	end)
-	Net.event("InventorySync"):FireServer()
-
-	Input.bind("Use", function(began, device)
+	local function cuff(began: boolean, device: Input.Device)
 		lastDevice = device
 		if began and aimedTarget then
 			requestRemote:FireServer(aimedTarget)
 		end
-	end)
+	end
+	Input.bind("Use", cuff)
+	Hotbar.onUse("Cuffs", cuff)
 	Input.bind("Jump", function(began, device)
 		lastDevice = device
 		if began and player:GetAttribute("Cuffed") then
