@@ -8,8 +8,8 @@ return {
 	},
 	-- A quiet bed under the game sounds; the installation and dawn loops sit a little louder
 	Volume = { Day = 0.22, Night = 0.22, Installation = 0.38, Dawn = 0.32 },
-	SirenDuck = 0.5, -- the day loop drops to this share of its volume while the siren goes
+	SirenDuck = 0.5, -- the lights-on music drops to this share of its volume while the siren goes
 	CrossfadeSeconds = 2,
-	DawnSeconds = 48, -- one pass of the dawn loop after a night, then the day loop takes over
+	RotateSeconds = 48, -- with the lights on, the day and dawn loops swap after one full pass each
 	InstallationPadding = 12, -- studs outside an installation's dark hall where its music starts
 }

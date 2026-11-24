@@ -7544,7 +7544,7 @@
    "size": [
     0.25,
     0.834,
-    1.035
+    1.069
    ],
    "parts": [
     {
@@ -7552,7 +7552,7 @@
      "center": [
       0.0,
       0.713,
-      0.076
+      0.059
      ],
      "size": [
       0.234,
@@ -7570,7 +7570,7 @@
      "center": [
       0.0,
       0.433,
-      0.012
+      -0.005
      ],
      "size": [
       0.25,
@@ -7588,12 +7588,30 @@
      "center": [
       0.0,
       0.261,
-      -0.358
+      -0.375
      ],
      "size": [
       0.2,
       0.522,
       0.319
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Muzzle",
+     "center": [
+      0.0,
+      0.663,
+      0.494
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
      ],
      "pivot": [
       0,
@@ -12536,8 +12554,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 85177944206239,
+   "textureId": 71549673061290,
    "screenId": null
   },
   {
@@ -13063,8 +13081,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 128583571903154,
+   "textureId": 94235210168596,
    "screenId": null
   },
   {
@@ -13118,8 +13136,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 87810969610893,
+   "textureId": 129163073815129,
    "screenId": null
   },
   {
@@ -13467,8 +13485,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 74821591267173,
+   "textureId": 89759992547415,
    "screenId": null
   },
   {
@@ -13522,8 +13540,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 86624302457511,
+   "textureId": 92240373960797,
    "screenId": null
   },
   {
@@ -13577,8 +13595,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 119131753128713,
+   "textureId": 79781638174448,
    "screenId": null
   },
   {
@@ -13632,8 +13650,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 139904884342920,
+   "textureId": 88804187510213,
    "screenId": null
   },
   {
@@ -13723,8 +13741,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 79510055444853,
+   "textureId": 77425345162393,
    "screenId": null
   },
   {

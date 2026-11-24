@@ -3512,24 +3512,30 @@ return {
 		{
 			name = "starter_pistol",
 			group = "gear",
-			size = { 0.25, 0.834, 1.035 },
+			size = { 0.25, 0.834, 1.069 },
 			parts = {
 				{
 					name = "Glow",
-					center = { 0.0, 0.713, 0.076 },
+					center = { 0.0, 0.713, 0.059 },
 					size = { 0.234, 0.025, 0.34 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.433, 0.012 },
+					center = { 0.0, 0.433, -0.005 },
 					size = { 0.25, 0.801, 1.012 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { 0.0, 0.261, -0.358 },
+					center = { 0.0, 0.261, -0.375 },
 					size = { 0.2, 0.522, 0.319 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Muzzle",
+					center = { 0.0, 0.663, 0.494 },
+					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -5486,6 +5492,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 85177944206239,
+			textureId = 71549673061290,
 		},
 		{
 			name = "broken_skylight",
@@ -5739,6 +5747,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 128583571903154,
+			textureId = 94235210168596,
 		},
 		{
 			name = "mission_clipboard",
@@ -5760,6 +5770,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 87810969610893,
+			textureId = 129163073815129,
 		},
 		{
 			name = "notes_wall",
@@ -5936,6 +5948,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 74821591267173,
+			textureId = 89759992547415,
 		},
 		{
 			name = "viewmodel_arm_left",
@@ -5957,6 +5971,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 86624302457511,
+			textureId = 92240373960797,
 		},
 		{
 			name = "viewmodel_arm_left_open",
@@ -5978,6 +5994,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 119131753128713,
+			textureId = 79781638174448,
 		},
 		{
 			name = "viewmodel_arm_right",
@@ -5999,6 +6017,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 139904884342920,
+			textureId = 88804187510213,
 		},
 		{
 			name = "viewmodel_blaster",
@@ -6032,6 +6052,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 79510055444853,
+			textureId = 77425345162393,
 		},
 		{
 			name = "aisle_sign_hanging",

@@ -137,10 +137,10 @@ Rules
 | tapes | cassette clacks in with a play thunk, old tape hiss loop | normal, hiss quiet |
 
 ## Music
-Keani's own track, made in GarageBand, cut into four 48-second loops in `sounds/music/`. One plays at a time, crossfading over about 2 seconds when the moment changes.
+Keani's own track, made in GarageBand, cut into four loops in `sounds/music/`. One plays at a time, crossfading over about 2 seconds when the moment changes.
 | Loop | When | Loudness |
 |---|---|---|
-| music_day_loop | lights on | quiet bed under everything |
-| music_night_loop | night (lights out) | quiet bed |
-| music_installation_loop | a player is close to an installation; overrides day or night while they're near | normal |
-| music_dawn_loop | lights come back on after a night, until the day loop takes over | normal |
+| music_day_loop | lights on: rotates with music_dawn_loop, one after the other | quiet bed under everything |
+| music_dawn_loop | lights on: rotates with music_day_loop | quiet bed |
+| music_night_loop | night (lights out), the only night song | quiet bed |
+| music_installation_loop | a player is close to an installation; overrides whatever is playing while they're near | normal |

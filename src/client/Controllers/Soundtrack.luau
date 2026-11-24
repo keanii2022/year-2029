@@ -1,6 +1,6 @@
--- Plays Keani's soundtrack: the day loop with the lights on, the night loop in the dark, the dawn
--- loop once when the lights come back, and the installation loop whenever you're close to one of
--- the dark halls, whatever the time. One loop at a time, crossfading. Silent until uploaded.
+-- Plays Keani's soundtrack: with the lights on, the day and dawn loops take turns (one all the way
+-- through, then the other); the night loop in the dark; the installation loop whenever you're close
+-- to one of the dark halls, whatever the time. One loop at a time, crossfading. Silent until uploaded.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -15,8 +15,8 @@ local player = Players.LocalPlayer
 local Soundtrack = {}
 
 local loops: { [string]: Sound } = {}
-local dawnUntil = 0
-local lastPhase: string? = nil
+local lightsTrack = "Day"
+local swapAt = 0
 
 local function nearInstallation(): boolean
 	local character = player.Character
@@ -45,23 +45,21 @@ local function wanted(): string
 	if phase == "Night" then
 		return "Night"
 	end
-	if os.clock() < dawnUntil then
-		return "Dawn"
+	-- Lights on: day and dawn take turns, a full pass each
+	if os.clock() >= swapAt then
+		lightsTrack = if lightsTrack == "Day" then "Dawn" else "Day"
+		swapAt = os.clock() + settings.RotateSeconds
 	end
-	return "Day"
+	return lightsTrack
 end
 
 local function step(dt: number)
 	local phase = ReplicatedStorage:GetAttribute("Phase")
-	if lastPhase == "Night" and phase == "Day" then
-		dawnUntil = os.clock() + settings.DawnSeconds
-	end
-	lastPhase = phase
 	local active = wanted()
 	local fade = dt / settings.CrossfadeSeconds
 	for name, sound in loops do
 		local target = if name == active then settings.Volume[name] else 0
-		if name == "Day" and phase == "Siren" then
+		if (name == "Day" or name == "Dawn") and phase == "Siren" then
 			target *= settings.SirenDuck
 		end
 		local change = fade * math.max(settings.Volume[name], 0.01)
@@ -91,7 +89,6 @@ function Soundtrack.Start()
 			loops[name] = sound
 		end
 	end
-	lastPhase = ReplicatedStorage:GetAttribute("Phase")
 	local acc = 0
 	RunService.Heartbeat:Connect(function(dt)
 		acc += dt
