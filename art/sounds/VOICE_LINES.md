@@ -95,3 +95,19 @@ Plays when a player picks up after `warehouse/phone_ring_far.mp3`. Record close 
 | phone_breathing | (slow breathing on the line, a few breaths, nothing else) |
 | phone_giggle | (breathing, then a small giggle, then hang up) |
 | phone_jingle_hum | (hum the store jingle slowly, a bit off key) |
+
+## PA lines (day, the livelier warehouse)
+| id | line |
+|---|---|
+| pa_never_close | Attention shoppers: the store will never close. |
+| pa_smiling_mandatory | A reminder that smiling is mandatory in aisle 40. |
+| pa_special_everything | Today's special is everything, forever. |
+| pa_lost_children | Lost children will collect themselves at the front desk. |
+| pa_helpers_looking | Please do not look directly at the helpers. |
+| pa_keep_moving | Standing still is shoplifting. Keep moving. |
+| pa_always_happy | We are always happy to help. Always. |
+| pa_aisle_12 | Please do not go into aisle 12. |
+| pa_thank_you | Thank you for shopping. Thank you. Thank you. |
+| pa_exit_elsewhere | The exit is somewhere else. |
+| pa_your_name | If you hear your name, do not answer. |
+| pa_fresh_bread | Fresh bread in the bakery. There is no bakery. |

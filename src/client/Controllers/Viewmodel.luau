@@ -94,9 +94,14 @@ local function use(newModel: Model, newAlignment: CFrame)
 	model = newModel
 	alignment = newAlignment
 	local found = newModel:FindFirstChild("Muzzle", true)
-	muzzle = if found and found:IsA("BasePart") then found else nil
-	if muzzle then
-		muzzle.Transparency = 1
+	muzzle = if found and found:IsA("BasePart") then found else nil -- The kit's marker cubes (bright magenta) only say where things attach
+	for _, markerName in { "Muzzle", "Grip" } do
+		local marker = newModel:FindFirstChild(markerName, true)
+		if marker and marker:IsA("BasePart") then
+			marker.Transparency = 1
+			marker.CanCollide = false
+			marker.CanQuery = false
+		end
 	end
 	for _, part in newModel:GetDescendants() do
 		if part:IsA("BasePart") then

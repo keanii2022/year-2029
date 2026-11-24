@@ -192,35 +192,43 @@ function Islands.spill(layout: any, _config: any, rng: Rng.Rng, x: number, z: nu
 	kitProp(layout, "wet_floor_sign", x + rng:range(-2, 2), z + rng:range(-2, 2), rng:range(0, 360))
 end
 
--- Checkout lanes from the old store: a row of counters, belts stopped mid-item
+-- Checkout lanes from the old store: a row of counters 8 studs apart, belts stopped mid-item, and
+-- one lane light still on for nobody
 function Islands.checkout(layout: any, _config: any, rng: Rng.Rng, x: number, z: number)
-	local turn = rng:pick({ 0, 90 })
-	for n = -1, 1 do
-		local cx = if turn == 0 then x + n * 5 else x
-		local cz = if turn == 0 then z else z + n * 5
-		kitProp(layout, "checkout_lane", cx, cz, turn)
+	local turn = rng:pick({ 0, 90, 180, 270 })
+	local alongX = turn % 180 == 0
+	local count = rng:int(3, 4)
+	local lit = rng:int(1, count)
+	for n = 1, count do
+		local offset = (n - (count + 1) / 2) * 8
+		local cx = if alongX then x + offset else x
+		local cz = if alongX then z else z + offset
+		kitProp(layout, if n == lit then "checkout_lane_lit" else "checkout_lane", cx, cz, turn)
 		piece(layout, {
 			x = cx,
 			y = 1.6,
 			z = cz,
-			sx = if turn == 0 then 1.8 else 9,
+			sx = if alongX then 2.4 else 11,
 			sy = 3.2,
-			sz = if turn == 0 then 9 else 1.8,
+			sz = if alongX then 11 else 2.4,
 			style = "counter_grey",
 			solid = true,
 			skipIfKit = "checkout_lane",
 		})
-		piece(layout, {
-			x = cx,
-			y = 3.3,
-			z = cz,
-			sx = if turn == 0 then 1.2 else 5,
-			sy = 0.2,
-			sz = if turn == 0 then 5 else 1.2,
-			style = "rubber",
-			collide = false,
-			skipIfKit = "checkout_lane",
-		})
+		if n == lit then
+			piece(layout, {
+				x = cx,
+				y = 9.6,
+				z = cz,
+				sx = 0.6,
+				sy = 0.8,
+				sz = 0.6,
+				style = "panel_warm",
+				collide = false,
+				lamp = "warm",
+				skipIfKit = "checkout_lane_lit",
+			})
+		end
 	end
 end
 
