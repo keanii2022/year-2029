@@ -111,3 +111,8 @@ Plays when a player picks up after `warehouse/phone_ring_far.mp3`. Record close 
 | pa_exit_elsewhere | The exit is somewhere else. |
 | pa_your_name | If you hear your name, do not answer. |
 | pa_fresh_bread | Fresh bread in the bakery. There is no bakery. |
+
+## Night phone
+| id | line |
+|---|---|
+| phone_giggle | A child's giggle, close to the mouthpiece, cut off. (Played after a few seconds of breathing when you answer a ringing phone at night.) |
