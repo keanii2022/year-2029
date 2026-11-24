@@ -346,7 +346,7 @@ The Blender run is done. Every model lives in `art/` with its FBX, texture, prev
 - Pick the music: `Config.DayNight.DayMusicId` and `Config.Interact.BoomboxMusicId`.
 - Import the animation clips from `art/**/anim/` with the Animation Editor (Open Cloud can't upload them); motion is procedural until then.
 - Record the lines in `art/sounds/VOICE_LINES.md`. The dog has no sounds yet (dog_bark, dog_growl, dog_whine, dog_bite, dog_yelp, dog_eat).
-- Quick test loop: `Config.DayNight.ShortCycle = true`, `Config.Warehouse.UseTestRoom = true`, `Config.Cuffs` debug flag for free cuffs.
+- Quick test loop: `Config.DayNight.ShortCycle = true`, `Config.Warehouse.UseTestRoom = true`, `Config.Cuffs.DebugGiveCuffs = true` for free cuffs.
 
 ## Calls to review
 
