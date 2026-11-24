@@ -6,28 +6,37 @@ return {
 	AnimRate = 15,
 
 	-- Only rooms this close to a player get a live robot; the rest sleep.
-	ActivationRadius = 220,
-	DeactivationRadius = 300, -- a live room keeps its robot until every player is this far
+	ActivationRadius = 320,
+	DeactivationRadius = 400, -- a live room keeps its robot until every player is this far
 	ActivationInterval = 2,
-	MaxLiveChoreBots = 12,
+	MaxLiveChoreBots = 16,
 
 	-- Night hunters spawn out of sight near players and stall where they stand at lights on.
 	MaxHunters = 8,
-	HunterNearRadius = 160, -- a player with no hunter this close gets one
-	HunterSpawnDistance = { 90, 140 },
-	HunterDespawnRadius = 400,
+	HunterNearRadius = 260, -- a player with no hunter this close gets one
+	HunterSpawnDistance = { 200, 260 }, -- far enough that you hear and see them coming
+	HunterGrace = 25, -- seconds of quiet after lights out before any hunter spawns
+	HunterDespawnRadius = 450,
 	ChoreDespawnRadius = 400, -- a chore bot out sweeping this far from everyone goes back to sleep
 
 	-- Which chore bot lives in which kind of room
 	RoomBots = {
-		kitchen = "cook",
-		living = "carrier",
-		bedroom = "cleaner",
-		kids = "cleaner",
-		office = "carrier",
-		bathroom = "cleaner",
-		arcade = "carrier",
-		store = "carrier",
+		sky_door = "carrier",
+		kids_corner = "cleaner",
+		sky_hatch = "carrier",
+		tile_maze = "cleaner",
+		cloud_hill = "carrier",
+		fog_lawn = "cleaner",
+		basement = "cook",
+		poolroom = "cleaner",
+		dead_mall = "carrier",
+		light_grid = "cleaner",
+		backroom = "carrier",
+		green_hall = "cleaner",
+		pastel_houses = "cook",
+		curtain_room = "cook",
+		grass_store = "carrier",
+		window_court = "cleaner",
 	},
 	HunterTypes = { "scout", "brute", "crawler" },
 	NightSuffix = "_night", -- night model name = day name .. suffix
@@ -124,4 +133,17 @@ return {
 	-- Keys for the gear (no shared Input action for these yet)
 	EmpKeys = { Enum.KeyCode.G, Enum.KeyCode.DPadDown },
 	DisruptorKeys = { Enum.KeyCode.V, Enum.KeyCode.DPadRight },
+
+	-- Sounds (names from the manifest), heard out to SoundRollOff[2] studs
+	Sounds = { Hum = "hum_loop", HumVolume = 0.35, CueVolume = 0.9, Grab = "grab_clank" },
+	SoundRollOff = { 6, 70 },
+	StateSounds = {
+		chase = "chase_servo_scream",
+		suspicious = { "curious_beep_1", "curious_beep_2", "curious_beep_3" },
+		investigate = { "curious_beep_1", "curious_beep_2", "scanner_ping" },
+		sweep = "scanner_ping",
+		stalled = "error_stall",
+	},
+	CaughtDayLine = "A ROBOT GRABBED YOU. It took your %s back to its room. Sneak in and steal it back.",
+	CaughtNightLine = "A ROBOT GOT YOU IN THE DARK.",
 }

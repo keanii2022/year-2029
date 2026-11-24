@@ -8,7 +8,9 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Hints = require(script.Parent.Hints)
 
 local settings = Config.Robots
 local player = Players.LocalPlayer
@@ -125,7 +127,82 @@ local function step(folder: Instance)
 	end
 end
 
+-- Robot sounds, all local: a hum that follows each robot, a scream when it starts chasing, curious
+-- beeps when it's onto something, a fault noise when it stalls. You hear them before you see them.
+local function soundOn(parent: Instance, name: string, volume: number, looped: boolean): Sound?
+	local id = ModelLibrary.soundId(name)
+	if not id then
+		return nil
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = volume
+	sound.Looped = looped
+	sound.RollOffMinDistance = settings.SoundRollOff[1]
+	sound.RollOffMaxDistance = settings.SoundRollOff[2]
+	sound.Parent = parent
+	return sound
+end
+
+local function voice(model: Model)
+	local body = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
+	if not body then
+		return
+	end
+	local hum = soundOn(body, settings.Sounds.Hum, settings.Sounds.HumVolume, true)
+	if hum then
+		hum:Play()
+	end
+	model:GetAttributeChangedSignal("State"):Connect(function()
+		local cue = settings.StateSounds[model:GetAttribute("State")]
+		if not cue then
+			return
+		end
+		local name = if type(cue) == "table" then cue[random:NextInteger(1, #cue)] else cue
+		local sound = soundOn(body, name, settings.Sounds.CueVolume, false)
+		if sound then
+			sound.PlaybackSpeed = random:NextNumber(0.92, 1.08)
+			sound:Play()
+			Debris:AddItem(sound, 6)
+		end
+	end)
+end
+
+-- Getting grabbed: a red flash, a jolt, the clank of the claw and words saying what happened
+local function caught(kind: string, itemName: string?)
+	local gui = player:FindFirstChildOfClass("PlayerGui")
+	if gui then
+		local screen = Instance.new("ScreenGui")
+		screen.IgnoreGuiInset = true
+		screen.DisplayOrder = 20
+		local flash = Instance.new("Frame")
+		flash.Size = UDim2.fromScale(1, 1)
+		flash.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+		flash.BackgroundTransparency = 0.35
+		flash.Parent = screen
+		screen.Parent = gui
+		TweenService:Create(flash, TweenInfo.new(1.2), { BackgroundTransparency = 1 }):Play()
+		Debris:AddItem(screen, 1.4)
+	end
+	local camera = workspace.CurrentCamera
+	if camera then
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local clank = root and soundOn(root, settings.Sounds.Grab, 1, false)
+		if clank then
+			clank:Play()
+			Debris:AddItem(clank, 4)
+		end
+	end
+	if kind == "night" then
+		Hints.flash("caught", settings.CaughtNightLine, 5)
+	else
+		Hints.flash("caught", string.format(settings.CaughtDayLine, itemName or "something"), 6)
+	end
+end
+
 function Robots.Start()
+	Net.event("RobotCaught").OnClientEvent:Connect(caught)
 	gearRemote = Net.event("RobotGear")
 	ContextActionService:BindAction("RobotEmp", useGear("Emp"), false, table.unpack(settings.EmpKeys))
 	ContextActionService:BindAction(
@@ -137,6 +214,16 @@ function Robots.Start()
 
 	task.spawn(function()
 		local folder = workspace:WaitForChild("Robots")
+		for _, child in folder:GetChildren() do
+			if child:IsA("Model") then
+				voice(child)
+			end
+		end
+		folder.ChildAdded:Connect(function(child)
+			if child:IsA("Model") then
+				task.defer(voice, child)
+			end
+		end)
 		local elapsed = 0
 		RunService.Heartbeat:Connect(function(dt)
 			elapsed += dt

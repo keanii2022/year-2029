@@ -756,6 +756,7 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 	end
 	if DayNight.isNight() then
 		-- caught at night counts as going down: Combat drops their bag when the Humanoid dies
+		Net.event("RobotCaught"):FireClient(player, "night", nil)
 		target.humanoid.Health = 0
 		return
 	end
@@ -767,6 +768,8 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 	local taken = Inventory.remove(player, itemId, Inventory.count(player, itemId))
 	if taken > 0 then
 		placeStash(robot.room.id, itemId, taken, shelfSpot(robot.room))
+		local item = Inventory.Items[itemId]
+		Net.event("RobotCaught"):FireClient(player, "day", if item then item.name else itemId)
 	end
 end
 
@@ -973,6 +976,8 @@ local function spawnChoreBot(room: any)
 	end
 end
 
+local nightStartedAt = 0
+
 local function spawnHunter(near: Vector3)
 	local typeName = settings.HunterTypes[random:NextInteger(1, #settings.HunterTypes)]
 	for _ = 1, 8 do
@@ -1027,7 +1032,8 @@ local function activate()
 			end
 		end
 	end
-	if DayNight.isNight() then
+	-- A quiet stretch after lights out, then hunters start far off and work their way in
+	if DayNight.isNight() and os.clock() - nightStartedAt >= settings.HunterGrace then
 		local need = RobotRooms.needHunters(points, hunters, settings.HunterNearRadius, settings.MaxHunters)
 		for _, player in need do
 			for _, target in alive do
@@ -1041,6 +1047,9 @@ end
 
 local function onPhaseChanged(phase: string)
 	local now = os.clock()
+	if phase == "Night" then
+		nightStartedAt = now
+	end
 	if phase == "Day" then
 		table.clear(destroyedRooms)
 	end
@@ -1211,6 +1220,8 @@ function Robots.Start()
 	DayNight.onPhaseChanged(function(phase)
 		task.spawn(onPhaseChanged, phase)
 	end)
+	-- Made up front so clients waiting on it don't hang until the first catch
+	Net.event("RobotCaught")
 	Net.event("GunFire").OnServerEvent:Connect(function(player)
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
