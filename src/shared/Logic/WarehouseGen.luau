@@ -1,8 +1,8 @@
 -- Seeded warehouse layout. Pure data: the server builds parts from it, other systems ask it
 -- where rooms are and how deep a spot is. Local studs: x east, z south, (0, 0) is the floor centre,
 -- the entrance is the middle of the south wall.
-local Rng = require("./WarehouseGenRng")
-local Rooms = require("./WarehouseGenRooms")
+local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
+local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
 
 local WarehouseGen = {}
 

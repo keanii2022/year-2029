@@ -1,6 +1,6 @@
 -- Robot rooms: scattered off-grid rectangles with walls, one or two doorways, a rug, a lamp and
 -- furniture backed against the inside walls. Coordinates are warehouse-local studs (x, z).
-local Rng = require("./WarehouseGenRng")
+local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 
 local WarehouseGenRooms = {}
 
