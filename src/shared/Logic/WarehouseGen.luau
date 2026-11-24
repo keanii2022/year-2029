@@ -1,8 +1,11 @@
 -- Seeded warehouse layout. Pure data: the server builds parts from it, other systems ask it
--- where rooms are and how deep a spot is. Local studs: x east, z south, (0, 0) is the floor centre,
--- the entrance is the middle of the south wall.
+-- where rooms are, how deep a spot is and whether a spot is clear. Local studs: x east, z south,
+-- (0, 0) is the floor centre, the entrance is the middle of the south wall.
+-- The floor is a grid of square zones split by cross aisles; each zone gets one kind of content
+-- (see WarehouseGenZones). Giant pillars stand on every other cross aisle corner.
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
+local Zones = if script then require(script.Parent.WarehouseGenZones) else require("./WarehouseGenZones")
 
 local WarehouseGen = {}
 
@@ -24,6 +27,41 @@ export type Decal = {
 	height: number,
 }
 export type Spawn = { x: number, z: number }
+export type Zone = { i: number, j: number, kind: string, x0: number, z0: number, x1: number, z1: number }
+export type Light = {
+	x: number,
+	y: number,
+	z: number,
+	length: number,
+	axis: string,
+	tone: string,
+	state: string,
+	cable: number,
+}
+export type Piece = {
+	shape: string,
+	x: number,
+	y: number,
+	z: number,
+	sx: number,
+	sy: number,
+	sz: number,
+	turn: number,
+	style: string,
+	solid: boolean?,
+	collide: boolean,
+	label: string?,
+	paint: string?,
+	lamp: string?,
+	lean: number?,
+	kit: string?,
+	kitOnly: boolean?,
+	skipIfKit: string?,
+	kitFloor: string?,
+}
+export type Pocket = { kind: string, x0: number, z0: number, x1: number, z1: number, height: number }
+export type DeptSign = { x: number, z: number, y: number, text: string }
+export type Solid = { x0: number, z0: number, x1: number, z1: number, room: boolean? }
 export type Layout = {
 	seed: number,
 	size: number,
@@ -31,6 +69,7 @@ export type Layout = {
 	blockSize: number,
 	blocks: number,
 	entrance: { x: number, z: number },
+	zones: { Zone },
 	rooms: { Rooms.Room },
 	shelves: { Shelf },
 	signs: { Sign },
@@ -39,7 +78,11 @@ export type Layout = {
 	pillars: { Pillar },
 	decals: { Decal },
 	spawns: { Spawn },
-	shelvesByBlock: { [number]: { Shelf } },
+	lights: { Light },
+	pieces: { Piece },
+	pockets: { Pocket },
+	deptSigns: { DeptSign },
+	solidsByBlock: { [number]: { Solid } },
 }
 
 local function blockIndex(layout: any, x: number, z: number): number
@@ -48,142 +91,140 @@ local function blockIndex(layout: any, x: number, z: number): number
 	return j * layout.blocks + i + 1
 end
 
-local function inAnyRoom(rooms: { Rooms.Room }, x: number, z: number, pad: number): boolean
-	for _, room in rooms do
-		if Rooms.contains(room, x, z, pad) then
-			return true
+-- Every block a rect touches gets it, so a spot check only has to look in its own block
+local function addSolid(layout: any, solid: Solid)
+	local i0 = math.clamp(math.floor((solid.x0 + layout.half) / layout.blockSize), 0, layout.blocks - 1)
+	local i1 = math.clamp(math.floor((solid.x1 + layout.half) / layout.blockSize), 0, layout.blocks - 1)
+	local j0 = math.clamp(math.floor((solid.z0 + layout.half) / layout.blockSize), 0, layout.blocks - 1)
+	local j1 = math.clamp(math.floor((solid.z1 + layout.half) / layout.blockSize), 0, layout.blocks - 1)
+	for j = j0, j1 do
+		for i = i0, i1 do
+			local key = j * layout.blocks + i + 1
+			layout.solidsByBlock[key] = layout.solidsByBlock[key] or {}
+			table.insert(layout.solidsByBlock[key], solid)
 		end
 	end
-	return false
 end
 
--- Pieces of [x0, x1] left after cutting out every room whose padded rect crosses the row's band
-local function clipRow(rooms: { Rooms.Room }, x0: number, x1: number, z: number, depth: number, pad: number)
-	local pieces = { { x0, x1 } }
-	for _, room in rooms do
-		if room.z0 - pad < z + depth / 2 and z - depth / 2 < room.z1 + pad then
-			local cutFrom, cutTo = room.x0 - pad, room.x1 + pad
-			local nextPieces = {}
-			for _, piece in pieces do
-				if cutTo <= piece[1] or cutFrom >= piece[2] then
-					table.insert(nextPieces, piece)
-				else
-					if cutFrom > piece[1] then
-						table.insert(nextPieces, { piece[1], cutFrom })
-					end
-					if cutTo < piece[2] then
-						table.insert(nextPieces, { cutTo, piece[2] })
+-- Plans every zone before anything is built, so nothing clumps: the special kinds never sit right
+-- next to the same kind, long runs of racking get broken up, and now and then an installation
+-- swallows a 2 by 2 block of zones and becomes something enormous.
+local function planZones(layout: any, config: any, rng: Rng.Rng): { [number]: any }
+	local blocks = layout.blocks
+	local plan = {} -- The block you walk in through is always a store department
+	local entranceI = math.floor((layout.entrance.x + layout.half) / config.BlockSize)
+	plan[(blocks - 1) * blocks + entranceI + 1] =
+		{ kind = "showroom", i0 = entranceI, j0 = blocks - 1, i1 = entranceI, j1 = blocks - 1, owner = true } -- An installation set nobody has used within InstallationRepeatGap zones, so a repeat is never
+	-- in sight
+	local function pickSet(i: number, j: number, weights: any?): string
+		local gap = config.InstallationRepeatGap
+		local set
+		for _ = 1, 10 do
+			set = rng:weighted(weights or config.InstallationKinds)
+			local repeated = false
+			for nj = math.max(0, j - gap), math.min(blocks - 1, j + gap) do
+				for ni = math.max(0, i - gap), math.min(blocks - 1, i + gap) do
+					local other = plan[nj * blocks + ni + 1]
+					if other and other.set == set then
+						repeated = true
 					end
 				end
 			end
-			pieces = nextPieces
-		end
-	end
-	return pieces
-end
-
-local function addShelves(
-	layout: Layout,
-	config: any,
-	byBlock: { [number]: { Shelf } },
-	bx0: number,
-	bz0: number,
-	rng: Rng.Rng
-)
-	local margin, block = config.BlockMargin, config.BlockSize
-	local depth = config.ShelfDepth
-	local z = bz0 + margin + depth / 2
-	local first: Shelf? = nil
-	while z + depth / 2 <= bz0 + block - margin do
-		for _, piece in
-			clipRow(layout.rooms, bx0 + margin, bx0 + block - margin, z, depth, config.RoomClearance)
-		do
-			if piece[2] - piece[1] >= config.ShelfMinLength then
-				local shelf = { x0 = piece[1], x1 = piece[2], z = z, depth = depth }
-				table.insert(layout.shelves, shelf)
-				local key = blockIndex(layout, (shelf.x0 + shelf.x1) / 2, z)
-				byBlock[key] = byBlock[key] or {}
-				table.insert(byBlock[key], shelf)
-				first = first or shelf
+			if not repeated then
+				break
 			end
 		end
-		z += config.ShelfPitch
+		return set
 	end
-	if first then
-		-- Numbers are random on purpose: the signs don't really help
-		table.insert(layout.signs, { x = first.x0 - 3, z = first.z, number = rng:int(1, 99) })
-	end
-end
 
-local function nearPillar(layout: Layout, config: any, x: number, z: number, pad: number): boolean
-	local step = config.BlockSize * config.PillarEvery
-	local function offGrid(v: number): number
-		local rel = (v + layout.half) % step
-		return math.min(rel, step - rel)
-	end
-	return offGrid(x) < config.PillarSize / 2 + pad and offGrid(z) < config.PillarSize / 2 + pad
-end
-
-local function spotFree(layout: Layout, config: any, x: number, z: number, pad: number): boolean
-	return not inAnyRoom(layout.rooms, x, z, config.RoomClearance + pad)
-		and not nearPillar(layout, config, x, z, pad)
-end
-
-local function addJunk(layout: Layout, config: any, rng: Rng.Rng, bx0: number, bz0: number, count: number)
-	local inner = config.BlockMargin + 6
-	for _ = 1, count do
-		for _ = 1, 6 do
-			local x = rng:range(bx0 + inner, bx0 + config.BlockSize - inner)
-			local z = rng:range(bz0 + inner, bz0 + config.BlockSize - inner)
-			if spotFree(layout, config, x, z, 4) then
-				local boxes = {}
-				local y = 0
-				for _ = 1, rng:int(config.JunkBoxes[1], config.JunkBoxes[2]) do
-					local sy = rng:range(1.6, 3.2)
-					table.insert(boxes, {
-						sx = rng:range(2, 4.5),
-						sy = sy,
-						sz = rng:range(2, 4),
-						x = rng:range(-0.6, 0.6),
-						y = y + sy / 2,
-						z = rng:range(-0.6, 0.6),
-						turn = rng:range(-25, 25),
-					})
-					y += sy
+	-- True when a block already planned on any side (outside the given giant, if any) is this kind
+	local function besideSame(i: number, j: number, kind: string, own: any?): boolean
+		for _, step in { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } } do
+			local ni, nj = i + step[1], j + step[2]
+			if ni >= 0 and nj >= 0 and ni < blocks and nj < blocks then
+				local other = plan[nj * blocks + ni + 1]
+				local mine = own and ni >= own.i0 and ni <= own.i1 and nj >= own.j0 and nj <= own.j1
+				if other and other.kind == kind and not mine then
+					return true
 				end
-				table.insert(layout.junk, { x = x, z = z, boxes = boxes })
-				break
+			end
+		end
+		return false
+	end
+	for j = 0, blocks - 1 do
+		for i = 0, blocks - 1 do
+			local key = j * blocks + i + 1
+			if not plan[key] then
+				local left = if i > 0 then plan[key - 1] else nil
+				local up = if j > 0 then plan[key - blocks] else nil
+				local kind
+				do
+					for _ = 1, 8 do
+						kind = rng:weighted(config.ZoneKinds)
+						local ok = if config.ZoneSpread[kind]
+							then not besideSame(i, j, kind)
+							elseif
+								kind == "racking"
+								and left
+								and up
+								and left.kind == kind
+								and up.kind == kind
+							then rng:next() < config.RackRunChance
+							else true
+						if ok then
+							break
+						end
+					end
+				end
+				local entry: any = { kind = kind, i0 = i, j0 = j, i1 = i, j1 = j, owner = true }
+				local canGrow = i + 1 < blocks
+					and j + 1 < blocks
+					and not plan[key + 1]
+					and not plan[key + blocks]
+					and not plan[key + blocks + 1]
+				local giant = { i0 = i, j0 = j, i1 = i + 1, j1 = j + 1 }
+				local roomAround = canGrow
+					and not besideSame(i + 1, j, kind, giant)
+					and not besideSame(i, j + 1, kind, giant)
+					and not besideSame(i + 1, j + 1, kind, giant)
+				if kind == "installation" and roomAround and rng:next() < config.MegaChance then
+					entry.i1, entry.j1 = i + 1, j + 1
+					entry.set = pickSet(i, j, config.MegaInstallationKinds)
+					for _, other in { key + 1, key + blocks, key + blocks + 1 } do
+						plan[other] = {
+							kind = kind,
+							i0 = i,
+							j0 = j,
+							i1 = i + 1,
+							j1 = j + 1,
+							owner = false,
+							set = entry.set,
+						}
+					end
+				end
+				if kind == "installation" and not entry.set then
+					entry.set = pickSet(i, j)
+				end
+				plan[key] = entry
 			end
 		end
 	end
+	return plan
 end
 
-local function addLoose(layout: Layout, config: any, rng: Rng.Rng, bx0: number, bz0: number, count: number)
-	local inner = config.BlockMargin + 10
-	for _ = 1, count do
-		for _ = 1, 6 do
-			local x = rng:range(bx0 + inner, bx0 + config.BlockSize - inner)
-			local z = rng:range(bz0 + inner, bz0 + config.BlockSize - inner)
-			if spotFree(layout, config, x, z, 6) then
-				table.insert(
-					layout.loose,
-					{ name = rng:pick(config.LooseFurniture), x = x, z = z, turn = rng:range(0, 360) }
-				)
-				break
-			end
-		end
-	end
-end
-
-local function addPillars(layout: Layout, config: any)
-	local pad = config.PillarSize / 2 + config.RoomClearance
+local function addPillars(layout: Layout, config: any, plan: { [number]: any })
+	local half = config.PillarSize / 2
 	for j = config.PillarEvery, layout.blocks - 1, config.PillarEvery do
 		for i = config.PillarEvery, layout.blocks - 1, config.PillarEvery do
+			-- No pillar in the middle of a merged giant installation
+			local inside = plan[j * layout.blocks + i + 1]
+			if inside and inside.i0 < i and inside.j0 < j then
+				continue
+			end
 			local x = -layout.half + i * config.BlockSize
 			local z = -layout.half + j * config.BlockSize
-			if not inAnyRoom(layout.rooms, x, z, pad) then
-				table.insert(layout.pillars, { x = x, z = z })
-			end
+			table.insert(layout.pillars, { x = x, z = z })
+			addSolid(layout, { x0 = x - half, x1 = x + half, z0 = z - half, z1 = z + half })
 		end
 	end
 end
@@ -191,13 +232,13 @@ end
 -- A paintable face: centre (x, z), outward normal, and the face width available
 local function decalSurface(layout: Layout, config: any, rng: Rng.Rng)
 	local roll = rng:next()
-	if roll < 0.5 and #layout.shelves > 0 then
+	if roll < 0.45 and #layout.shelves > 0 then
 		local shelf = rng:pick(layout.shelves)
 		if rng:next() < 0.5 then
 			return shelf.x0 - 0.06, shelf.z, -1, 0, shelf.depth
 		end
 		return shelf.x1 + 0.06, shelf.z, 1, 0, shelf.depth
-	elseif roll < 0.75 and #layout.rooms > 0 then
+	elseif roll < 0.65 and #layout.rooms > 0 then
 		local room = rng:pick(layout.rooms)
 		local wall = rng:pick(room.walls)
 		local alongX = wall.x1 - wall.x0 > wall.z1 - wall.z0
@@ -217,6 +258,17 @@ local function decalSurface(layout: Layout, config: any, rng: Rng.Rng)
 			return room.x0 - 0.06, z, -1, 0, length
 		end
 		return room.x1 + 0.06, z, 1, 0, length
+	elseif roll < 0.8 and #layout.pockets > 0 then
+		local pocket = rng:pick(layout.pockets)
+		local face = rng:int(1, 4)
+		if face == 1 then
+			return rng:range(pocket.x0 + 2, pocket.x1 - 2), pocket.z0 - 0.06, 0, -1, pocket.x1 - pocket.x0
+		elseif face == 2 then
+			return rng:range(pocket.x0 + 2, pocket.x1 - 2), pocket.z1 + 0.06, 0, 1, pocket.x1 - pocket.x0
+		elseif face == 3 then
+			return pocket.x0 - 0.06, rng:range(pocket.z0 + 2, pocket.z1 - 2), -1, 0, pocket.z1 - pocket.z0
+		end
+		return pocket.x1 + 0.06, rng:range(pocket.z0 + 2, pocket.z1 - 2), 1, 0, pocket.z1 - pocket.z0
 	elseif #layout.pillars > 0 then
 		local pillar = rng:pick(layout.pillars)
 		local faces = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
@@ -250,22 +302,15 @@ local function addDecals(layout: Layout, config: any, rng: Rng.Rng)
 	end
 end
 
--- True when a player standing here isn't inside a room, shelf, junk stack or pillar
+-- True when a player standing here isn't inside a wall, rack, junk stack, pillar or room
 function WarehouseGen.isClear(layout: Layout, config: any, x: number, z: number, pad: number): boolean
 	local edge = layout.half - config.WallThickness - pad
 	if math.abs(x) > edge or math.abs(z) > edge then
 		return false
 	end
-	if not spotFree(layout, config, x, z, pad) then
-		return false
-	end
-	for _, shelf in layout.shelvesByBlock[blockIndex(layout, x, z)] or {} do
-		if
-			x > shelf.x0 - pad
-			and x < shelf.x1 + pad
-			and z > shelf.z - shelf.depth / 2 - pad
-			and z < shelf.z + shelf.depth / 2 + pad
-		then
+	for _, solid in layout.solidsByBlock[blockIndex(layout, x, z)] or {} do
+		local grow = if solid.room then pad + config.RoomClearance else pad
+		if x > solid.x0 - grow and x < solid.x1 + grow and z > solid.z0 - grow and z < solid.z1 + grow then
 			return false
 		end
 	end
@@ -281,19 +326,6 @@ local function addSpawns(layout: Layout, config: any, rng: Rng.Rng)
 		end
 		return best
 	end
-	local function clearOfJunk(x: number, z: number): boolean
-		for _, junk in layout.junk do
-			if math.abs(junk.x - x) < pad + 4 and math.abs(junk.z - z) < pad + 4 then
-				return false
-			end
-		end
-		for _, item in layout.loose do
-			if math.abs(item.x - x) < pad + 6 and math.abs(item.z - z) < pad + 6 then
-				return false
-			end
-		end
-		return true
-	end
 
 	local rounds = 0
 	while #layout.spawns < config.SpawnCount and rounds < config.SpawnCount * 20 do
@@ -305,7 +337,7 @@ local function addSpawns(layout: Layout, config: any, rng: Rng.Rng)
 			tries += 1
 			local x = rng:range(-layout.half, layout.half)
 			local z = rng:range(-layout.half, layout.half)
-			if WarehouseGen.isClear(layout, config, x, z, pad) and clearOfJunk(x, z) then
+			if WarehouseGen.isClear(layout, config, x, z, pad) then
 				found += 1
 				local gap = nearestGap(x, z)
 				if gap > bestGap then
@@ -330,6 +362,7 @@ function WarehouseGen.generate(config: any, seed: number): Layout
 		blockSize = config.BlockSize,
 		blocks = blocks,
 		entrance = { x = 0, z = half },
+		zones = {},
 		rooms = {},
 		shelves = {},
 		signs = {},
@@ -338,36 +371,54 @@ function WarehouseGen.generate(config: any, seed: number): Layout
 		pillars = {},
 		decals = {},
 		spawns = {},
+		lights = {},
+		pieces = {},
+		pockets = {},
+		deptSigns = {},
+		solidsByBlock = {},
 	}
-
-	local inset = config.WallThickness + config.BlockMargin * 2
-	layout.rooms = Rooms.place(
-		config,
-		rng,
-		{ x0 = -half + inset, z0 = -half + inset, x1 = half - inset, z1 = half - inset },
-		{ x = 0, z = half, radius = config.BlockSize * 1.5 }
-	)
-
-	local byBlock = {}
-	for j = 0, blocks - 1 do
-		for i = 0, blocks - 1 do
-			local bx0, bz0 = -half + i * config.BlockSize, -half + j * config.BlockSize
-			local kind = rng:weighted(config.BlockKinds)
-			if kind == "aisles" then
-				addShelves(layout, config, byBlock, bx0, bz0, rng)
-			elseif kind == "open" then
-				addJunk(layout, config, rng, bx0, bz0, rng:int(config.OpenJunk[1], config.OpenJunk[2]))
-				addLoose(layout, config, rng, bx0, bz0, rng:int(config.OpenLoose[1], config.OpenLoose[2]))
-			else
-				addJunk(layout, config, rng, bx0, bz0, rng:int(config.EmptyJunk[1], config.EmptyJunk[2]))
-			end
-		end
+	layout.addSolid = function(solid: Solid)
+		addSolid(layout, solid)
 	end
-	layout.shelvesByBlock = byBlock
 
-	addPillars(layout, config)
+	local plan = planZones(layout, config, rng)
+	addPillars(layout, config, plan)
+	local margin = config.BlockMargin
+	local size = config.BlockSize
+	for key = 1, blocks * blocks do
+		local entry = plan[key]
+		local i, j = (key - 1) % blocks, (key - 1) // blocks
+		local rect = {
+			x0 = -half + entry.i0 * size + margin,
+			z0 = -half + entry.j0 * size + margin,
+			x1 = -half + (entry.i1 + 1) * size - margin,
+			z1 = -half + (entry.j1 + 1) * size - margin,
+		}
+		-- The outermost ring keeps clear of the outer wall
+		if entry.i0 == 0 then
+			rect.x0 += config.WallThickness
+		end
+		if entry.j0 == 0 then
+			rect.z0 += config.WallThickness
+		end
+		if entry.i1 == blocks - 1 then
+			rect.x1 -= config.WallThickness
+		end
+		if entry.j1 == blocks - 1 then
+			rect.z1 -= config.WallThickness
+		end
+		if entry.owner then
+			Zones[entry.kind](layout, config, rng, rect, entry.set)
+		end
+		table.insert(
+			layout.zones,
+			{ i = i, j = j, kind = entry.kind, x0 = rect.x0, z0 = rect.z0, x1 = rect.x1, z1 = rect.z1 }
+		)
+	end
+
 	addDecals(layout, config, rng)
 	addSpawns(layout, config, rng)
+	layout.addSolid = nil
 	return layout
 end
 
@@ -382,6 +433,24 @@ function WarehouseGen.roomAt(layout: Layout, x: number, z: number): Rooms.Room?
 	for _, room in layout.rooms do
 		if Rooms.contains(room, x, z, 0) then
 			return room
+		end
+	end
+	return nil
+end
+
+function WarehouseGen.zoneAt(layout: Layout, x: number, z: number): Zone?
+	local i = math.floor((x + layout.half) / layout.blockSize)
+	local j = math.floor((z + layout.half) / layout.blockSize)
+	if i < 0 or j < 0 or i >= layout.blocks or j >= layout.blocks then
+		return nil
+	end
+	return layout.zones[j * layout.blocks + i + 1]
+end
+
+function WarehouseGen.pocketAt(layout: Layout, x: number, z: number): Pocket?
+	for _, pocket in layout.pockets do
+		if x > pocket.x0 and x < pocket.x1 and z > pocket.z0 and z < pocket.z1 then
+			return pocket
 		end
 	end
 	return nil

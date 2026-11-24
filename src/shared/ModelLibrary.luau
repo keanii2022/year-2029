@@ -42,6 +42,75 @@ local function buildGreybox(entry: Manifest.ModelEntry): Model
 	return model
 end
 
+-- Box round every part, in world axes
+local function worldExtents(model: Model): (Vector3, Vector3)
+	local low, high = Vector3.one * math.huge, -Vector3.one * math.huge
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") then
+			local half = part.Size / 2
+			for _, corner in
+				{
+					Vector3.new(1, 1, 1),
+					Vector3.new(1, 1, -1),
+					Vector3.new(1, -1, 1),
+					Vector3.new(1, -1, -1),
+					Vector3.new(-1, 1, 1),
+					Vector3.new(-1, 1, -1),
+					Vector3.new(-1, -1, 1),
+					Vector3.new(-1, -1, -1),
+				}
+			do
+				local point = part.CFrame:PointToWorldSpace(half * corner)
+				low, high = low:Min(point), high:Max(point)
+			end
+		end
+	end
+	return low, high
+end
+
+-- The pivot keeps its position but loses any tilt, so placing code can turn the model freely
+local function levelPivot(model: Model)
+	local root = model.PrimaryPart
+	if root then
+		root.PivotOffset = root.CFrame:ToObjectSpace(CFrame.new(root:GetPivot().Position))
+	else
+		model.WorldPivot = CFrame.new(model:GetPivot().Position)
+	end
+end
+
+-- An imported model can come in tipped over (the art is built z-up). Stand it upright by checking
+-- which way its height (from the manifest) is pointing, and level its pivot either way.
+local function standUpright(model: Model, entry: Manifest.ModelEntry)
+	levelPivot(model)
+	local want = entry.size[2]
+	local low, high = worldExtents(model)
+	local extents = high - low
+	local function near(a: number): boolean
+		return math.abs(a - want) <= math.max(0.15 * want, 0.1)
+	end
+	if near(extents.Y) or not (near(extents.Z) or near(extents.X)) then
+		return
+	end
+	local axis = if near(extents.Z) then Vector3.xAxis else Vector3.zAxis
+	-- Of the two quarter turns, keep the one that leaves most of the model's weight low, the way
+	-- furniture and racks sit
+	local best, bestScore = nil, math.huge
+	for _, sign in { 1, -1 } do
+		local turn = CFrame.fromAxisAngle(axis, sign * math.pi / 2)
+		local trial = model:Clone()
+		trial:PivotTo(trial:GetPivot() * turn)
+		local tLow, tHigh = worldExtents(trial)
+		local root = trial.PrimaryPart
+		local score = if root then (root.Position.Y - tLow.Y) / math.max(tHigh.Y - tLow.Y, 0.01) else 0
+		trial:Destroy()
+		if score < bestScore then
+			best, bestScore = turn, score
+		end
+	end
+	model:PivotTo(model:GetPivot() * best)
+	levelPivot(model)
+end
+
 local function loadUploaded(entry: Manifest.ModelEntry): Model?
 	local ok, result = pcall(InsertService.LoadAsset, InsertService, entry.assetId :: number)
 	if not ok then
@@ -61,6 +130,7 @@ local function loadUploaded(entry: Manifest.ModelEntry): Model?
 	end
 	local root = Manifest.rootPart(Manifest.partNames(entry))
 	model.PrimaryPart = root and model:FindFirstChild(root, true) :: BasePart?
+	standUpright(model, entry)
 	return model
 end
 
@@ -70,6 +140,9 @@ local function template(entry: Manifest.ModelEntry): Model
 		return cached
 	end
 	local model = if entry.assetId and RunService:IsServer() then loadUploaded(entry) else nil
+	if model then
+		model:SetAttribute("Uploaded", true)
+	end
 	model = model or buildGreybox(entry)
 	model:SetAttribute("ModelName", entry.name)
 	templates[entry.name] = model
@@ -83,6 +156,16 @@ function ModelLibrary.get(name: string): Model?
 		return nil
 	end
 	return template(entry):Clone()
+end
+
+-- True once the real model has been uploaded and actually loads here, so callers can swap their own
+-- stand-in geometry for it. A failed load (no permission, still in review) counts as not uploaded.
+function ModelLibrary.uploaded(name: string): boolean
+	local entry = index.models[name]
+	if not entry or not entry.assetId then
+		return false
+	end
+	return template(entry):GetAttribute("Uploaded") == true
 end
 
 function ModelLibrary.entry(name: string): Manifest.ModelEntry?

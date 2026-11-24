@@ -1,5 +1,6 @@
--- Builds the giant warehouse from the seeded layout in Logic/WarehouseGen: floor, walls and a roof
--- lost in haze, giant pillars, shelving aisles, junk, robot rooms, paint and oil on the walls, spawns.
+-- Builds the warehouse from the seeded layout in Logic/WarehouseGen: a dark concrete floor, walls and
+-- a trussed roof lost in haze, giant pillars, packed racking, store departments under hanging signs,
+-- strip lights on cables, robot rooms, dreamcore pockets, paint and oil on the walls, spawns.
 -- Parts go into square chunk folders so streaming (on in the place file) can load them near players.
 local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
@@ -13,7 +14,9 @@ local Warehouse = {}
 
 local settings = Config.Warehouse
 local MAX_PART = 2000 -- Roblox caps a part at 2048 studs per side
-local YIELD_EVERY = 300 -- instances built between yields so the server never stalls
+local YIELD_EVERY = 400 -- instances built between yields so the server never stalls
+local FLICKER_TAG = "FlickerLight"
+local LIGHT_TAG = "WarehouseLight" -- client Lighting switches these off at night, emergency ones go red
 
 local layout: WarehouseGen.Layout
 local root: Folder
@@ -68,6 +71,14 @@ local function block(
 	return part
 end
 
+-- Thin, non-colliding bits (cables, tape) that nothing should hit or cast shadows from
+local function detail(part: BasePart)
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.CastShadow = false
+end
+
 -- Turns the model so its front (+z in the manifest) points along facing, stands it on the floor at
 -- (x, z), and with backToWall pushes it out by half its depth so its back touches (x, z).
 local function placeModel(model: Model, x: number, z: number, facing: Vector3, backToWall: boolean)
@@ -106,6 +117,150 @@ local function facingFromTurn(degrees: number): Vector3
 	return Vector3.new(math.sin(radians), 0, math.cos(radians))
 end
 
+-- Blender kit pieces replace the code-built stand-ins only once they're uploaded; before that the
+-- greybox stand-in would look worse than the styled boxes.
+local function hasKit(name: string?): boolean
+	return name ~= nil and ModelLibrary.uploaded(name)
+end
+
+local function placeKit(name: string, x: number, z: number, facing: Vector3, lift: number?): Model?
+	local model = ModelLibrary.get(name)
+	if not model then
+		return nil
+	end
+	placeModel(model, x, z, facing, false)
+	if lift and lift ~= 0 then
+		model:PivotTo(model:GetPivot() + Vector3.new(0, lift, 0))
+	end
+	model.Parent = chunkFor(x, z)
+	noteBuilt()
+	return model
+end
+
+-- Tiles a 32-stud kit floor over a rect, whole tiles only, turned at random so repeats don't line up
+local function tileKitFloor(name: string, x0: number, z0: number, x1: number, z1: number, lift: number)
+	local size = 32
+	local x = x0
+	while x + size <= x1 + 0.01 do
+		local z = z0
+		while z + size <= z1 + 0.01 do
+			placeKit(name, x + size / 2, z + size / 2, facingFromTurn(cosmetic:NextInteger(0, 3) * 90), lift)
+			z += size
+		end
+		x += size
+	end
+end
+
+local function textGui(part: BasePart, face: Enum.NormalId, text: string, color: Color3, font: Enum.Font)
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = face
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 30
+	gui.LightInfluence = 0.6
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(0.92, 0.8)
+	label.Position = UDim2.fromScale(0.04, 0.1)
+	label.BackgroundTransparency = 1
+	label.TextScaled = true
+	label.Font = font
+	label.TextColor3 = color
+	label.Text = text
+	label.Parent = gui
+	gui.Parent = part
+end
+
+local PAINT_SKIES = {
+	sky = { Color3.fromRGB(86, 150, 214), Color3.fromRGB(200, 226, 244), 0.15 },
+	dusk = { Color3.fromRGB(120, 70, 170), Color3.fromRGB(220, 150, 200), 0.5 },
+	night = { Color3.fromRGB(10, 16, 44), Color3.fromRGB(40, 60, 110), 0.55 },
+}
+
+local function rounded(parent: Instance, size: UDim2, position: UDim2, color: Color3, transparency: number)
+	local blob = Instance.new("Frame")
+	blob.Size = size
+	blob.Position = position
+	blob.BackgroundColor3 = color
+	blob.BackgroundTransparency = transparency
+	blob.BorderSizePixel = 0
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0.5, 0)
+	corner.Parent = blob
+	blob.Parent = parent
+	return blob
+end
+
+-- A painted sky (blue, dusk purple or night) with flat clouds, optionally a green hill; or a wall
+-- of party stars and balloons. Painted, never quite convincing.
+local function paintFace(part: BasePart, face: Enum.NormalId, kind: string)
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = face
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 4
+	gui.LightInfluence = if kind == "night" then 0.1 else 0.4
+	local canvas = Instance.new("Frame")
+	canvas.Size = UDim2.fromScale(1, 1)
+	canvas.BorderSizePixel = 0
+	if kind == "stars" then
+		canvas.BackgroundTransparency = 1
+		for _ = 1, cosmetic:NextInteger(8, 14) do
+			local star = Instance.new("TextLabel")
+			local size = cosmetic:NextNumber(0.05, 0.12)
+			star.Size = UDim2.fromScale(size, size * 2)
+			star.Position = UDim2.fromScale(cosmetic:NextNumber(0, 0.95), cosmetic:NextNumber(0.05, 0.6))
+			star.BackgroundTransparency = 1
+			star.TextScaled = true
+			star.Text = if cosmetic:NextNumber() < 0.6 then "★" else "●"
+			star.TextColor3 = ({
+				Color3.fromRGB(240, 220, 200),
+				Color3.fromRGB(220, 70, 70),
+				Color3.fromRGB(240, 200, 60),
+			})[cosmetic:NextInteger(1, 3)]
+			star.Parent = canvas
+		end
+		canvas.Parent = gui
+		gui.Parent = part
+		return
+	end
+	local palette = PAINT_SKIES[if kind == "hill" or kind == "sky_floor" then "sky" else kind]
+		or PAINT_SKIES.sky
+	canvas.BackgroundColor3 = Color3.new(1, 1, 1)
+	local gradient = Instance.new("UIGradient")
+	gradient.Rotation = 90
+	gradient.Color = ColorSequence.new(palette[1], palette[2])
+	gradient.Parent = canvas
+	canvas.Parent = gui
+	for _ = 1, cosmetic:NextInteger(3, 6) do
+		local w = cosmetic:NextNumber(0.12, 0.3)
+		rounded(
+			canvas,
+			UDim2.fromScale(w, w * 0.35),
+			UDim2.fromScale(cosmetic:NextNumber(0, 1 - w), cosmetic:NextNumber(0.05, 0.6)),
+			Color3.fromRGB(250, 250, 252),
+			palette[3]
+		)
+	end
+	if kind == "night" then
+		for _ = 1, 30 do
+			rounded(
+				canvas,
+				UDim2.fromOffset(2, 2),
+				UDim2.fromScale(cosmetic:NextNumber(), cosmetic:NextNumber()),
+				Color3.fromRGB(255, 255, 240),
+				0.2
+			)
+		end
+	elseif kind == "hill" then
+		rounded(
+			canvas,
+			UDim2.fromScale(1.6, 0.9),
+			UDim2.fromScale(-0.3, 0.62),
+			Color3.fromRGB(78, 150, 62),
+			0
+		)
+	end
+	gui.Parent = part
+end
+
 local function buildHaze()
 	local haze = Lighting:FindFirstChild("Haze")
 	if not haze then
@@ -136,7 +291,8 @@ local function buildFloor()
 	end
 end
 
--- Outer walls and roof are huge single parts, kept outside the chunks so they're always there
+-- Outer walls, roof and trusses are tiled from pieces under the part size cap and kept outside
+-- the chunks so they're always there: no sky anywhere, ever.
 local function buildShell(shell: Folder)
 	local height = settings.CeilingHeight
 	local thick = settings.WallThickness
@@ -145,52 +301,75 @@ local function buildShell(shell: Folder)
 	for n = 0, pieces - 1 do
 		local along = -layout.half + (n + 0.5) * length
 		local edge = layout.half - thick / 2
-		local alongX = Vector3.new(length, height, thick)
-		local alongZ = Vector3.new(thick, height, length)
-		local y = height / 2
-		block(
-			shell,
-			"WallNorth",
-			alongX,
-			CFrame.new(toWorld(along, -edge, y)),
-			settings.WallColor,
-			Enum.Material.Concrete
-		)
-		block(
-			shell,
-			"WallSouth",
-			alongX,
-			CFrame.new(toWorld(along, edge, y)),
-			settings.WallColor,
-			Enum.Material.Concrete
-		)
-		block(
-			shell,
-			"WallWest",
-			alongZ,
-			CFrame.new(toWorld(-edge, along, y)),
-			settings.WallColor,
-			Enum.Material.Concrete
-		)
-		block(
-			shell,
-			"WallEast",
-			alongZ,
-			CFrame.new(toWorld(edge, along, y)),
-			settings.WallColor,
-			Enum.Material.Concrete
-		)
+		local alongX = Vector3.new(length, height + 8, thick)
+		local alongZ = Vector3.new(thick, height + 8, length)
+		local y = (height + 8) / 2
+		for _, spot in
+			{
+				{ "WallNorth", alongX, toWorld(along, -edge, y) },
+				{ "WallSouth", alongX, toWorld(along, edge, y) },
+				{ "WallWest", alongZ, toWorld(-edge, along, y) },
+				{ "WallEast", alongZ, toWorld(edge, along, y) },
+			}
+		do
+			block(
+				shell,
+				spot[1],
+				spot[2],
+				CFrame.new(spot[3]),
+				settings.WallColor,
+				Enum.Material.CorrodedMetal
+			)
+		end
 		for m = 0, pieces - 1 do
 			local other = -layout.half + (m + 0.5) * length
 			block(
 				shell,
-				"Ceiling",
+				"Roof",
 				Vector3.new(length, 4, length),
 				CFrame.new(toWorld(along, other, height + 2)),
 				settings.CeilingColor,
-				Enum.Material.Metal
+				Enum.Material.CorrodedMetal
 			)
 		end
+	end -- Kit wall panels line the inside of the outer wall: block and steel below, steel above, a dock
+	-- door now and then. They sit in the chunks so streaming can drop the far ones.
+	if hasKit("wall_lower") and hasKit("wall_upper") then
+		local inset = layout.half - thick
+		local panels = math.floor(layout.size / 16)
+		for _, side in { { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } } do
+			local inward = Vector3.new(-side[1], 0, -side[2])
+			for n = 0, panels - 1 do
+				local along = -layout.half + (n + 0.5) * 16
+				local x = if side[1] == 0 then along else side[1] * inset
+				local z = if side[1] == 0 then side[2] * inset else along
+				local roll = cosmetic:NextNumber()
+				local lower = if roll < 0.04 and hasKit("dock_door")
+					then "dock_door"
+					elseif roll < 0.2 and hasKit("wall_oily") then "wall_oily"
+					elseif roll < 0.32 and hasKit("wall_lower_damaged") then "wall_lower_damaged"
+					else "wall_lower"
+				placeKit(lower, x, z, inward)
+				placeKit("wall_upper", x, z, inward, 16)
+			end
+		end
+	end
+	-- Steel trusses every TrussGap studs: the thing that makes it read as a warehouse when you look up
+	local x = -layout.half + settings.TrussGap
+	while x < layout.half do
+		for n = 0, pieces - 1 do
+			local along = -layout.half + (n + 0.5) * length
+			local truss = block(
+				shell,
+				"Truss",
+				Vector3.new(1.2, 3, length),
+				CFrame.new(toWorld(x, along, height - 1.5)),
+				settings.TrussColor,
+				Enum.Material.Metal
+			)
+			truss.CastShadow = false
+		end
+		x += settings.TrussGap
 	end
 	local gate = ModelLibrary.get("entrance_gate")
 	if gate then
@@ -207,10 +386,10 @@ local function buildSpawns(folder: Folder)
 		spawn.Neutral = true
 		spawn.Duration = 0
 		spawn.Enabled = not settings.UseTestRoom
+		spawn.Transparency = 1
+		spawn.CanCollide = false
 		spawn.Size = Vector3.new(6, 0.2, 6)
 		spawn.CFrame = CFrame.new(toWorld(spot.x, spot.z, 0.1))
-		spawn.Color = settings.FloorColor
-		spawn.Material = Enum.Material.Concrete
 		spawn.Parent = folder
 	end
 	-- Step 1's test room spawns would win half the time, so they go quiet while the warehouse is live
@@ -226,9 +405,19 @@ end
 
 local function buildPillars()
 	local height = settings.CeilingHeight
+	local kitPillars = hasKit("giant_pillar_base") and hasKit("giant_pillar")
 	for _, pillar in layout.pillars do
 		local parent = chunkFor(pillar.x, pillar.z)
-		block(
+		if kitPillars then
+			-- Base, then segments stacked every 32, each turned a quarter from the one below
+			placeKit("giant_pillar_base", pillar.x, pillar.z, Vector3.new(0, 0, 1))
+			local level = 1
+			while level * 32 < height do
+				placeKit("giant_pillar", pillar.x, pillar.z, facingFromTurn(level * 90), level * 32)
+				level += 1
+			end
+		end
+		local shaft = block(
 			parent,
 			"Pillar",
 			Vector3.new(settings.PillarSize, height, settings.PillarSize),
@@ -236,23 +425,85 @@ local function buildPillars()
 			settings.PillarColor,
 			Enum.Material.Concrete
 		)
-		local base = ModelLibrary.get("pillar_base")
-		if base then
-			placeModel(base, pillar.x, pillar.z, Vector3.new(0, 0, 1), false)
-			base.Parent = parent
-			noteBuilt()
+		-- The kit pillar is slightly bigger, so the plain shaft hides inside it as its collision
+		shaft.Transparency = if kitPillars then 1 else 0
+		-- A faded safety band at the bottom, the bit everyone scuffs
+		local band = block(
+			parent,
+			"PillarBand",
+			Vector3.new(settings.PillarSize + 0.2, 4, settings.PillarSize + 0.2),
+			CFrame.new(toWorld(pillar.x, pillar.z, 2)),
+			Color3.fromRGB(170, 140, 50),
+			Enum.Material.Concrete
+		)
+		detail(band)
+		band.CanCollide = true
+		band.Transparency = if kitPillars then 1 else 0
+		-- Some pillars still point to an exit. None of them lead anywhere.
+		if cosmetic:NextNumber() < settings.ExitSignChance then
+			local face = cosmetic:NextInteger(0, 3)
+			local out = settings.PillarSize / 2 + 0.3
+			local offset = ({
+				Vector3.new(out, 0, 0),
+				Vector3.new(-out, 0, 0),
+				Vector3.new(0, 0, out),
+				Vector3.new(0, 0, -out),
+			})[face + 1]
+			local at = toWorld(pillar.x, pillar.z, 14) + offset
+			local sign = block(
+				parent,
+				"ExitSign",
+				Vector3.new(4, 1.6, 0.3),
+				CFrame.lookAt(at, at + offset),
+				Color3.fromRGB(40, 200, 90),
+				Enum.Material.Neon
+			)
+			detail(sign)
+			textGui(sign, Enum.NormalId.Front, "EXIT", Color3.fromRGB(235, 255, 240), Enum.Font.GothamBlack)
 		end
 	end
 end
 
-local function buildShelf(shelf: WarehouseGen.Shelf)
+local RACK_BAYS =
+	{ "rack_bay_full", "rack_bay_full", "rack_bay_bulk", "rack_bay_sparse", "rack_bay_furniture" }
+local RACK_WRECKS = { "rack_collapsed", "rack_toppled_beam" }
+
+local function buildKitRack(shelf: WarehouseGen.Shelf): boolean
+	if not hasKit("rack_bay_full") then
+		return false
+	end
+	local length = shelf.x1 - shelf.x0
+	local bays = math.max(1, math.floor(length / 12.1))
+	local step = length / bays
+	for n = 0, bays - 1 do
+		local name = RACK_BAYS[cosmetic:NextInteger(1, #RACK_BAYS)]
+		if cosmetic:NextNumber() < settings.RackWreckChance then
+			name = RACK_WRECKS[cosmetic:NextInteger(1, #RACK_WRECKS)]
+		end
+		if not hasKit(name) then
+			name = "rack_bay_full"
+		end
+		local facing = if cosmetic:NextNumber() < 0.5 then Vector3.new(0, 0, 1) else Vector3.new(0, 0, -1)
+		placeKit(name, shelf.x0 + (n + 0.5) * step, shelf.z, facing)
+	end
+	if hasKit("rack_end") then
+		placeKit("rack_end", shelf.x0 - 1.2, shelf.z, Vector3.new(-1, 0, 0))
+		placeKit("rack_end", shelf.x1 + 1.2, shelf.z, Vector3.new(1, 0, 0))
+	end
+	return true
+end
+
+local function buildRack(shelf: WarehouseGen.Shelf)
+	if buildKitRack(shelf) then
+		return
+	end
 	local model = Instance.new("Model")
-	model.Name = "Shelving"
+	model.Name = "Racking"
 	local length = shelf.x1 - shelf.x0
 	local centre = (shelf.x0 + shelf.x1) / 2
-	local height = settings.ShelfHeight
+	local height = settings.RackHeight
 
-	local uprights = math.max(2, math.ceil(length / settings.ShelfBay) + 1)
+	local uprights = math.max(2, math.ceil(length / settings.RackBay) + 1)
 	for n = 0, uprights - 1 do
 		local x = shelf.x0 + 0.3 + (length - 0.6) * n / (uprights - 1)
 		block(
@@ -260,52 +511,40 @@ local function buildShelf(shelf: WarehouseGen.Shelf)
 			"Upright",
 			Vector3.new(0.6, height, shelf.depth),
 			CFrame.new(toWorld(x, shelf.z, height / 2)),
-			settings.ShelfSteel,
+			settings.RackUpright,
 			Enum.Material.Metal
 		)
 	end
-	for _, y in settings.ShelfDecks do
+	for _, y in settings.RackDecks do
 		block(
 			model,
 			"Deck",
-			Vector3.new(length, 0.3, shelf.depth),
-			CFrame.new(toWorld(centre, shelf.z, y + 0.15)),
-			settings.ShelfDeck,
+			Vector3.new(length, 0.5, shelf.depth),
+			CFrame.new(toWorld(centre, shelf.z, y + 0.25)),
+			settings.RackBeam,
 			Enum.Material.Metal
 		)
-	end
-	for _ = 1, settings.ShelfStockRuns do
-		local deck = settings.ShelfDecks[cosmetic:NextInteger(1, #settings.ShelfDecks)]
-		local runLength = length * cosmetic:NextNumber(0.3, 0.7)
-		local runHeight = cosmetic:NextNumber(2.5, 4.5)
-		local x = shelf.x0 + 1 + runLength / 2 + cosmetic:NextNumber(0, length - runLength - 2)
-		block(
-			model,
-			"Stock",
-			Vector3.new(runLength, runHeight, shelf.depth - 0.6),
-			CFrame.new(toWorld(x, shelf.z, deck + 0.3 + runHeight / 2)),
-			settings.Cardboard,
-			Enum.Material.Cardboard
-		)
+		-- Packed with boxed stock, a few gaps where things were taken
+		local runs = cosmetic:NextInteger(settings.RackStock[1], settings.RackStock[2])
+		local slot = length / runs
+		for r = 0, runs - 1 do
+			if cosmetic:NextNumber() < 0.85 then
+				local runLength = slot * cosmetic:NextNumber(0.6, 0.95)
+				local runHeight = cosmetic:NextNumber(3, 5.5)
+				local x = shelf.x0 + r * slot + slot / 2
+				local shade = cosmetic:NextNumber(0.75, 1.1)
+				block(
+					model,
+					"Stock",
+					Vector3.new(runLength, runHeight, shelf.depth - 0.4),
+					CFrame.new(toWorld(x, shelf.z, y + 0.5 + runHeight / 2)),
+					settings.Cardboard:Lerp(Color3.new(0, 0, 0), 1 - math.min(shade, 1)),
+					Enum.Material.Cardboard
+				)
+			end
+		end
 	end
 	model.Parent = chunkFor(centre, shelf.z)
-end
-
-local function numberLabel(part: BasePart, face: Enum.NormalId, number: number)
-	local gui = Instance.new("SurfaceGui")
-	gui.Face = face
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = 40
-	local text = Instance.new("TextLabel")
-	text.Size = UDim2.fromScale(1, 0.5)
-	text.Position = UDim2.fromScale(0, 0.1)
-	text.BackgroundTransparency = 1
-	text.TextScaled = true
-	text.Font = Enum.Font.Oswald
-	text.TextColor3 = Color3.fromRGB(230, 226, 214)
-	text.Text = tostring(number)
-	text.Parent = gui
-	gui.Parent = part
 end
 
 local function buildSign(sign: WarehouseGen.Sign)
@@ -316,10 +555,212 @@ local function buildSign(sign: WarehouseGen.Sign)
 	placeModel(model, sign.x, sign.z, Vector3.new(-1, 0, 0), false)
 	local body = model:FindFirstChild("Body", true)
 	if body and body:IsA("BasePart") then
-		numberLabel(body, Enum.NormalId.Front, sign.number)
-		numberLabel(body, Enum.NormalId.Back, sign.number)
+		local color = Color3.fromRGB(230, 226, 214)
+		textGui(body, Enum.NormalId.Front, tostring(sign.number), color, Enum.Font.Oswald)
+		textGui(body, Enum.NormalId.Back, tostring(sign.number), color, Enum.Font.Oswald)
 	end
 	model.Parent = chunkFor(sign.x, sign.z)
+	noteBuilt()
+end
+
+-- A department name on a board hanging from the roof on two very long cables
+local function buildDeptSign(sign: WarehouseGen.DeptSign)
+	local parent = chunkFor(sign.x, sign.z)
+	local board = block(
+		parent,
+		"DeptSign",
+		Vector3.new(20, 5, 0.6),
+		CFrame.new(toWorld(sign.x, sign.z, sign.y))
+			* CFrame.Angles(0, math.rad(cosmetic:NextNumber(-6, 6)), 0),
+		Color3.fromRGB(196, 190, 172),
+		Enum.Material.SmoothPlastic
+	)
+	detail(board)
+	local ink = Color3.fromRGB(46, 52, 64)
+	textGui(board, Enum.NormalId.Front, sign.text, ink, Enum.Font.GothamBlack)
+	textGui(board, Enum.NormalId.Back, sign.text, ink, Enum.Font.GothamBlack)
+	local cable = settings.CeilingHeight - sign.y - 2.5
+	for _, dx in { -8, 8 } do
+		local wire = block(
+			parent,
+			"Cable",
+			Vector3.new(0.12, cable, 0.12),
+			board.CFrame * CFrame.new(dx, 2.5 + cable / 2, 0),
+			settings.CableColor,
+			Enum.Material.Metal
+		)
+		detail(wire)
+	end
+end
+
+local function buildLight(light: WarehouseGen.Light)
+	local parent = chunkFor(light.x, light.z)
+	local tone = settings.LightTones[light.tone] or settings.LightTones.cold
+	local size = if light.axis == "x"
+		then Vector3.new(light.length, 0.35, 0.8)
+		else Vector3.new(0.8, 0.35, light.length)
+	local dead = light.state == "dead"
+	local strip = block(
+		parent,
+		"LightStrip",
+		size,
+		CFrame.new(toWorld(light.x, light.z, light.y)),
+		if dead then Color3.fromRGB(70, 72, 74) else tone.glow,
+		if dead then Enum.Material.SmoothPlastic else Enum.Material.Neon
+	)
+	detail(strip)
+	if not dead then
+		local emergency = cosmetic:NextInteger(1, settings.EmergencyEvery) == 1
+		if emergency or cosmetic:NextInteger(1, settings.LightEvery) == 1 then
+			local glow = Instance.new("SurfaceLight")
+			glow.Face = Enum.NormalId.Bottom
+			glow.Color = tone.light
+			glow.Brightness = tone.brightness
+			glow.Range = tone.range
+			glow.Angle = 120
+			glow.Shadows = false
+			glow.Parent = strip
+		end
+		strip:SetAttribute("Glow", tone.glow)
+		strip:SetAttribute("LightColor", tone.light)
+		strip:SetAttribute("Brightness", tone.brightness)
+		strip:SetAttribute("Range", tone.range)
+		strip:SetAttribute("Emergency", emergency)
+		CollectionService:AddTag(strip, LIGHT_TAG)
+	end
+	if light.state == "flicker" then
+		CollectionService:AddTag(strip, FLICKER_TAG)
+	end
+	local wire = block(
+		parent,
+		"Cable",
+		Vector3.new(0.1, light.cable, 0.1),
+		CFrame.new(toWorld(light.x, light.z, light.y + light.cable / 2)),
+		settings.CableColor,
+		Enum.Material.Metal
+	)
+	detail(wire)
+end
+
+local SIDE_FACES = { Enum.NormalId.Front, Enum.NormalId.Back }
+
+local function buildPiece(spec: WarehouseGen.Piece)
+	if spec.kitOnly then
+		if hasKit(spec.kit) then
+			placeKit(spec.kit :: string, spec.x, spec.z, facingFromTurn(spec.turn), spec.y)
+		end
+		return
+	end
+	if hasKit(spec.skipIfKit) then
+		return
+	end
+	if hasKit(spec.kit) then
+		placeKit(spec.kit :: string, spec.x, spec.z, facingFromTurn(spec.turn))
+		return
+	end
+	if hasKit(spec.kitFloor) then
+		tileKitFloor(
+			spec.kitFloor :: string,
+			spec.x - spec.sx / 2,
+			spec.z - spec.sz / 2,
+			spec.x + spec.sx / 2,
+			spec.z + spec.sz / 2,
+			spec.y - spec.sy / 2
+		)
+	end
+	local style = settings.Styles[spec.style]
+	if not style then
+		warn(`[Warehouse] no style "{spec.style}"`)
+		return
+	end
+	local parent = chunkFor(spec.x, spec.z)
+	local part: BasePart
+	local cframe = CFrame.new(toWorld(spec.x, spec.z, spec.y)) * CFrame.Angles(0, math.rad(spec.turn), 0)
+	if spec.lean then
+		cframe *= CFrame.Angles(math.rad(spec.lean), 0, 0)
+	end
+	if spec.shape == "wedge" then
+		part = Instance.new("WedgePart")
+		part.Size = Vector3.new(spec.sx, spec.sy, spec.sz)
+		part.CFrame = cframe
+	elseif spec.shape == "ball" then
+		local ball = Instance.new("Part")
+		ball.Shape = Enum.PartType.Ball
+		ball.Size = Vector3.new(spec.sx, spec.sx, spec.sx)
+		ball.CFrame = cframe
+		part = ball
+	elseif spec.shape == "cylinder_wall" then
+		-- A disc flat against a wall: the cylinder's axis points out of the wall (z)
+		local disc = Instance.new("Part")
+		disc.Shape = Enum.PartType.Cylinder
+		disc.Size = Vector3.new(spec.sz, spec.sx, spec.sy)
+		disc.CFrame = cframe * CFrame.Angles(0, math.rad(90), 0)
+		part = disc
+	elseif spec.shape == "cylinder" then
+		local cylinder = Instance.new("Part")
+		cylinder.Shape = Enum.PartType.Cylinder
+		-- A cylinder's axis is its X, so stand it up
+		cylinder.Size = Vector3.new(spec.sy, spec.sx, spec.sz)
+		cylinder.CFrame = cframe * CFrame.Angles(0, 0, math.rad(90))
+		part = cylinder
+	else
+		part = Instance.new("Part")
+		part.Size = Vector3.new(spec.sx, spec.sy, spec.sz)
+		part.CFrame = cframe
+	end
+	part.Name = spec.style
+	part.Anchored = true
+	part.Color = style.color
+	part.Material = style.material
+	part.Transparency = style.transparency or 0
+	part.Reflectance = style.reflectance or 0
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	if not spec.collide then
+		detail(part)
+	end
+	if spec.label then
+		for _, face in SIDE_FACES do
+			textGui(part, face, spec.label, Color3.fromRGB(236, 228, 210), Enum.Font.FredokaOne)
+		end
+	end
+	if spec.paint == "sky_floor" then
+		paintFace(part, Enum.NormalId.Top, "sky")
+	elseif spec.paint == "hill" or spec.paint == "stars" then
+		for _, face in SIDE_FACES do
+			paintFace(part, face, spec.paint)
+		end
+	elseif spec.paint then
+		if spec.sy < 2 then
+			paintFace(part, Enum.NormalId.Bottom, spec.paint)
+		else
+			for _, face in
+				{ Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
+			do
+				paintFace(part, face, spec.paint)
+			end
+		end
+	end
+	if spec.lamp then
+		local tone = settings.LampTones[spec.lamp]
+		if tone then
+			local glow: Light
+			if spec.sy <= 0.4 then
+				local surface = Instance.new("SurfaceLight")
+				surface.Face = if spec.y < 1 then Enum.NormalId.Top else Enum.NormalId.Bottom
+				surface.Angle = 140
+				glow = surface
+			else
+				glow = Instance.new("PointLight")
+			end
+			glow.Color = tone.color
+			glow.Brightness = tone.brightness
+			glow.Range = tone.range
+			glow.Shadows = false
+			glow.Parent = part
+		end
+	end
+	part.Parent = parent
 	noteBuilt()
 end
 
@@ -333,33 +774,21 @@ local function buildJunk(junk: WarehouseGen.Junk)
 			Vector3.new(box.sx, box.sy, box.sz),
 			CFrame.new(toWorld(junk.x + box.x, junk.z + box.z, box.y))
 				* CFrame.Angles(0, math.rad(turn + box.turn), 0),
-			settings.Cardboard,
+			settings.Cardboard:Lerp(Color3.new(0, 0, 0), cosmetic:NextNumber(0, 0.3)),
 			Enum.Material.Cardboard
 		)
 		CollectionService:AddTag(part, Config.Grab.Tag)
 	end
 end
 
+-- A robot room is an installation set: its walls are pieces, so the model holds just its furniture
 local function buildRoom(room: any)
 	local model = Instance.new("Model")
 	model.Name = `Room{room.id}`
 	model:SetAttribute("RoomId", room.id)
 	model:SetAttribute("Kind", room.kind)
-	local height = settings.RoomWallHeight
-	for _, wall in room.walls do
-		block(
-			model,
-			"Wall",
-			Vector3.new(wall.x1 - wall.x0, height, wall.z1 - wall.z0),
-			CFrame.new(toWorld((wall.x0 + wall.x1) / 2, (wall.z0 + wall.z1) / 2, height / 2)),
-			settings.RoomWallColor,
-			Enum.Material.Plaster
-		)
-	end
 	for _, item in room.items do
-		local facing = Vector3.new(item.nx, 0, item.nz)
-		local onWall = item.name ~= settings.RoomRug
-		spawnModel(item.name, model, item.x, item.z, facing, onWall)
+		spawnModel(item.name, model, item.x, item.z, Vector3.new(item.nx, 0, item.nz), false)
 	end
 	model.Parent = chunkFor(room.cx, room.cz)
 end
@@ -409,10 +838,7 @@ local function buildDecal(decal: WarehouseGen.Decal)
 	local part = Instance.new("Part")
 	part.Name = `Paint_{decal.name}`
 	part.Anchored = true
-	part.CanCollide = false
-	part.CanQuery = false
-	part.CanTouch = false
-	part.CastShadow = false
+	detail(part)
 	part.Transparency = 1
 	part.Size = Vector3.new(decal.width, decal.height, 0.05)
 	part.CFrame = CFrame.lookAt(position, position + Vector3.new(decal.nx, 0, decal.nz))
@@ -456,6 +882,12 @@ function Warehouse.roomAt(position: Vector3): any?
 	return WarehouseGen.roomAt(layout, relative.X, relative.Z)
 end
 
+-- The dreamcore pocket a spot is inside, if any (kind: poolroom, flooded, office, ...)
+function Warehouse.pocketAt(position: Vector3): WarehouseGen.Pocket?
+	local relative = position - settings.Origin
+	return WarehouseGen.pocketAt(layout, relative.X, relative.Z)
+end
+
 function Warehouse.toWorld(x: number, z: number): Vector3
 	return toWorld(x, z)
 end
@@ -488,8 +920,28 @@ function Warehouse.Start()
 	for _, room in layout.rooms do
 		buildRoom(room)
 	end
+	-- Where the installations are, for the client soundtrack (it switches music near one)
+	local markers = Instance.new("Folder")
+	markers.Name = "Installations"
+	for index, hall in layout.pockets do
+		local marker = Instance.new("Vector3Value")
+		marker.Name = `{hall.kind}_{index}`
+		marker.Value = toWorld((hall.x0 + hall.x1) / 2, (hall.z0 + hall.z1) / 2)
+		marker:SetAttribute("Radius", math.max(hall.x1 - hall.x0, hall.z1 - hall.z0) / 2)
+		marker.Parent = markers
+	end
+	markers.Parent = ReplicatedStorage
 	for _, shelf in layout.shelves do
-		buildShelf(shelf)
+		buildRack(shelf)
+	end
+	for _, spec in layout.pieces do
+		buildPiece(spec)
+	end
+	for _, light in layout.lights do
+		buildLight(light)
+	end
+	for _, sign in layout.deptSigns do
+		buildDeptSign(sign)
 	end
 	for _, sign in layout.signs do
 		buildSign(sign)

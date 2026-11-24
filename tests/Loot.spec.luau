@@ -3,55 +3,7 @@ local Rng = require("../src/shared/Logic/WarehouseGenRng")
 local WarehouseGen = require("../src/shared/Logic/WarehouseGen")
 local expect = require("./expect")
 
--- Mirrors the layout numbers in Config/Warehouse (that file holds Roblox types Lune can't load)
-local config = {
-	Size = 8000,
-	WallThickness = 8,
-	BlockSize = 200,
-	BlockMargin = 12,
-	BlockKinds = { aisles = 40, open = 35, empty = 25 },
-	ShelfDepth = 5,
-	ShelfPitch = 30,
-	ShelfMinLength = 20,
-	RoomCount = 90,
-	RoomMinSize = 28,
-	RoomMaxSize = 44,
-	RoomWallThickness = 1,
-	RoomGap = 30,
-	RoomClearance = 8,
-	RoomDoorWidth = 7,
-	RoomSlotSpacing = 7,
-	RoomItems = { 4, 7 },
-	RoomKinds = { kitchen = 3, living = 4, bedroom = 3 },
-	RoomFurniture = {
-		kitchen = { "fridge", "stove", "counter" },
-		living = { "couch", "armchair" },
-		bedroom = { "bed", "nightstand", "dresser", "wardrobe" },
-	},
-	RoomRug = "rug",
-	RoomLamp = "floor_lamp",
-	OpenJunk = { 2, 4 },
-	OpenLoose = { 0, 2 },
-	EmptyJunk = { 0, 1 },
-	JunkBoxes = { 1, 4 },
-	LooseFurniture = { "armchair", "couch", "locker" },
-	PillarEvery = 2,
-	PillarSize = 8,
-	DecalCount = 1400,
-	DecalKinds = { spray = 40, oil = 35, claw = 10, poster = 15 },
-	DecalNames = {
-		spray = { "run", "hide", "lights_lie" },
-		oil = { "oil_handprint", "oil_splat" },
-		claw = { "claw_marks" },
-		poster = { "lost_dog" },
-	},
-	DecalSizes = { spray = { 7, 3.5 }, oil = { 3, 3 }, claw = { 3, 3 }, poster = { 3, 4.5 } },
-	DecalHeight = { 2.5, 8 },
-	SpawnCount = 40,
-	SpawnMinGap = 600,
-	SpawnCandidates = 24,
-	SpawnClearance = 6,
-}
+local config = require("./WarehouseConfig")
 
 local layout = WarehouseGen.generate(config, 2029)
 
