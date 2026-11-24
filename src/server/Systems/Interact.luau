@@ -1,6 +1,7 @@
 -- Press to use. The client says which object (and which part of it) it's looking at; the server checks
 -- reach and runs that object's behaviour from Logic/InteractKinds. Moving parts tween here so
 -- everyone sees them, every use makes a 3D sound and a Loudness event, and players can hide inside.
+-- Containers listens for opens and shuts here to show what's inside.
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -31,6 +32,8 @@ type Hiding = {
 	transparency: { [Instance]: number },
 }
 type Handler = (player: Player, model: Model, behaviour: Behaviour, key: string, parts: { string }) -> ()
+type OpenListener = (player: Player?, model: Model, key: string, open: boolean) -> ()
+type UseFilter = (player: Player, model: Model, behaviour: Behaviour) -> boolean
 
 local Interact = {}
 
@@ -45,7 +48,10 @@ local ringing: { [Model]: boolean } = {}
 local lastPlayerUse: { [Player]: number } = {}
 local hiding: { [Player]: Hiding } = {}
 local occupants: { [Model]: Player } = {}
+local openListeners: { OpenListener } = {}
+local useFilter: UseFilter? = nil
 
+local HIDE_KEY = "Hide"
 local random = Random.new()
 local useRemote: RemoteEvent
 
@@ -68,6 +74,12 @@ local function stateOf(model: Model, key: string): State
 		byKey[key] = state
 	end
 	return state
+end
+
+local function announceOpen(player: Player?, model: Model, key: string, open: boolean)
+	for _, listener in openListeners do
+		task.spawn(listener, player, model, key, open)
+	end
 end
 
 local function setOn(model: Model, key: string, state: State, on: boolean)
@@ -327,6 +339,7 @@ local function leave(player: Player, stepOut: boolean)
 	if occupants[entry.model] == player then
 		occupants[entry.model] = nil
 	end
+	announceOpen(player, entry.model, HIDE_KEY, false)
 	if player.Parent then
 		player:SetAttribute("Hidden", nil)
 	end
@@ -396,16 +409,20 @@ local function enter(player: Player, model: Model, behaviour: Behaviour, parts: 
 	}
 	occupants[model] = player
 	player:SetAttribute("Hidden", true)
+	announceOpen(player, model, HIDE_KEY, true)
 end
 
 -- Behaviours
 
 local handlers: { [string]: Handler } = {}
 
-function handlers.open(_player, model, behaviour, key, parts)
+local function toggle(player: Player?, model: Model, behaviour: Behaviour, key: string, parts: { string })
 	local state = stateOf(model, key)
 	local on = not state.on
 	setOn(model, key, state, on)
+	if behaviour.kind == "open" then
+		announceOpen(player, model, key, on)
+	end
 	tweenPose(model, parts, if on then 1 else 0, Settings.OpenTime)
 	pulse(model, behaviour.press)
 	makeNoise(
@@ -416,7 +433,8 @@ function handlers.open(_player, model, behaviour, key, parts)
 	setRunning(model, key, behaviour, state, on)
 end
 
-handlers.toggle = handlers.open
+handlers.open = toggle
+handlers.toggle = toggle
 
 function handlers.channel(_player, model, behaviour, key)
 	local state = stateOf(model, key)
@@ -686,6 +704,9 @@ local function onUse(player: Player, model: any, partName: any)
 	lastPlayerUse[player] = now
 	track(model)
 	local resolved, key, parts = Rules.resolve(behaviour, partName)
+	if useFilter and useFilter(player, model, resolved) then
+		return
+	end
 	local handler = handlers[resolved.kind]
 	if handler then
 		handler(player, model, resolved, key, parts)
@@ -750,6 +771,31 @@ function Interact.reveal(model: Model): Player?
 		leave(occupant, true)
 	end
 	return occupant
+end
+
+-- Calls listener(player, model, key, open) when a door, drawer or lid opens or shuts (player is
+-- nil when shut by the server), and with key HIDE_KEY when someone steps into or out of a spot.
+function Interact.onOpenChanged(listener: OpenListener)
+	table.insert(openListeners, listener)
+end
+
+-- A filter that returns true takes the press instead of the object's behaviour.
+function Interact.setUseFilter(filter: UseFilter)
+	useFilter = filter
+end
+
+-- Shuts every open door, drawer and lid on a model, with sound.
+function Interact.shut(model: Model)
+	local behaviour = InteractKinds.get(model:GetAttribute("ModelName"))
+	if not behaviour then
+		return
+	end
+	for key, state in states[model] or {} do
+		local resolved, _, parts = Rules.resolve(behaviour, if key == "" then nil else key)
+		if state.on and resolved.kind == "open" then
+			toggle(nil, model, resolved, key, parts)
+		end
+	end
 end
 
 function Interact.Init()
