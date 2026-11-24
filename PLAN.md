@@ -363,6 +363,12 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Scope:** `src/server/Systems/Missions.luau`, `src/client/Controllers/Missions.luau`, `src/shared/Config/Missions.luau`, `src/shared/Logic/Missions*.luau`, `tests/Missions*.spec.luau`
 - Each morning a short list (find something, reach a certain installation, survive the night) with a reward, so there's always a reason to go explore alone. Done when a solo day has a goal.
 
+### 25. Everything in hand
+- **Status:** pending
+- **Dependencies:** 19, 20
+- **Scope:** `src/client/Controllers/Hotbar.luau`, `src/client/Controllers/Hands.luau`, `src/client/Controllers/Viewmodel.luau`, `src/server/Systems/Inventory.luau` (selected item only), `src/shared/Config/Hotbar.luau`, `src/shared/Logic/Hotbar*.luau`, `tests/Hotbar*.spec.luau`
+- Keani: "we need to be able to see everything in hand." A hotbar of what's in your bag (number keys / scroll, D-pad on gamepad, tap on phone): the selected item shows on the gloves in first person (food, drinks, bandage, medkit, flashlight, batteries, every gun, handcuffs), and the use button does what that item does. Guns use their Muzzle marker, two-handed guns put the left glove on the Foregrip marker, the flashlight beam comes from its Lens. Done when you can look down and always see what you're holding.
+
 ## Later ideas
 
 - Hard night every 10th night. Foggy days where robots stay awake.
