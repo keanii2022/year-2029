@@ -14,25 +14,7 @@ export type Rect = Pieces.Rect
 
 local piece, light, loose = Pieces.piece, Pieces.light, Pieces.loose
 
-local function junkStack(layout: any, rng: Rng.Rng, x: number, z: number, count: number, big: boolean)
-	local boxes = {}
-	local y = 0
-	for _ = 1, count do
-		local sy = if big then rng:range(2.4, 4) else rng:range(1.6, 3.2)
-		table.insert(boxes, {
-			sx = if big then rng:range(3.5, 5) else rng:range(2, 4.5),
-			sy = sy,
-			sz = if big then rng:range(3.5, 5) else rng:range(2, 4),
-			x = rng:range(-0.5, 0.5),
-			y = y + sy / 2,
-			z = rng:range(-0.5, 0.5),
-			turn = rng:range(-20, 20),
-		})
-		y += sy
-	end
-	table.insert(layout.junk, { x = x, z = z, boxes = boxes })
-	layout.addSolid({ x0 = x - 3, x1 = x + 3, z0 = z - 3, z1 = z + 3 })
-end
+local junkStack = Pieces.junkStack
 
 -- Racking aisles: tall packed racks in rows, cold strip lights over every other aisle, tape, wet floor
 function Zones.racking(layout: any, config: any, rng: Rng.Rng, rect: Rect)

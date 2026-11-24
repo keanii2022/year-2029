@@ -6,6 +6,9 @@
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
 local Zones = if script then require(script.Parent.WarehouseGenZones) else require("./WarehouseGenZones")
+local Clutter = if script
+	then require(script.Parent.WarehouseGenClutter)
+	else require("./WarehouseGenClutter")
 
 local WarehouseGen = {}
 
@@ -415,7 +418,7 @@ function WarehouseGen.generate(config: any, seed: number): Layout
 			{ i = i, j = j, kind = entry.kind, x0 = rect.x0, z0 = rect.z0, x1 = rect.x1, z1 = rect.z1 }
 		)
 	end
-
+	Clutter.fill(layout, config, rng, WarehouseGen.zoneAt, WarehouseGen.isClear)
 	addDecals(layout, config, rng)
 	addSpawns(layout, config, rng)
 	layout.addSolid = nil

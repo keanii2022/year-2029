@@ -9,11 +9,11 @@ return {
 		racking = 28,
 		showroom = 16,
 		stockroom = 10,
-		junkyard = 8,
+		junkyard = 10,
 		installation = 22,
 		neighborhood = 5,
 		hall = 7,
-		empty = 8,
+		empty = 2,
 	},
 	-- These never sit right next to the same kind, so the floor stays a surprise
 	ZoneSpread = {
@@ -37,6 +37,31 @@ return {
 	},
 	MegaHeight = 66,
 	InstallationRepeatGap = 4, -- zones between two installations of the same kind, so you never see a repeat
+	-- Big overhead, tight underfoot: a clutter island on most open spots this far apart
+	ClutterSpacing = 36,
+	ClutterChance = 0.8,
+	ClutterClearance = 7,
+	ClutterKinds = {
+		pallets = 4,
+		wreck = 2,
+		heap = 3,
+		boxes = 3,
+		carts = 2,
+		drums = 2,
+		spill = 2,
+		checkout = 1,
+	},
+	ClutterSkipZones = {
+		racking = true,
+		showroom = true,
+		installation = true,
+		neighborhood = true,
+		hall = true,
+	},
+	FloorStoryChance = 0.35,
+	AirSpacing = 56, -- signs, banners, dangling lights and cables over the cross aisles
+	AirHeight = { 22, 48 },
+	BannerLines = { "SALE", "EVERYTHING MUST GO", "OPEN 24/7", "THANK YOU", "WE MISS YOU", "SMILE" },
 	NeighborhoodRoad = 12,
 	NeighborhoodHouses = { "house_ranch", "house_twostory", "house_garage", "house_tiny" },
 	NeighborhoodSunY = 62,

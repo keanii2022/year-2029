@@ -117,6 +117,27 @@ function Pieces.loose(layout: any, name: string, x: number, z: number, turn: num
 	layout.addSolid({ x0 = x - 2.5, x1 = x + 2.5, z0 = z - 2.5, z1 = z + 2.5 })
 end
 
+-- A leaning stack of cardboard boxes you can pull apart for a fort
+function Pieces.junkStack(layout: any, rng: Rng.Rng, x: number, z: number, count: number, big: boolean)
+	local boxes = {}
+	local y = 0
+	for _ = 1, count do
+		local sy = if big then rng:range(2.4, 4) else rng:range(1.6, 3.2)
+		table.insert(boxes, {
+			sx = if big then rng:range(3.5, 5) else rng:range(2, 4.5),
+			sy = sy,
+			sz = if big then rng:range(3.5, 5) else rng:range(2, 4),
+			x = rng:range(-0.5, 0.5),
+			y = y + sy / 2,
+			z = rng:range(-0.5, 0.5),
+			turn = rng:range(-20, 20),
+		})
+		y += sy
+	end
+	table.insert(layout.junk, { x = x, z = z, boxes = boxes })
+	layout.addSolid({ x0 = x - 3, x1 = x + 3, z0 = z - 3, z1 = z + 3 })
+end
+
 function Pieces.wetPatches(layout: any, rng: Rng.Rng, rect: Rect, count: number)
 	for _ = 1, count do
 		local w, d = rng:range(8, 26), rng:range(6, 18)
