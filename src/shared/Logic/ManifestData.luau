@@ -5473,6 +5473,21 @@ return {
 			textureId = 122818935350068,
 		},
 		{
+			name = "box_loose",
+			group = "story",
+			size = { 2.042, 1.44, 1.646 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.72, -0.0 },
+					size = { 2.042, 1.44, 1.646 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
 			name = "broken_skylight",
 			group = "story",
 			size = { 10.4, 0.67, 10.4 },
@@ -5705,6 +5720,48 @@ return {
 			textureId = 100957243089403,
 		},
 		{
+			name = "mission_board",
+			group = "story",
+			size = { 6.0, 7.5, 0.88 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.75, -0.0 },
+					size = { 6.0, 7.5, 0.88 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 4.8, 0.37 },
+					size = { 4.2, 2.5, 0.02 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "mission_clipboard",
+			group = "story",
+			size = { 1.03, 0.155, 1.3 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.077, -0.0 },
+					size = { 1.03, 0.155, 1.3 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { -0.045, 0.063, 0.12 },
+					size = { 0.772, 0.004, 0.945 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
 			name = "notes_wall",
 			group = "story",
 			size = { 5.6, 4.295, 1.42 },
@@ -5864,6 +5921,117 @@ return {
 			},
 			assetId = 127089374479753,
 			textureId = 134017373179736,
+		},
+		{
+			name = "muzzle_flash",
+			group = "viewmodel",
+			size = { 0.998, 0.869, 1.195 },
+			parts = {
+				{
+					name = "Glow",
+					center = { 0.0, 0.434, 0.0 },
+					size = { 0.998, 0.869, 1.195 },
+					pivot = { 0.0, 0.434, -0.602 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "viewmodel_arm_left",
+			group = "viewmodel",
+			size = { 0.69, 0.479, 1.868 },
+			parts = {
+				{
+					name = "Body",
+					center = { -0.0, 0.24, 0.0 },
+					size = { 0.69, 0.479, 1.868 },
+					pivot = { -0.061, 0.24, -0.927 },
+				},
+				{
+					name = "Grip",
+					center = { -0.001, 0.22, 0.673 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "viewmodel_arm_left_open",
+			group = "viewmodel",
+			size = { 0.61, 0.466, 2.065 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.233, 0.0 },
+					size = { 0.61, 0.466, 2.065 },
+					pivot = { 0.067, 0.227, -1.028 },
+				},
+				{
+					name = "Grip",
+					center = { 0.067, 0.347, 0.472 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "viewmodel_arm_right",
+			group = "viewmodel",
+			size = { 0.69, 0.479, 1.865 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.24, 0.0 },
+					size = { 0.69, 0.479, 1.865 },
+					pivot = { 0.061, 0.24, -0.928 },
+				},
+				{
+					name = "Grip",
+					center = { 0.001, 0.22, 0.672 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "viewmodel_blaster",
+			group = "viewmodel",
+			size = { 0.25, 0.859, 1.071 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.43, -0.017 },
+					size = { 0.25, 0.859, 1.037 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.714, 0.06 },
+					size = { 0.234, 0.025, 0.34 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Grip",
+					center = { 0.0, 0.274, -0.34 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Muzzle",
+					center = { 0.0, 0.664, 0.495 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 		{
 			name = "aisle_sign_hanging",
@@ -6122,6 +6290,42 @@ return {
 			moves = {},
 			assetId = 98309985651816,
 			textureId = 131432653242697,
+		},
+		{
+			name = "checkout_lane",
+			group = "warehouse",
+			size = { 4.638, 10.225, 11.72 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 5.113, -0.0 },
+					size = { 4.638, 10.225, 11.72 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "checkout_lane_lit",
+			group = "warehouse",
+			size = { 5.056, 10.225, 11.72 },
+			parts = {
+				{
+					name = "Body",
+					center = { -0.005, 5.0, -0.0 },
+					size = { 5.047, 10.0, 11.72 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 2.018, 10.1, 5.34 },
+					size = { 1.02, 0.25, 1.02 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 		{
 			name = "chrome_orb",
@@ -9873,6 +10077,14 @@ return {
 			name = "they_hear_you",
 			kind = "scrawl",
 			assetId = 96843149761935,
+		},
+		{
+			name = "bullet_tracer",
+			kind = "effect",
+		},
+		{
+			name = "muzzle_flash_card",
+			kind = "effect",
 		},
 	},
 }

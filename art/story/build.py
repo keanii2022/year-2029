@@ -272,4 +272,41 @@ def journal(P):
     P.add("Body", box((0.84, 0.05, 0.33), plain("#b8452e", grime=0.2), (0, 0.2, 0.15), r=0.01, n=1))  # the rubber band
 
 
+@item("mission_clipboard", "story")
+def mission_clipboard(P):
+    """Today's job list on a clipboard left on a shelf. The sheet is the Screen image so the game can write the missions."""
+    board = cardboard("#8a6a44")
+    steel = metal("#a8a49c", 0.35)
+    P.add("Body", box((0.9, 1.3, 0.05), board, (0, 0, 0.025), r=0.02, n=1))
+    P.add("Body", box((0.5, 0.18, 0.08), steel, (0, 0.5, 0.09), r=0.02, n=1), box((0.3, 0.08, 0.05), steel, (0, 0.6, 0.13), r=0.01, n=1))
+    P.add("Body", box((0.8, 1.05, 0.012), plain("#efe9da", grime=0.35, vary=0.1), (0.02, -0.08, 0.055), (0, 0, -2), r=0.0, n=1))
+    P.add("Screen", box((0.74, 0.92, 0.004), flat("#e6dfcc"), (0.02, -0.12, 0.063), (0, 0, -2), r=0.0, n=1))
+    P.add("Body", box((0.05, 0.7, 0.05), paint("#e0b43a", grime=0.4), (0.52, -0.1, 0.07), (0, 0, 6), r=0.01, n=1))
+
+
+@item("mission_board", "story", size=1024)
+def mission_board(P):
+    """A cork board screwed to a post by the start, where the day's jobs get pinned. The middle is the Screen image;
+    TODAY is sprayed above it in survivor red."""
+    frame = wood("#9a7448", dark="#6a4a2a", axis="x", wear=0.6)
+    P.add("Body", box((0.5, 0.5, 7.5), paint("#5a5e62", chip=0.3, grime=0.6), (0, 0.4, 3.75), r=0.03, n=1))
+    P.add("Body", box((6.0, 0.2, 4.0), frame, (0, 0, 5.0), r=0.03, n=1))
+    P.add("Body", box((5.6, 0.06, 3.6), plain("#b8875a", grime=0.4, vary=0.4), (0, -0.12, 5.0), r=0.0, n=1))
+    P.add("Screen", box((4.2, 0.02, 2.5), flat("#efe9da"), (0, -0.16, 4.8), r=0.0, n=1))
+    for x, z, c in ((-2.4, 6.4, "#e8361c"), (2.4, 6.4, "#e8361c"), (-2.4, 3.6, "#2f6db0"), (2.4, 3.6, "#e0b43a")):
+        P.add("Body", box((0.14, 0.1, 0.14), plain(c, grime=0.2), (x, -0.18, z), r=0.03, n=1))
+    P.add("Body", words("TODAY", 0.45, plain("#e8361c", grime=0.2), (0, -0.17, 6.35)))
+
+
+@item("box_loose", "story")
+def box_loose(P):
+    """One loose cardboard box, taped shut, one corner crushed. It's the one that slides off a shelf in the dark."""
+    cb = cardboard("#b58a5a")
+    body = box((2.0, 1.6, 1.4), cb, (0, 0, 0.7), r=0.04, n=1)
+    P.add("Body", crumple(body, 0.05, 1.2, seed=7))
+    tape = plain("#c9b48a", grime=0.3, vary=0.1)
+    P.add("Body", box((0.4, 1.62, 0.02), tape, (0, 0, 1.405), r=0.0, n=1), box((0.4, 0.02, 0.5), tape, (0, -0.81, 1.18), r=0.0, n=1))
+    P.add("Body", box((0.7, 0.01, 0.45), plain("#f2eee2", grime=0.4), (0.45, -0.806, 0.55), r=0.0, n=1))
+
+
 main()

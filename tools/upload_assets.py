@@ -34,7 +34,7 @@ MANIFEST_LUAU = os.path.join(ROOT, "src", "shared", "Logic", "ManifestData.luau"
 
 ASSETS_URL = "https://apis.roblox.com/assets/v1/assets"
 OPERATIONS_URL = "https://apis.roblox.com/assets/v1/"
-IMAGE_KINDS = {"posters": "poster", "posters/screens": "screen", "posters/scrawls": "scrawl"}
+IMAGE_KINDS = {"posters": "poster", "posters/screens": "screen", "posters/scrawls": "scrawl", "effects": "effect"}
 
 
 # ---------- FBX (binary, 7.x) ----------

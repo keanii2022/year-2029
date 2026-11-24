@@ -1091,4 +1091,57 @@ def bookshelf_wall(P):
     P.add("Body", wood_shelves(32.0, 7.5, 2.0, 8, (1.9, 3.3, 4.7, 6.1), honey(), tilt=(5, 2)))
 
 
+def checkout(P, number, lit):
+    """One checkout lane, 12 long along y: counter with a dead belt, register, bagging well, empty impulse rack, and a
+    lane light on a square pole. Rows of these go every 8 studs, so the lane between counters is about 5 wide."""
+    R = random.Random(300 + number)
+    shell = plain("#d8d2c4", grime=0.55, vary=0.25)
+    kick = plain("#4a4844", grime=0.5)
+    belt = plain("#1f1e1d", grime=0.3)
+    steel = metal("#9a968e", 0.35)
+    P.add("Body", box((2.6, 9.0, 0.3), kick, loc=(0, -0.5, 0.15), r=0.0, n=1),
+          box((2.6, 9.0, 2.7), shell, loc=(0, -0.5, 1.65), r=0.04, n=1),
+          box((2.2, 6.0, 0.08), belt, loc=(0, -2.0, 3.04), r=0.01, n=1),
+          box((2.4, 0.12, 0.25), steel, loc=(0, -5.0, 3.1), r=0.02, n=1),
+          box((0.12, 6.0, 0.18), steel, loc=(-1.15, -2.0, 3.1), r=0.0, n=1),
+          box((0.12, 6.0, 0.18), steel, loc=(1.15, -2.0, 3.1), r=0.0, n=1))
+    # register and dead card reader
+    P.add("Body", box((1.1, 0.9, 0.6), plain("#3a3a3c", grime=0.4), loc=(0.6, 2.2, 3.3), r=0.04, n=1),
+          box((0.9, 0.06, 0.6), plain("#151617"), loc=(0.6, 1.72, 3.75), rot=(-20, 0, 0), r=0.01, n=1),
+          box((0.35, 0.3, 0.5), plain("#2a2b2d", grime=0.4), loc=(-0.8, 1.6, 3.25), r=0.03, n=1))
+    # bagging well at the far end, square bars
+    P.add("Body", box((2.6, 2.6, 0.12), steel, loc=(0, 5.3, 2.6), r=0.0, n=1))
+    for x in (-1.25, 1.25):
+        for y in (4.05, 6.55):
+            P.add("Body", box((0.1, 0.1, 2.6), steel, loc=(x, y, 1.3), r=0.0, n=1))
+    # empty impulse rack on the customer side, a few leftovers
+    P.add("Body", box((0.6, 3.0, 4.2), plain(PRIMARY[R.randrange(len(PRIMARY))], grime=0.55, vary=0.3), loc=(-1.75, -3.4, 2.1), r=0.03, n=1))
+    for z in (1.0, 2.0, 3.0, 4.0):
+        P.add("Body", box((0.5, 2.9, 0.06), steel, loc=(-2.1, -3.4, z), r=0.0, n=1))
+    for k in range(R.randint(1, 3)):
+        P.add("Body", box((0.3, 0.4, 0.5), plain(PRIMARY[R.randrange(len(PRIMARY))], grime=0.4), loc=(-2.15, -4.5 + R.random() * 2.2, 1.0 + R.randint(0, 3) + 0.28), rot=(0, 0, R.uniform(-20, 20)), r=0.02, n=1))
+    # lane light: square pole, number box; one lane's light is still on
+    P.add("Body", box((0.25, 0.25, 6.0), steel, loc=(1.1, -4.6, 6.0), r=0.0, n=1),
+          box((1.0, 1.0, 1.0), plain("#e6e1d6", grime=0.5), loc=(1.1, -4.6, 9.5), r=0.05, n=1))
+    for face in (-1, 1):
+        P.add("Body", words(str(number), 0.55, plain("#2a2a2a"), loc=(1.1, -4.6 + face * 0.51, 9.25), rot=(0, 0, 0 if face < 0 else 180)))
+    if lit:
+        P.add("Glow", box((1.02, 1.02, 0.25), plain("#ffd27a"), loc=(1.1, -4.6, 10.1), r=0.02, n=1))
+    else:
+        P.add("Body", box((1.02, 1.02, 0.25), plain("#6a6458", grime=0.5), loc=(1.1, -4.6, 10.1), r=0.02, n=1))
+    P.add("Body", streak(0.4, -5.02 + 0.0, 2.9, 1.6), handprint(-0.6, -5.02, 2.3, s=0.9, tilt=10))
+    P.add("Body", puddle(R, -2.3, 1.5, 0.9))
+
+
+@item("checkout_lane", "warehouse")
+def checkout_lane(P):
+    checkout(P, 7, lit=False)
+
+
+@item("checkout_lane_lit", "warehouse")
+def checkout_lane_lit(P):
+    """The one lane whose light still works."""
+    checkout(P, 4, lit=True)
+
+
 main()

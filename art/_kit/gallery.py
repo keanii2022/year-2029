@@ -3,7 +3,7 @@ Run from art: python3 _kit/gallery.py"""
 import base64, glob, os, subprocess, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GROUPS = [("robots", "Robots"), ("haunt", "Haunts"), ("critters", "Critters"), ("dog", "Dog"), ("story", "Story spots"), ("gear", "Guns and gear"), ("fun", "Fun props"), ("food", "Food"), ("furniture", "Furniture"), ("lab", "Lab pieces"), ("warehouse", "Warehouse kit")]
+GROUPS = [("robots", "Robots"), ("haunt", "Haunts"), ("critters", "Critters"), ("dog", "Dog"), ("story", "Story spots"), ("gear", "Guns and gear"), ("fun", "Fun props"), ("food", "Food"), ("furniture", "Furniture"), ("lab", "Lab pieces"), ("warehouse", "Warehouse kit"), ("viewmodel", "First-person hands")]
 
 tmp = tempfile.mkdtemp()
 sections = []

@@ -52,6 +52,7 @@ return {
 		{ key = "RobotKills", label = "Robots disabled" },
 		{ key = "Downs", label = "Times down" },
 		{ key = "LongestLife", label = "Longest life", minutes = true },
+		{ key = "MissionsDone", label = "Missions done" },
 	},
 
 	Boards = {
