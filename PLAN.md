@@ -307,6 +307,7 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Dependencies:** 5
 - **Scope:** `src/server/Systems/Warehouse.luau`, `src/shared/Config/Warehouse.luau`, `src/shared/Logic/WarehouseGen*.luau`, `tests/WarehouseGen*.spec.luau`
 - Fully enclosed (roof and walls tiled from pieces Roblox allows, no sky anywhere), much tighter and denser: tall shelving packed close, narrow aisles, clutter and junk everywhere, ceiling light fixtures. Done when it feels like being lost inside a huge, cramped, abandoned store.
+- Look (from Keani's references): store departments (furniture zones on wood, carpet and tile under department signs on long cables) mixed with tall racking aisles packed with boxes; thick fog for depth; rows of cold fluorescent strips; dark wet concrete that reflects light; caution tape; furniture piled up; giant pillars vanishing into fog that players can build forts up. Uses the Blender kit in `art/warehouse/` (sizes in `art/warehouse/KIT.md`).
 
 ### 16. Nights you can read
 - **Status:** pending
