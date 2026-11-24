@@ -11,6 +11,8 @@ return {
 	-- hold: what sits in your hand when there's no inventory item behind it.
 	-- The "Guns" slot becomes one slot per gun you carry, best first (Config.Guns.Blasters rank).
 	Slots = {
+		-- Empty hands: Fire grabs furniture. First, so 1 / Triangle get you there fast.
+		{ id = "Hands", label = "HANDS", use = "Grab", always = true },
 		{ id = "Flashlight", label = "LIGHT", use = "Flashlight", always = true, hold = "Flashlight" },
 		{ id = "Guns", label = "GUN", use = "Fire" },
 		{ id = "Food", label = "FOOD", use = "Eat", kind = "Eat" },
@@ -25,6 +27,7 @@ return {
 
 	-- What the phone's big use button says for each use
 	Verbs = {
+		Grab = "GRAB",
 		Fire = "FIRE",
 		Eat = "EAT",
 		Drink = "DRINK",

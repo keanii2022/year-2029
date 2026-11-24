@@ -1,7 +1,10 @@
--- Grab and build controls. Grab/drop is the Grab action (Input); carry controls read keyboard,
--- mouse, gamepad and phone buttons directly while carrying. Asks the server to
--- grab or drop, streams aim and rotation while carrying, and draws the ghost and axis arrow.
--- Someone else's placed piece needs the key held while a pry bar fills; the server times it too.
+-- Grab and build controls. Grabbing works like shooting: with empty hands (the HANDS hotbar slot)
+-- Fire grabs and, while carrying, drops; F on the keyboard empties your hands and does the same.
+-- While carrying, Grab takes over the keys that move the prop: D-pad / arrows / R T turn and tip
+-- (L2 or right mouse + left/right rolls), L1 / R1 / the wheel bring it closer or push it away, and
+-- phone players get TURN, TIP, NEAR and FAR buttons. A tap steps; holding keeps going smoothly.
+-- Asks the server to grab or drop, streams aim and rotation, and draws the ghost and axis arrow.
+-- Someone else's placed piece needs the button held while a pry bar fills; the server times it too.
 local CollectionService = game:GetService("CollectionService")
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
@@ -16,6 +19,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 
 local Settings = Config.Grab
 local Hints = require(script.Parent.Hints)
+local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 local player = Players.LocalPlayer
 
@@ -26,10 +30,25 @@ local AXIS_COLORS = {
 	Tip = Color3.fromRGB(90, 200, 255),
 	Roll = Color3.fromRGB(200, 120, 255),
 }
-local DPAD_AXES = {
-	[Enum.KeyCode.DPadLeft] = "Turn",
-	[Enum.KeyCode.DPadUp] = "Tip",
-	[Enum.KeyCode.DPadRight] = "Roll",
+local HANDS_SLOT = "Hands"
+-- Turn and tip keys: which axis and which way. Left / right roll instead while L2 or the right
+-- mouse button is held.
+type RotateKey = { axis: GrabMath.Axis, direction: number, rolls: boolean? }
+local ROTATE_KEYS: { [Enum.KeyCode]: RotateKey } = {
+	[Enum.KeyCode.DPadLeft] = { axis = "Turn", direction = -1, rolls = true },
+	[Enum.KeyCode.DPadRight] = { axis = "Turn", direction = 1, rolls = true },
+	[Enum.KeyCode.DPadUp] = { axis = "Tip", direction = 1 },
+	[Enum.KeyCode.DPadDown] = { axis = "Tip", direction = -1 },
+	[Enum.KeyCode.Left] = { axis = "Turn", direction = -1, rolls = true },
+	[Enum.KeyCode.Right] = { axis = "Turn", direction = 1, rolls = true },
+	[Enum.KeyCode.Up] = { axis = "Tip", direction = 1 },
+	[Enum.KeyCode.Down] = { axis = "Tip", direction = -1 },
+	[Enum.KeyCode.R] = { axis = "Turn", direction = 1 },
+	[Enum.KeyCode.T] = { axis = "Tip", direction = 1 },
+}
+local DISTANCE_KEYS = {
+	[Enum.KeyCode.ButtonR1] = 1,
+	[Enum.KeyCode.ButtonL1] = -1,
 }
 
 local Grab = {}
@@ -45,10 +64,13 @@ local holding: PVInstance? = nil
 local angles = { Tip = 0, Turn = 0, Roll = 0 }
 local axis: GrabMath.Axis = "Turn"
 local holdDistance = Settings.DefaultHoldDistance
-local freeRotate = false
-local rotateHeld: { [Enum.KeyCode]: number } = {}
+local rollModifier = false
+-- Turn / tip / distance keys held right now, by key name: what they move and since when
+type Held = { axis: GrabMath.Axis?, direction: number, since: number }
+local held: { [string]: Held } = {}
 local lastAim = 0
 local prying: { prop: PVInstance, startedAt: number }? = nil
+local lastTarget: "grab" | "pry" | nil = nil
 
 local ghost: BoxHandleAdornment
 local arrow: ConeHandleAdornment
@@ -75,6 +97,11 @@ end
 local function needsPry(prop: PVInstance): boolean
 	local placedBy = prop:GetAttribute("PlacedBy")
 	return GrabPry.needsPry(if type(placedBy) == "number" then placedBy else nil, player.UserId)
+end
+
+local function handsEmpty(): boolean
+	local slot = Hotbar.selected()
+	return slot ~= nil and slot.id == HANDS_SLOT
 end
 
 local function stopPry(tellServer: boolean)
@@ -119,6 +146,7 @@ local function tryGrab(device: Input.Device)
 	end
 end
 
+-- Fire with empty hands: grab, drop, or hold to pry
 local function onToggle(began: boolean, device: Input.Device)
 	if not began then
 		stopPry(true)
@@ -129,47 +157,69 @@ local function onToggle(began: boolean, device: Input.Device)
 	end
 end
 
-local function onRotate(_, inputState: Enum.UserInputState, input: InputObject)
-	local direction = if input.KeyCode == Enum.KeyCode.ButtonL2 then -1 else 1
-	if inputState == Enum.UserInputState.Begin then
-		rotateHeld[input.KeyCode] = direction
-		if not freeRotate then
-			angles[axis] = GrabMath.stepAngle(angles[axis], direction, Settings.RotateStep)
-		end
-	elseif inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
-		rotateHeld[input.KeyCode] = nil
+-- The F shortcut empties your hands first, so the rule stays "only empty hands carry"
+local function onGrabKey(began: boolean, device: Input.Device)
+	if began and not holding then
+		Hotbar.select(HANDS_SLOT)
 	end
-	return Enum.ContextActionResult.Sink
+	onToggle(began, device)
 end
 
-local function onAxis(_, inputState: Enum.UserInputState, input: InputObject)
-	if inputState ~= Enum.UserInputState.Begin then
-		return Enum.ContextActionResult.Sink
-	end
-	if input.KeyCode == Enum.KeyCode.T or input.UserInputType == Enum.UserInputType.Touch then
-		axis = GrabMath.nextAxis(axis)
-	elseif input.KeyCode == Enum.KeyCode.DPadDown then
-		angles.Tip, angles.Turn, angles.Roll = 0, 0, 0
+local function startHold(key: string, turnAxis: GrabMath.Axis?, direction: number)
+	held[key] = { axis = turnAxis, direction = direction, since = os.clock() }
+	if turnAxis then
+		angles[turnAxis] = GrabMath.stepAngle(angles[turnAxis], direction, Settings.RotateStep)
+		axis = turnAxis
 	else
-		axis = DPAD_AXES[input.KeyCode] or axis
-	end
-	return Enum.ContextActionResult.Sink
-end
-
-local function onFree(_, inputState: Enum.UserInputState)
-	freeRotate = inputState == Enum.UserInputState.Begin
-	return Enum.ContextActionResult.Sink
-end
-
-local function onDistance(_, inputState: Enum.UserInputState, input: InputObject)
-	if inputState == Enum.UserInputState.Change then
 		holdDistance = GrabMath.clampHoldDistance(
-			holdDistance + math.sign(input.Position.Z) * Settings.WheelStep,
+			holdDistance + direction * Settings.WheelStep,
 			Settings.MinHoldDistance,
 			Settings.MaxHoldDistance
 		)
 	end
+end
+
+local function onRotate(_, inputState: Enum.UserInputState, input: InputObject)
+	local key = ROTATE_KEYS[input.KeyCode]
+	if inputState == Enum.UserInputState.Begin and key then
+		startHold(input.KeyCode.Name, if key.rolls and rollModifier then "Roll" else key.axis, key.direction)
+	elseif inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
+		held[input.KeyCode.Name] = nil
+	end
 	return Enum.ContextActionResult.Sink
+end
+
+local function onDistance(_, inputState: Enum.UserInputState, input: InputObject)
+	if input.UserInputType == Enum.UserInputType.MouseWheel then
+		if inputState == Enum.UserInputState.Change then
+			startHold("Wheel", nil, math.sign(input.Position.Z))
+			held.Wheel = nil
+		end
+	elseif inputState == Enum.UserInputState.Begin then
+		startHold(input.KeyCode.Name, nil, DISTANCE_KEYS[input.KeyCode] or 0)
+	elseif inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
+		held[input.KeyCode.Name] = nil
+	end
+	return Enum.ContextActionResult.Sink
+end
+
+local function onRollModifier(_, inputState: Enum.UserInputState)
+	rollModifier = inputState == Enum.UserInputState.Begin or inputState == Enum.UserInputState.Change
+	return Enum.ContextActionResult.Sink
+end
+
+-- Phone carry buttons come in through Input actions
+local function touchHold(key: string, turnAxis: GrabMath.Axis?, direction: number)
+	return function(began: boolean)
+		if not holding then
+			return
+		end
+		if began then
+			startHold(key, turnAxis, direction)
+		else
+			held[key] = nil
+		end
+	end
 end
 
 local function axisDirection(): Vector3
@@ -182,40 +232,40 @@ local function axisDirection(): Vector3
 	return Vector3.yAxis
 end
 
--- On a phone, CAS draws TURN and AXIS buttons beside the jump button while carrying.
+-- High priority so the arrow keys move the prop instead of the character and camera. The phone's
+-- carry buttons are TouchButtons, not CAS's grey defaults.
 local function bindCarryControls()
-	ContextActionService:BindAction(
-		"GrabRotate",
-		onRotate,
-		true,
-		Enum.KeyCode.R,
-		Enum.KeyCode.ButtonR2,
-		Enum.KeyCode.ButtonL2
+	local high = Enum.ContextActionPriority.High.Value
+	local rotateKeys = {}
+	for key in ROTATE_KEYS do
+		table.insert(rotateKeys, key)
+	end
+	ContextActionService:BindActionAtPriority("GrabRotate", onRotate, false, high, table.unpack(rotateKeys))
+	ContextActionService:BindActionAtPriority(
+		"GrabDistance",
+		onDistance,
+		false,
+		high,
+		Enum.UserInputType.MouseWheel,
+		Enum.KeyCode.ButtonR1,
+		Enum.KeyCode.ButtonL1
 	)
-	ContextActionService:BindAction(
-		"GrabAxis",
-		onAxis,
-		true,
-		Enum.KeyCode.T,
-		Enum.KeyCode.DPadLeft,
-		Enum.KeyCode.DPadUp,
-		Enum.KeyCode.DPadRight,
-		Enum.KeyCode.DPadDown
+	ContextActionService:BindActionAtPriority(
+		"GrabRoll",
+		onRollModifier,
+		false,
+		high,
+		Enum.KeyCode.ButtonL2,
+		Enum.UserInputType.MouseButton2
 	)
-	ContextActionService:BindAction("GrabFree", onFree, false, Enum.KeyCode.ButtonL1, Enum.KeyCode.LeftAlt)
-	ContextActionService:BindAction("GrabDistance", onDistance, false, Enum.UserInputType.MouseWheel)
-	ContextActionService:SetTitle("GrabRotate", "TURN")
-	ContextActionService:SetTitle("GrabAxis", "AXIS")
-	ContextActionService:SetPosition("GrabRotate", UDim2.new(1, -250, 1, -150))
-	ContextActionService:SetPosition("GrabAxis", UDim2.new(1, -250, 1, -230))
 end
 
 local function unbindCarryControls()
-	for _, name in { "GrabRotate", "GrabAxis", "GrabFree", "GrabDistance" } do
+	for _, name in { "GrabRotate", "GrabDistance", "GrabRoll" } do
 		ContextActionService:UnbindAction(name)
 	end
-	rotateHeld = {}
-	freeRotate = false
+	held = {}
+	rollModifier = false
 end
 
 local function onState(prop: PVInstance?)
@@ -232,7 +282,7 @@ local function onState(prop: PVInstance?)
 		bindCarryControls()
 		arrow.Visible = true
 		Hints.set("grabTarget", nil)
-		Hints.set("carry", Hints.text("CarryHint"), 2)
+		Hints.set("carry", Config.Hints.CarryHint, 2)
 	else
 		unbindCarryControls()
 		ghost.Visible = false
@@ -252,7 +302,8 @@ local function onGhost(landed: CFrame?, size: Vector3, ok: boolean)
 	ghost.Visible = true
 end
 
--- "[F] Grab" under the crosshair when something grabbable is in reach, checked a few times a second
+-- "Grab" under the crosshair when something grabbable is in reach, checked a few times a second.
+-- With something else in hand it says how to empty them instead.
 local lastLook = 0
 local function lookForGrabbable(camera: Camera?, head: BasePart?)
 	local now = os.clock()
@@ -261,6 +312,7 @@ local function lookForGrabbable(camera: Camera?, head: BasePart?)
 	end
 	lastLook = now
 	if not camera or not head then
+		lastTarget = nil
 		Hints.set("grabTarget", nil)
 		return
 	end
@@ -270,11 +322,28 @@ local function lookForGrabbable(camera: Camera?, head: BasePart?)
 	local result =
 		workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * Settings.GrabReach, params)
 	local target = result and grabbableFrom(result.Instance)
+	local pry = target ~= nil and needsPry(target)
+	lastTarget = if not target then nil elseif pry then "pry" else "grab"
+	local hints = Config.Hints
+	local empty = handsEmpty()
 	local text = if not target
 		then nil
-		elseif needsPry(target) then Settings.PryHint
-		else Hints.text("GrabTargetHint")
+		elseif pry then (if empty then hints.PryHint else hints.PryNeedsHands)
+		elseif empty then hints.GrabTargetHint
+		else hints.GrabNeedsHands
+	if text and Hints.nudge("grab", hints.GrabNudge) then
+		text = nil
+	end
 	Hints.set("grabTarget", text, 3)
+end
+
+-- What's in reach for the phone's big button: "grab", "pry" or nil
+function Grab.target(): "grab" | "pry" | nil
+	return lastTarget
+end
+
+function Grab.carrying(): boolean
+	return holding ~= nil
 end
 
 local function stepPry()
@@ -304,13 +373,23 @@ local function onRender(dt: number)
 		return
 	end
 
-	if freeRotate then
-		for _, direction in rotateHeld do
-			angles[axis] = GrabMath.wrapAngle(angles[axis] + direction * Settings.FreeRotateSpeed * dt)
+	local now = os.clock()
+	for _, hold in held do
+		if now - hold.since < Settings.RepeatDelay then
+			continue
+		end
+		if hold.axis then
+			angles[hold.axis] =
+				GrabMath.wrapAngle(angles[hold.axis] + hold.direction * Settings.FreeRotateSpeed * dt)
+		else
+			holdDistance = GrabMath.clampHoldDistance(
+				holdDistance + hold.direction * Settings.HoldDistanceSpeed * dt,
+				Settings.MinHoldDistance,
+				Settings.MaxHoldDistance
+			)
 		end
 	end
 
-	local now = os.clock()
 	if now - lastAim >= 1 / Settings.AimRate then
 		lastAim = now
 		local aim = head.Position + camera.CFrame.LookVector * holdDistance
@@ -386,7 +465,12 @@ function Grab:Start()
 		stopPry(false)
 	end)
 	RunService.RenderStepped:Connect(onRender)
-	Input.bind("Grab", onToggle)
+	Input.bind("Grab", onGrabKey)
+	Hotbar.onUse("Grab", onToggle)
+	Input.bind("CarryTurn", touchHold("CarryTurn", "Turn", 1))
+	Input.bind("CarryTip", touchHold("CarryTip", "Tip", 1))
+	Input.bind("CarryCloser", touchHold("CarryCloser", nil, -1))
+	Input.bind("CarryFarther", touchHold("CarryFarther", nil, 1))
 end
 
 return Grab

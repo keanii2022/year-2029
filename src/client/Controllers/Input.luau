@@ -1,17 +1,26 @@
 -- Shared input layer and the one button map for keyboard, gamepad and phone. Every action has a
 -- keyboard/mouse input and/or a gamepad button; phone buttons (TouchButtons) press actions by name.
--- Gamepad names are Roblox's Xbox names; the PS button is in the comment beside each.
+-- Gamepad names are Roblox's Xbox names; the PS button is in the comment beside each. The layout
+-- follows what shooter players already know: R2 fire / use what you hold (empty hands: grab),
+-- L2 aim, Square use/reload, Cross jump, L1 / R1 step the hotbar (empty hands is a slot),
+-- Triangle opens the backpack. Circle psst and R3 crouch stay where players already learned them.
+-- While carrying, Grab takes over L1 / R1 / L2 and the D-pad to move the prop.
+-- Glyphs draws these keys on screen.
 -- Other controllers call Input.bind / Input.isDown instead of reading keys themselves.
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
 export type Device = "Keyboard" | "Gamepad" | "Touch"
 -- freeHandsOnPad: Grab turns a carried prop with the D-pad, shoulders and triggers, so on a
--- gamepad these actions only fire while nothing is carried.
+-- gamepad these actions only fire while nothing is carried. freeHands: off on every device while
+-- carrying (R turns the prop on the keyboard). keyboardAlt: a second key for the same action.
 export type Binding = {
 	keyboard: (Enum.KeyCode | Enum.UserInputType)?,
+	keyboardAlt: Enum.KeyCode?,
 	gamepad: Enum.KeyCode?,
 	freeHandsOnPad: boolean?,
+	freeHands: boolean?,
 }
 
 local player = Players.LocalPlayer
@@ -19,19 +28,21 @@ local player = Players.LocalPlayer
 local Input = {}
 
 local actions: { [string]: Binding } = {
-	Sprint = { keyboard = Enum.KeyCode.LeftShift, gamepad = Enum.KeyCode.ButtonL3 }, -- L3
-	Crouch = { keyboard = Enum.KeyCode.C, gamepad = Enum.KeyCode.ButtonR3 }, -- R3
+	Sprint = { keyboard = Enum.KeyCode.LeftShift, gamepad = Enum.KeyCode.ButtonL3 }, -- L3 (click toggles)
+	Crouch = {
+		keyboard = Enum.KeyCode.C,
+		keyboardAlt = Enum.KeyCode.LeftControl,
+		gamepad = Enum.KeyCode.ButtonR3,
+	}, -- R3
 	Jump = { keyboard = Enum.KeyCode.Space, gamepad = Enum.KeyCode.ButtonA }, -- Cross
 	Psst = { keyboard = Enum.KeyCode.Q, gamepad = Enum.KeyCode.ButtonB }, -- Circle
 	Use = { keyboard = Enum.KeyCode.E, gamepad = Enum.KeyCode.ButtonX }, -- Square
-	-- On a gamepad Gun reloads from Square (Use) when there's nothing to use; R turns a carried prop
-	Reload = { keyboard = Enum.KeyCode.R },
-	Grab = { keyboard = Enum.KeyCode.F, gamepad = Enum.KeyCode.ButtonR1 }, -- R1
-	Fire = {
-		keyboard = Enum.UserInputType.MouseButton1,
-		gamepad = Enum.KeyCode.ButtonR2,
-		freeHandsOnPad = true,
-	}, -- R2
+	-- On a gamepad Gun reloads from Square (Use) when there's nothing to use
+	Reload = { keyboard = Enum.KeyCode.R, freeHands = true },
+	-- Keyboard shortcut: empties your hands and grabs. Otherwise grabbing is Fire with empty hands.
+	Grab = { keyboard = Enum.KeyCode.F },
+	-- Also drops a carried prop (only empty hands can carry), so it stays on while carrying
+	Fire = { keyboard = Enum.UserInputType.MouseButton1, gamepad = Enum.KeyCode.ButtonR2 }, -- R2
 	Aim = {
 		keyboard = Enum.UserInputType.MouseButton2,
 		gamepad = Enum.KeyCode.ButtonL2,
@@ -45,10 +56,18 @@ local actions: { [string]: Binding } = {
 	-- Shortcuts on the keyboard; the gamepad and phone throw these from the hotbar
 	Emp = { keyboard = Enum.KeyCode.G },
 	Disruptor = { keyboard = Enum.KeyCode.V },
-	HotbarNext = { gamepad = Enum.KeyCode.ButtonY, freeHandsOnPad = true }, -- Triangle
-	HotbarPrevious = { gamepad = Enum.KeyCode.ButtonL1, freeHandsOnPad = true }, -- L1
-	Record = { keyboard = Enum.KeyCode.M, gamepad = Enum.KeyCode.ButtonSelect }, -- touchpad
-	Controls = { keyboard = Enum.KeyCode.H },
+	HotbarNext = { gamepad = Enum.KeyCode.ButtonR1, freeHands = true }, -- R1
+	HotbarPrevious = { gamepad = Enum.KeyCode.ButtonL1, freeHands = true }, -- L1
+	-- B, not Tab: Roblox keeps Tab for its player list
+	Backpack = { keyboard = Enum.KeyCode.B, gamepad = Enum.KeyCode.ButtonY, freeHands = true }, -- Triangle
+	-- Touchpad: tap opens the controls card, hold opens the record (Hints times it)
+	Controls = { keyboard = Enum.KeyCode.H, gamepad = Enum.KeyCode.ButtonSelect },
+	Record = { keyboard = Enum.KeyCode.M },
+	-- Phone-only carry buttons; keyboard and gamepad move props through Grab's own keys
+	CarryTurn = {},
+	CarryTip = {},
+	CarryCloser = {},
+	CarryFarther = {},
 }
 -- Number keys pick hotbar slots (Slot1 .. Slot9); the mouse wheel is read by Hotbar itself.
 local NUMBER_KEYS = {
@@ -63,7 +82,7 @@ local NUMBER_KEYS = {
 	Enum.KeyCode.Nine,
 }
 for number, key in NUMBER_KEYS do
-	actions[`Slot{number}`] = { keyboard = key }
+	actions[`Slot{number}`] = { keyboard = key, freeHands = true }
 end
 Input.Actions = table.freeze(actions)
 Input.SlotCount = #NUMBER_KEYS
@@ -86,7 +105,11 @@ local function match(input: InputObject): (string?, Device?)
 		if
 			not gamepad
 			and binding.keyboard
-			and (input.KeyCode == binding.keyboard or input.UserInputType == binding.keyboard)
+			and (
+				input.KeyCode == binding.keyboard
+				or input.UserInputType == binding.keyboard
+				or (binding.keyboardAlt and input.KeyCode == binding.keyboardAlt)
+			)
 		then
 			return action, "Keyboard"
 		end
@@ -106,11 +129,21 @@ local function dispatch(input: InputObject, began: boolean)
 	if not action or not device then
 		return
 	end
-	local carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil
-	if began and device == "Gamepad" and carrying and Input.Actions[action].freeHandsOnPad then
+	if not began then
+		send(action, false, device)
 		return
 	end
-	send(action, began, device)
+	local binding = Input.Actions[action]
+	local carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil
+	if carrying and (binding.freeHands or (device == "Gamepad" and binding.freeHandsOnPad)) then
+		return
+	end
+	-- While a menu has the gamepad's selection (container, rob list, locker), the pad works the
+	-- menu only, so Circle doesn't crouch and Square doesn't reload behind it.
+	if device == "Gamepad" and GuiService.SelectedObject ~= nil and action ~= "Controls" then
+		return
+	end
+	send(action, true, device)
 end
 
 -- Calls listener(began, device) on press and release. Returns a function that unbinds.
@@ -147,6 +180,9 @@ function Input.lastDevice(): Device
 end
 
 function Input.Init()
+	-- Roblox's default turns the touchpad / Select button into "pick a GUI button" mode, which would
+	-- grab the hotbar every time someone opens the controls card.
+	GuiService.AutoSelectGuiEnabled = false
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if not gameProcessed then
 			dispatch(input, true)

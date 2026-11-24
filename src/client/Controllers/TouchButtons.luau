@@ -1,13 +1,18 @@
 -- On-screen buttons for phone players, shown only while the last input was a touch. Each button
--- presses an Input action, so a tap does exactly what the key or gamepad button does. Roblox's own
--- thumbstick and jump button stay; the jump button also presses the Jump action (breath, mash).
--- Supplies and gear are picked by tapping the hotbar; the big button then does what's in hand and
--- says so (FIRE, EAT, THROW, ...).
+-- presses an Input action, so a tap does exactly what the key or gamepad button does.
+-- The cluster wraps round Roblox's jump button (movement stacked above it, actions to its left)
+-- and only shows what matters right now: AIM and RELOAD with a gun in hand, TURN / TIP / NEAR /
+-- FAR while carrying. The big button says what it'll do: FIRE, EAT, THROW, GRAB, PRY, DROP.
+-- Roblox's own thumbstick and jump button stay; the jump button also presses Jump (breath, mash).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Glyphs = require(script.Parent.Glyphs)
+local Grab = require(script.Parent.Grab)
+local Gun = require(script.Parent.Gun)
 local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
@@ -18,142 +23,91 @@ local PANEL = Color3.fromRGB(12, 12, 14)
 local TEXT = Color3.fromRGB(225, 222, 215)
 local IDLE = 0.35
 local PRESSED = 0.05
+local REFRESH_EVERY = 0.2
+
+-- Roblox's jump button on a small screen (min side <= 500): 70 across, centre 60 / 55 in from the
+-- bottom-right corner. Bigger screens get a 120 one further in; the cluster moves out with it.
+local SMALL_JUMP = { centre = Vector2.new(-60, -55), radius = 35 }
+local LARGE_JUMP = { centre = Vector2.new(-110, -150), radius = 60 }
 
 -- mode: hold mirrors the finger, toggle stays pressed until tapped again, tap is a quick press.
--- Positions are from the bottom-right corner (bottom-left for the top row), clear of the jump
--- button Roblox puts in the bottom-right.
+-- at: centre, from the bottom-right corner, laid out round the small-screen jump button.
+-- when: shown only then ("gun", "carry", "free" = not carrying). corner: top-left instead.
 type Spec = {
-	label: string,
+	name: string,
 	action: string?,
 	mode: "hold" | "toggle" | "tap",
 	size: number,
-	anchor: Vector2,
-	position: UDim2,
+	at: Vector2,
+	when: ("gun" | "carry" | "free")?,
+	corner: boolean?,
 }
 
 local BUTTONS: { Spec } = {
+	{ name = "Fire", action = "Fire", mode = "hold", size = 80, at = Vector2.new(-160, -60) },
+	{ name = "Crouch", action = "Crouch", mode = "tap", size = 56, at = Vector2.new(-60, -138) },
+	{ name = "Use", action = "Use", mode = "hold", size = 56, at = Vector2.new(-136, -150) },
 	{
-		label = "FIRE",
-		action = "Fire",
-		mode = "hold",
-		size = 88,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -196, 1, -100),
+		name = "Backpack",
+		action = "Backpack",
+		mode = "tap",
+		size = 56,
+		at = Vector2.new(-212, -150),
+		when = "free",
 	},
+	{ name = "Aim", action = "Aim", mode = "toggle", size = 56, at = Vector2.new(-248, -56), when = "gun" },
 	{
-		label = "AIM",
-		action = "Aim",
-		mode = "toggle",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -296, 1, -130),
-	},
-	{
-		label = "RELOAD",
+		name = "Reload",
 		action = "Reload",
 		mode = "tap",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -296, 1, -200),
+		size = 56,
+		at = Vector2.new(-288, -130),
+		when = "gun",
 	},
+	{ name = "Sprint", action = "Sprint", mode = "toggle", size = 56, at = Vector2.new(-60, -222) },
+	{ name = "Flashlight", action = "Flashlight", mode = "tap", size = 56, at = Vector2.new(-136, -226) },
+	{ name = "Psst", action = "Psst", mode = "tap", size = 56, at = Vector2.new(-212, -226) },
 	{
-		label = "USE",
-		action = "Use",
+		name = "CarryTurn",
+		action = "CarryTurn",
 		mode = "hold",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -24, 1, -236),
+		size = 56,
+		at = Vector2.new(-248, -56),
+		when = "carry",
 	},
 	{
-		label = "GRAB",
-		action = "Grab",
+		name = "CarryTip",
+		action = "CarryTip",
 		mode = "hold",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -96, 1, -236),
+		size = 56,
+		at = Vector2.new(-288, -130),
+		when = "carry",
 	},
 	{
-		label = "LIGHT",
-		action = "Flashlight",
-		mode = "tap",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -168, 1, -236),
+		name = "CarryCloser",
+		action = "CarryCloser",
+		mode = "hold",
+		size = 56,
+		at = Vector2.new(-324, -56),
+		when = "carry",
 	},
 	{
-		label = "CROUCH",
-		action = "Crouch",
-		mode = "tap",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -24, 1, -308),
+		name = "CarryFarther",
+		action = "CarryFarther",
+		mode = "hold",
+		size = 56,
+		at = Vector2.new(-364, -130),
+		when = "carry",
 	},
-	{
-		label = "RUN",
-		action = "Sprint",
-		mode = "toggle",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -96, 1, -308),
-	},
-	{
-		label = "PSST",
-		action = "Psst",
-		mode = "tap",
-		size = 60,
-		anchor = Vector2.new(1, 1),
-		position = UDim2.new(1, -168, 1, -308),
-	},
-	{
-		action = "Eat",
-		mode = "tap",
-		size = 52,
-		anchor = Vector2.new(0.5, 1),
-		position = UDim2.new(0.5, -120, 1, -24),
-	},
-	{
-		action = "Drink",
-		mode = "tap",
-		size = 52,
-		anchor = Vector2.new(0.5, 1),
-		position = UDim2.new(0.5, -60, 1, -24),
-	},
-	{
-		action = "Heal",
-		mode = "tap",
-		size = 52,
-		anchor = Vector2.new(0.5, 1),
-		position = UDim2.new(0.5, 0, 1, -24),
-	},
-	{
-		action = "Emp",
-		mode = "tap",
-		size = 52,
-		anchor = Vector2.new(0.5, 1),
-		position = UDim2.new(0.5, 60, 1, -24),
-	},
-	{
-		action = "Disruptor",
-		mode = "tap",
-		size = 52,
-		anchor = Vector2.new(0.5, 1),
-		position = UDim2.new(0.5, 120, 1, -24),
-	},
-	{ label = "?", mode = "tap", size = 44, anchor = Vector2.new(0, 0), position = UDim2.fromOffset(16, 70) },
-	{
-		label = "REC",
-		action = "Record",
-		mode = "tap",
-		size = 44,
-		anchor = Vector2.new(0, 0),
-		position = UDim2.fromOffset(68, 70),
-	},
+	{ name = "Controls", mode = "tap", size = 56, at = Vector2.new(16, 72), corner = true },
+	{ name = "Record", action = "Record", mode = "tap", size = 56, at = Vector2.new(84, 72), corner = true },
 }
 
 local TouchButtons = {}
 
 local gui: ScreenGui
-local toggled: { [string]: TextButton } = {}
+local buttons: { [string]: TextButton } = {}
+local toggled: { [string]: boolean } = {}
 
 local function paint(button: TextButton, pressed: boolean)
 	button.BackgroundTransparency = if pressed then PRESSED else IDLE
@@ -167,25 +121,29 @@ local function press(spec: Spec, began: boolean)
 	end
 end
 
+local function fitText(button: TextButton, size: number)
+	local text = button.Text
+	button.TextSize = if size >= 80 then 17 elseif #text > 5 then 11 else 13
+end
+
 local function build(spec: Spec)
 	local button = Instance.new("TextButton")
-	button.Name = spec.label
-	button.AnchorPoint = spec.anchor
-	button.Position = spec.position
+	button.Name = spec.name
+	button.AnchorPoint = if spec.corner then Vector2.zero else Vector2.new(0.5, 0.5)
 	button.Size = UDim2.fromOffset(spec.size, spec.size)
 	button.BackgroundColor3 = PANEL
 	button.BorderSizePixel = 0
 	button.AutoButtonColor = false
-	button.Text = spec.label
+	button.Text = Glyphs.touchLabel(spec.name) or spec.name
 	button.TextColor3 = TEXT
 	button.Font = Enum.Font.GothamBold
-	button.TextSize = if spec.size >= 80 then 18 elseif #spec.label > 5 then 10 else 13
+	fitText(button, spec.size)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(1, 0)
 	corner.Parent = button
 	local stroke = Instance.new("UIStroke")
 	stroke.Color = TEXT
-	stroke.Transparency = 0.7
+	stroke.Transparency = if spec.size >= 80 then 0.5 else 0.7
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	stroke.Parent = button
 	paint(button, false)
@@ -196,8 +154,8 @@ local function build(spec: Spec)
 			return
 		end
 		if spec.mode == "toggle" then
-			local on = toggled[spec.label] == nil
-			toggled[spec.label] = if on then button else nil
+			local on = not toggled[spec.name]
+			toggled[spec.name] = on or nil
 			paint(button, on)
 			press(spec, on)
 			return
@@ -220,17 +178,77 @@ local function build(spec: Spec)
 		end
 	end)
 	button.Parent = gui
+	buttons[spec.name] = button
+end
+
+local function release(spec: Spec)
+	if toggled[spec.name] then
+		toggled[spec.name] = nil
+		paint(buttons[spec.name], false)
+		press(spec, false)
+	end
 end
 
 local function releaseToggles()
 	for _, spec in BUTTONS do
-		local button = toggled[spec.label]
-		if button then
-			toggled[spec.label] = nil
-			paint(button, false)
-			press(spec, false)
+		release(spec)
+	end
+end
+
+-- Places the cluster round whichever jump button this screen gets
+local function layout()
+	local camera = workspace.CurrentCamera
+	local viewport = if camera then camera.ViewportSize else Vector2.new(844, 390)
+	local jump = if math.min(viewport.X, viewport.Y) <= 500 then SMALL_JUMP else LARGE_JUMP
+	local grow = jump.radius - SMALL_JUMP.radius
+	for _, spec in BUTTONS do
+		local button = buttons[spec.name]
+		if spec.corner then
+			button.Position = UDim2.fromOffset(spec.at.X, spec.at.Y)
+		else
+			local offset = spec.at - SMALL_JUMP.centre
+			local at = jump.centre + offset + Vector2.new(math.sign(offset.X), math.sign(offset.Y)) * grow
+			button.Position = UDim2.new(1, at.X, 1, at.Y)
 		end
 	end
+end
+
+-- What the big button does right now, and which context buttons show
+local function refreshContext()
+	local slot = Hotbar.selected()
+	local carrying = Grab.carrying()
+	local gun = Gun.getAmmo() ~= nil
+	local word = if not slot then "FIRE" else Config.Hotbar.Verbs[slot.use] or "USE"
+	if carrying then
+		word = "DROP"
+	elseif slot and slot.use == "Grab" and Grab.target() == "pry" then
+		word = "PRY"
+	end
+	Glyphs.setTouchLabel("Fire", word)
+	local fire = buttons.Fire
+	if fire.Text ~= word then
+		fire.Text = word
+		fitText(fire, 80)
+	end
+	for _, spec in BUTTONS do
+		local show = spec.when == nil
+			or (spec.when == "gun" and gun and not carrying)
+			or (spec.when == "carry" and carrying)
+			or (spec.when == "free" and not carrying)
+		local button = buttons[spec.name]
+		if button.Visible and not show then
+			release(spec)
+		end
+		button.Visible = show
+	end
+end
+
+local function refresh()
+	local onTouch = Glyphs.device() == "Touch"
+	if gui.Enabled and not onTouch then
+		releaseToggles()
+	end
+	gui.Enabled = onTouch
 end
 
 -- Roblox's jump button lives in TouchGui and is rebuilt now and then, so hook each one that appears.
@@ -250,22 +268,6 @@ local function hookJump(descendant: Instance)
 			end)
 		end
 	end)
-end
-
-local function relabelFire()
-	local fire = gui:FindFirstChild("FIRE") :: TextButton?
-	local slot = Hotbar.selected()
-	if fire then
-		fire.Text = if slot then Config.Hotbar.Verbs[slot.use] or "USE" else "FIRE"
-	end
-end
-
-local function refresh()
-	local onTouch = Input.lastDevice() == "Touch"
-	if gui.Enabled and not onTouch then
-		releaseToggles()
-	end
-	gui.Enabled = onTouch
 end
 
 function TouchButtons.Init()
@@ -291,9 +293,22 @@ function TouchButtons.Start()
 		hookJump(descendant)
 	end
 	player.CharacterAdded:Connect(releaseToggles)
-	Hotbar.onChanged(relabelFire)
-	relabelFire()
-	UserInputService.LastInputTypeChanged:Connect(refresh)
+	layout()
+	local camera = workspace.CurrentCamera
+	if camera then
+		camera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+	end
+	Hotbar.onChanged(refreshContext)
+	refreshContext()
+	local since = 0
+	RunService.Heartbeat:Connect(function(dt)
+		since += dt
+		if since >= REFRESH_EVERY and gui.Enabled then
+			since = 0
+			refreshContext()
+		end
+	end)
+	Glyphs.onChanged(refresh)
 	refresh()
 end
 

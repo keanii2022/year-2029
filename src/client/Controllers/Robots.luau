@@ -1,4 +1,4 @@
--- Robot gear keys (EMP G / D-pad down, disruptor V / D-pad right) and the local-only life of stalled
+-- Robot gear (EMP G, disruptor V, or Fire with it picked on the hotbar) and the local-only life of stalled
 -- robots: flickering eyes, twitches and the odd "ERROR. NEEDS MORE TRAINING." over the nearest one.
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")

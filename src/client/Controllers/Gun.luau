@@ -17,8 +17,10 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
+local Interact = require(script.Parent.Interact)
 local Viewmodel = require(script.Parent.Viewmodel)
 
 local settings = Config.Guns
@@ -450,17 +452,41 @@ local function fireOnce(): boolean
 end
 
 -- On a gamepad Reload shares Square with Use: it reloads only while a gun is in hand and there's
--- nothing to use (Interact shows its prompt whenever there is).
+-- nothing to use: no Interact prompt and no pickup / stash prompt showing.
 local function onPadUse(began: boolean, device: Input.Device)
-	if not began or device ~= "Gamepad" or not currentGun() or player:GetAttribute("Hidden") == true then
-		return
-	end
-	local playerGui = player:FindFirstChild("PlayerGui")
-	local prompt = playerGui and playerGui:FindFirstChild("InteractPrompt")
-	if prompt and prompt:IsA("BillboardGui") and prompt.Enabled then
+	if not began or device ~= "Gamepad" or not currentGun() or Interact.canUse() then
 		return
 	end
 	startReload()
+end
+
+-- Under the crosshair: Fire / Aim / Reload for a few seconds after you pull the gun out, then
+-- only Reload in spray red when the mag runs low, so it stays quiet while you're fine.
+local hints = Config.Hints
+local equippedId: string? = nil
+local equippedAt = 0
+local function updateHint()
+	local id, gun = currentGun()
+	if id ~= equippedId then
+		equippedId = id
+		equippedAt = os.clock()
+	end
+	if not gun then
+		Hints.set("gun", nil)
+		return
+	end
+	local loaded, reserve, reloading = Gun.getMagazine()
+	local low = (loaded or 0) <= math.ceil(gun.magSize * hints.LowAmmoShare)
+	local empty = (loaded or 0) == 0 and (reserve or 0) == 0
+	if not reloading and low and empty then
+		Hints.set("gun", hints.NoAmmoHint, 4, "warn")
+	elseif not reloading and low and (reserve or 0) > 0 then
+		Hints.set("gun", hints.LowAmmoHint, 4, "warn")
+	elseif not reloading and os.clock() - equippedAt < hints.GunHintSeconds then
+		Hints.set("gun", hints.GunHint, 4)
+	else
+		Hints.set("gun", nil)
+	end
 end
 
 local function onFire(began: boolean)
@@ -557,6 +583,12 @@ function Gun.Start()
 	RunService:BindToRenderStep("GunAimRestore", Enum.RenderPriority.Camera.Value, restoreFieldOfView)
 	RunService:BindToRenderStep("GunAim", Enum.RenderPriority.Camera.Value + 2, applyAim)
 	RunService.RenderStepped:Connect(moveBullets)
+	task.spawn(function()
+		while true do
+			task.wait(0.2)
+			updateHint()
+		end
+	end)
 	Net.event("InventorySync"):FireServer()
 end
 

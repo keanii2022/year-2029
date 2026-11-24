@@ -11,6 +11,7 @@ local UserInputService = game:GetService("UserInputService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Glyphs = require(script.Parent.Glyphs)
 
 local Settings = Config.Containers
 local player = Players.LocalPlayer
@@ -39,7 +40,7 @@ local closeButton: TextButton
 local bagGrid: ScrollingFrame
 local boxGrid: ScrollingFrame
 local boxTitle: TextLabel
-local hintLabel: TextLabel
+local footer: Frame
 local moveRemote: RemoteEvent
 local closeRemote: RemoteEvent
 
@@ -203,13 +204,13 @@ local function refresh()
 	end
 end
 
-local function hint(): string
-	if UserInputService.GamepadEnabled then
-		return "Cross: move stack    Square: move one    Circle: close"
-	elseif UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-		return "Tap a stack to move it"
-	end
-	return "Click: move stack    Right click: move one    E: shut it"
+-- The footer's keys follow the device in use, live
+local function fillFooter()
+	Glyphs.fill(footer, Config.Hints.ContainerFooter, {
+		size = 18,
+		textSize = 12,
+		color = Color3.fromRGB(150, 146, 136),
+	})
 end
 
 local function onPad(_action: string, inputState: Enum.UserInputState, input: InputObject)
@@ -249,7 +250,7 @@ local function show(model: Model, incoming: State)
 		refresh()
 		return
 	end
-	hintLabel.Text = hint()
+	fillFooter()
 	panel.Visible = true
 	-- A visible modal button frees the mouse while the panel is up, even in first person
 	closeButton.Modal = true
@@ -331,13 +332,12 @@ local function build()
 	divider.BackgroundColor3 = SPRAY_RED
 	divider.BackgroundTransparency = 0.4
 	divider.Parent = panel
-	hintLabel = label({
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 20, 1, -10),
-		Size = UDim2.new(1, -40, 0, 18),
-		TextSize = 11,
-		TextTransparency = 0.45,
-	}, panel)
+	footer = Instance.new("Frame")
+	footer.AnchorPoint = Vector2.new(0, 1)
+	footer.Position = UDim2.new(0, 20, 1, -6)
+	footer.Size = UDim2.new(1, -40, 0, 24)
+	footer.BackgroundTransparency = 1
+	footer.Parent = panel
 end
 
 function Containers.Init()
@@ -378,6 +378,11 @@ function Containers.Start()
 	end)
 	Net.event("InventorySync"):FireServer()
 	player.CharacterRemoving:Connect(hide)
+	Glyphs.onChanged(function()
+		if current then
+			fillFooter()
+		end
+	end)
 end
 
 return Containers

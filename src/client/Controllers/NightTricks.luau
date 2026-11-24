@@ -13,6 +13,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local World = require(ReplicatedStorage.Shared.Logic.NightTricksWorld)
+local Glyphs = require(script.Parent.Glyphs)
 local Input = require(script.Parent.Input)
 local Movement = require(script.Parent.Movement)
 local Music = require(script.Parent.Music)
@@ -166,17 +167,15 @@ local function buildLorePanel(parent: Instance): Frame
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
 	}, panel)
-	label({
-		Name = "Close",
-		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.fromScale(1, 1),
-		Size = UDim2.fromOffset(200, 16),
-		TextSize = 12,
-		TextColor3 = ink,
-		TextStrokeTransparency = 1,
-		TextXAlignment = Enum.TextXAlignment.Right,
-		Text = "Use to close",
-	}, panel)
+	-- Filled with the Use key's glyph each time the note opens
+	local close = Instance.new("Frame")
+	close.Name = "Close"
+	close.AnchorPoint = Vector2.new(1, 1)
+	close.Position = UDim2.fromScale(1, 1)
+	close.AutomaticSize = Enum.AutomaticSize.X
+	close.Size = UDim2.fromOffset(0, 20)
+	close.BackgroundTransparency = 1
+	close.Parent = panel
 	panel.Parent = parent
 	return panel
 end
@@ -189,15 +188,8 @@ local function buildGui()
 	gui.DisplayOrder = 2
 	peek = buildPeek(gui)
 	batteryBar = bar("Battery", 72, gui)
+	-- The "hold breath" key shows in Hints' hidden line, under the crosshair with "get out"
 	breathBar = bar("Breath", 92, gui)
-	label({
-		Name = "Hint",
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 0, -4),
-		Size = UDim2.fromOffset(260, 16),
-		TextSize = 13,
-		Text = "Hold Jump to hold your breath",
-	}, breathBar)
 	subtitle = label({
 		Name = "Subtitle",
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -245,6 +237,11 @@ local function showLore(title: unknown, text: unknown)
 	end
 	(lorePanel:FindFirstChild("Title") :: TextLabel).Text = title;
 	(lorePanel:FindFirstChild("Body") :: TextLabel).Text = text
+	Glyphs.fill(lorePanel:FindFirstChild("Close") :: Frame, Config.Hints.LoreClose, {
+		size = 18,
+		textSize = 12,
+		color = Color3.fromRGB(35, 32, 30),
+	})
 	lorePanel.Visible = true
 end
 

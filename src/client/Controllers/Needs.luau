@@ -4,11 +4,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Net = require(ReplicatedStorage.Shared.Net)
 local NeedsLogic = require(ReplicatedStorage.Shared.Logic.Needs)
+local Glyphs = require(script.Parent.Glyphs)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 
@@ -33,7 +33,7 @@ local Needs = {}
 local gui: ScreenGui
 local bars: { [string]: Bar } = {}
 local listRows: { TextLabel } = {}
-local hintLabel: TextLabel
+local hintRow: Frame
 local feedbackLabel: TextLabel
 local feedbackUntil = 0
 local bag: { NeedsLogic.Stack } = {}
@@ -118,14 +118,11 @@ local function buildShoppingList()
 end
 
 local function buildHint()
-	hintLabel = label({
+	hintRow = frame({
 		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 24, 1, -128),
-		Size = UDim2.fromOffset(320, 14),
-		Text = "",
-		TextSize = 11,
-		TextTransparency = 0.45,
-		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.new(0, 24, 1, -126),
+		Size = UDim2.fromOffset(320, 18),
+		BackgroundTransparency = 1,
 	}, gui)
 end
 
@@ -142,14 +139,30 @@ local function buildFeedback()
 	}, gui)
 end
 
+-- The D-pad quick-use legend; keyboard and phone have no quick-use keys, so it only shows on a pad
 local function refreshHint()
 	local parts = {}
 	if device == "Gamepad" then
 		for _, entry in settings.QuickUse do
-			table.insert(parts, `[{entry.hint}] {entry.label}`)
+			table.insert(parts, "{" .. entry.action .. "} " .. entry.label)
 		end
 	end
-	hintLabel.Text = table.concat(parts, "   ")
+	Glyphs.fill(hintRow, table.concat(parts, "   "), {
+		size = 16,
+		textSize = 11,
+		color = Color3.fromRGB(150, 146, 136),
+		font = Enum.Font.GothamBold,
+	})
+end
+
+local function hasKind(kind: string): boolean
+	for _, stack in bag do
+		local use = settings.Uses[stack.id]
+		if use and use.kind == kind and stack.count > 0 then
+			return true
+		end
+	end
+	return false
 end
 
 local function readState(): NeedsLogic.State
@@ -202,12 +215,9 @@ local function showFeedback(text: unknown)
 	end
 end
 
-local function onLastInput()
-	local now = Input.lastDevice()
-	if now ~= device then
-		device = now
-		refreshHint()
-	end
+local function onLastInput(now: Input.Device)
+	device = now
+	refreshHint()
 end
 
 function Needs.Init()
@@ -239,12 +249,20 @@ function Needs.Start()
 				useRemote:FireServer(entry.kind)
 			end
 		end
-		Input.bind(entry.action, use)
+		-- D-pad down heals with whatever you have: a bandage first, else the medkit
+		local function quickUse(began: boolean)
+			if began and entry.kind == "Heal" and not hasKind("Heal") and hasKind("Medkit") then
+				useRemote:FireServer("Medkit")
+			else
+				use(began)
+			end
+		end
+		Input.bind(entry.action, quickUse)
 		Hotbar.onUse(entry.action, use)
 	end
-	device = Input.lastDevice()
+	device = Glyphs.device()
 	refreshHint()
-	UserInputService.LastInputTypeChanged:Connect(onLastInput)
+	Glyphs.onChanged(onLastInput)
 	RunService.RenderStepped:Connect(update)
 end
 

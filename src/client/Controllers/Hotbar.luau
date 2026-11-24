@@ -1,7 +1,9 @@
 -- The hotbar: what's in your bag as slots along the bottom centre, the selected one in your hands.
--- Number keys or the mouse wheel pick a slot on keyboard, Triangle / L1 step through on gamepad,
--- a tap picks one on a phone. The Fire action does what the selected item does: other controllers
--- register that with Hotbar.onUse(use, handler) and read Hotbar.selected().
+-- Number keys or the mouse wheel pick a slot on keyboard, L1 / R1 step through on gamepad, a tap
+-- picks one on a phone; the keys show as glyphs on the bar. The first slot is empty hands, where
+-- Fire grabs furniture. The Fire action does what the selected item does: other controllers
+-- register that with Hotbar.onUse(use, handler) and read Hotbar.selected(). While carrying, the
+-- pick stays on empty hands (the keys move the prop then).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -10,6 +12,8 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local HotbarLogic = require(ReplicatedStorage.Shared.Logic.Hotbar)
 local Net = require(ReplicatedStorage.Shared.Net)
 local NeedsLogic = require(ReplicatedStorage.Shared.Logic.Needs)
+local Glyphs = require(script.Parent.Glyphs)
+local Hints = require(script.Parent.Hints)
 local Input = require(script.Parent.Input)
 
 local settings = Config.Hotbar
@@ -36,6 +40,12 @@ local guns: { [string]: HotbarLogic.Gun } = {}
 local gui: ScreenGui
 local strip: Frame
 local cells: { TextButton } = {}
+local padPrevious: Frame
+local padNext: Frame
+
+local function carrying(): boolean
+	return player:GetAttribute("CarrySpeedMultiplier") ~= nil
+end
 
 -- Ties a slot's use (Fire, Eat, Flashlight, ...) to what pressing use/fire does with it.
 function Hotbar.onUse(use: string, handler: Handler)
@@ -48,6 +58,15 @@ end
 
 function Hotbar.selected(): HotbarLogic.Slot?
 	return (HotbarLogic.find(slots, selectedId))
+end
+
+-- The bar's slots in order and the raw bag, for the backpack panel
+function Hotbar.slots(): { HotbarLogic.Slot }
+	return slots
+end
+
+function Hotbar.bag(): { NeedsLogic.Stack }
+	return bag
 end
 
 local function missing(): NeedsLogic.Missing
@@ -91,12 +110,6 @@ local function cell(index: number): TextButton
 				TextSize = 12,
 				TextXAlignment = Enum.TextXAlignment.Right,
 			},
-			Key = {
-				Position = UDim2.fromOffset(5, 4),
-				Size = UDim2.new(1, -5, 0, 14),
-				TextSize = 11,
-				TextXAlignment = Enum.TextXAlignment.Left,
-			},
 		}
 	do
 		local label = Instance.new("TextLabel")
@@ -108,6 +121,12 @@ local function cell(index: number): TextButton
 			(label :: any)[key] = value
 		end
 		label.Parent = button
+	end
+	if index <= Input.SlotCount then
+		local key = Glyphs.chip(tostring(index), "Keyboard", 14)
+		key.Name = "Key"
+		key.Position = UDim2.fromOffset(4, 4)
+		key.Parent = button
 	end
 	button.Activated:Connect(function()
 		local slot = slots[index]
@@ -121,7 +140,11 @@ local function cell(index: number): TextButton
 end
 
 local function redraw()
-	local showKeys = Input.lastDevice() == "Keyboard"
+	local device = Glyphs.device()
+	local showKeys = device == "Keyboard"
+	local onPad = device == "Gamepad" and #slots > 1
+	padPrevious.Visible = onPad
+	padNext.Visible = onPad
 	for index, slot in slots do
 		local button = cell(index)
 		local selected = slot.id == selectedId
@@ -135,9 +158,10 @@ local function redraw()
 		label.TextTransparency = if selected then 0 else 0.35
 		local count = button:FindFirstChild("Count") :: TextLabel
 		count.Text = if slot.count > 1 then tostring(slot.count) else ""
-		local key = button:FindFirstChild("Key") :: TextLabel
-		key.Text = if showKeys and index <= Input.SlotCount then tostring(index) else ""
-		key.TextTransparency = 0.5
+		local key = button:FindFirstChild("Key") :: GuiObject?
+		if key then
+			key.Visible = showKeys
+		end
 	end
 	for index = #slots + 1, #cells do
 		cells[index].Visible = false
@@ -160,12 +184,28 @@ local function rebuild()
 		shownId, shownItem = selectedId, item
 		notify()
 	end
+	if #bag > 0 then
+		Hints.nudge("item", Config.Hints.ItemNudge)
+	end
+end
+
+-- Says what Fire does with the item just picked ("{Fire} Eat"); Gun shows its own for guns
+local function sayVerb()
+	local slot = Hotbar.selected()
+	local verb = slot and slot.use ~= "Fire" and settings.Verbs[slot.use]
+	if verb then
+		local word = string.upper(string.sub(verb, 1, 1)) .. string.lower(string.sub(verb, 2))
+		Hints.flash("held", string.format(Config.Hints.HeldHint, word), Config.Hints.HeldHintSeconds)
+	else
+		Hints.set("held", nil)
+	end
 end
 
 function Hotbar.select(id: string?)
-	if id and id ~= selectedId then
+	if id and id ~= selectedId and not carrying() then
 		selectedId = id
 		rebuild()
+		sayVerb()
 	end
 end
 
@@ -222,6 +262,23 @@ function Hotbar.Init()
 	layout.Padding = UDim.new(0, settings.SlotGap)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = strip
+	-- L1 / R1 chips at the ends of the bar on a gamepad
+	for index, action in { "HotbarPrevious", "HotbarNext" } do
+		local holder = Instance.new("Frame")
+		holder.Name = action
+		holder.LayoutOrder = if index == 1 then -1 else 10000
+		holder.AutomaticSize = Enum.AutomaticSize.X
+		holder.Size = UDim2.fromOffset(0, settings.SlotSize)
+		holder.BackgroundTransparency = 1
+		holder.Visible = false
+		holder.Parent = strip
+		Glyphs.fill(holder, "{" .. action .. "}", { size = 22, device = "Gamepad" })
+		if index == 1 then
+			padPrevious = holder
+		else
+			padNext = holder
+		end
+	end
 	strip.Parent = gui
 end
 
@@ -261,7 +318,7 @@ function Hotbar.Start()
 		end
 	end)
 	UserInputService.InputChanged:Connect(onWheel)
-	UserInputService.LastInputTypeChanged:Connect(redraw)
+	Glyphs.onChanged(redraw)
 	rebuild()
 	task.spawn(function()
 		while true do

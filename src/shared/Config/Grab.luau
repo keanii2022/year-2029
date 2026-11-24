@@ -11,7 +11,9 @@ return {
 
 	GridSize = 1,
 	RotateStep = 15,
-	FreeRotateSpeed = 120, -- degrees per second while the free-rotate button is held
+	FreeRotateSpeed = 90, -- degrees per second once a turn / tip key is held past RepeatDelay
+	RepeatDelay = 0.3, -- a tap steps RotateStep or WheelStep; holding keeps going smoothly
+	HoldDistanceSpeed = 6, -- studs per second while closer / farther is held
 	MaxPlaceAboveFeet = 12, -- tallest a stack can get: prop bottom above the placer's feet
 	MaxDropFall = 60,
 
@@ -31,7 +33,6 @@ return {
 	PrySounds = { "cabinet_creak", "scrape", "wardrobe_creak" },
 	PryOwnerWarning = "Someone is pulling apart your fort",
 	PryOwnerWarningCooldown = 10,
-	PryHint = "[Hold F] Pry loose",
 
 	SpawnTestProps = true,
 	TestPropsOrigin = Vector3.new(20, 0, 20),

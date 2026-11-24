@@ -9,6 +9,8 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local CuffsLogic = require(ReplicatedStorage.Shared.Logic.Cuffs)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Glyphs = require(script.Parent.Glyphs)
+local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 
@@ -23,10 +25,10 @@ local AIM_DOT = 0.6 -- how close to the camera's look a target must be to get pi
 local Cuffs = {}
 
 local gui: ScreenGui
-local hintLabel: TextLabel
 local overlay: Frame
 local timerLabel: TextLabel
-local mashLabel: TextLabel
+local mashRow: Frame
+local mashFilled = false
 local robPanel: Frame
 local robTitle: TextLabel
 local robList: Frame
@@ -64,16 +66,6 @@ local function button(props: { [string]: any }, parent: Instance): TextButton
 	return make("TextButton", props, parent)
 end
 
-local function buildHint()
-	hintLabel = text({
-		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0.5, 28),
-		Size = UDim2.fromOffset(300, 22),
-		TextSize = 16,
-		Visible = false,
-	}, gui)
-end
-
 local function buildOverlay()
 	overlay = make("Frame", {
 		Size = UDim2.fromScale(1, 1),
@@ -103,12 +95,12 @@ local function buildOverlay()
 		TextSize = 34,
 		ZIndex = 11,
 	}, overlay)
-	mashLabel = text({
+	mashRow = make("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.57),
-		Size = UDim2.fromOffset(600, 24),
-		TextSize = 18,
-		TextTransparency = 0.15,
+		Position = UDim2.fromScale(0.5, 0.565),
+		AutomaticSize = Enum.AutomaticSize.X,
+		Size = UDim2.fromOffset(0, 28),
+		BackgroundTransparency = 1,
 		ZIndex = 11,
 	}, overlay)
 	text({
@@ -247,11 +239,11 @@ end
 local function update()
 	local slot = Hotbar.selected()
 	aimedTarget = if slot and slot.item == settings.ItemId then findTarget() else nil
-	local key = if lastDevice == "Gamepad" then "Square" elseif lastDevice == "Touch" then "USE" else "E"
-	hintLabel.Visible = aimedTarget ~= nil
-	if aimedTarget then
-		hintLabel.Text = `[{key}] Cuff {aimedTarget.DisplayName}`
-	end
+	Hints.set(
+		"cuff",
+		if aimedTarget then string.format(Config.Hints.CuffHint, aimedTarget.DisplayName) else nil,
+		2
+	)
 
 	local cuffed = player:GetAttribute("Cuffed") == true
 	overlay.Visible = cuffed
@@ -259,9 +251,14 @@ local function update()
 		local untilTime = player:GetAttribute("CuffedUntil")
 		local left = if type(untilTime) == "number" then untilTime - workspace:GetServerTimeNow() else 0
 		timerLabel.Text = `{math.max(0, math.ceil(left))}`
-		mashLabel.Text = if lastDevice == "Gamepad"
-			then "Mash Cross to break free"
-			else "Mash Space to break free"
+		if not mashFilled then
+			mashFilled = true
+			Glyphs.fill(
+				mashRow,
+				Config.Hints.MashHint,
+				{ size = 26, textSize = 18, font = Enum.Font.GothamBold }
+			)
+		end
 	end
 end
 
@@ -280,7 +277,6 @@ function Cuffs.Init()
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 5
-	buildHint()
 	buildOverlay()
 	buildRobPanel()
 end
@@ -310,6 +306,9 @@ function Cuffs.Start()
 		hideOwnPrompt(player.Character)
 	end
 	gui.Parent = player:WaitForChild("PlayerGui")
+	Glyphs.onChanged(function()
+		mashFilled = false
+	end)
 	RunService.RenderStepped:Connect(update)
 end
 

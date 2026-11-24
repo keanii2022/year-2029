@@ -96,12 +96,12 @@ return {
 	},
 
 	-- Gamepad quick-use buttons in HUD order. action is the Input action that fires it (keys live in
-	-- Controllers/Input); hint is the button label shown on screen. Keyboard and phone players pick
-	-- supplies from the hotbar instead.
+	-- Controllers/Input, drawn by Glyphs); label sits beside it. Heal falls back to the medkit when
+	-- there's no bandage. Keyboard and phone players pick supplies from the hotbar instead.
 	QuickUse = {
-		{ kind = "Eat", action = "Eat", hint = "LEFT", label = "EAT" },
-		{ kind = "Drink", action = "Drink", hint = "RIGHT", label = "DRINK" },
-		{ kind = "Heal", action = "Heal", hint = "DOWN", label = "BANDAGE" },
+		{ kind = "Eat", action = "Eat", label = "EAT" },
+		{ kind = "Drink", action = "Drink", label = "DRINK" },
+		{ kind = "Heal", action = "Heal", label = "HEAL" },
 	},
 	UseCooldown = 0.3,
 
