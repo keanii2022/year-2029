@@ -2831,8 +2831,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 106017262777137,
-			textureId = 86596558772533,
 		},
 		{
 			name = "disruptor",
@@ -2889,8 +2887,6 @@ return {
 					does = "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots.",
 				},
 			},
-			assetId = 138889223319629,
-			textureId = 124673194279639,
 		},
 		{
 			name = "emp_charge",
@@ -2965,24 +2961,28 @@ return {
 					does = "The flare round. A fired flare lights an area for a while and pulls robots to it.",
 				},
 			},
-			assetId = 112578027908242,
-			textureId = 131741208023562,
 		},
 		{
 			name = "flashlight",
 			group = "gear",
-			size = { 0.831, 0.24, 0.24 },
+			size = { 0.871, 0.24, 0.24 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.003, 0.12, -0.0 },
+					center = { 0.023, 0.12, -0.0 },
 					size = { 0.825, 0.24, 0.24 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { -0.41, 0.12, -0.0 },
+					center = { -0.39, 0.12, -0.0 },
 					size = { 0.012, 0.17, 0.17 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Lens",
+					center = { -0.396, 0.12, -0.0 },
+					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -2993,8 +2993,6 @@ return {
 					does = "On or off. Seen from far away at night.",
 				},
 			},
-			assetId = 72596757265423,
-			textureId = 129378628230291,
 		},
 		{
 			name = "handcuffs",
@@ -3109,8 +3107,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 102144810785054,
-			textureId = 103549855514516,
 		},
 		{
 			name = "hiking_pack",
@@ -3225,8 +3221,6 @@ return {
 					does = "Scope lens glints. Players far away can spot it.",
 				},
 			},
-			assetId = 102830101894773,
-			textureId = 120718372931449,
 		},
 		{
 			name = "medkit",
@@ -3292,8 +3286,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 100816911723406,
-			textureId = 106851564377767,
 		},
 		{
 			name = "noise_maker",
@@ -3374,8 +3366,6 @@ return {
 					does = "The hex drum. Swings out to reload.",
 				},
 			},
-			assetId = 91581629052288,
-			textureId = 124721509166054,
 		},
 		{
 			name = "rifle",
@@ -3424,8 +3414,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 77827548145553,
-			textureId = 111407526802604,
 		},
 		{
 			name = "riot_helmet",
@@ -3530,8 +3518,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 94928714082997,
-			textureId = 75036603340008,
 		},
 		{
 			name = "smg",
@@ -3580,8 +3566,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 80751014582583,
-			textureId = 105641416382031,
 		},
 		{
 			name = "smoke_can",
@@ -3646,8 +3630,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 78842474579257,
-			textureId = 98225233382806,
 		},
 		{
 			name = "supply_locker",
@@ -6050,58 +6032,54 @@ return {
 		{
 			name = "viewmodel_arm_left",
 			group = "viewmodel",
-			size = { 0.69, 0.479, 1.868 },
+			size = { 0.69, 0.479, 1.867 },
 			parts = {
 				{
 					name = "Body",
 					center = { -0.0, 0.24, 0.0 },
-					size = { 0.69, 0.479, 1.868 },
-					pivot = { -0.061, 0.24, -0.927 },
+					size = { 0.69, 0.479, 1.867 },
+					pivot = { -0.061, 0.24, -0.928 },
 				},
 				{
 					name = "Grip",
-					center = { -0.001, 0.22, 0.673 },
+					center = { -0.001, 0.22, 0.672 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 86624302457511,
-			textureId = 92240373960797,
 		},
 		{
 			name = "viewmodel_arm_left_open",
 			group = "viewmodel",
-			size = { 0.61, 0.466, 2.065 },
+			size = { 0.606, 0.463, 2.068 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.233, 0.0 },
-					size = { 0.61, 0.466, 2.065 },
-					pivot = { 0.067, 0.227, -1.028 },
+					center = { 0.0, 0.232, -0.0 },
+					size = { 0.606, 0.463, 2.068 },
+					pivot = { 0.069, 0.224, -1.027 },
 				},
 				{
 					name = "Grip",
-					center = { 0.067, 0.347, 0.472 },
+					center = { 0.069, 0.344, 0.473 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 119131753128713,
-			textureId = 79781638174448,
 		},
 		{
 			name = "viewmodel_arm_right",
 			group = "viewmodel",
-			size = { 0.69, 0.479, 1.865 },
+			size = { 0.69, 0.479, 1.867 },
 			parts = {
 				{
 					name = "Body",
 					center = { 0.0, 0.24, 0.0 },
-					size = { 0.69, 0.479, 1.865 },
+					size = { 0.69, 0.479, 1.867 },
 					pivot = { 0.061, 0.24, -0.928 },
 				},
 				{
@@ -6113,8 +6091,6 @@ return {
 			},
 			clips = {},
 			moves = {},
-			assetId = 139904884342920,
-			textureId = 88804187510213,
 		},
 		{
 			name = "viewmodel_blaster",
@@ -6148,8 +6124,6 @@ return {
 			},
 			clips = {},
 			moves = {},
-			assetId = 79510055444853,
-			textureId = 77425345162393,
 		},
 		{
 			name = "aisle_sign_hanging",

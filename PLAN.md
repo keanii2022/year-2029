@@ -322,49 +322,49 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - By day you find chore bots busy in rooms around you. At night hunters start far away and sweep toward noise and light, with warning signs (scanner light, footsteps, hum) before they reach you. Done when a night alone builds dread instead of an instant catch.
 
 ### 18. Storage that works
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 7
 - **Scope:** `src/server/Systems/Interact.luau`, `src/server/Systems/Containers.luau`, `src/client/Controllers/Containers.luau`, `src/shared/Config/Interact.luau`, `src/shared/Logic/Container*.luau`, `tests/Container*.spec.luau`
 - Every drawer, cabinet, fridge, chest and crate holds items: open it, see what's inside, put stuff in, take stuff out. Some start with loot. Nothing you can open is just for show. Done when hiding your stash in a dresser is a real choice.
 
 ### 19. You see what you do
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 18
 - **Scope:** `src/client/Controllers/Needs.luau`, `src/client/Controllers/Interact.luau`, `src/client/Controllers/Hands.luau`, `src/shared/Config/Hands.luau`
 - First-person hands: food comes up and you take bites, drinks tip back, bandages wrap. Opening things visibly swings and slides. Text only as a small extra. Done when using anything feels physical.
 
 ### 20. Gun feel
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 4
 - **Scope:** `src/client/Controllers/Gun.luau`, `src/server/Systems/Combat.luau`, `src/shared/Config/Guns.luau`, `src/shared/Logic/Combat*.luau`, `tests/Combat*.spec.luau`
 - A bullet you see fly (short glowing streak), muzzle flash, impact sparks and dents, the blaster in your hands with recoil. Done when one shot feels punchy.
 
 ### 21. Fort raids take effort
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 3
 - **Scope:** `src/server/Systems/Grab.luau`, `src/client/Controllers/Grab.luau`, `src/shared/Config/Grab.luau`, `src/shared/Logic/Grab*.luau`, `tests/Grab*.spec.luau`
 - Pulling a piece out of someone else's fort takes a few seconds of prying and makes noise, so the owner hears it. Your own pieces stay instant. Done when raiding a fort is a commitment.
 
 ### 22. Controls for every player
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 18, 19, 20, 21
 - **Scope:** `src/client/Controllers/Input.luau`, `src/client/Controllers/TouchButtons.luau`, every controller's key binding lines only, `src/shared/Config/Supplies.luau`
 - One button map for keyboard, controller and phone. Eat and drink share the D-pad. Phone players get clean on-screen buttons for everything. Done when each device feels made for it.
 
 ### 23. A livelier warehouse
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 15, 17
 - **Scope:** `src/server/Systems/Life.luau`, `src/client/Controllers/Life.luau`, `src/shared/Config/Life.luau`, `src/shared/Logic/Life*.luau`, `tests/Life*.spec.luau`
 - Second playtest: it felt like landing in a dead game. Fill it with life even with nobody else on: chore bots out doing things where you can see them, the announcer talking, distant machinery, carts rolling, lights buzzing, things falling off shelves somewhere far off. Done when walking alone feels like the place is busy and wrong, not empty.
 
 ### 24. Daily missions
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 23
 - **Scope:** `src/server/Systems/Missions.luau`, `src/client/Controllers/Missions.luau`, `src/shared/Config/Missions.luau`, `src/shared/Logic/Missions*.luau`, `tests/Missions*.spec.luau`
 - Each morning a short list (find something, reach a certain installation, survive the night) with a reward, so there's always a reason to go explore alone. Done when a solo day has a goal.
 
 ### 25. Everything in hand
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 19, 20
 - **Scope:** `src/client/Controllers/Hotbar.luau`, `src/client/Controllers/Hands.luau`, `src/client/Controllers/Viewmodel.luau`, `src/server/Systems/Inventory.luau` (selected item only), `src/shared/Config/Hotbar.luau`, `src/shared/Logic/Hotbar*.luau`, `tests/Hotbar*.spec.luau`
 - Keani: "we need to be able to see everything in hand." A hotbar of what's in your bag (number keys / scroll, D-pad on gamepad, tap on phone): the selected item shows on the gloves in first person (food, drinks, bandage, medkit, flashlight, batteries, every gun, handcuffs), and the use button does what that item does. Guns use their Muzzle marker, two-handed guns put the left glove on the Foregrip marker, the flashlight beam comes from its Lens. Done when you can look down and always see what you're holding.
@@ -533,3 +533,4 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 4: Blaster sounds: a zap when you fire, a thump where it lands, a dry click when empty. Other players hear your shots from up to 120 studs away.
 - Playtest 2 fixes: imported models are stood upright and turned flat before placing (racks and furniture were lying on their sides); on-screen hints ("[F] Grab", the carry controls while holding, "[H] Controls" at start, "[L] Flashlight" when it gets dark) and a controls card on H; couch searching says what you found; the siren comes in 4-second blasts with 6 seconds of quiet, the siren phase is 45 seconds and it says why ("NIGHT IS COMING"); robots hum, scream when they start a chase, beep when curious; getting grabbed flashes red, clanks and says what the robot took.
 - Playtest 3 (too big): clutter islands on most open floor about every 36 studs (pallet towers, wrecked racks, furniture heaps, box piles, cart trains, oil drums, spills with tape and barriers, old checkout lanes), signs, banners, dangling lights and cable runs hanging over the cross aisles at 22-48 up, drag trails and oil blots on the floor. Empty zones are now rare clearings.
+- Steps 18-25 calls: containers hold 4-10 slots by kind, a third to half start with a little loot; bullets are warm orange streaks flying 650 studs a second with scorch marks; prying someone's fort piece is a 3s hold with noise every second and an owner warning; daily missions are 3 a morning from 6 kinds with item rewards; the livelier warehouse runs one moment every 9-22s by day (nights 0.7x), PA lines every 40-90s; the hotbar shows only what you have (flashlight, guns, food, drink, bandage, batteries, EMP, disruptor, cuffs), number keys or Triangle/L1 pick it, eat/drink/bandage on D-pad left/right/down, phone gets an on-screen cluster with a use button that names what you hold.

@@ -6095,8 +6095,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 106017262777137,
-   "textureId": 86596558772533,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6221,8 +6221,8 @@
      "does": "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots."
     }
    ],
-   "assetId": 138889223319629,
-   "textureId": 124673194279639,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6385,8 +6385,8 @@
      "does": "The flare round. A fired flare lights an area for a while and pulls robots to it."
     }
    ],
-   "assetId": 112578027908242,
-   "textureId": 131741208023562,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6397,7 +6397,7 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.831,
+    0.871,
     0.24,
     0.24
    ],
@@ -6405,7 +6405,7 @@
     {
      "name": "Body",
      "center": [
-      0.003,
+      0.023,
       0.12,
       -0.0
      ],
@@ -6423,7 +6423,7 @@
     {
      "name": "Glow",
      "center": [
-      -0.41,
+      -0.39,
       0.12,
       -0.0
      ],
@@ -6431,6 +6431,24 @@
       0.012,
       0.17,
       0.17
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Lens",
+     "center": [
+      -0.396,
+      0.12,
+      -0.0
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
      ],
      "pivot": [
       0,
@@ -6445,8 +6463,8 @@
      "does": "On or off. Seen from far away at night."
     }
    ],
-   "assetId": 72596757265423,
-   "textureId": 129378628230291,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6705,8 +6723,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 102144810785054,
-   "textureId": 103549855514516,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6965,8 +6983,8 @@
      "does": "Scope lens glints. Players far away can spot it."
     }
    ],
-   "assetId": 102830101894773,
-   "textureId": 120718372931449,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7120,8 +7138,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 100816911723406,
-   "textureId": 106851564377767,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7302,8 +7320,8 @@
      "does": "The hex drum. Swings out to reload."
     }
    ],
-   "assetId": 91581629052288,
-   "textureId": 124721509166054,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7420,8 +7438,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 77827548145553,
-   "textureId": 111407526802604,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7658,8 +7676,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 94928714082997,
-   "textureId": 75036603340008,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7776,8 +7794,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 80751014582583,
-   "textureId": 105641416382031,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7918,8 +7936,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 78842474579257,
-   "textureId": 98225233382806,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -13787,7 +13805,7 @@
    "size": [
     0.69,
     0.479,
-    1.868
+    1.867
    ],
    "parts": [
     {
@@ -13800,12 +13818,12 @@
      "size": [
       0.69,
       0.479,
-      1.868
+      1.867
      ],
      "pivot": [
       -0.061,
       0.24,
-      -0.927
+      -0.928
      ]
     },
     {
@@ -13813,7 +13831,7 @@
      "center": [
       -0.001,
       0.22,
-      0.673
+      0.672
      ],
      "size": [
       0.08,
@@ -13828,8 +13846,8 @@
     }
    ],
    "moves": [],
-   "assetId": 86624302457511,
-   "textureId": 92240373960797,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -13840,35 +13858,35 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.61,
-    0.466,
-    2.065
+    0.606,
+    0.463,
+    2.068
    ],
    "parts": [
     {
      "name": "Body",
      "center": [
       0.0,
-      0.233,
-      0.0
+      0.232,
+      -0.0
      ],
      "size": [
-      0.61,
-      0.466,
-      2.065
+      0.606,
+      0.463,
+      2.068
      ],
      "pivot": [
-      0.067,
-      0.227,
-      -1.028
+      0.069,
+      0.224,
+      -1.027
      ]
     },
     {
      "name": "Grip",
      "center": [
-      0.067,
-      0.347,
-      0.472
+      0.069,
+      0.344,
+      0.473
      ],
      "size": [
       0.08,
@@ -13883,8 +13901,8 @@
     }
    ],
    "moves": [],
-   "assetId": 119131753128713,
-   "textureId": 79781638174448,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -13897,7 +13915,7 @@
    "size": [
     0.69,
     0.479,
-    1.865
+    1.867
    ],
    "parts": [
     {
@@ -13910,7 +13928,7 @@
      "size": [
       0.69,
       0.479,
-      1.865
+      1.867
      ],
      "pivot": [
       0.061,
@@ -13938,8 +13956,8 @@
     }
    ],
    "moves": [],
-   "assetId": 139904884342920,
-   "textureId": 88804187510213,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -14029,8 +14047,8 @@
     }
    ],
    "moves": [],
-   "assetId": 79510055444853,
-   "textureId": 77425345162393,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {

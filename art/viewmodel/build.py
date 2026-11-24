@@ -34,7 +34,7 @@ def lit(color):
 
 def marker(loc):
     """Hidden 0.08 cube the game code reads for a position."""
-    return box((0.08, 0.08, 0.08), flat("#ff00ff"), loc=loc, r=0.0, n=1)
+    return box((0.08, 0.08, 0.08), flat("#34322f"), loc=loc, r=0.0, n=1)
 
 
 def bar(a, b, w, h, mat, r=0.03, extra=0.05):

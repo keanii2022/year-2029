@@ -108,7 +108,7 @@ def starter_pistol(P):
     P.add("Handle", hazard(0.2, 0.08, (0.112, 0.2, 0.6), (1, 0, 0), n=3))
     P.add("Handle", screws([(0.111, 0.08, 0.56), (0.111, -0.36, 0.56), (-0.111, 0.08, 0.56)]))
     P.add("Handle", box((0.006, 0.12, 0.05), flat("#6c6e70"), loc=(0.112, -0.32, 0.67), rot=(18, 0, 0), r=0.0, n=1))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.615, 0.61), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.615, 0.61), r=0.0, n=1))
 
 
 @item("smg", "gear")
@@ -135,8 +135,8 @@ def smg(P):
     P.add("Handle", hazard(0.26, 0.09, (0.132, 0.2, 0.56), (1, 0, 0), n=4))
     P.add("Handle", tie(0.22, 0.22, -0.48, 0.64))
     P.add("Handle", screws([(0.131, -0.32, 0.54), (0.131, 0.36, 0.7), (-0.131, -0.32, 0.54), (-0.131, 0.36, 0.7)]))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.98, 0.64), r=0.0, n=1))
-    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.64, 0.64), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.98, 0.64), r=0.0, n=1))
+    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.64, 0.64), r=0.0, n=1))
 
 
 @item("shotgun", "gear")
@@ -165,8 +165,8 @@ def shotgun(P):
     P.add("Handle", hazard(0.42, 0.08, (-0.192, -0.72, 0.68), (-1, 0, 0), n=5))
     P.add("Handle", band((0.39, 0.09, 0.23), loc=(0, -0.38, 0.72)))
     P.add("Handle", screws([(0.151, 0.4, 0.76), (-0.151, 0.4, 0.76), (0.151, -0.2, 0.76), (-0.151, -0.2, 0.76)]))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -1.3, 0.72), r=0.0, n=1))
-    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.72, 0.53), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.3, 0.72), r=0.0, n=1))
+    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.72, 0.53), r=0.0, n=1))
 
 
 @item("rifle", "gear")
@@ -197,8 +197,8 @@ def rifle(P):
     P.add("Handle", tie(0.18, 0.18, -0.45, 0.66))
     P.add("Handle", band((0.19, 0.1, 0.19), loc=(0, -1.25, 0.66)))
     P.add("Handle", screws([(0.111, -0.25, 0.7), (0.111, 0.45, 0.7), (-0.111, -0.25, 0.7), (-0.111, 0.45, 0.7)]))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -1.7, 0.66), r=0.0, n=1))
-    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.85, 0.66), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.7, 0.66), r=0.0, n=1))
+    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.85, 0.66), r=0.0, n=1))
 
 
 @item("heavy_blaster", "gear")
@@ -232,8 +232,8 @@ def heavy_blaster(P):
     P.add("Handle", box((0.46, 0.06, 0.06), plain(TEAL, grime=0.3), loc=(0, -0.6, 1.04), r=0.015, n=1))
     P.add("Handle", band((0.47, 0.1, 0.12), loc=(0, 0.45, 0.6)))
     P.add("Handle", screws([(0.231, -0.4, 0.62), (0.231, 0.5, 0.62), (-0.231, -0.4, 0.62), (-0.231, 0.5, 0.62)], r=0.024))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -1.495, 0.8), r=0.0, n=1))
-    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.78, 0.45), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.495, 0.8), r=0.0, n=1))
+    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.78, 0.45), r=0.0, n=1))
 
 
 def ammo_box(P, color, label, w=0.5, d=0.32, h=0.28):
@@ -320,7 +320,7 @@ def flashlight(P):
     P.add("Body", box((0.06, 0.07, 0.03), plain(ORANGE, grime=0.3), loc=(0, -0.08, 0.195), r=0.01, n=1))
     P.add("Body", box((0.012, 0.18, 0.025), plain(TEAL, grime=0.1), loc=(-0.081, 0.08, 0.11), r=0.004, n=1))
     P.add("Body", hazard(0.1, 0.14, (0, 0.33, 0.201), (0, 0, 1), n=2))
-    P.add("Lens", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.432, 0.11), r=0.0, n=1))
+    P.add("Lens", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.432, 0.11), r=0.0, n=1))
     for obs in P.parts.values():
         move(obs, rot=(0, 0, -90))
 
@@ -457,8 +457,8 @@ def disruptor(P):
         P.add("Glow", glowstrip(0.5, (sx * 0.151, 0.15, 0.62), "#7ff6ff"))
     P.add("Handle", hazard(0.34, 0.08, (0.152, 0.45, 0.76), (1, 0, 0), n=4))
     P.add("Handle", screws([(0.151, -0.2, 0.76), (-0.151, -0.2, 0.76), (0.151, 0.65, 0.6), (-0.151, 0.65, 0.6)]))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -1.83, 0.72), r=0.0, n=1))
-    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.56, 0.5), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.83, 0.72), r=0.0, n=1))
+    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.56, 0.5), r=0.0, n=1))
 
 @item("revolver", "gear")
 def revolver(P):
@@ -481,7 +481,7 @@ def revolver(P):
     P.add("Handle", hazard(0.16, 0.07, (0.101, 0.18, 0.6), (1, 0, 0), n=3))
     P.add("Handle", screws([(0.101, 0.0, 0.54), (-0.101, 0.0, 0.54), (0.101, 0.24, 0.68)]))
     P.add("Handle", band((0.17, 0.08, 0.17), loc=(0, -0.3, 0.68)))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.805, 0.68), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.805, 0.68), r=0.0, n=1))
 
 
 @item("marksman_rifle", "gear")
@@ -518,8 +518,8 @@ def marksman_rifle(P):
     P.add("Handle", box((0.14, 0.08, 0.08), g, loc=(0, -1.66, 0.57), r=0.015, n=1))
     P.add("Handle", hazard(0.3, 0.08, (0.101, 0.35, 0.56), (1, 0, 0), n=4))
     P.add("Handle", screws([(0.101, 0.45, 0.68), (-0.101, 0.45, 0.68)]))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -2.04, 0.66), r=0.0, n=1))
-    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -1.0, 0.64), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -2.04, 0.66), r=0.0, n=1))
+    P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.0, 0.64), r=0.0, n=1))
 
 
 @item("nail_gun", "gear")
@@ -549,7 +549,7 @@ def nail_gun(P):
     P.add("Glow", box((0.08, 0.012, 0.04), lit(NAIL), loc=(0, 0.351, 0.78), r=0.006, n=1))
     P.add("Handle", hazard(0.2, 0.07, (0.121, -0.3, 0.62), (1, 0, 0), n=3))
     P.add("Handle", words("NL", 0.07, flat("#1e1e22"), loc=(-0.123, 0.0, 0.72), rot=(0, 0, 90)))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.775, 0.62), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.775, 0.62), r=0.0, n=1))
 
 
 @item("flare_gun", "gear")
@@ -572,7 +572,7 @@ def flare_gun(P):
     for sx in (1, -1):
         P.add("Handle", hazard(0.3, 0.08, (sx * 0.121, 0.06, 0.58), (sx, 0, 0), n=4))
     P.add("Handle", screws([(0.121, 0.22, 0.74), (-0.121, 0.22, 0.74)]))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -0.665, 0.68), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.665, 0.68), r=0.0, n=1))
 
 
 @item("dart_blaster", "gear")
@@ -597,7 +597,7 @@ def dart_blaster(P):
         P.add("Glow", glowstrip(0.45, (sx * 0.081, -0.15, 0.62), DART))
     P.add("Handle", words("SHH", 0.05, flat("#2b6b5a"), loc=(0, -0.85, 0.66), rot=(0, 0, 90)))
     P.add("Handle", screws([(0.081, 0.3, 0.66), (-0.081, 0.3, 0.66)], r=0.014))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#ff00ff"), loc=(0, -1.11, 0.66), r=0.0, n=1))
+    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.11, 0.66), r=0.0, n=1))
 
 
 @item("ammo_nails", "gear")
