@@ -248,28 +248,28 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Server clock, day and night phases, lighting flip, siren, music and voice line hooks (sound ids from the manifest), flashlights. Done when the mood flips hard.
 
 ### 7. Objects come to life and sound
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 2, 3
 - **Scope:** `src/server/Systems/Interact.luau`, `src/server/Systems/Loudness.luau`, `src/client/Controllers/Interact.luau`, `src/shared/Config/Interact.luau`, `src/shared/Logic/Loudness*.luau`, `tests/Loudness*.spec.luau`
 - **Out of scope:** robots reacting to sound (step 8 reads the loudness system).
 - Press to use, hide inside, switch on and off, screens, the loudness system. Done when a boombox at your fort pulls in a stranger.
 
 ### 8. Robots
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 5, 6, 7
 - **Scope:** `src/server/Systems/Robots.luau`, `src/server/Systems/RobotGear.luau`, `src/shared/Config/Robots.luau`, `src/shared/Logic/Robot*.luau`, `tests/Robot*.spec.luau`
 - **Out of scope:** the dog, haunts.
 - Day: chore bots study in rooms, room-only sight, chase, steal your best item. Night: swap to night models, sweep the aisles, take loose stuff and players, walk to loud sounds. EMP and disruptor. Done when sneaking into a room is tense and a night is scary with no other players around.
 
 ### 9. Supplies
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 4, 5, 7
 - **Scope:** `src/server/Systems/Supplies.luau`, `src/client/Controllers/Needs.luau`, `src/shared/Config/Supplies.luau`, `src/shared/Logic/Needs*.luau`, `src/shared/Logic/Loot*.luau`, `tests/Needs*.spec.luau`, `tests/Loot*.spec.luau`
 - **Out of scope:** saving (step 14).
 - Hunger, energy, food, ammo boxes, bandages, loot by depth. Done when day has a clear shopping list.
 
 ### 10. Handcuffs
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 4
 - **Scope:** `src/server/Systems/Cuffs.luau`, `src/client/Controllers/Cuffs.luau`, `src/shared/Config/Cuffs.luau`, `src/shared/Logic/Cuffs*.luau`, `tests/Cuffs*.spec.luau`
 - Cuff, rob, break free, cooldown. Done when getting cuffed feels bad but not unfair.
@@ -287,7 +287,7 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Store rearranging, hiding inside furniture with breath holding, room sound, rain and lightning, PA lines, phones, flashlight battery, generators with fuel, lore. Done when a night alone has a plan, not just hiding.
 
 ### 13. Haunts and life
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 6, 7
 - **Scope:** `src/server/Systems/Haunts.luau`, `src/client/Controllers/Haunts.luau`, `src/shared/Config/Haunts.luau`, `src/shared/Logic/Haunt*.luau`, `tests/Haunt*.spec.luau`
 - The lost kid, pigeons, rats, moths, mannequins, greeter, cameras, story spots. Done when a player alone at night jumps at least once.
@@ -373,3 +373,16 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 5: Aisle sign numbers are random 1-99 so they can't be used to navigate. Adds to the lost feeling.
 - Step 5: About 1400 wall marks: spray 40% (RUN, HIDE, LIGHTS LIE, EXIT?, DON'T SLEEP, tallies, >>>), oil 35%, claws 10%, old posters 15%.
 - Step 5: Haze is dusty grey-tan (density 0.42).
+- Step 10: E / Square cuffs the player you're looking at ("[E] Cuff Name" hint). Having cuffs in your bag counts as holding them, since there's no item-select yet.
+- Step 10: 3-minute cooldown after being cuffed, against everyone, not just the last cuffer. Stops a crowd chain-cuffing one person.
+- Step 10: Cuffs last 20s, each mash takes 0.25s off, 5s minimum; mashing hard gets you out in about 7s. Low health = 35% or less, "behind" = roughly a 140° cone, 6-stud reach.
+- Step 10: Anyone else can uncuff with a 2s hold. Robbing takes a whole stack per click. Handcuffs item value 30.
+- Step 10: Copy: big red spray-paint "CUFFED" with a countdown, "Mash Space/Cross to break free", "Anyone else can uncuff you.", rob panel "Name's bag".
+- Step 7: Use prompt is a dark rounded pill like "E  Open" / "Square  Hide", shown through walls. Verbs: Open/Close, Turn on/off, Hide, Get out, Change channel, Next picture, Start, Buy a snack, Sit, Sit and search, Answer, Dial, Press.
+- Step 7: PRESS ME uses the lines from VOICE_LINES.md; the desk screen says "Are you still there?"; an empty vending machine says "SOLD OUT. Thank you for shopping!"
+- Step 7: TV goes off, then 6 channels with static between, then off again; loud only while on. Posters cycle the 8 clean + 4 defaced ones.
+- Step 7: Pressing a wardrobe, toy chest, bathtub or bed hides you right away, and you can't tell from outside whether it's taken. Keeps hide-and-seek tense.
+- Step 7: Sitting on a couch searches the cushions: 35% chance of 2-6 Blaster Cells, then a 5-minute cooldown for that couch. Vending machines hold 3 snacks. The phone rings every 90-240s.
+- Step 7: Lamps throw warm light (range 18), so a lit fort shows at night, like the plan says.
+- Step 7: Hearing ranges: quiet 20 for players (robots only in the same room), normal 45 / 25, loud 120 / 80.
+- Step 7: `Config.Interact.BoomboxMusicId` is empty: there's no boombox song in the pack yet, so it's your pick.
