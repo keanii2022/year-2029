@@ -370,19 +370,19 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - Keani: "we need to be able to see everything in hand." A hotbar of what's in your bag (number keys / scroll, D-pad on gamepad, tap on phone): the selected item shows on the gloves in first person (food, drinks, bandage, medkit, flashlight, batteries, every gun, handcuffs), and the use button does what that item does. Guns use their Muzzle marker, two-handed guns put the left glove on the Foregrip marker, the flashlight beam comes from its Lens. Done when you can look down and always see what you're holding.
 
 ### 26. Robots out on chores
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 17, 23
 - **Scope:** `src/server/Systems/Robots.luau`, `src/shared/Config/Robots.luau`, `src/shared/Logic/Robot*.luau`, `tests/Robot*.spec.luau`, `src/server/Systems/Life.luau`
 - By day, chore bots leave their installations on errands you can see: carrying boxes down aisles, sweeping, restocking racks, then walking home. Done when you run into robots at work without hunting for them.
 
 ### 27. Reload, medkit, psst
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 20, 25
 - **Scope:** combat, inventory items, supplies, a new Psst system (see the brief)
 - A reload moment with the mag dropping out (you're exposed for a beat), a rare medkit that heals fully over a few seconds, and Psst: a quiet whisper other players nearby hear with a direction. Done when a fight has a reload rhythm and strangers can psst each other.
 
 ### 28. The store at night, and lighter on phones
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 15, 7
 - **Scope:** a new Rearrange system, the phone handler in Interact, `default.project.json` streaming settings, a new client quality module
 - Overnight the store rearranges itself: loose junk, carts and signs move so the morning layout is different (forts and lockers stay). Night phones play breathing and a giggle or the jingle slowed down. Streaming and effects tuned so phones and slow devices keep up. Done when mornings feel different and a phone can play.
@@ -552,3 +552,4 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Playtest 2 fixes: imported models are stood upright and turned flat before placing (racks and furniture were lying on their sides); on-screen hints ("[F] Grab", the carry controls while holding, "[H] Controls" at start, "[L] Flashlight" when it gets dark) and a controls card on H; couch searching says what you found; the siren comes in 4-second blasts with 6 seconds of quiet, the siren phase is 45 seconds and it says why ("NIGHT IS COMING"); robots hum, scream when they start a chase, beep when curious; getting grabbed flashes red, clanks and says what the robot took.
 - Playtest 3 (too big): clutter islands on most open floor about every 36 studs (pallet towers, wrecked racks, furniture heaps, box piles, cart trains, oil drums, spills with tape and barriers, old checkout lanes), signs, banners, dangling lights and cable runs hanging over the cross aisles at 22-48 up, drag trails and oil blots on the floor. Empty zones are now rare clearings.
 - Steps 18-25 calls: containers hold 4-10 slots by kind, a third to half start with a little loot; bullets are warm orange streaks flying 650 studs a second with scorch marks; prying someone's fort piece is a 3s hold with noise every second and an owner warning; daily missions are 3 a morning from 6 kinds with item rewards; the livelier warehouse runs one moment every 9-22s by day (nights 0.7x), PA lines every 40-90s; the hotbar shows only what you have (flashlight, guns, food, drink, bandage, batteries, EMP, disruptor, cuffs), number keys or Triangle/L1 pick it, eat/drink/bandage on D-pad left/right/down, phone gets an on-screen cluster with a use button that names what you hold.
+- Steps 26-28 calls: up to 2 chore bots out on errands near each player (8 per server), 12-22s of work each, 24-stud sight while out; mag of 12, 1.6s reload, medkit heals fully after 4s and only drops deep; psst has a 3s cooldown and reaches 30 studs; each dawn moves a fifth of loose junk, some furniture, a third of carts and swaps a few signs; phones start on low quality.
