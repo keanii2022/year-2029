@@ -154,6 +154,7 @@ local function release(player: Player, carry: Carry, pivot: CFrame?)
 	player:SetAttribute("CarrySpeedMultiplier", nil)
 	carriers[player] = nil
 	carriedBy[carry.prop] = nil
+	carry.prop:SetAttribute("CarriedBy", nil)
 	if player.Parent then
 		stateRemote:FireClient(player, nil)
 	end
@@ -235,6 +236,7 @@ local function onGrabRequest(player: Player, prop: any)
 	player:SetAttribute("CarrySpeedMultiplier", multiplier)
 	carriers[player] = carry
 	carriedBy[prop] = player
+	prop:SetAttribute("CarriedBy", player.UserId)
 	stateRemote:FireClient(player, prop)
 end
 

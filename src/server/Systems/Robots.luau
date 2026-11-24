@@ -493,11 +493,7 @@ local function isLoose(instance: PVInstance, position: Vector3): boolean
 	if math.max(size.X, size.Y, size.Z) > settings.MaxHaulSize then
 		return false
 	end
-	-- a prop a player is carrying has collisions switched off
-	local first = if instance:IsA("BasePart")
-		then instance
-		else instance:FindFirstChildWhichIsA("BasePart", true)
-	return first ~= nil and first.CanCollide
+	return instance:GetAttribute("CarriedBy") == nil
 end
 
 local function findLoose(robot: Robot): Loose?
