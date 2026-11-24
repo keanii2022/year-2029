@@ -62,7 +62,15 @@ export type Piece = {
 	skipIfKit: string?,
 	kitFloor: string?,
 }
-export type Pocket = { kind: string, x0: number, z0: number, x1: number, z1: number, height: number }
+export type Pocket = {
+	kind: string,
+	x0: number,
+	z0: number,
+	x1: number,
+	z1: number,
+	height: number,
+	doors: { Rooms.Door }?,
+}
 export type DeptSign = { x: number, z: number, y: number, text: string }
 export type Solid = { x0: number, z0: number, x1: number, z1: number, room: boolean? }
 export type Layout = {

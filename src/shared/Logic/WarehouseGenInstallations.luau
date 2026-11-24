@@ -2359,10 +2359,15 @@ function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Piece
 	end
 	table.insert(layout.rooms, room)
 	layout.addSolid({ x0 = room.x0, x1 = room.x1, z0 = room.z0, z1 = room.z1, room = true })
-	table.insert(
-		layout.pockets,
-		{ kind = kind, x0 = hall.x0, z0 = hall.z0, x1 = hall.x1, z1 = hall.z1, height = hallHeight }
-	)
+	table.insert(layout.pockets, {
+		kind = kind,
+		x0 = hall.x0,
+		z0 = hall.z0,
+		x1 = hall.x1,
+		z1 = hall.z1,
+		height = hallHeight,
+		doors = hall.doors,
+	})
 end
 
 return Installations
