@@ -625,11 +625,78 @@ def shot_nursery():
     render("nursery")
 
 
+def shot_skyhatch():
+    """A small room of painted-sky walls; in the floor, a hatch with a ladder that opens onto more sky."""
+    hall(0.005, (0.6, 0.65, 0.75))
+    grid("floor_wood", (-16, 16), (48, 80), 0.2)
+    wall_run("wall_sky", -24, 24, 96, (0, 16))
+    side_run("wall_sky", -32, 40, 88, (0, 16), rot=90)
+    side_run("wall_sky", 32, 40, 88, (0, 16), rot=-90)
+    place("sky_hatch", (2, 64, 0.4), rot=15)
+    place("door_frame_lone", (-14, 95.2, 0.4))
+    place("giant_cloud", (14, 84, 16), scale=0.6)
+    fill((0, 68), 30, 46, 9000, (0.85, 0.92, 1.0))
+    lamp("AREA", (2, 64, 0.6), 400, (0.7, 0.85, 1.0), size=4, aim=(2, 64, 20))
+    place("robots/scout", (-10, 74, 0.4), rot=150)
+    camera((6, 34, 8.5), (0, 72, 1), lens=22)
+    render("skyhatch")
+
+
+def shot_orbdunes():
+    """Blue sand dunes indoors, a giant chrome sphere, footprints that stop halfway."""
+    hall(0.004, (0.45, 0.4, 0.6), hole=(-32, 32, 48, 112))
+    grid("sand_floor", (-32, 0, 32), (48, 80, 112), 0.0)
+    place("chrome_orb", (6, 96, 0.5))
+    lamp("AREA", (-50, 70, 30), 30000, (1.0, 0.3, 0.25), size=30, aim=(6, 96, 12))
+    lamp("AREA", (50, 110, 30), 30000, (0.3, 0.45, 1.0), size=30, aim=(6, 96, 12))
+    fill((0, 80), 40, 70, 6000, (0.75, 0.75, 1.0))
+    camera((-8, 34, 4.0), (4, 96, 14), lens=22)
+    render("orbdunes")
+
+
+def shot_waitingroom():
+    """A waiting room: blue curtains, a pink bench, a moon in the window, and a pit with steps going down into black."""
+    hall(0.005, (0.5, 0.5, 0.6), hole=(0, 0, 80, 80))
+    for x, y in ((-32, 48), (0, 48), (32, 48), (-32, 80), (32, 80), (-32, 112), (0, 112), (32, 112)):
+        place("floor_carpet_blue", (x, y, 0.0))
+    wall_run("wall_pastel", -40, 40, 120, (0, 16))
+    side_run("wall_pastel", -48, 40, 112, (0, 16), rot=90)
+    side_run("wall_pastel", 48, 40, 112, (0, 16), rot=-90)
+    place("curtains", (-26, 119.2, 2))
+    place("curtains", (26, 119.2, 2))
+    place("moon_window", (-26, 119.4, 9))
+    place("pink_bench", (-44, 70, 0.2), rot=90)
+    place("pink_bench", (-44, 92, 0.2), rot=90)
+    place("stairs_down", (0, 80, -10))
+    fill((0, 80), 30, 70, 8000, (0.8, 0.82, 1.0))
+    lamp("SPOT", (-26, 112, 12), 1500, (0.7, 0.8, 1.0), size=1, aim=(-10, 80, 0), spot=60)
+    camera((12, 40, 8), (-4, 96, 2), lens=22)
+    render("waitingroom")
+
+
+def shot_stairsnowhere():
+    """Overgrown concrete steps on fake grass at dusk, climbing to a door frame standing in mid air."""
+    wipe()
+    world((0.02, 0.02, 0.05), 0.006, (0.45, 0.4, 0.55))
+    floor_strip(["floor_tile", "floor_cracked"], range(-96, 128, 32), range(-48, 208, 32))
+    grid("turf_tile", (-32, 0, 32), (48, 80, 112))
+    wall_run("wall_sky", -56, 56, 132, (0, 16, 32))
+    place("stairs_nowhere", (0, 84, 0.7))
+    place("door_frame_lone", (0, 90.6, 6.7))
+    for x, y in ((-5, 80), (4, 78), (-3, 92), (6, 94)):
+        place("story/weeds", (x, y, 0.7), rot=x * 20)
+    lamp("SPOT", (60, 40, 12), 30000, (1.0, 0.5, 0.25), size=2, aim=(0, 88, 3), spot=40)
+    fill((0, 90), 40, 80, 9000, (0.5, 0.55, 1.0))
+    camera((-14, 50, 5.0), (0, 90, 6), lens=24)
+    render("stairsnowhere")
+
+
 SHOTS = {"aisle": shot_aisle, "installation": shot_installation, "pillar": shot_pillar, "culdesac": shot_culdesac,
          "pool": shot_pool, "courtyard": shot_courtyard, "catwalk": shot_catwalk, "blacksun": shot_blacksun, "mall": shot_mall,
          "party": shot_party, "office": shot_office, "basement": shot_basement, "library": shot_library,
          "nightlot": shot_nightlot, "softplay": shot_softplay, "monolith": shot_monolith, "grandma": shot_grandma,
-         "maze": shot_maze, "playground": shot_playground, "nursery": shot_nursery}
+         "maze": shot_maze, "playground": shot_playground, "nursery": shot_nursery,
+         "skyhatch": shot_skyhatch, "orbdunes": shot_orbdunes, "waitingroom": shot_waitingroom, "stairsnowhere": shot_stairsnowhere}
 for name in WANT:
     if name in SHOTS:
         SHOTS[name]()
