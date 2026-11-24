@@ -255,7 +255,7 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Press to use, hide inside, switch on and off, screens, the loudness system. Done when a boombox at your fort pulls in a stranger.
 
 ### 8. Robots
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 5, 6, 7
 - **Scope:** `src/server/Systems/Robots.luau`, `src/server/Systems/RobotGear.luau`, `src/shared/Config/Robots.luau`, `src/shared/Logic/Robot*.luau`, `tests/Robot*.spec.luau`
 - **Out of scope:** the dog, haunts.
@@ -275,13 +275,13 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Cuff, rob, break free, cooldown. Done when getting cuffed feels bad but not unfair.
 
 ### 11. The dog
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 4, 8, 9
 - **Scope:** `src/server/Systems/Dog.luau`, `src/shared/Config/Dog.luau`, `src/shared/Logic/Dog*.luau`, `tests/Dog*.spec.luau`
 - Spawn, trust over visits with food, follow, guard, bark, bite. Done when finding one feels like a big deal.
 
 ### 12. Night tricks
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 6, 7, 8
 - **Scope:** `src/server/Systems/NightTricks.luau`, `src/client/Controllers/NightTricks.luau`, `src/shared/Config/NightTricks.luau`, `src/shared/Logic/NightTricks*.luau`, `tests/NightTricks*.spec.luau`
 - Store rearranging, hiding inside furniture with breath holding, room sound, rain and lightning, PA lines, phones, flashlight battery, generators with fuel, lore. Done when a night alone has a plan, not just hiding.
@@ -400,3 +400,14 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 13: Security cams on pillars 16 studs up with a red glow. Mannequin poses: stand, reach, point, crouch, look back, hug.
 - Step 13: Counts: 12 camps, 10 drawing walls, 25 leaks, 15 skylights, 40 weed patches, 30 pigeon flocks, 30 rat nests, moths at 30 lamps, 40 cams.
 - Step 13: Scare odds when alone at night are about 35% a minute (10% of that by day, 40% during the siren), with at least 75s between scares.
+- Step 8: Room to bot: kitchen = cook; living/office/arcade/store = carrier; bedroom/kids/bathroom = cleaner.
+- Step 8: Speeds: chore bots walk 8, chase 17-18; hunters 17-21 (crawler fastest). Sprinting at 22 outruns all of them, but not for long on an empty energy bar.
+- Step 8: Sight: chore 34 studs, scout 70, brute 45, crawler 40, 110° cone. Crouch halves it, sprinting +20%, night +20%. Noticing you takes ~1.2s by day, ~0.35s at night.
+- Step 8: Chases give up 4s after losing you; day chases stay within 120 studs of home.
+- Step 8: Caught by day: your best item's whole stack goes into a dark metal crate on a shelf in that room ("Take" prompt, quiet sound), and the robot ignores you for 8s. Caught at night = going down.
+- Step 8: Footsteps carry 12 studs walking, 30 sprinting, 0 crouched; gunshots are loud. A flashlight on a robot at night gives you away. A hunter at a sound has a 40% chance to open a hiding spot within 10 studs.
+- Step 8: Rooms wake within 220 studs of a player; max 12 chore bots + 8 hunters live at once.
+- Step 8: EMP: G, thrown 45 studs, 22-stud radius, robots off for 8s, loud pop. Disruptor: V, 60-stud range, 45s cooldown, destroys one robot.
+- Step 8: A destroyed robot leaves a wreck, a black oil puddle and sparks; its room's loot spills out and the destroyer gets 2 EMP charges.
+- Step 8: Eyes are pale cyan by day, dim flickering red when stalled, bright red at night with a red scanner light. "ERROR. NEEDS MORE TRAINING." is on-screen text until you record it.
+- Gamepad map after merging: D-pad up flashlight, D-pad down EMP, D-pad right disruptor, D-pad left eat, L1 drink, touchpad bandage. Every button gets one job (Grab takes the D-pad and L1 only while carrying).
