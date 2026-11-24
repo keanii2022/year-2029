@@ -93,7 +93,7 @@ return {
 		Bandage = { kind = "Heal", health = 35, time = 3, loudness = "quiet", sound = "tape_rip" },
 	},
 
-	-- Quick-use buttons in HUD order; hints are the keyboard and gamepad labels shown on screen. Gamepad buttons only work while not carrying (Grab uses D-pad and L1 then). D-pad up/down/right belong to flashlight, EMP and disruptor.
+	-- Quick-use buttons in HUD order; hints are the keyboard and gamepad labels shown on screen. Gamepad buttons only work while not carrying (Grab uses D-pad and L1 then). D-pad up/down/right belong to flashlight, EMP and disruptor; touchpad opens your record.
 	QuickUse = {
 		{
 			kind = "Eat",
@@ -112,8 +112,8 @@ return {
 		{
 			kind = "Heal",
 			key = Enum.KeyCode.Three,
-			pad = Enum.KeyCode.ButtonSelect,
-			hints = { "3", "PAD" },
+			pad = Enum.KeyCode.ButtonY,
+			hints = { "3", "TRIANGLE" },
 			label = "BANDAGE",
 		},
 	},

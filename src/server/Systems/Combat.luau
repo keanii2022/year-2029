@@ -8,6 +8,7 @@ local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Inventory = require(script.Parent.Inventory)
+local Scores = require(script.Parent.Scores)
 
 local settings = Config.Guns
 
@@ -111,7 +112,11 @@ local function onFire(player: Player, origin: any, direction: any)
 		if target and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
 			targetHumanoid:TakeDamage(CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude))
 			hitPlayer = true
-			hitRemote:FireClient(player, targetHumanoid.Health <= 0)
+			local downed = targetHumanoid.Health <= 0
+			if downed then
+				Scores.add(player, "PlayerKills", 1)
+			end
+			hitRemote:FireClient(player, downed)
 		end
 	end
 	fxRemote:FireAllClients(player, origin, hitPosition, hitNormal, hitPlayer)

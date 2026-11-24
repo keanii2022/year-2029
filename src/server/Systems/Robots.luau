@@ -23,6 +23,7 @@ local DayNight = require(script.Parent.DayNight)
 local Interact = require(script.Parent.Interact)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
+local Scores = require(script.Parent.Scores)
 local Warehouse = require(script.Parent.Warehouse)
 
 local settings = Config.Robots
@@ -1141,6 +1142,9 @@ function Robots.destroy(robot: Robot, byPlayer: Player?)
 		return
 	end
 	local position = robot.position
+	if byPlayer then
+		Scores.add(byPlayer, "RobotKills", 1)
+	end
 	despawn(robot)
 	wreck(position)
 	Loudness.emit(position, "loud", stashFolder)
