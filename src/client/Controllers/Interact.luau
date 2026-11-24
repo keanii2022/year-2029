@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Hands = require(script.Parent.Hands)
 local Input = require(script.Parent.Input)
 local InteractKinds = require(ReplicatedStorage.Shared.Logic.InteractKinds)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -117,6 +118,7 @@ function Interact.Init()
 			useRemote:FireServer(nil, nil)
 		elseif target and targetPart then
 			useRemote:FireServer(target, targetPart.Name)
+			Hands.reach(targetPart.Position)
 		end
 	end)
 end
