@@ -93,12 +93,13 @@ return {
 		Bandage = { kind = "Heal", health = 35, time = 3, loudness = "quiet", sound = "tape_rip" },
 	},
 
-	-- Quick-use buttons in HUD order. action is the Input action that fires it (keys live in
-	-- Controllers/Input); hints are the keyboard and gamepad labels shown on screen.
+	-- Gamepad quick-use buttons in HUD order. action is the Input action that fires it (keys live in
+	-- Controllers/Input); hint is the button label shown on screen. Keyboard and phone players pick
+	-- supplies from the hotbar instead.
 	QuickUse = {
-		{ kind = "Eat", action = "Eat", hints = { "1", "LEFT" }, label = "EAT" },
-		{ kind = "Drink", action = "Drink", hints = { "2", "RIGHT" }, label = "DRINK" },
-		{ kind = "Heal", action = "Heal", hints = { "3", "DOWN" }, label = "BANDAGE" },
+		{ kind = "Eat", action = "Eat", hint = "LEFT", label = "EAT" },
+		{ kind = "Drink", action = "Drink", hint = "RIGHT", label = "DRINK" },
+		{ kind = "Heal", action = "Heal", hint = "DOWN", label = "BANDAGE" },
 	},
 	UseCooldown = 0.3,
 

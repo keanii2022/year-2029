@@ -188,8 +188,8 @@ local function buildGui()
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 2
 	peek = buildPeek(gui)
-	batteryBar = bar("Battery", 24, gui)
-	breathBar = bar("Breath", 44, gui)
+	batteryBar = bar("Battery", 72, gui)
+	breathBar = bar("Breath", 92, gui)
 	label({
 		Name = "Hint",
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -201,7 +201,7 @@ local function buildGui()
 	subtitle = label({
 		Name = "Subtitle",
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -110),
+		Position = UDim2.new(0.5, 0, 1, -150),
 		Size = UDim2.new(0.6, 0, 0, 24),
 		TextSize = 18,
 		TextWrapped = true,
@@ -210,7 +210,7 @@ local function buildGui()
 	note = label({
 		Name = "Note",
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -70),
+		Position = UDim2.new(0.5, 0, 1, -122),
 		Size = UDim2.new(0.5, 0, 0, 20),
 		TextSize = 15,
 		Visible = false,

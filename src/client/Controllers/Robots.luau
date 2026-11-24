@@ -10,6 +10,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Hints = require(script.Parent.Hints)
+local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 
 local settings = Config.Robots
@@ -203,8 +204,10 @@ end
 function Robots.Start()
 	Net.event("RobotCaught").OnClientEvent:Connect(caught)
 	gearRemote = Net.event("RobotGear")
-	Input.bind("Emp", useGear("Emp"))
-	Input.bind("Disruptor", useGear("Disruptor"))
+	for _, gear in { "Emp", "Disruptor" } do
+		Input.bind(gear, useGear(gear))
+		Hotbar.onUse(gear, useGear(gear))
+	end
 
 	task.spawn(function()
 		local folder = workspace:WaitForChild("Robots")

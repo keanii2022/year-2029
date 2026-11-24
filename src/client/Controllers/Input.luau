@@ -18,7 +18,7 @@ local player = Players.LocalPlayer
 
 local Input = {}
 
-Input.Actions = table.freeze({
+local actions: { [string]: Binding } = {
 	Sprint = { keyboard = Enum.KeyCode.LeftShift, gamepad = Enum.KeyCode.ButtonL3 }, -- L3
 	Crouch = { keyboard = Enum.KeyCode.C, gamepad = Enum.KeyCode.ButtonR3 }, -- R3
 	Jump = { keyboard = Enum.KeyCode.Space, gamepad = Enum.KeyCode.ButtonA }, -- Cross
@@ -36,14 +36,35 @@ Input.Actions = table.freeze({
 		freeHandsOnPad = true,
 	}, -- L2
 	Flashlight = { keyboard = Enum.KeyCode.L, gamepad = Enum.KeyCode.DPadUp, freeHandsOnPad = true },
-	Eat = { keyboard = Enum.KeyCode.One, gamepad = Enum.KeyCode.DPadLeft, freeHandsOnPad = true },
-	Drink = { keyboard = Enum.KeyCode.Two, gamepad = Enum.KeyCode.DPadRight, freeHandsOnPad = true },
-	Heal = { keyboard = Enum.KeyCode.Three, gamepad = Enum.KeyCode.DPadDown, freeHandsOnPad = true },
-	Emp = { keyboard = Enum.KeyCode.G, gamepad = Enum.KeyCode.ButtonY, freeHandsOnPad = true }, -- Triangle
-	Disruptor = { keyboard = Enum.KeyCode.V, gamepad = Enum.KeyCode.ButtonL1, freeHandsOnPad = true }, -- L1
+	-- Quick use on the gamepad; keyboard and phone pick these from the hotbar instead
+	Eat = { gamepad = Enum.KeyCode.DPadLeft, freeHandsOnPad = true },
+	Drink = { gamepad = Enum.KeyCode.DPadRight, freeHandsOnPad = true },
+	Heal = { gamepad = Enum.KeyCode.DPadDown, freeHandsOnPad = true },
+	-- Shortcuts on the keyboard; the gamepad and phone throw these from the hotbar
+	Emp = { keyboard = Enum.KeyCode.G },
+	Disruptor = { keyboard = Enum.KeyCode.V },
+	HotbarNext = { gamepad = Enum.KeyCode.ButtonY, freeHandsOnPad = true }, -- Triangle
+	HotbarPrevious = { gamepad = Enum.KeyCode.ButtonL1, freeHandsOnPad = true }, -- L1
 	Record = { keyboard = Enum.KeyCode.M, gamepad = Enum.KeyCode.ButtonSelect }, -- touchpad
 	Controls = { keyboard = Enum.KeyCode.H },
-} :: { [string]: Binding })
+}
+-- Number keys pick hotbar slots (Slot1 .. Slot9); the mouse wheel is read by Hotbar itself.
+local NUMBER_KEYS = {
+	Enum.KeyCode.One,
+	Enum.KeyCode.Two,
+	Enum.KeyCode.Three,
+	Enum.KeyCode.Four,
+	Enum.KeyCode.Five,
+	Enum.KeyCode.Six,
+	Enum.KeyCode.Seven,
+	Enum.KeyCode.Eight,
+	Enum.KeyCode.Nine,
+}
+for number, key in NUMBER_KEYS do
+	actions[`Slot{number}`] = { keyboard = key }
+end
+Input.Actions = table.freeze(actions)
+Input.SlotCount = #NUMBER_KEYS
 
 type Listener = (began: boolean, device: Device) -> ()
 

@@ -1,5 +1,6 @@
 -- Hunger and energy bars above the health bar, the supplies shopping list, the quick-use actions
--- (Eat, Drink, Heal in Input) and short feedback text. Same look as Hud.
+-- (gamepad D-pad, or the hotbar's food, drink and bandage slots) and short feedback text. Same
+-- look as Hud.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -8,6 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Net = require(ReplicatedStorage.Shared.Net)
 local NeedsLogic = require(ReplicatedStorage.Shared.Logic.Needs)
+local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 
 local settings = Config.Supplies
@@ -130,7 +132,7 @@ end
 local function buildFeedback()
 	feedbackLabel = label({
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -110),
+		Position = UDim2.new(0.5, 0, 1, -150),
 		Size = UDim2.fromOffset(400, 18),
 		Text = "",
 		TextSize = 14, -- the hands show what's happening; this is just a quiet caption
@@ -142,9 +144,9 @@ end
 
 local function refreshHint()
 	local parts = {}
-	if device ~= "Touch" then
+	if device == "Gamepad" then
 		for _, entry in settings.QuickUse do
-			table.insert(parts, `[{entry.hints[if device == "Gamepad" then 2 else 1]}] {entry.label}`)
+			table.insert(parts, `[{entry.hint}] {entry.label}`)
 		end
 	end
 	hintLabel.Text = table.concat(parts, "   ")
@@ -232,11 +234,13 @@ function Needs.Start()
 	Net.event("InventorySync"):FireServer()
 
 	for _, entry in settings.QuickUse do
-		Input.bind(entry.action, function(began)
+		local function use(began: boolean)
 			if began then
 				useRemote:FireServer(entry.kind)
 			end
-		end)
+		end
+		Input.bind(entry.action, use)
+		Hotbar.onUse(entry.action, use)
 	end
 	device = Input.lastDevice()
 	refreshHint()

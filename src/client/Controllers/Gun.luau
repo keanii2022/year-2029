@@ -14,6 +14,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 local Viewmodel = require(script.Parent.Viewmodel)
 
@@ -46,11 +47,14 @@ type Bullet = {
 local bullets: { Bullet } = {}
 local scorches: { BasePart } = {}
 
+-- The gun in hand: whichever gun slot is selected on the hotbar.
 local function currentGun(): (string?, CombatLogic.Gun?)
-	local id = CombatLogic.pickGun(settings.Blasters, function(gunId)
-		return (carried[gunId] or 0) > 0
-	end)
-	return id, id and settings.Blasters[id]
+	local slot = Hotbar.selected()
+	local id = slot and slot.use == "Fire" and slot.item
+	if not id or not settings.Blasters[id] or (carried[id] or 0) <= 0 then
+		return nil, nil
+	end
+	return id, settings.Blasters[id]
 end
 
 -- Ammo for the gun in hand, or nil when holding no gun.
@@ -68,7 +72,9 @@ function Gun.onHit(listener: (down: boolean) -> ())
 end
 
 local function notifyChanged()
-	Viewmodel.setArmed(Gun.getAmmo() ~= nil)
+	local id = currentGun()
+	local look = id and Config.Hotbar.Guns[id]
+	Viewmodel.setArmed(if id then (look and look.model or id) else nil)
 	for _, listener in changedListeners do
 		task.spawn(listener)
 	end
@@ -451,7 +457,8 @@ function Gun.Start()
 		end
 	)
 
-	Input.bind("Fire", onFire)
+	Hotbar.onUse("Fire", onFire)
+	Hotbar.onChanged(notifyChanged)
 	RunService:BindToRenderStep("GunAimRestore", Enum.RenderPriority.Camera.Value, restoreFieldOfView)
 	RunService:BindToRenderStep("GunAim", Enum.RenderPriority.Camera.Value + 2, applyAim)
 	RunService.RenderStepped:Connect(moveBullets)

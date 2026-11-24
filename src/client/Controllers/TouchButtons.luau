@@ -1,10 +1,15 @@
 -- On-screen buttons for phone players, shown only while the last input was a touch. Each button
 -- presses an Input action, so a tap does exactly what the key or gamepad button does. Roblox's own
 -- thumbstick and jump button stay; the jump button also presses the Jump action (breath, mash).
+-- Supplies and gear are picked by tapping the hotbar; the big button then does what's in hand and
+-- says so (FIRE, EAT, THROW, ...).
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
+local Config = require(ReplicatedStorage.Shared.Config)
 local Hints = require(script.Parent.Hints)
+local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 
 local player = Players.LocalPlayer
@@ -84,7 +89,6 @@ local BUTTONS: { Spec } = {
 		position = UDim2.new(1, -96, 1, -308),
 	},
 	{
-		label = "EAT",
 		action = "Eat",
 		mode = "tap",
 		size = 52,
@@ -92,7 +96,6 @@ local BUTTONS: { Spec } = {
 		position = UDim2.new(0.5, -120, 1, -24),
 	},
 	{
-		label = "DRINK",
 		action = "Drink",
 		mode = "tap",
 		size = 52,
@@ -100,7 +103,6 @@ local BUTTONS: { Spec } = {
 		position = UDim2.new(0.5, -60, 1, -24),
 	},
 	{
-		label = "BANDAGE",
 		action = "Heal",
 		mode = "tap",
 		size = 52,
@@ -108,7 +110,6 @@ local BUTTONS: { Spec } = {
 		position = UDim2.new(0.5, 0, 1, -24),
 	},
 	{
-		label = "EMP",
 		action = "Emp",
 		mode = "tap",
 		size = 52,
@@ -116,7 +117,6 @@ local BUTTONS: { Spec } = {
 		position = UDim2.new(0.5, 60, 1, -24),
 	},
 	{
-		label = "ZAP",
 		action = "Disruptor",
 		mode = "tap",
 		size = 52,
@@ -236,6 +236,14 @@ local function hookJump(descendant: Instance)
 	end)
 end
 
+local function relabelFire()
+	local fire = gui:FindFirstChild("FIRE") :: TextButton?
+	local slot = Hotbar.selected()
+	if fire then
+		fire.Text = if slot then Config.Hotbar.Verbs[slot.use] or "USE" else "FIRE"
+	end
+end
+
 local function refresh()
 	local onTouch = Input.lastDevice() == "Touch"
 	if gui.Enabled and not onTouch then
@@ -267,6 +275,8 @@ function TouchButtons.Start()
 		hookJump(descendant)
 	end
 	player.CharacterAdded:Connect(releaseToggles)
+	Hotbar.onChanged(relabelFire)
+	relabelFire()
 	UserInputService.LastInputTypeChanged:Connect(refresh)
 	refresh()
 end

@@ -2,6 +2,8 @@
 -- wrapped, boxes get pulled open, and pressing use reaches out with the left hand. Driven by the
 -- server's "UsingSupply" attribute (the item id being used), with a progress ring round the
 -- crosshair. Sets the local "HandsBusy" attribute while the hands are up.
+-- Between uses they hold whatever is selected on the hotbar: the gloves on a gun's Grip and
+-- Foregrip, or the item in the right hand.
 -- Uses the uploaded arm and item models once the server copies them into
 -- ReplicatedStorage.Viewmodels, otherwise stand-ins built from plain parts.
 local Players = game:GetService("Players")
@@ -10,16 +12,23 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local HandsLogic = require(ReplicatedStorage.Shared.Logic.Hands)
+local Hotbar = require(script.Parent.Hotbar)
+local Viewmodel = require(script.Parent.Viewmodel)
 
 local settings = Config.Hands
+local hotbarSettings = Config.Hotbar
 local uses = Config.Supplies.Uses
 local player = Players.LocalPlayer
 
 local TEXT = Color3.fromRGB(225, 222, 215)
 local LEFT_KINDS = { Heal = "LeftOpen", Open = "Left" }
+local MARKERS = { "Lens", "Grip", "Muzzle", "Foregrip" }
 
 type Arm = { model: Model, offset: CFrame, length: number, uploaded: boolean }
-type Item = { model: Model, centre: CFrame, baseScale: number, crumbs: Color3? }
+-- tip: the item's Lens marker, which also points it forward
+type Item =
+	{ model: Model, centre: CFrame, baseScale: number, crumbs: Color3?, offset: CFrame, tip: BasePart? }
+type Holding = { itemId: string, item: Item, since: number, shown: boolean }
 type Action = {
 	kind: string,
 	started: number,
@@ -32,6 +41,7 @@ local Hands = {}
 
 local arms: { [string]: Arm } = {}
 local action: Action? = nil
+local holding: Holding? = nil
 local reachStarted = -math.huge
 local reachDirection = Vector3.new(0, 0, -1)
 local crumbPart: Part
@@ -186,7 +196,10 @@ local function buildStandInItem(look: { [string]: any }): Model
 end
 
 local function heldItem(itemId: string, kind: string): Item
-	local look = settings.Items[itemId] or settings.Fallback[kind] or settings.Fallback.Eat
+	local look = settings.Items[itemId]
+		or hotbarSettings.Held[itemId]
+		or settings.Fallback[kind]
+		or settings.Fallback.Eat
 	local model = template(look.model)
 	if model then
 		for _, part in model:GetDescendants() do
@@ -205,11 +218,28 @@ local function heldItem(itemId: string, kind: string): Item
 	end
 	local held = model :: Model
 	local box = held:GetBoundingBox()
+	local centre = box:ToObjectSpace(held:GetPivot())
+	for _, name in MARKERS do
+		local marker = held:FindFirstChild(name, true)
+		if marker and marker:IsA("BasePart") then
+			marker.Transparency = 1
+		end
+	end
+	local lens = held:FindFirstChild("Lens", true)
+	local tip = if lens and lens:IsA("BasePart") then lens else nil
+	if tip then
+		local forward = box:VectorToObjectSpace(tip.Position - box.Position)
+		if forward.Magnitude > 0.01 then
+			centre = CFrame.lookAt(Vector3.zero, forward):Inverse() * centre
+		end
+	end
 	return {
 		model = held,
-		centre = box:ToObjectSpace(held:GetPivot()),
+		centre = centre,
 		baseScale = held:GetScale(),
 		crumbs = look.crumbs,
+		offset = look.offset or settings.ItemOffset,
+		tip = tip,
 	}
 end
 
@@ -219,14 +249,23 @@ local function poseFrame(camera: Camera, pose: HandsLogic.Pose): CFrame
 		* CFrame.Angles(math.rad(pose.pitch), math.rad(pose.yaw), math.rad(pose.roll))
 end
 
-local function placeArm(camera: Camera, slot: string, side: string, pose: HandsLogic.Pose): CFrame
-	local hand = poseFrame(camera, pose)
+local function placeArmAt(camera: Camera, slot: string, side: string, hand: CFrame)
 	local chosen = arm(slot)
 	local tilt = settings.ArmTilt[side]
 	local forearm = hand * CFrame.Angles(math.rad(tilt.pitch), math.rad(tilt.yaw), 0)
 	chosen.model:PivotTo(forearm * CFrame.new(0, 0, chosen.length) * chosen.offset)
 	chosen.model.Parent = camera
+end
+
+local function placeArm(camera: Camera, slot: string, side: string, pose: HandsLogic.Pose): CFrame
+	local hand = poseFrame(camera, pose)
+	placeArmAt(camera, slot, side, hand)
 	return hand
+end
+
+-- A glove on a gun marker, facing the way the camera looks
+local function onMarker(camera: Camera, marker: CFrame): CFrame
+	return CFrame.new(marker.Position) * camera.CFrame.Rotation
 end
 
 local function hideArms(except: { [string]: boolean })
@@ -249,6 +288,32 @@ end
 
 local function itemScale(item: Item): number
 	return item.model:GetScale() / item.baseScale
+end
+
+local function heldFor(itemId: string): Holding
+	local current = holding
+	if current and current.itemId == itemId then
+		return current
+	end
+	if current then
+		current.item.model:Destroy()
+	end
+	local use = uses[itemId]
+	local fresh = {
+		itemId = itemId,
+		item = heldItem(itemId, if use then use.kind else "Eat"),
+		since = 0,
+		shown = false,
+	}
+	holding = fresh
+	return fresh
+end
+
+local function hideHeld()
+	if holding then
+		holding.item.model.Parent = nil
+		holding.shown = false
+	end
 end
 
 local function endAction()
@@ -309,6 +374,7 @@ local function update()
 	if not camera or not humanoid or humanoid.Health <= 0 then
 		endAction()
 		hideArms({})
+		hideHeld()
 		ringGui.Enabled = false
 		setBusy(false)
 		return
@@ -346,12 +412,43 @@ local function update()
 			current.lastT = t
 			local scale = itemScale(item)
 			local centre = CFrame.new(item.centre.Position * scale) * item.centre.Rotation
-			local itemFrame = hand * settings.ItemOffset
+			local itemFrame = hand * item.offset
 			item.model:PivotTo(itemFrame * centre)
 			item.model.Parent = camera
 			crumbPart.CFrame = itemFrame
 			crumbPart.Parent = camera
 		end
+	end
+
+	local slot = Hotbar.selected()
+	local handsFree = not current
+		and player:GetAttribute("CarrySpeedMultiplier") == nil
+		and player:GetAttribute("Cuffed") ~= true
+	local foregrip: CFrame? = nil
+	local held: Holding? = nil
+	if handsFree and slot and slot.use == "Fire" then
+		local grip
+		grip, foregrip = Viewmodel.grips()
+		if grip then
+			placeArmAt(camera, "Right", "Right", onMarker(camera, grip))
+			shown.Right = true
+		end
+	elseif handsFree and slot and slot.item then
+		held = heldFor(slot.item)
+	end
+	if held then
+		if not held.shown then
+			held.since = now
+			held.shown = true
+		end
+		local raise = HandsLogic.smooth(math.clamp((now - held.since) / hotbarSettings.SwapTime, 0, 1))
+		local hand =
+			placeArm(camera, "Right", "Right", HandsLogic.lerp(settings.Rest, hotbarSettings.HoldPose, raise))
+		shown.Right = true
+		held.item.model:PivotTo(hand * held.item.offset * held.item.centre)
+		held.item.model.Parent = camera
+	else
+		hideHeld()
 	end
 
 	local sinceReach = now - reachStarted
@@ -375,11 +472,25 @@ local function update()
 		)
 		placeArm(camera, "LeftOpen", "Left", pose)
 		shown.LeftOpen = true
+	elseif foregrip then
+		placeArmAt(camera, "Left", "Left", onMarker(camera, foregrip))
+		shown.Left = true
 	end
 
 	hideArms(shown)
 	updateRing()
 	setBusy(current ~= nil or reaching)
+end
+
+-- Where a flashlight beam leaves the held item, facing where you look; nil when nothing held has
+-- a Lens marker.
+function Hands.lensFrame(): CFrame?
+	local camera = workspace.CurrentCamera
+	local item = holding and holding.shown and holding.item
+	if not camera or not item or not item.tip then
+		return nil
+	end
+	return CFrame.lookAt(item.tip.Position, item.tip.Position + camera.CFrame.LookVector)
 end
 
 -- Interact calls this on a use press: a quick left-hand reach toward what's being used.
