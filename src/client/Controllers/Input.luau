@@ -24,6 +24,8 @@ local actions: { [string]: Binding } = {
 	Jump = { keyboard = Enum.KeyCode.Space, gamepad = Enum.KeyCode.ButtonA }, -- Cross
 	Psst = { keyboard = Enum.KeyCode.Q, gamepad = Enum.KeyCode.ButtonB }, -- Circle
 	Use = { keyboard = Enum.KeyCode.E, gamepad = Enum.KeyCode.ButtonX }, -- Square
+	-- On a gamepad Gun reloads from Square (Use) when there's nothing to use; R turns a carried prop
+	Reload = { keyboard = Enum.KeyCode.R },
 	Grab = { keyboard = Enum.KeyCode.F, gamepad = Enum.KeyCode.ButtonR1 }, -- R1
 	Fire = {
 		keyboard = Enum.UserInputType.MouseButton1,

@@ -2,11 +2,14 @@
 -- on each shot, and drops out of view while carrying a prop or when no gun is selected.
 -- Uses the gun's uploaded viewmodel once the server copies it into ReplicatedStorage.Viewmodels,
 -- otherwise a stand-in built from plain parts. Hands puts the gloves on its Grip and Foregrip.
+-- On reload it dips and its Mag part (a small block on the stand-in) drops out and fades.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local CombatFeel = require(ReplicatedStorage.Shared.Logic.CombatFeel)
+local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
 
@@ -24,6 +27,7 @@ local wantedName: string? = nil
 local muzzle: BasePart? = nil
 local gripMarker: BasePart? = nil
 local foregripMarker: BasePart? = nil
+local magPart: BasePart? = nil
 -- Turns the model's own pivot into "barrel along -Z, centred on the body".
 local alignment = CFrame.identity
 local armed = false
@@ -32,6 +36,8 @@ local lowerBlend = 1
 local bobAmount = 0
 local phase = 0
 local lastKickAt = -math.huge
+local reloadStartedAt = -math.huge
+local reloadDuration = 0
 
 local function prepare(part: BasePart)
 	part.Anchored = true
@@ -108,6 +114,7 @@ local function use(newModel: Model, newAlignment: CFrame, name: string?)
 	muzzle = findPart(newModel, "Muzzle")
 	gripMarker = findPart(newModel, "Grip")
 	foregripMarker = findPart(newModel, "Foregrip")
+	magPart = findPart(newModel, "Mag")
 	-- The kit's marker cubes (bright magenta) only say where things attach. The stand-in's grip is
 	-- a real part, so only uploaded models hide theirs.
 	for _, markerName in MARKERS do
@@ -189,6 +196,70 @@ function Viewmodel.kick()
 	lastKickAt = os.clock()
 end
 
+local function dropMag(camera: Camera)
+	local character = player.Character
+	if not model or model.Parent == nil or not character then
+		return
+	end
+	local piece: BasePart
+	if magPart then
+		piece = magPart:Clone()
+		for _, child in piece:GetDescendants() do
+			if child:IsA("JointInstance") or child:IsA("Constraint") then
+				child:Destroy()
+			end
+		end
+		piece.CFrame = magPart.CFrame
+	else
+		local body = model.PrimaryPart or findPart(model, "Body")
+		local part = Instance.new("Part")
+		part.Size = settings.MagStandInSize
+		part.Color = settings.MagStandInColor
+		part.Material = Enum.Material.SmoothPlastic
+		part.CFrame = if body
+			then body.CFrame * CFrame.new(0, -0.2, 0.1)
+			else camera.CFrame * CFrame.new(0.6, -0.9, -1.2)
+		piece = part
+	end
+	piece.Name = "DroppedMag"
+	piece.Anchored = false
+	piece.CanCollide = true
+	piece.CanQuery = false
+	piece.CanTouch = false
+	piece.Massless = false
+	piece.Transparency = 0
+	piece.LocalTransparencyModifier = 0
+	-- It starts inside your own body; without these it would shove you around.
+	for _, bodyPart in character:GetDescendants() do
+		if bodyPart:IsA("BasePart") then
+			local ignore = Instance.new("NoCollisionConstraint")
+			ignore.Part0 = piece
+			ignore.Part1 = bodyPart
+			ignore.Parent = piece
+		end
+	end
+	piece.Parent = workspace
+	piece.AssemblyLinearVelocity = camera.CFrame.RightVector * 1.5 + Vector3.new(0, -3, 0)
+	task.delay(settings.MagFallTime, function()
+		if piece.Parent then
+			local fade = TweenService:Create(piece, TweenInfo.new(settings.MagFadeTime), { Transparency = 1 })
+			fade:Play()
+			fade.Completed:Wait()
+			piece:Destroy()
+		end
+	end)
+end
+
+-- Gun calls this when a reload starts: dip the blaster for duration seconds and drop the old mag.
+function Viewmodel.reload(duration: number)
+	reloadStartedAt = os.clock()
+	reloadDuration = duration
+	local camera = workspace.CurrentCamera
+	if camera then
+		dropMag(camera)
+	end
+end
+
 -- Current kick strength 0..1, so the camera can tip with the blaster.
 function Viewmodel.recoil(): number
 	return CombatFeel.recoil(os.clock() - lastKickAt, settings.RecoilRise, settings.RecoilSettle)
@@ -240,12 +311,22 @@ local function update(dt: number)
 	)
 
 	local kick = Viewmodel.recoil()
+	local reloadT = os.clock() - reloadStartedAt
+	local dip =
+		CombatReload.motion(reloadT, reloadDuration, settings.ReloadDipShare, settings.ReloadRiseShare)
+	-- The gun's own mag is gone from the drop until the fresh one comes up with the rise.
+	if magPart then
+		local swapping = reloadT >= 0 and reloadT < reloadDuration * (1 - settings.ReloadRiseShare)
+		magPart.LocalTransparencyModifier = if swapping then 1 else 0
+	end
 	local offset = settings.ViewmodelOffset:Lerp(settings.ViewmodelAimOffset, aimBlend)
 	local hold = camera.CFrame
 		* CFrame.new(offset + Vector3.new(side, up - settings.ViewmodelLoweredDrop * lowerBlend, 0))
 		* CFrame.Angles(math.rad(-settings.ViewmodelLoweredPitch * lowerBlend), 0, math.rad(roll))
 		* CFrame.new(0, 0, settings.RecoilKickBack * kick)
 		* CFrame.Angles(math.rad(settings.RecoilKickPitch * kick), 0, 0)
+		* CFrame.new(0, -settings.ReloadDropSink * dip, 0)
+		* CFrame.Angles(math.rad(-settings.ReloadDropPitch * dip), 0, math.rad(settings.ReloadDropRoll * dip))
 	model:PivotTo(hold * alignment)
 	model.Parent = camera
 end

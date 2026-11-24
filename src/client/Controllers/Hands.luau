@@ -21,7 +21,7 @@ local uses = Config.Supplies.Uses
 local player = Players.LocalPlayer
 
 local TEXT = Color3.fromRGB(225, 222, 215)
-local LEFT_KINDS = { Heal = "LeftOpen", Open = "Left" }
+local LEFT_KINDS = { Heal = "LeftOpen", Open = "Left", Medkit = "LeftOpen" }
 local MARKERS = { "Lens", "Grip", "Muzzle", "Foregrip" }
 
 type Arm = { model: Model, offset: CFrame, length: number, uploaded: boolean }

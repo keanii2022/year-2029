@@ -11,6 +11,8 @@ local gun = {
 	range = 300,
 	fireInterval = 0.2,
 	automatic = false,
+	magSize = 12,
+	reloadTime = 1.6,
 }
 
 local function fire(overrides: { [string]: any })
@@ -55,6 +57,8 @@ return {
 		expect(reason).toBe("cuffed")
 		_, reason = fire({ hasGun = false })
 		expect(reason).toBe("no gun")
+		_, reason = fire({ reloading = true })
+		expect(reason).toBe("reloading")
 		_, reason = fire({ ammo = 0 })
 		expect(reason).toBe("no ammo")
 		_, reason = fire({ sinceLastShot = 0.1 })

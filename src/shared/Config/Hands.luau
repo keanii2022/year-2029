@@ -21,6 +21,11 @@ return {
 		Drink = { right = pose(0.1, -0.5, -1, 0, 0, 6) },
 		Heal = { right = pose(0.28, -0.62, -1.2, 10, 0, -30), left = pose(-0.12, -0.78, -1.25, 0, -20, 70) },
 		Open = { right = pose(0.22, -0.62, -1.15, 10, 0, -10), left = pose(-0.22, -0.62, -1.15, 10, 0, 10) },
+		-- Kit held low in the right hand, left hand pressing a pad from it to your side
+		Medkit = {
+			right = pose(0.18, -0.66, -1.1, 20, 0, -12),
+			left = pose(-0.3, -0.72, -1, 10, -30, 50),
+		},
 	},
 	-- Forearms rise into view from below and come in from their own side
 	ArmTilt = { Right = { pitch = 55, yaw = 18 }, Left = { pitch = 55, yaw = -18 } },
@@ -164,6 +169,12 @@ return {
 			size = Vector3.new(0.2, 0.2, 0.2),
 			color = Color3.fromRGB(236, 232, 222),
 		},
+		Medkit = {
+			model = "medkit",
+			shape = "Box",
+			size = Vector3.new(0.46, 0.32, 0.16),
+			color = Color3.fromRGB(196, 54, 46),
+		},
 	},
 	-- Generic held item when an item has no entry above, by quick-use kind
 	Fallback = {
@@ -175,6 +186,7 @@ return {
 		},
 		Drink = { shape = "Can", size = Vector3.new(0.16, 0.34, 0.16), color = Color3.fromRGB(150, 150, 156) },
 		Heal = { shape = "Roll", size = Vector3.new(0.2, 0.2, 0.2), color = Color3.fromRGB(236, 232, 222) },
+		Medkit = { shape = "Box", size = Vector3.new(0.46, 0.32, 0.16), color = Color3.fromRGB(196, 54, 46) },
 	},
 	-- Grip to item centre: food held up in front of the fist, cans standing on it
 	ItemOffset = CFrame.new(0, 0.12, -0.05),

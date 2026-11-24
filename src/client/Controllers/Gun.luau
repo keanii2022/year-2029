@@ -1,6 +1,8 @@
 -- Client side of guns: fires from the camera through the crosshair, flashes the muzzle and sends a
 -- glowing bullet flying to the hit right away, and asks the server to check the shot. Also draws
--- other players' shots, kicks the view on each shot and zooms it while aiming.
+-- other players' shots, kicks the view on each shot and zooms it while aiming. Reloads the mag
+-- from the bag on R / Square / RELOAD and on its own when you fire empty; the server's "Mag" and
+-- "Reloading" attributes have the final say.
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 
 local CombatFeel = require(ReplicatedStorage.Shared.Logic.CombatFeel)
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
+local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
@@ -27,10 +30,14 @@ local carried: { [string]: number } = {}
 local changedListeners: { () -> () } = {}
 local hitListeners: { (down: boolean) -> () } = {}
 local lastShotAt = 0
+local mag = 0
+local reloadStartedAt: number? = nil
+local reloadId = 0
 local firing = false
 local aimBlend = 0
 local baseFieldOfView: number? = nil
 local fireRemote: RemoteEvent
+local reloadRemote: RemoteEvent
 local fxFolder: Folder
 
 type Bullet = {
@@ -61,6 +68,16 @@ end
 function Gun.getAmmo(): number?
 	local _, gun = currentGun()
 	return if gun then carried[gun.ammo] or 0 else nil
+end
+
+-- Mag, reserve and whether a reload is under way, or nil when holding no gun.
+function Gun.getMagazine(): (number?, number?, boolean)
+	local _, gun = currentGun()
+	if not gun then
+		return nil, nil, false
+	end
+	local bag = carried[gun.ammo] or 0
+	return CombatReload.loaded(mag, bag), CombatReload.reserve(mag, bag), reloadStartedAt ~= nil
 end
 
 function Gun.onChanged(listener: () -> ())
@@ -332,6 +349,48 @@ local function drawShot(from: Vector3, to: Vector3, normal: Vector3?, hitPlayer:
 	end)
 end
 
+local function startReload()
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local _, gun = currentGun()
+	if not gun or not reloadRemote then
+		return
+	end
+	local ok = CombatReload.canReload({
+		alive = humanoid ~= nil and humanoid.Health > 0,
+		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
+		cuffed = player:GetAttribute("Cuffed") == true,
+		hasGun = true,
+		reloading = reloadStartedAt ~= nil,
+		mag = mag,
+		magSize = gun.magSize,
+		bag = carried[gun.ammo] or 0,
+	})
+	if not ok then
+		return
+	end
+	reloadId += 1
+	local thisReload = reloadId
+	reloadStartedAt = os.clock()
+	reloadRemote:FireServer()
+	Viewmodel.reload(gun.reloadTime)
+	playSound(settings.Sounds.Reload, nil, settings.Sounds.ReloadVolume)
+	notifyChanged()
+	task.delay(gun.reloadTime, function()
+		if reloadId == thisReload then
+			reloadStartedAt = nil
+			mag = CombatReload.refill(gun.magSize, carried[gun.ammo] or 0)
+			notifyChanged()
+		end
+	end)
+end
+
+local function cancelReload()
+	reloadId += 1
+	reloadStartedAt = nil
+	notifyChanged()
+end
+
 local function fireOnce(): boolean
 	local camera = workspace.CurrentCamera
 	local character = player.Character
@@ -340,17 +399,21 @@ local function fireOnce(): boolean
 	if not camera or not character or not humanoid or not gun then
 		return false
 	end
-	local ok = CombatLogic.canFire({
+	local bag = carried[gun.ammo] or 0
+	local ok, reason = CombatLogic.canFire({
 		alive = humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
 		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = true,
-		ammo = carried[gun.ammo] or 0,
+		reloading = reloadStartedAt ~= nil,
+		ammo = CombatReload.loaded(mag, bag),
 		sinceLastShot = os.clock() - lastShotAt,
 		minInterval = gun.fireInterval,
 	})
 	if not ok then
-		if (carried[gun.ammo] or 0) <= 0 and os.clock() - lastShotAt >= gun.fireInterval then
+		if reason == "no ammo" and CombatReload.shouldAutoReload(mag, bag) then
+			startReload()
+		elseif reason == "no ammo" and os.clock() - lastShotAt >= gun.fireInterval then
 			lastShotAt = os.clock()
 			playSound(settings.Sounds.Empty, nil, 0.7)
 		end
@@ -360,6 +423,7 @@ local function fireOnce(): boolean
 	playSound(settings.Sounds.Fire, nil, settings.Sounds.FireVolume, settings.Sounds.FirePitch)
 	-- Spend the cell now so the HUD and the next shot don't wait on the server's reply.
 	carried[gun.ammo] -= 1
+	mag = CombatReload.loaded(mag, bag) - 1
 	notifyChanged()
 
 	local origin = camera.CFrame.Position
@@ -383,6 +447,20 @@ local function fireOnce(): boolean
 	)
 	fireRemote:FireServer(origin, direction)
 	return true
+end
+
+-- On a gamepad Reload shares Square with Use: it reloads only while a gun is in hand and there's
+-- nothing to use (Interact shows its prompt whenever there is).
+local function onPadUse(began: boolean, device: Input.Device)
+	if not began or device ~= "Gamepad" or not currentGun() or player:GetAttribute("Hidden") == true then
+		return
+	end
+	local playerGui = player:FindFirstChild("PlayerGui")
+	local prompt = playerGui and playerGui:FindFirstChild("InteractPrompt")
+	if prompt and prompt:IsA("BillboardGui") and prompt.Enabled then
+		return
+	end
+	startReload()
 end
 
 local function onFire(began: boolean)
@@ -433,6 +511,23 @@ end
 -- Remotes are fetched in Start because the client waits for them and Init may not yield.
 function Gun.Start()
 	fireRemote = Net.event("GunFire")
+	reloadRemote = Net.event("GunReload")
+	local function adoptServerMag()
+		local serverMag = player:GetAttribute("Mag")
+		if type(serverMag) == "number" then
+			mag = serverMag
+			notifyChanged()
+		end
+	end
+	player:GetAttributeChangedSignal("Mag"):Connect(adoptServerMag)
+	adoptServerMag()
+	player.CharacterAdded:Connect(cancelReload)
+	Input.bind("Reload", function(began)
+		if began then
+			startReload()
+		end
+	end)
+	Input.bind("Use", onPadUse)
 	Net.event("InventoryChanged").OnClientEvent:Connect(function(list: { { id: string, count: number } })
 		table.clear(carried)
 		for _, entry in list do

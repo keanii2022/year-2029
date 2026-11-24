@@ -49,6 +49,14 @@ local BUTTONS: { Spec } = {
 		position = UDim2.new(1, -296, 1, -130),
 	},
 	{
+		label = "RELOAD",
+		action = "Reload",
+		mode = "tap",
+		size = 60,
+		anchor = Vector2.new(1, 1),
+		position = UDim2.new(1, -296, 1, -200),
+	},
+	{
 		label = "USE",
 		action = "Use",
 		mode = "hold",
@@ -87,6 +95,14 @@ local BUTTONS: { Spec } = {
 		size = 60,
 		anchor = Vector2.new(1, 1),
 		position = UDim2.new(1, -96, 1, -308),
+	},
+	{
+		label = "PSST",
+		action = "Psst",
+		mode = "tap",
+		size = 60,
+		anchor = Vector2.new(1, 1),
+		position = UDim2.new(1, -168, 1, -308),
 	},
 	{
 		action = "Eat",

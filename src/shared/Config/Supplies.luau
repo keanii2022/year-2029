@@ -91,6 +91,8 @@ return {
 			sound = "energy_crack_fizz",
 		},
 		Bandage = { kind = "Heal", health = 35, time = 3, loudness = "quiet", sound = "tape_rip" },
+		-- health matches Config.Guns.MaxHealth, so a medkit always fills you up
+		Medkit = { kind = "Medkit", health = 100, time = 4, loudness = "quiet", sound = "medkit_latch" },
 	},
 
 	-- Gamepad quick-use buttons in HUD order. action is the Input action that fires it (keys live in
@@ -132,6 +134,7 @@ return {
 		{ item = "RationPack", model = "ration_pack", count = { 1, 1 }, near = 0, deep = 4, minDepth = 0.4 },
 		{ item = "EmpCharge", model = "emp_charge", count = { 1, 1 }, near = 0, deep = 0.6, minDepth = 0.75 },
 		{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 0, deep = 0.3, minDepth = 0.85 },
+		{ item = "Medkit", model = "medkit", count = { 1, 1 }, near = 0, deep = 1.2, minDepth = 0.6 },
 	},
 
 	-- Pickups across the open floor, plus extra in robot rooms (riskier, so rolled deeper)
