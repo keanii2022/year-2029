@@ -770,22 +770,75 @@ def picture_frame(P):
 
 # ---------------------------------------------------------------- installations (lit dreamcore rooms in the dark)
 
+def moulded_orange():
+    """Glossy moulded plastic gone a bit chalky: pale scuffs on the rims, a soft fake sheen, grime in the dips."""
+    g = kit.G("plain")
+    c = g.mix(g.math("MULTIPLY", g.step(g.noise(1.8, 4), 0.3, 0.75), 0.15), "#e4511a", "#e07a48")
+    scuffs = g.math("MULTIPLY", g.step(g.noise(9, 5, stretch=(1, 1, 0.2)), 0.68, 0.78), 0.5)
+    rims = g.math("MULTIPLY", g.step(g.edge(0.12), 0.05, 0.4), 0.6)
+    c = g.mix(g.math("ADD", scuffs, rims, clamp=True), c, "#f2b48c")
+    sheen = g.n("ShaderNodeVectorMath")
+    sheen.operation = "DOT_PRODUCT"
+    g.t.links.new(g.geo.outputs["Normal"], sheen.inputs[0])
+    sheen.inputs[1].default_value = V((-0.35, -0.55, 0.76)).normalized()
+    c = g.mix(g.math("MULTIPLY", g.step(sheen.outputs["Value"], 0.86, 0.98), 0.45), c, "#ffe2c8")
+    c = g.mix(g.math("MULTIPLY", g.step(g.noise(3.5, 6, world=True), 0.5, 0.8), 0.15), c, "#6a5646", "MULTIPLY")
+    return g.done(c, ao=0.8)
+
+
+def _spline(pts, per):
+    """Catmull-Rom through 2D points, per samples per stretch."""
+    pts = [pts[0]] + pts + [pts[-1]]
+    out = []
+    for i in range(1, len(pts) - 2):
+        p0, p1, p2, p3 = (V(p) for p in pts[i - 1:i + 3])
+        for k in range(per):
+            t = k / per
+            out.append(0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (3 * p1 - p0 - 3 * p2 + p3) * t ** 3))
+    out.append(V(pts[-2]))
+    return out
+
+
 @item("giant_chair", "warehouse", size=1024)
 def giant_chair(P):
-    shell = plain("#e0632a", grime=0.35, vary=0.2)
-    legs = metal("#9a9a96", rust=0.35)
-    seat = box((8.6, 8.0, 0.7), shell, loc=(0, 0, 9.0), r=0.35, n=4)
-    warp(seat, lambda c: V((c.x, c.y, c.z + 0.012 * c.x * c.x + 0.25 * max(0.0, -c.y - 2.5))))
-    back = box((8.6, 0.7, 7.6), shell, loc=(0, 0, 0), r=0.35, n=4)
-    warp(back, lambda c: V((c.x, c.y + 0.05 * c.x * c.x, c.z)))
-    move(back, rot=(-10, 0, 0), loc=(0, 4.3, 14.0))
-    P.add("Body", seat, back, box((8.6, 0.7, 2.0), shell, loc=(0, 3.85, 9.75), rot=(-40, 0, 0), r=0.35, n=2))
+    # One moulded shell: side profile (y, z) runs from under the rolled front lip, over the seat, round the soft
+    # bend and up the back. Each cross-section is a thin dished strip, lofted along that path.
+    path = _spline([(-3.5, 8.45), (-4.2, 8.75), (-4.25, 9.3), (-3.6, 9.55), (-1.5, 9.25), (1.2, 9.15), (2.9, 9.35),
+                    (3.75, 10.2), (4.1, 11.8), (4.45, 14.0), (4.85, 16.2), (5.25, 17.75)], 4)
+    n = len(path)
+    dist = [0.0]
+    for a, b in zip(path, path[1:]):
+        dist.append(dist[-1] + (b - a).length)
+    t, half = 0.32, 10
+    rings = []
+    for i, p in enumerate(path):
+        s = dist[i] / dist[-1]
+        tan = (path[min(i + 1, n - 1)] - path[max(i - 1, 0)]).normalized()
+        nrm = V((-tan.y, tan.x))
+        lip = min(1.0, max(0.0, (dist[i] - 2.2) / 1.5))
+        back = min(1.0, max(0.0, (s - 0.55) / 0.12))
+        width = 8.6 - 0.8 * back - 0.6 * math.exp(-((s - 0.6) / 0.12) ** 2)
+        top_round = (dist[-1] - dist[i]) / 1.6
+        if top_round < 1.0:
+            width *= math.sqrt(max(0.05, 1.0 - (1.0 - top_round) ** 2))
+        dish = lip * (0.55 - 0.15 * back) * (1.0 - 0.6 * math.exp(-((s - 0.6) / 0.1) ** 2)) * min(1.0, top_round)
+        ring = []
+        for side, off in ((1, t / 2), (-1, -t / 2)):
+            for j in range(half + 1):
+                u = (j / half * 2 - 1) * side
+                x = u * width / 2
+                d = off + dish * u ** 4
+                ring.append(V((x, p.x + nrm.x * d, p.y + nrm.y * d)))
+            x = side * (width / 2 + t * 0.45)
+            ring.append(V((x, p.x + nrm.x * dish, p.y + nrm.y * dish)))
+        rings.append(ring)
+    P.add("Body", loft(rings, moulded_orange(), smooth=70))
+    legs = metal("#8f918f", rust=0.3)
     for sx in (-1, 1):
-        for sy in (-1, 1):
-            P.add("Body", bar((sx * 3.2, sy * 2.8, 8.7), (sx * 4.0, sy * 3.6, 0.3), 0.5, legs),
-                  box((0.75, 0.75, 0.3), rubber(), loc=(sx * 4.0, sy * 3.6, 0.15), r=0.08, n=1))
-        P.add("Body", bar((sx * 3.2, 2.8, 8.7), (sx * 3.6, 4.2, 10.6), 0.5, legs))
-    P.add("Body", bar((-3.5, -3.15, 3.2), (3.5, -3.15, 3.2), 0.35, legs), bar((-3.5, 3.15, 3.2), (3.5, 3.15, 3.2), 0.35, legs))
+        P.add("Body", box((0.5, 6.4, 0.35), legs, loc=(sx * 2.9, -0.3, 8.85), r=0.08, n=1))
+        for y0, y1 in ((-3.2, -4.1), (2.6, 3.6)):
+            P.add("Body", bar((sx * 2.9, y0, 8.95), (sx * 3.85, y1, 0.3), 0.42, legs),
+                  box((0.7, 0.7, 0.3), rubber(), loc=(sx * 3.85, y1, 0.15), r=0.08, n=1))
 
 
 @item("giant_cloud", "warehouse", size=1024)

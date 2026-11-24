@@ -619,6 +619,7 @@ return {
 					does = "Heavy, two hands. Hit it to split it into watermelon slices.",
 				},
 			},
+			assetId = 115190648582879,
 			textureId = 133944026823147,
 		},
 		{
@@ -782,6 +783,7 @@ return {
 			},
 			assetId = 115813202082524,
 			textureId = 100130423674922,
+			screenId = 71723007920596,
 		},
 		{
 			name = "boombox",
@@ -828,6 +830,8 @@ return {
 					does = "Play or stop music (loud). Tape door opens. Lights bounce to the beat.",
 				},
 			},
+			assetId = 121473903517230,
+			textureId = 126039977728908,
 		},
 		{
 			name = "crank_radio",
@@ -874,6 +878,8 @@ return {
 					does = "Crank to charge it (makes a little noise). Turn the knob to tune: old broadcasts, a hint where a supply drop lands, bits of the story. Dial glows while it has charge.",
 				},
 			},
+			assetId = 104004832727058,
+			textureId = 139823303971519,
 		},
 		{
 			name = "crt_tv",
@@ -910,6 +916,9 @@ return {
 					does = "Turn the knob: next channel, with a burst of static.",
 				},
 			},
+			assetId = 94385029060120,
+			textureId = 114907403269178,
+			screenId = 89468817660646,
 		},
 		{
 			name = "desk_lamp",
@@ -946,6 +955,8 @@ return {
 					does = "Light on or off. The arm can be aimed.",
 				},
 			},
+			assetId = 128209076054396,
+			textureId = 111249710790276,
 		},
 		{
 			name = "disco_ball",
@@ -972,6 +983,8 @@ return {
 					does = "Spins and throws light spots.",
 				},
 			},
+			assetId = 135725987354198,
+			textureId = 109128529338427,
 		},
 		{
 			name = "jack_in_the_box",
@@ -1018,6 +1031,8 @@ return {
 					does = "Crank plays a tune, then the lid pops and Jack springs out (loud).",
 				},
 			},
+			assetId = 128837224895970,
+			textureId = 71915364881829,
 		},
 		{
 			name = "lava_lamp",
@@ -1054,6 +1069,8 @@ return {
 					does = "Switch on: glass glows (see-through Neon), blobs drift slowly up and down.",
 				},
 			},
+			assetId = 107572267133242,
+			textureId = 82546656070061,
 		},
 		{
 			name = "microwave",
@@ -1110,6 +1127,8 @@ return {
 					does = "Door opens, plate spins, light on, ding at the end (loud). Heat up food for a bigger refill.",
 				},
 			},
+			assetId = 89910651310387,
+			textureId = 83024326109278,
 		},
 		{
 			name = "music_box",
@@ -1146,6 +1165,8 @@ return {
 					does = "Open: the little robot dancer spins and a tune plays (quiet).",
 				},
 			},
+			assetId = 99449329306390,
+			textureId = 127883389526382,
 		},
 		{
 			name = "neon_open_sign",
@@ -1172,6 +1193,8 @@ return {
 					does = "On or off. Flickers.",
 				},
 			},
+			assetId = 129820221419408,
+			textureId = 114756976306626,
 		},
 		{
 			name = "poster_frame",
@@ -1198,6 +1221,9 @@ return {
 					does = "Shows any poster.",
 				},
 			},
+			assetId = 117093425773213,
+			textureId = 125539404981061,
+			screenId = 128285107242157,
 		},
 		{
 			name = "press_button",
@@ -1224,6 +1250,8 @@ return {
 					does = 'Press: it says something cheerful and useless ("Good job!", "Task complete!", "You did it!").',
 				},
 			},
+			assetId = 85312231448869,
+			textureId = 124337358320928,
 		},
 		{
 			name = "record_player",
@@ -1270,6 +1298,8 @@ return {
 					does = "Lid opens, record spins, arm swings over. Plays a record.",
 				},
 			},
+			assetId = 113593402076755,
+			textureId = 79837567721471,
 		},
 		{
 			name = "rotary_phone",
@@ -1306,6 +1336,8 @@ return {
 					does = "Rings now and then (loud). Pick up: a creepy cheerful message. Dial spins.",
 				},
 			},
+			assetId = 90477799070705,
+			textureId = 84719587037042,
 		},
 		{
 			name = "rubber_duck",
@@ -1326,6 +1358,8 @@ return {
 					does = "Squeaks when pressed or stepped on. A quiet tripwire for your fort.",
 				},
 			},
+			assetId = 111181777436668,
+			textureId = 137288499812962,
 		},
 		{
 			name = "spray_can",
@@ -1352,6 +1386,8 @@ return {
 					does = "Hold to spray. Pick a warning from a short list (RUN, HIDE, NOT SAFE, arrow, tally...) and it lands on the wall as a red decal. You become the survivor who wrote it. Limited paint per can.",
 				},
 			},
+			assetId = 113266689016626,
+			textureId = 71837726781042,
 		},
 		{
 			name = "table_fan",
@@ -1378,6 +1414,8 @@ return {
 					does = "Blades spin when on.",
 				},
 			},
+			assetId = 125068717817166,
+			textureId = 129770007434268,
 		},
 		{
 			name = "toaster",
@@ -1414,6 +1452,8 @@ return {
 					does = "Push the lever, wait, toast pops up. Toast is food.",
 				},
 			},
+			assetId = 109209845345125,
+			textureId = 113710060956913,
 		},
 		{
 			name = "toilet",
@@ -1450,6 +1490,8 @@ return {
 					does = "Lid flips up. Flush (loud).",
 				},
 			},
+			assetId = 138901676486276,
+			textureId = 100387998694001,
 		},
 		{
 			name = "vending_machine",
@@ -1496,6 +1538,8 @@ return {
 					does = "Press a button: a random snack drops into the flap. A few per round.",
 				},
 			},
+			assetId = 139794971167204,
+			textureId = 126098820996572,
 		},
 		{
 			name = "walkie_talkie",
@@ -1542,6 +1586,8 @@ return {
 					does = "Spawns in pairs across the map. Hold the side button to talk to whoever has the other one. Knob picks the channel. Light blinks when someone talks. You never know who's on the other end.",
 				},
 			},
+			assetId = 104892786102834,
+			textureId = 117294609548957,
 		},
 		{
 			name = "wall_clock",
@@ -1588,6 +1634,9 @@ return {
 					does = "Hands count down to lights out. A survivor sprayed the danger zone on the face.",
 				},
 			},
+			assetId = 98879066979671,
+			textureId = 106413014605697,
+			screenId = 98148237360457,
 		},
 		{
 			name = "armchair",
@@ -1608,6 +1657,8 @@ return {
 					does = "Sit. Search the cushions for loose ammo now and then.",
 				},
 			},
+			assetId = 117716490518171,
+			textureId = 113144858296387,
 		},
 		{
 			name = "bathtub",
@@ -1638,6 +1689,8 @@ return {
 					does = "Lie down to hide.",
 				},
 			},
+			assetId = 92921271340115,
+			textureId = 107323140677737,
 		},
 		{
 			name = "bed",
@@ -1658,6 +1711,8 @@ return {
 					does = "Hide under. Sleep to refill energy by day.",
 				},
 			},
+			assetId = 127158076569961,
+			textureId = 97682581226948,
 		},
 		{
 			name = "bookshelf",
@@ -1673,6 +1728,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 102448233785502,
+			textureId = 126243217189783,
 		},
 		{
 			name = "bunk_bed",
@@ -1693,6 +1750,8 @@ return {
 					does = "Hide under. Sleep to refill energy by day.",
 				},
 			},
+			assetId = 128802945127045,
+			textureId = 125924504857685,
 		},
 		{
 			name = "coffee_table",
@@ -1708,6 +1767,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 93771520223614,
+			textureId = 73330211078195,
 		},
 		{
 			name = "couch",
@@ -1728,6 +1789,8 @@ return {
 					does = "Sit. Search the cushions for loose ammo now and then.",
 				},
 			},
+			assetId = 106118060167242,
+			textureId = 112034539849498,
 		},
 		{
 			name = "counter",
@@ -1774,6 +1837,8 @@ return {
 					does = "Swing open on a side hinge. Small loot inside.",
 				},
 			},
+			assetId = 118867265931840,
+			textureId = 71881378423173,
 		},
 		{
 			name = "desk",
@@ -1830,6 +1895,9 @@ return {
 					does = 'Old computer screen. Press: a pop up asks "Are you still there?"',
 				},
 			},
+			assetId = 127781155954767,
+			textureId = 108531153725487,
+			screenId = 74705613891615,
 		},
 		{
 			name = "door_frame",
@@ -1856,6 +1924,8 @@ return {
 					does = "EXIT? sign flickers.",
 				},
 			},
+			assetId = 83841659111837,
+			textureId = 100255959540358,
 		},
 		{
 			name = "dresser",
@@ -1902,6 +1972,8 @@ return {
 					does = "Slide out. Small loot.",
 				},
 			},
+			assetId = 91515768760660,
+			textureId = 112437823139012,
 		},
 		{
 			name = "filing_cabinet",
@@ -1948,6 +2020,8 @@ return {
 					does = "Slide out. Papers inside, sometimes a key card or ammo.",
 				},
 			},
+			assetId = 96366930286517,
+			textureId = 75055810076238,
 		},
 		{
 			name = "floor_lamp",
@@ -1984,6 +2058,8 @@ return {
 					does = "Pull the chain: light on or off. A lit lamp is seen from far away at night.",
 				},
 			},
+			assetId = 94068582779104,
+			textureId = 87897411764120,
 		},
 		{
 			name = "fridge",
@@ -2030,6 +2106,8 @@ return {
 					does = "Inside light turns on while a door is open.",
 				},
 			},
+			assetId = 113400552852025,
+			textureId = 73919002595556,
 		},
 		{
 			name = "kid_bed",
@@ -2050,6 +2128,8 @@ return {
 					does = "Hide under. Sleep to refill energy by day.",
 				},
 			},
+			assetId = 133813044575635,
+			textureId = 93341718301825,
 		},
 		{
 			name = "kitchen_chair",
@@ -2065,6 +2145,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 128171138316414,
+			textureId = 111669670352860,
 		},
 		{
 			name = "kitchen_table",
@@ -2080,6 +2162,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 107262214495327,
+			textureId = 108650593216679,
 		},
 		{
 			name = "nightstand",
@@ -2116,6 +2200,8 @@ return {
 					does = "Alarm clock face. Rings at lights out (loud).",
 				},
 			},
+			assetId = 125454974672066,
+			textureId = 94343632114761,
 		},
 		{
 			name = "office_chair",
@@ -2142,6 +2228,8 @@ return {
 					does = "Sit and spin.",
 				},
 			},
+			assetId = 114565850779815,
+			textureId = 81594191302169,
 		},
 		{
 			name = "pantry",
@@ -2168,6 +2256,8 @@ return {
 					does = "Swings open. Cans on the shelves are food loot.",
 				},
 			},
+			assetId = 117400091282786,
+			textureId = 99875391115063,
 		},
 		{
 			name = "play_table",
@@ -2183,6 +2273,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 78327640548391,
+			textureId = 113207334103976,
 		},
 		{
 			name = "rug",
@@ -2198,6 +2290,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 123689010531574,
+			textureId = 137664253831886,
 		},
 		{
 			name = "shower_door",
@@ -2224,6 +2318,8 @@ return {
 					does = "Glass slides sideways along x.",
 				},
 			},
+			assetId = 120066429518654,
+			textureId = 124479134560077,
 		},
 		{
 			name = "sink_cabinet",
@@ -2270,6 +2366,8 @@ return {
 					does = "Turn on: water runs (particles from the spout). Refill a water bottle at the sink.",
 				},
 			},
+			assetId = 79848344536881,
+			textureId = 104756568700871,
 		},
 		{
 			name = "stove",
@@ -2306,6 +2404,8 @@ return {
 					does = "Oven door drops open. Loot or a hiding spot for small stuff.",
 				},
 			},
+			assetId = 123258052992198,
+			textureId = 133836842160306,
 		},
 		{
 			name = "toy_chest",
@@ -2332,6 +2432,8 @@ return {
 					does = "Opens up. Plays a little tune (quiet). Hide inside.",
 				},
 			},
+			assetId = 138221772637988,
+			textureId = 106212440537614,
 		},
 		{
 			name = "tv_stand",
@@ -2378,6 +2480,9 @@ return {
 					does = "Cabinet doors swing open.",
 				},
 			},
+			assetId = 95297890487217,
+			textureId = 137030200774950,
+			screenId = 112825953415930,
 		},
 		{
 			name = "wall_panel",
@@ -2404,6 +2509,9 @@ return {
 					does = "Picture in the frame. Swappable.",
 				},
 			},
+			assetId = 100415972061736,
+			textureId = 135191728346314,
+			screenId = 73573944822437,
 		},
 		{
 			name = "wardrobe",
@@ -2440,6 +2548,8 @@ return {
 					does = "Swing open. Hide inside with the doors shut.",
 				},
 			},
+			assetId = 96860664831863,
+			textureId = 116906260804371,
 		},
 		{
 			name = "whiteboard",
@@ -2466,6 +2576,9 @@ return {
 					does = "Shows scribbles. Later: pick a message to write on it.",
 				},
 			},
+			assetId = 106207596129385,
+			textureId = 111394664008937,
+			screenId = 113290953328343,
 		},
 		{
 			name = "ammo_cell",
@@ -2487,6 +2600,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 135725013076661,
+			textureId = 123750688224861,
 		},
 		{
 			name = "ammo_darts",
@@ -2502,6 +2617,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 102963650788270,
+			textureId = 129202932379153,
 		},
 		{
 			name = "ammo_flares",
@@ -2517,6 +2634,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 79203504213196,
+			textureId = 96552112943836,
 		},
 		{
 			name = "ammo_heavy",
@@ -2532,6 +2651,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 98483993945122,
+			textureId = 76586830664062,
 		},
 		{
 			name = "ammo_light",
@@ -2547,6 +2668,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 117908978607393,
+			textureId = 91800297683740,
 		},
 		{
 			name = "ammo_nails",
@@ -2562,6 +2685,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 136784187523883,
+			textureId = 114487812819829,
 		},
 		{
 			name = "ammo_shells",
@@ -2577,6 +2702,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 93967241443978,
+			textureId = 133474140368869,
 		},
 		{
 			name = "bandage",
@@ -2592,6 +2719,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 83331125686576,
+			textureId = 132174635828758,
 		},
 		{
 			name = "battery",
@@ -2613,6 +2742,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80908029403382,
+			textureId = 113989211888953,
 		},
 		{
 			name = "big_duffel",
@@ -2639,6 +2770,8 @@ return {
 					does = "Opens when you look in your bag. Bigger bag, more slots.",
 				},
 			},
+			assetId = 119990172266169,
+			textureId = 76163713775205,
 		},
 		{
 			name = "bike_helmet",
@@ -2654,6 +2787,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 133653924109970,
+			textureId = 136901914999021,
 		},
 		{
 			name = "dart_blaster",
@@ -2690,6 +2825,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 106017262777137,
+			textureId = 86596558772533,
 		},
 		{
 			name = "disruptor",
@@ -2734,6 +2871,8 @@ return {
 					does = "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots.",
 				},
 			},
+			assetId = 138889223319629,
+			textureId = 124673194279639,
 		},
 		{
 			name = "emp_charge",
@@ -2760,6 +2899,8 @@ return {
 					does = "Pull the tab, throw it: robots nearby freeze for a few seconds.",
 				},
 			},
+			assetId = 88107885646374,
+			textureId = 93178975652285,
 		},
 		{
 			name = "flare_gun",
@@ -2800,6 +2941,8 @@ return {
 					does = "The flare round. A fired flare lights an area for a while and pulls robots to it.",
 				},
 			},
+			assetId = 112578027908242,
+			textureId = 131741208023562,
 		},
 		{
 			name = "flashlight",
@@ -2826,6 +2969,8 @@ return {
 					does = "On or off. Seen from far away at night.",
 				},
 			},
+			assetId = 72596757265423,
+			textureId = 129378628230291,
 		},
 		{
 			name = "handcuffs",
@@ -2862,6 +3007,8 @@ return {
 					does = "Cuff swings shut. Red lights blink while locked on a robot.",
 				},
 			},
+			assetId = 122236429732295,
+			textureId = 129190712168961,
 		},
 		{
 			name = "hard_hat",
@@ -2888,6 +3035,8 @@ return {
 					does = "Headlamp on or off, hands free.",
 				},
 			},
+			assetId = 77278260057344,
+			textureId = 90487638687739,
 		},
 		{
 			name = "heavy_blaster",
@@ -2924,6 +3073,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 102144810785054,
+			textureId = 103549855514516,
 		},
 		{
 			name = "hiking_pack",
@@ -2950,6 +3101,8 @@ return {
 					does = "Opens when you look in your bag. Bigger bag, more slots.",
 				},
 			},
+			assetId = 70398984947606,
+			textureId = 88032775051361,
 		},
 		{
 			name = "loot_crate",
@@ -2982,6 +3135,8 @@ return {
 					does = "Flips open. Loot inside.",
 				},
 			},
+			assetId = 121357723730596,
+			textureId = 128744556243204,
 		},
 		{
 			name = "marksman_rifle",
@@ -3022,6 +3177,8 @@ return {
 					does = "Scope lens glints. Players far away can spot it.",
 				},
 			},
+			assetId = 102830101894773,
+			textureId = 120718372931449,
 		},
 		{
 			name = "medkit",
@@ -3043,6 +3200,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 98985221347810,
+			textureId = 90357756530224,
 		},
 		{
 			name = "nail_gun",
@@ -3079,6 +3238,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 100816911723406,
+			textureId = 106851564377767,
 		},
 		{
 			name = "noise_maker",
@@ -3111,6 +3272,8 @@ return {
 					does = "Wind the key, it ticks, then rings (loud). Throw it to pull robots or players away. The key turns around y, not z.",
 				},
 			},
+			assetId = 119122368344710,
+			textureId = 79737074825864,
 		},
 		{
 			name = "revolver",
@@ -3151,6 +3314,8 @@ return {
 					does = "The hex drum. Swings out to reload.",
 				},
 			},
+			assetId = 91581629052288,
+			textureId = 124721509166054,
 		},
 		{
 			name = "rifle",
@@ -3187,6 +3352,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 77827548145553,
+			textureId = 111407526802604,
 		},
 		{
 			name = "riot_helmet",
@@ -3213,6 +3380,8 @@ return {
 					does = "Flips down for more protection, up to see better.",
 				},
 			},
+			assetId = 101937813649158,
+			textureId = 95588885691873,
 		},
 		{
 			name = "school_backpack",
@@ -3239,6 +3408,8 @@ return {
 					does = "Opens when you look in your bag. Bigger bag, more slots.",
 				},
 			},
+			assetId = 115375465409443,
+			textureId = 95354089854738,
 		},
 		{
 			name = "shotgun",
@@ -3275,6 +3446,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 94928714082997,
+			textureId = 75036603340008,
 		},
 		{
 			name = "smg",
@@ -3311,6 +3484,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 80751014582583,
+			textureId = 105641416382031,
 		},
 		{
 			name = "smoke_can",
@@ -3331,6 +3506,8 @@ return {
 					does = "Throw it: a smoke cloud blocks sight for a while.",
 				},
 			},
+			assetId = 85154947044066,
+			textureId = 130543034496164,
 		},
 		{
 			name = "starter_pistol",
@@ -3367,6 +3544,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 78842474579257,
+			textureId = 98225233382806,
 		},
 		{
 			name = "supply_locker",
@@ -3399,6 +3578,8 @@ return {
 					does = "Swings open. Better loot, locked by day.",
 				},
 			},
+			assetId = 130845385297842,
+			textureId = 78075084267181,
 		},
 		{
 			name = "drawing_wall",
@@ -3425,6 +3606,9 @@ return {
 					does = "Kids' drawings, happy at the start, darker by the end.",
 				},
 			},
+			assetId = 104248767078144,
+			textureId = 100202167399652,
+			screenId = 110143136329209,
 		},
 		{
 			name = "greeter",
@@ -3463,6 +3647,9 @@ return {
 					does = "Waves on a loop. Head and Screen tilt together. Plays the welcome line, worse each night.",
 				},
 			},
+			assetId = 106003449299742,
+			textureId = 99606564508422,
+			screenId = 107049133518408,
 		},
 		{
 			name = "kid_ball",
@@ -3483,6 +3670,8 @@ return {
 					does = "Rolls slowly toward you out of the dark. Quiet.",
 				},
 			},
+			assetId = 125419663246690,
+			textureId = 76875416429614,
 		},
 		{
 			name = "lost_kid",
@@ -3582,6 +3771,8 @@ return {
 					does = "`posters/scrawls/fog_found_you.png` goes on a freezer door after it was there.",
 				},
 			},
+			assetId = 78109738403958,
+			textureId = 91707246416159,
 		},
 		{
 			name = "mannequin",
@@ -3674,6 +3865,8 @@ return {
 					does = "stand, reach, turn, crouch, face. Snap to a new pose only while no player's camera can see it.",
 				},
 			},
+			assetId = 116598981932838,
+			textureId = 113079198131964,
 		},
 		{
 			name = "robot_pile",
@@ -3706,6 +3899,8 @@ return {
 					does = "The arm jerks now and then. Glow eyes flicker.",
 				},
 			},
+			assetId = 79577555409750,
+			textureId = 102454783537024,
 		},
 		{
 			name = "security_cam",
@@ -3742,6 +3937,8 @@ return {
 					does = "Cam turns slowly to face the nearest player in range. Glow red light on.",
 				},
 			},
+			assetId = 136507808536186,
+			textureId = 108754110416429,
 		},
 		{
 			name = "shirt_folder",
@@ -3778,6 +3975,8 @@ return {
 					does = "Arm swings down, Shirt flips its half over, back to start. Forever. Quiet whir.",
 				},
 			},
+			assetId = 127631141607732,
+			textureId = 131478703177806,
 		},
 		{
 			name = "stuffed_robot",
@@ -3793,6 +3992,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 132430799341655,
+			textureId = 93874340106596,
 		},
 		{
 			name = "aisle_sign",
@@ -3808,6 +4009,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 120751298064108,
+			textureId = 80345553515544,
 		},
 		{
 			name = "arm_bench",
@@ -3834,6 +4037,8 @@ return {
 					does = "Robot arm sways back and forth, picking up nothing.",
 				},
 			},
+			assetId = 74295746098212,
+			textureId = 113398120418099,
 		},
 		{
 			name = "ceiling_light",
@@ -3860,6 +4065,8 @@ return {
 					does = "On by day, off at lights out.",
 				},
 			},
+			assetId = 122439420331906,
+			textureId = 99796815296662,
 		},
 		{
 			name = "charging_dock",
@@ -3886,6 +4093,8 @@ return {
 					does = "Pulses while a robot is docked.",
 				},
 			},
+			assetId = 126216686452987,
+			textureId = 90821132165745,
 		},
 		{
 			name = "emergency_light",
@@ -3912,6 +4121,8 @@ return {
 					does = "Off by day, red at night.",
 				},
 			},
+			assetId = 118865800605039,
+			textureId = 95380985464755,
 		},
 		{
 			name = "entrance_gate",
@@ -3948,6 +4159,8 @@ return {
 					does = "Lamps blink, the grate slides up at round start.",
 				},
 			},
+			assetId = 81410629534317,
+			textureId = 112764550333358,
 		},
 		{
 			name = "pillar_base",
@@ -3963,6 +4176,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 104974329204745,
+			textureId = 132581442995363,
 		},
 		{
 			name = "pillar_segment",
@@ -3978,6 +4193,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 123548154225630,
+			textureId = 108789728432042,
 		},
 		{
 			name = "siren_light",
@@ -4014,6 +4231,8 @@ return {
 					does = "Glows and the mirror spins during the lights out siren.",
 				},
 			},
+			assetId = 131809747119311,
+			textureId = 73874846701133,
 		},
 		{
 			name = "speaker_horn",
@@ -4034,6 +4253,8 @@ return {
 					does = "Plays store announcements and the day music.",
 				},
 			},
+			assetId = 101826676509600,
+			textureId = 127368442856885,
 		},
 		{
 			name = "brute",
@@ -4129,6 +4350,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 93683239385577,
+			textureId = 118910722607673,
 		},
 		{
 			name = "brute_night",
@@ -4224,6 +4447,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 98734512884471,
+			textureId = 75975705997098,
 		},
 		{
 			name = "carrier",
@@ -4318,6 +4543,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 74033957110044,
+			textureId = 80630883818984,
 		},
 		{
 			name = "carrier_night",
@@ -4412,6 +4639,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 102337433800821,
+			textureId = 133970543198248,
 		},
 		{
 			name = "cleaner",
@@ -4506,6 +4735,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 127299973966857,
+			textureId = 91894467413722,
 		},
 		{
 			name = "cleaner_night",
@@ -4600,6 +4831,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 94019097787771,
+			textureId = 103553643326463,
 		},
 		{
 			name = "cook",
@@ -4694,6 +4927,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 100354870322242,
+			textureId = 113617239610120,
 		},
 		{
 			name = "cook_night",
@@ -4788,6 +5023,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 116605579345924,
+			textureId = 109804464914016,
 		},
 		{
 			name = "crawler",
@@ -4901,6 +5138,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 102066396945971,
+			textureId = 85225935373490,
 		},
 		{
 			name = "crawler_night",
@@ -5014,6 +5253,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 97066319557719,
+			textureId = 101212385809777,
 		},
 		{
 			name = "scout",
@@ -5109,6 +5350,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 105532146113692,
+			textureId = 74837508279462,
 		},
 		{
 			name = "scout_night",
@@ -5204,6 +5447,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 120900154224628,
+			textureId = 98841042454765,
 		},
 		{
 			name = "blueprint",
@@ -5224,6 +5469,8 @@ return {
 					does = "Lay it out once a day, during the day: a ghost outline your pieces snap into.",
 				},
 			},
+			assetId = 71635188852308,
+			textureId = 122818935350068,
 		},
 		{
 			name = "broken_skylight",
@@ -5250,6 +5497,8 @@ return {
 					does = "Set see-through. Moonlight comes down through it at night.",
 				},
 			},
+			assetId = 132081003068999,
+			textureId = 138883091335012,
 		},
 		{
 			name = "candles",
@@ -5276,6 +5525,8 @@ return {
 					does = "Flames flicker. Light seen from far at night. Press to blow out.",
 				},
 			},
+			assetId = 84316851312461,
+			textureId = 111060936953542,
 		},
 		{
 			name = "cassette_tape",
@@ -5296,6 +5547,8 @@ return {
 					does = "Play in a walkie_talkie: a survivor's recording. Lore.",
 				},
 			},
+			assetId = 97918055093473,
+			textureId = 120687768689006,
 		},
 		{
 			name = "dog_bowl",
@@ -5316,6 +5569,8 @@ return {
 					does = "Put food in it near the dog. Each fill builds trust.",
 				},
 			},
+			assetId = 110349248312848,
+			textureId = 72755791858258,
 		},
 		{
 			name = "fuel_can",
@@ -5336,6 +5591,8 @@ return {
 					does = "Pour into a generator. Loot, rare deep in.",
 				},
 			},
+			assetId = 83907684370397,
+			textureId = 99846392613270,
 		},
 		{
 			name = "generator",
@@ -5372,6 +5629,8 @@ return {
 					does = "Pull Handle to start (can fail a few times). Glow on while running. Lights a section. Burns fuel, sputters when low, then dies: refuel with fuel_can and pull again. The hum pulls robots.",
 				},
 			},
+			assetId = 84327884210757,
+			textureId = 87584128614452,
 		},
 		{
 			name = "journal",
@@ -5392,6 +5651,8 @@ return {
 					does = "Read a survivor's pages. Lore.",
 				},
 			},
+			assetId = 131957726590458,
+			textureId = 94297355193638,
 		},
 		{
 			name = "leak_bucket",
@@ -5412,6 +5673,8 @@ return {
 					does = "Drip sound loop.",
 				},
 			},
+			assetId = 96388991574948,
+			textureId = 92863723630650,
 		},
 		{
 			name = "locker",
@@ -5438,6 +5701,8 @@ return {
 					does = "Swings open on its left hinge. Your saved stash, the only thing that comes with you to every server.",
 				},
 			},
+			assetId = 106467824813921,
+			textureId = 100957243089403,
 		},
 		{
 			name = "notes_wall",
@@ -5464,6 +5729,9 @@ return {
 					does = "Survivor notes with hints (siren timer, pigeons, the kid, mannequins).",
 				},
 			},
+			assetId = 116919854860880,
+			textureId = 104461320658573,
+			screenId = 102603016166267,
 		},
 		{
 			name = "paper_and_pen",
@@ -5484,6 +5752,8 @@ return {
 					does = "Pick up to draw a blueprint of your fort. Used up when you do.",
 				},
 			},
+			assetId = 103051690125776,
+			textureId = 112109562821961,
 		},
 		{
 			name = "puddle",
@@ -5504,6 +5774,8 @@ return {
 					does = "A little shiny and see-through. Splash sound when you walk through, pulls robots.",
 				},
 			},
+			assetId = 85832976802621,
+			textureId = 112612572925946,
 		},
 		{
 			name = "sleeping_bag",
@@ -5524,6 +5796,8 @@ return {
 					does = "Set dressing. The tent is a hiding spot.",
 				},
 			},
+			assetId = 101146685799440,
+			textureId = 99271840614163,
 		},
 		{
 			name = "survivor_tent",
@@ -5544,6 +5818,8 @@ return {
 					does = "Set dressing. The tent is a hiding spot.",
 				},
 			},
+			assetId = 132001437022345,
+			textureId = 93353061233670,
 		},
 		{
 			name = "vines",
@@ -5564,6 +5840,8 @@ return {
 					does = "Set dressing. The tent is a hiding spot.",
 				},
 			},
+			assetId = 119864004439215,
+			textureId = 97171774837098,
 		},
 		{
 			name = "weeds",
@@ -5584,6 +5862,8 @@ return {
 					does = "Set dressing. The tent is a hiding spot.",
 				},
 			},
+			assetId = 127089374479753,
+			textureId = 134017373179736,
 		},
 		{
 			name = "aisle_sign_hanging",
@@ -5611,6 +5891,9 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 84178335797432,
+			textureId = 130519814410740,
+			screenId = 120872877800972,
 		},
 		{
 			name = "bollard",
@@ -5626,6 +5909,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 140729694162139,
+			textureId = 88330782700430,
 		},
 		{
 			name = "bookshelf_empty",
@@ -5641,6 +5926,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 111151246663019,
+			textureId = 106682711633594,
 		},
 		{
 			name = "bookshelf_wall",
@@ -5656,6 +5943,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 124955974408885,
+			textureId = 93386093621265,
 		},
 		{
 			name = "box_pile_big",
@@ -5671,6 +5960,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 83970025852589,
+			textureId = 132373588888690,
 		},
 		{
 			name = "box_pile_small",
@@ -5686,6 +5977,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 109207796625969,
+			textureId = 74848887791794,
 		},
 		{
 			name = "caution_tape",
@@ -5701,6 +5994,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 110463394087449,
+			textureId = 107108859792865,
 		},
 		{
 			name = "column",
@@ -5716,6 +6011,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 91399503865791,
+			textureId = 113979743661086,
 		},
 		{
 			name = "column_base",
@@ -5731,6 +6028,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 76261311944579,
+			textureId = 88638707055221,
 		},
 		{
 			name = "crate_stack",
@@ -5746,6 +6045,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 111581030265741,
+			textureId = 71386772221137,
 		},
 		{
 			name = "cubbies",
@@ -5756,6 +6057,23 @@ return {
 					name = "Body",
 					center = { 0.0, 3.3, -0.0 },
 					size = { 4.633, 6.6, 3.868 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 104201434506466,
+			textureId = 93263719453333,
+		},
+		{
+			name = "culdesac_end",
+			group = "warehouse",
+			size = { 32.0, 0.7, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.35, -0.0 },
+					size = { 32.0, 0.7, 32.0 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -5776,6 +6094,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 97674923992410,
+			textureId = 135314110053972,
 		},
 		{
 			name = "curtains",
@@ -5791,6 +6111,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 91675264711286,
+			textureId = 102931792190712,
 		},
 		{
 			name = "dept_sign",
@@ -5818,6 +6140,9 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 135597341177010,
+			textureId = 90603120537626,
+			screenId = 91433696410832,
 		},
 		{
 			name = "dock_door",
@@ -5839,6 +6164,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 120518229677085,
+			textureId = 132822125190642,
 		},
 		{
 			name = "door_frame_lone",
@@ -5866,6 +6193,23 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80589363525283,
+			textureId = 130256341458642,
+		},
+		{
+			name = "driveway",
+			group = "warehouse",
+			size = { 16.0, 0.71, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.355, -0.0 },
+					size = { 16.0, 0.71, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 		{
 			name = "drop_ceiling",
@@ -5887,6 +6231,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 136809441514087,
+			textureId = 109218570786360,
 		},
 		{
 			name = "electrical_panel",
@@ -5914,6 +6260,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 138760931764272,
+			textureId = 103056250018867,
 		},
 		{
 			name = "exit_sign",
@@ -5931,6 +6279,23 @@ return {
 					center = { 0.0, 0.65, 0.0 },
 					size = { 2.6, 0.96, 0.56 },
 					pivot = { 0.0, 3.3, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 106421149051807,
+			textureId = 88321345501543,
+		},
+		{
+			name = "fake_tree",
+			group = "warehouse",
+			size = { 9.0, 12.88, 8.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 6.44, -0.0 },
+					size = { 9.0, 12.88, 8.2 },
+					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
@@ -5956,6 +6321,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 95100592201139,
+			textureId = 110805007184835,
 		},
 		{
 			name = "floor_cage",
@@ -5977,6 +6344,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 124002803775600,
+			textureId = 139201605605092,
 		},
 		{
 			name = "floor_carpet",
@@ -5992,6 +6361,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 90331878442924,
+			textureId = 126594803759754,
 		},
 		{
 			name = "floor_carpet_blue",
@@ -6007,6 +6378,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 112081262448783,
+			textureId = 86411725544260,
 		},
 		{
 			name = "floor_carpet_wild",
@@ -6022,6 +6395,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 137972106777725,
+			textureId = 97596015862285,
 		},
 		{
 			name = "floor_checker",
@@ -6037,6 +6412,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 87156507899728,
+			textureId = 117102394630391,
 		},
 		{
 			name = "floor_checker_color",
@@ -6052,6 +6429,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 97952611455753,
+			textureId = 125465654976101,
 		},
 		{
 			name = "floor_cracked",
@@ -6067,6 +6446,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 119082833827813,
+			textureId = 116463271365481,
 		},
 		{
 			name = "floor_grass",
@@ -6082,6 +6463,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 120544965588230,
+			textureId = 117017556990280,
 		},
 		{
 			name = "floor_hatch",
@@ -6103,6 +6486,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80996368980128,
+			textureId = 137577800434251,
 		},
 		{
 			name = "floor_lane",
@@ -6118,6 +6503,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 97583195091122,
+			textureId = 111615681835639,
 		},
 		{
 			name = "floor_marble",
@@ -6133,6 +6520,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 103852862038158,
+			textureId = 98006653946954,
 		},
 		{
 			name = "floor_pool",
@@ -6148,6 +6537,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 105160562931988,
+			textureId = 93461064421632,
 		},
 		{
 			name = "floor_tile",
@@ -6163,6 +6554,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 115439997208703,
+			textureId = 106670091884224,
 		},
 		{
 			name = "floor_wet",
@@ -6184,6 +6577,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 110071140965915,
+			textureId = 117007099908681,
 		},
 		{
 			name = "floor_wood",
@@ -6199,6 +6594,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 128685991436804,
+			textureId = 123295850911251,
 		},
 		{
 			name = "furniture_heap",
@@ -6214,16 +6611,39 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 115000999291786,
+			textureId = 104840207754913,
+		},
+		{
+			name = "garden_sprinkler",
+			group = "warehouse",
+			size = { 1.425, 0.688, 1.55 },
+			parts = {
+				{
+					name = "Body",
+					center = { -0.0, 0.26, -0.0 },
+					size = { 1.039, 0.52, 1.55 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Spin",
+					center = { -0.0, 0.59, 0.004 },
+					size = { 1.425, 0.196, 1.234 },
+					pivot = { -0.0, 0.55, 0.175 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 		{
 			name = "giant_chair",
 			group = "warehouse",
-			size = { 8.75, 17.742, 10.032 },
+			size = { 8.888, 17.792, 9.873 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 8.871, -0.0 },
-					size = { 8.75, 17.742, 10.032 },
+					center = { 0.0, 8.896, -0.0 },
+					size = { 8.888, 17.792, 9.873 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -6244,6 +6664,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 79377586258248,
+			textureId = 77960379225650,
 		},
 		{
 			name = "giant_pillar",
@@ -6259,6 +6681,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 74077569437298,
+			textureId = 95163217269753,
 		},
 		{
 			name = "giant_pillar_base",
@@ -6274,6 +6698,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 134885308780776,
+			textureId = 92722392883830,
 		},
 		{
 			name = "gondola_empty",
@@ -6289,6 +6715,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 96648414340721,
+			textureId = 76161108153121,
 		},
 		{
 			name = "gondola_end",
@@ -6304,6 +6732,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 123869899802987,
+			textureId = 118390060427874,
 		},
 		{
 			name = "gondola_shelf",
@@ -6319,6 +6749,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 97624871358470,
+			textureId = 102424287885836,
 		},
 		{
 			name = "handrail",
@@ -6334,6 +6766,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 96414834396648,
+			textureId = 136482623436369,
 		},
 		{
 			name = "hazard_barrier",
@@ -6349,6 +6783,113 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 74656484478208,
+			textureId = 125403734568487,
+		},
+		{
+			name = "hedge",
+			group = "warehouse",
+			size = { 6.0, 3.1, 2.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.55, -0.0 },
+					size = { 6.0, 3.1, 2.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "house_garage",
+			group = "warehouse",
+			size = { 26.2, 14.325, 7.938 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 7.162, -0.0 },
+					size = { 26.2, 14.325, 7.938 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Door",
+					center = { -5.5, 4.7, 2.189 },
+					size = { 9.9, 8.0, 0.39 },
+					pivot = { -5.5, 8.7, 2.094 },
+				},
+				{
+					name = "Glow",
+					center = { 8.6, 4.9, 2.214 },
+					size = { 4.0, 3.8, 0.04 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "house_ranch",
+			group = "warehouse",
+			size = { 26.2, 13.425, 7.977 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 6.712, -0.0 },
+					size = { 26.2, 13.425, 7.977 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 4.9, 2.208 },
+					size = { 17.8, 3.8, 0.04 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "house_tiny",
+			group = "warehouse",
+			size = { 11.04, 9.537, 5.325 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.769, -0.0 },
+					size = { 11.04, 9.537, 5.325 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -2.9, 2.65, 1.537 },
+					size = { 1.4, 1.5, 0.04 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "house_twostory",
+			group = "warehouse",
+			size = { 22.99, 24.432, 9.4 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 12.216, -0.0 },
+					size = { 22.99, 24.432, 9.4 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -6.0, 12.7, 2.32 },
+					size = { 3.2, 4.2, 0.04 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 		{
 			name = "junk_pile",
@@ -6359,6 +6900,23 @@ return {
 					name = "Body",
 					center = { 0.0, 1.396, -0.0 },
 					size = { 8.047, 2.793, 7.296 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 135297210129440,
+			textureId = 87935447205088,
+		},
+		{
+			name = "lawn_flamingo",
+			group = "warehouse",
+			size = { 2.17, 3.77, 0.165 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.885, -0.0 },
+					size = { 2.17, 3.77, 0.165 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -6385,6 +6943,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 117638753682569,
+			textureId = 72291038390089,
 		},
 		{
 			name = "light_emergency",
@@ -6406,6 +6966,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 136004835284753,
+			textureId = 98118611407076,
 		},
 		{
 			name = "light_highbay",
@@ -6427,6 +6989,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80691897650595,
+			textureId = 130013543810325,
 		},
 		{
 			name = "light_strip",
@@ -6448,6 +7012,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 72780610896326,
+			textureId = 98610234876238,
 		},
 		{
 			name = "light_strip_dead",
@@ -6463,6 +7029,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 110144362114741,
+			textureId = 82944732803453,
 		},
 		{
 			name = "light_troffer",
@@ -6484,6 +7052,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 101751659700023,
+			textureId = 80212229048357,
 		},
 		{
 			name = "lone_display",
@@ -6494,6 +7064,23 @@ return {
 					name = "Body",
 					center = { 0.0, 2.04, -0.0 },
 					size = { 3.3, 4.08, 3.3 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 98106197007917,
+			textureId = 127946145953897,
+		},
+		{
+			name = "mailbox",
+			group = "warehouse",
+			size = { 1.0, 4.18, 1.9 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.09, -0.0 },
+					size = { 1.0, 4.18, 1.9 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -6520,6 +7107,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 119651827720346,
+			textureId = 106988665200794,
 		},
 		{
 			name = "oil_drum",
@@ -6535,6 +7124,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 90393416795501,
+			textureId = 78895259088275,
 		},
 		{
 			name = "pallet",
@@ -6550,6 +7141,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 101710688020691,
+			textureId = 85815709828334,
 		},
 		{
 			name = "pallet_boxes",
@@ -6565,6 +7158,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 139734809773906,
+			textureId = 110262609371710,
 		},
 		{
 			name = "pallet_jack",
@@ -6580,6 +7175,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 90974272676098,
+			textureId = 102646556769699,
 		},
 		{
 			name = "pallet_sacks",
@@ -6595,6 +7192,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80954878115310,
+			textureId = 75121407582066,
 		},
 		{
 			name = "pallet_tower",
@@ -6610,6 +7209,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 127458698464418,
+			textureId = 117695221816518,
 		},
 		{
 			name = "pallet_wrapped",
@@ -6625,6 +7226,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 81373470286523,
+			textureId = 86253118966942,
 		},
 		{
 			name = "picket_fence",
@@ -6640,6 +7243,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 120291665735191,
+			textureId = 126387426496269,
 		},
 		{
 			name = "picture_frame",
@@ -6661,6 +7266,9 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80895329900868,
+			textureId = 100311015207971,
+			screenId = 74806796822016,
 		},
 		{
 			name = "pink_bench",
@@ -6672,6 +7280,29 @@ return {
 					center = { 0.0, 1.425, -0.0 },
 					size = { 8.2, 2.85, 2.288 },
 					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 131737023328354,
+			textureId = 135532535345690,
+		},
+		{
+			name = "porch_light",
+			group = "warehouse",
+			size = { 0.84, 1.11, 1.17 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.555, -0.0 },
+					size = { 0.84, 1.11, 1.17 },
+					pivot = { 0.0, 0.5, -0.585 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.5, 0.165 },
+					size = { 0.5, 0.74, 0.5 },
+					pivot = { 0.0, 0.5, -0.585 },
 				},
 			},
 			clips = {},
@@ -6691,6 +7322,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 118592985941342,
+			textureId = 91445745953734,
 		},
 		{
 			name = "rack_bay_full",
@@ -6706,6 +7339,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 79406942480593,
+			textureId = 84706936023092,
 		},
 		{
 			name = "rack_bay_furniture",
@@ -6721,6 +7356,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 74690118958860,
+			textureId = 77360714477730,
 		},
 		{
 			name = "rack_bay_sparse",
@@ -6736,6 +7373,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 113680175272241,
+			textureId = 93048937937259,
 		},
 		{
 			name = "rack_collapsed",
@@ -6751,6 +7390,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 72653360557769,
+			textureId = 81343772129847,
 		},
 		{
 			name = "rack_end",
@@ -6766,6 +7407,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 95977609403934,
+			textureId = 78377008643248,
 		},
 		{
 			name = "rack_toppled_beam",
@@ -6781,6 +7424,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 116676442512292,
+			textureId = 83801207807629,
 		},
 		{
 			name = "ramp",
@@ -6796,6 +7441,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 131019707088159,
+			textureId = 108863435321233,
 		},
 		{
 			name = "road_sign",
@@ -6817,6 +7464,9 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 124270080763385,
+			textureId = 102107365398796,
+			screenId = 139540082934902,
 		},
 		{
 			name = "rolling_ladder",
@@ -6832,6 +7482,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 107260178733678,
+			textureId = 106516742258996,
 		},
 		{
 			name = "roof_panel",
@@ -6847,6 +7499,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 97335407477812,
+			textureId = 104211206857830,
 		},
 		{
 			name = "roof_skylight",
@@ -6868,6 +7522,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 102340785392657,
+			textureId = 126953693762095,
 		},
 		{
 			name = "roof_truss",
@@ -6883,6 +7539,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 105936748788458,
+			textureId = 134168619154789,
 		},
 		{
 			name = "sale_banner",
@@ -6904,6 +7562,9 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 85406824206016,
+			textureId = 131513366993339,
+			screenId = 75838151120212,
 		},
 		{
 			name = "shopping_cart",
@@ -6919,6 +7580,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 96321729807646,
+			textureId = 137850480994282,
 		},
 		{
 			name = "shutter_front",
@@ -6946,6 +7609,24 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 133694863654682,
+			textureId = 126216850264472,
+			screenId = 134097269425358,
+		},
+		{
+			name = "sidewalk",
+			group = "warehouse",
+			size = { 32.0, 0.71, 5.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.355, -0.0 },
+					size = { 32.0, 0.71, 5.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 		{
 			name = "stair_flight",
@@ -6961,6 +7642,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 125308621987363,
+			textureId = 102441944204073,
 		},
 		{
 			name = "star_decal",
@@ -6972,6 +7655,110 @@ return {
 					center = { 0.0, 1.816, -0.0 },
 					size = { 6.658, 3.632, 0.05 },
 					pivot = { -0.12, 1.694, -0.025 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 106976117447284,
+			textureId = 132320518605674,
+		},
+		{
+			name = "street_curb",
+			group = "warehouse",
+			size = { 32.0, 0.71, 6.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.355, -0.0 },
+					size = { 32.0, 0.71, 6.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "street_tile",
+			group = "warehouse",
+			size = { 32.0, 0.305, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.152, -0.0 },
+					size = { 32.0, 0.305, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "streetlamp",
+			group = "warehouse",
+			size = { 1.848, 13.125, 2.255 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 6.562, -0.0 },
+					size = { 1.848, 13.125, 2.255 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -0.024, 11.4, -0.227 },
+					size = { 1.16, 1.8, 1.16 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "sun_panel",
+			group = "warehouse",
+			size = { 32.0, 2.4, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.2, -0.0 },
+					size = { 32.0, 2.4, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.35, -0.0 },
+					size = { 29.6, 0.1, 29.6 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "tricycle",
+			group = "warehouse",
+			size = { 1.6, 1.87, 2.7 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.935, -0.0 },
+					size = { 1.6, 1.87, 2.7 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "turf_tile",
+			group = "warehouse",
+			size = { 32.015, 1.3, 32.013 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.65, -0.0 },
+					size = { 32.015, 1.3, 32.013 },
+					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
@@ -6991,6 +7778,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 74240023708770,
+			textureId = 121433940412191,
 		},
 		{
 			name = "wall_curved",
@@ -7006,6 +7795,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 108146955630289,
+			textureId = 92302178083880,
 		},
 		{
 			name = "wall_lower",
@@ -7021,6 +7812,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 118389458078732,
+			textureId = 130538310662155,
 		},
 		{
 			name = "wall_lower_damaged",
@@ -7036,6 +7829,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 138643512145047,
+			textureId = 101323323349718,
 		},
 		{
 			name = "wall_oily",
@@ -7051,6 +7846,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 101574068687602,
+			textureId = 130594850324252,
 		},
 		{
 			name = "wall_pastel",
@@ -7066,6 +7863,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80161921367661,
+			textureId = 74701815535439,
 		},
 		{
 			name = "wall_sky",
@@ -7087,6 +7886,9 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 99385919471297,
+			textureId = 87623452813789,
+			screenId = 80234883027233,
 		},
 		{
 			name = "wall_tile",
@@ -7102,6 +7904,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 76273811454816,
+			textureId = 138330215929954,
 		},
 		{
 			name = "wall_upper",
@@ -7117,6 +7921,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 133301378934463,
+			textureId = 136477020116418,
 		},
 		{
 			name = "wall_windows",
@@ -7138,6 +7944,23 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 123658591235742,
+			textureId = 90427501875534,
+		},
+		{
+			name = "welcome_mat",
+			group = "warehouse",
+			size = { 3.2, 0.13, 2.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.065, -0.0 },
+					size = { 3.2, 0.13, 2.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 		{
 			name = "wet_floor_sign",
@@ -7153,926 +7976,1157 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 112478026697907,
+			textureId = 78131107726716,
 		},
 	},
 	sounds = {
 		{
 			name = "bite",
 			group = "food",
+			assetId = 74035063593872,
 		},
 		{
 			name = "can_pop",
 			group = "food",
+			assetId = 80842310888843,
 		},
 		{
 			name = "cap_twist",
 			group = "food",
+			assetId = 102506635223771,
 		},
 		{
 			name = "cardboard_lid",
 			group = "food",
+			assetId = 117307294020575,
 		},
 		{
 			name = "cereal_rattle",
 			group = "food",
+			assetId = 90978133954993,
 		},
 		{
 			name = "chew",
 			group = "food",
+			assetId = 91316975557460,
 		},
 		{
 			name = "chips_crinkle",
 			group = "food",
+			assetId = 82743555378085,
 		},
 		{
 			name = "crunch",
 			group = "food",
+			assetId = 120675928475930,
 		},
 		{
 			name = "energy_crack_fizz",
 			group = "food",
+			assetId = 95955570597852,
 		},
 		{
 			name = "glug",
 			group = "food",
+			assetId = 123687712457194,
 		},
 		{
 			name = "jar_twist",
 			group = "food",
+			assetId = 115707546882285,
 		},
 		{
 			name = "popcorn_popping",
 			group = "food",
+			assetId = 88257664877546,
 		},
 		{
 			name = "straw_slurp",
 			group = "food",
+			assetId = 123438455960495,
 		},
 		{
 			name = "tin_lid",
 			group = "food",
+			assetId = 114506936464686,
 		},
 		{
 			name = "wrapper_crinkle",
 			group = "food",
+			assetId = 103974099512545,
 		},
 		{
 			name = "arcade_coin",
 			group = "fun",
+			assetId = 126188234773698,
 		},
 		{
 			name = "arcade_joystick",
 			group = "fun",
+			assetId = 90774637494272,
 		},
 		{
 			name = "boombox_button",
 			group = "fun",
+			assetId = 136293554222185,
 		},
 		{
 			name = "boombox_tape_door",
 			group = "fun",
+			assetId = 79659932862126,
 		},
 		{
 			name = "cam_servo",
 			group = "fun",
+			assetId = 120281273877437,
 		},
 		{
 			name = "clock_tick_fast_loop",
 			group = "fun",
+			assetId = 103792042396963,
 		},
 		{
 			name = "clock_tick_loop",
 			group = "fun",
+			assetId = 70971992443741,
 		},
 		{
 			name = "disco_motor_loop",
 			group = "fun",
+			assetId = 82391510165873,
 		},
 		{
 			name = "duck_squeak",
 			group = "fun",
+			assetId = 106049357435185,
 		},
 		{
 			name = "fan_click",
 			group = "fun",
+			assetId = 80716471100665,
 		},
 		{
 			name = "fan_whir_loop",
 			group = "fun",
+			assetId = 73053670907602,
 		},
 		{
 			name = "jack_boing",
 			group = "fun",
+			assetId = 84551387710836,
 		},
 		{
 			name = "jack_crank",
 			group = "fun",
+			assetId = 85171393209890,
 		},
 		{
 			name = "lava_bubble_loop",
 			group = "fun",
+			assetId = 89999670695113,
 		},
 		{
 			name = "lava_switch",
 			group = "fun",
+			assetId = 124983365245360,
 		},
 		{
 			name = "monitor_static_loop",
 			group = "fun",
+			assetId = 133111438650185,
 		},
 		{
 			name = "neon_buzz_loop",
 			group = "fun",
+			assetId = 88350401332940,
 		},
 		{
 			name = "neon_crackle",
 			group = "fun",
+			assetId = 101243588226703,
 		},
 		{
 			name = "phone_dial",
 			group = "fun",
+			assetId = 72248705828828,
 		},
 		{
 			name = "phone_handset",
 			group = "fun",
+			assetId = 127332493314883,
 		},
 		{
 			name = "phone_ring",
 			group = "fun",
+			assetId = 98352064383272,
 		},
 		{
 			name = "press_button_click",
 			group = "fun",
+			assetId = 74254999349324,
 		},
 		{
 			name = "radio_crank",
 			group = "fun",
+			assetId = 112937178186379,
 		},
 		{
 			name = "radio_tune_squeal",
 			group = "fun",
+			assetId = 106082274105236,
 		},
 		{
 			name = "record_crackle_loop",
 			group = "fun",
+			assetId = 98764602625004,
 		},
 		{
 			name = "record_lid",
 			group = "fun",
+			assetId = 75197969327930,
 		},
 		{
 			name = "spray_hiss",
 			group = "fun",
+			assetId = 83922723451344,
 		},
 		{
 			name = "spray_rattle",
 			group = "fun",
+			assetId = 118121924250350,
 		},
 		{
 			name = "vending_beep",
 			group = "fun",
+			assetId = 113158629971728,
 		},
 		{
 			name = "vending_thud",
 			group = "fun",
+			assetId = 77018662809441,
 		},
 		{
 			name = "vending_whirr",
 			group = "fun",
+			assetId = 118181853266663,
 		},
 		{
 			name = "walkie_beep",
 			group = "fun",
+			assetId = 102930852745587,
 		},
 		{
 			name = "walkie_click",
 			group = "fun",
+			assetId = 127794356310506,
 		},
 		{
 			name = "walkie_static",
 			group = "fun",
+			assetId = 81092598687695,
 		},
 		{
 			name = "blaster_thump",
 			group = "gear",
+			assetId = 99926890758788,
 		},
 		{
 			name = "blaster_zap",
 			group = "gear",
+			assetId = 120417259136225,
 		},
 		{
 			name = "cell_eject",
 			group = "gear",
+			assetId = 126220538349952,
 		},
 		{
 			name = "crate_lid",
 			group = "gear",
+			assetId = 111803348458144,
 		},
 		{
 			name = "cuffs_lock",
 			group = "gear",
+			assetId = 131831089968798,
 		},
 		{
 			name = "cuffs_rattle",
 			group = "gear",
+			assetId = 102275371977321,
 		},
 		{
 			name = "dart_pop",
 			group = "gear",
+			assetId = 113579670455801,
 		},
 		{
 			name = "disruptor_charge",
 			group = "gear",
+			assetId = 97223815402988,
 		},
 		{
 			name = "disruptor_crack",
 			group = "gear",
+			assetId = 88423742913011,
 		},
 		{
 			name = "emp_charge",
 			group = "gear",
+			assetId = 126413029210368,
 		},
 		{
 			name = "emp_tab",
 			group = "gear",
+			assetId = 131050271599128,
 		},
 		{
 			name = "emp_thump",
 			group = "gear",
+			assetId = 134486222542363,
 		},
 		{
 			name = "flare_burn_loop",
 			group = "gear",
+			assetId = 87871535597138,
 		},
 		{
 			name = "flare_pop",
 			group = "gear",
+			assetId = 78612957490661,
 		},
 		{
 			name = "flashlight_click",
 			group = "gear",
+			assetId = 102480904694272,
 		},
 		{
 			name = "locker_clang",
 			group = "gear",
+			assetId = 121925049267035,
 		},
 		{
 			name = "medkit_latch",
 			group = "gear",
+			assetId = 96606344747817,
 		},
 		{
 			name = "nail_gun",
 			group = "gear",
+			assetId = 75343123704751,
 		},
 		{
 			name = "noise_maker_bell",
 			group = "gear",
+			assetId = 102487629512904,
 		},
 		{
 			name = "noise_maker_tick_loop",
 			group = "gear",
+			assetId = 111748463886452,
 		},
 		{
 			name = "noise_maker_wind",
 			group = "gear",
+			assetId = 100551821077199,
 		},
 		{
 			name = "shell_clink",
 			group = "gear",
+			assetId = 76846330256831,
 		},
 		{
 			name = "smoke_hiss",
 			group = "gear",
+			assetId = 108431207436427,
 		},
 		{
 			name = "smoke_pin",
 			group = "gear",
+			assetId = 90886832369753,
 		},
 		{
 			name = "tape_rip",
 			group = "gear",
+			assetId = 72274835656543,
 		},
 		{
 			name = "velcro",
 			group = "gear",
+			assetId = 108936515870959,
 		},
 		{
 			name = "visor_clack",
 			group = "gear",
+			assetId = 78998585615256,
 		},
 		{
 			name = "zipper",
 			group = "gear",
+			assetId = 127186175908670,
 		},
 		{
 			name = "cabinet_creak",
 			group = "kitchen",
+			assetId = 76656595491198,
 		},
 		{
 			name = "cabinet_shut",
 			group = "kitchen",
+			assetId = 130509130333035,
 		},
 		{
 			name = "fridge_hum_loop",
 			group = "kitchen",
+			assetId = 99946316584987,
 		},
 		{
 			name = "fridge_jars",
 			group = "kitchen",
+			assetId = 112195041072360,
 		},
 		{
 			name = "fridge_open",
 			group = "kitchen",
+			assetId = 88446456559568,
 		},
 		{
 			name = "microwave_ding",
 			group = "kitchen",
+			assetId = 126234727100929,
 		},
 		{
 			name = "microwave_door",
 			group = "kitchen",
+			assetId = 135456291788396,
 		},
 		{
 			name = "microwave_hum_loop",
 			group = "kitchen",
+			assetId = 95665276213978,
 		},
 		{
 			name = "microwave_plate_squeak",
 			group = "kitchen",
+			assetId = 136681113120551,
 		},
 		{
 			name = "oven_door",
 			group = "kitchen",
+			assetId = 119366863396919,
 		},
 		{
 			name = "stove_burner_loop",
 			group = "kitchen",
+			assetId = 123370701402352,
 		},
 		{
 			name = "stove_ignite",
 			group = "kitchen",
+			assetId = 129761374352119,
 		},
 		{
 			name = "toaster_lever",
 			group = "kitchen",
+			assetId = 135940137866730,
 		},
 		{
 			name = "toaster_pop",
 			group = "kitchen",
+			assetId = 95524108625979,
 		},
 		{
 			name = "toaster_tick_loop",
 			group = "kitchen",
+			assetId = 80527761877324,
 		},
 		{
 			name = "alarm_clock_beep",
 			group = "living",
+			assetId = 135187731463503,
 		},
 		{
 			name = "bulb_buzz_loop",
 			group = "living",
+			assetId = 129506106566538,
 		},
 		{
 			name = "cushion_squish",
 			group = "living",
+			assetId = 109258976846604,
 		},
 		{
 			name = "drawer_metal",
 			group = "living",
+			assetId = 78289484197332,
 		},
 		{
 			name = "drawer_wood",
 			group = "living",
+			assetId = 92547828134610,
 		},
 		{
 			name = "hangers_clink",
 			group = "living",
+			assetId = 133929877190545,
 		},
 		{
 			name = "lamp_chain_click",
 			group = "living",
+			assetId = 102417335634740,
 		},
 		{
 			name = "sheets_rustle",
 			group = "living",
+			assetId = 132580411255280,
 		},
 		{
 			name = "spring_creak",
 			group = "living",
+			assetId = 100951354035073,
 		},
 		{
 			name = "tv_channel_thunk",
 			group = "living",
+			assetId = 75415973034816,
 		},
 		{
 			name = "tv_static_burst",
 			group = "living",
+			assetId = 110182470813163,
 		},
 		{
 			name = "wardrobe_creak",
 			group = "living",
+			assetId = 135797634448660,
 		},
 		{
 			name = "night_sampler",
 			group = "misc",
+			assetId = 120134863745629,
 		},
 		{
 			name = "night_tricks_sampler",
 			group = "misc",
+			assetId = 112661227635903,
 		},
 		{
 			name = "chair_roll",
 			group = "office",
+			assetId = 90406977427902,
 		},
 		{
 			name = "chair_squeak",
 			group = "office",
+			assetId = 135660904505712,
 		},
 		{
 			name = "computer_chime",
 			group = "office",
+			assetId = 122222628282347,
 		},
 		{
 			name = "computer_fan_loop",
 			group = "office",
+			assetId = 80048157917139,
 		},
 		{
 			name = "marker_squeak",
 			group = "office",
+			assetId = 84255778059192,
 		},
 		{
 			name = "pipe_knock",
 			group = "office",
+			assetId = 81041940346591,
 		},
 		{
 			name = "shower_rattle",
 			group = "office",
+			assetId = 120469852177125,
 		},
 		{
 			name = "shower_slide",
 			group = "office",
+			assetId = 96467006786289,
 		},
 		{
 			name = "tap_squeak",
 			group = "office",
+			assetId = 97496123438186,
 		},
 		{
 			name = "toilet_flush",
 			group = "office",
+			assetId = 113346758341630,
 		},
 		{
 			name = "toilet_lid",
 			group = "office",
+			assetId = 140447397972630,
 		},
 		{
 			name = "toy_chest_creak",
 			group = "office",
+			assetId = 97241359251323,
 		},
 		{
 			name = "water_running_loop",
 			group = "office",
+			assetId = 101092214961658,
 		},
 		{
 			name = "breath_heavy_loop",
 			group = "players",
+			assetId = 85034685595467,
 		},
 		{
 			name = "breath_release",
 			group = "players",
+			assetId = 137820624424400,
 		},
 		{
 			name = "crouch_step",
 			group = "players",
+			assetId = 122955771425890,
 		},
 		{
 			name = "down_zap",
 			group = "players",
+			assetId = 124005521249911,
 		},
 		{
 			name = "flashlight_flicker",
 			group = "players",
+			assetId = 132927815848716,
 		},
 		{
 			name = "heartbeat_loop",
 			group = "players",
+			assetId = 103991414368753,
 		},
 		{
 			name = "hide_creak",
 			group = "players",
+			assetId = 87195278594381,
 		},
 		{
 			name = "hold_breath",
 			group = "players",
+			assetId = 134199168949384,
 		},
 		{
 			name = "land_thud",
 			group = "players",
+			assetId = 89594629170099,
 		},
 		{
 			name = "prop_cardboard_thump",
 			group = "players",
+			assetId = 75357468509096,
 		},
 		{
 			name = "prop_metal_clang",
 			group = "players",
+			assetId = 136402674764729,
 		},
 		{
 			name = "prop_wood_knock",
 			group = "players",
+			assetId = 113887023982926,
 		},
 		{
 			name = "psst",
 			group = "players",
+			assetId = 72532151909609,
 		},
 		{
 			name = "run_concrete",
 			group = "players",
+			assetId = 133127962563066,
 		},
 		{
 			name = "run_metal",
 			group = "players",
+			assetId = 96318332527490,
 		},
 		{
 			name = "run_wood",
 			group = "players",
+			assetId = 93997249723795,
 		},
 		{
 			name = "stack_crash",
 			group = "players",
+			assetId = 135942616474184,
 		},
 		{
 			name = "walk_concrete",
 			group = "players",
+			assetId = 124747520110728,
 		},
 		{
 			name = "walk_metal",
 			group = "players",
+			assetId = 86576641643211,
 		},
 		{
 			name = "walk_wood",
 			group = "players",
+			assetId = 74261871337584,
 		},
 		{
 			name = "brute_groan",
 			group = "robots",
+			assetId = 121926839372187,
 		},
 		{
 			name = "brute_thud",
 			group = "robots",
+			assetId = 119263010523639,
 		},
 		{
 			name = "chase_servo_scream",
 			group = "robots",
+			assetId = 110349771813157,
 		},
 		{
 			name = "chase_steps",
 			group = "robots",
+			assetId = 132579789546999,
 		},
 		{
 			name = "crawler_skitter_loop",
 			group = "robots",
+			assetId = 129177683325847,
 		},
 		{
 			name = "curious_beep_1",
 			group = "robots",
+			assetId = 80640581588348,
 		},
 		{
 			name = "curious_beep_2",
 			group = "robots",
+			assetId = 113981036217790,
 		},
 		{
 			name = "curious_beep_3",
 			group = "robots",
+			assetId = 80152316730961,
 		},
 		{
 			name = "drag",
 			group = "robots",
+			assetId = 109214577972447,
 		},
 		{
 			name = "emp_shutdown",
 			group = "robots",
+			assetId = 116219883482597,
 		},
 		{
 			name = "error_stall",
 			group = "robots",
+			assetId = 140013043287739,
 		},
 		{
 			name = "fumble",
 			group = "robots",
+			assetId = 127226965760038,
 		},
 		{
 			name = "grab_clank",
 			group = "robots",
+			assetId = 126545407886948,
 		},
 		{
 			name = "heavy_step",
 			group = "robots",
+			assetId = 140278800213667,
 		},
 		{
 			name = "hum_loop",
 			group = "robots",
+			assetId = 134796717209411,
 		},
 		{
 			name = "jingle_distorted",
 			group = "robots",
+			assetId = 97656652677433,
 		},
 		{
 			name = "scanner_ping",
 			group = "robots",
+			assetId = 89116867981817,
 		},
 		{
 			name = "scout_eye_whine",
 			group = "robots",
+			assetId = 126453422207456,
 		},
 		{
 			name = "scout_step",
 			group = "robots",
+			assetId = 98987923375500,
 		},
 		{
 			name = "scrape",
 			group = "robots",
+			assetId = 140381889758100,
 		},
 		{
 			name = "servo_whirr_1",
 			group = "robots",
+			assetId = 96495886367795,
 		},
 		{
 			name = "servo_whirr_2",
 			group = "robots",
+			assetId = 118321188591677,
 		},
 		{
 			name = "spot_alert",
 			group = "robots",
+			assetId = 95338565831027,
 		},
 		{
 			name = "distant_hum_loop",
 			group = "warehouse",
+			assetId = 91293495891472,
 		},
 		{
 			name = "fuel_pour",
 			group = "warehouse",
+			assetId = 75391890770342,
 		},
 		{
 			name = "generator_die",
 			group = "warehouse",
+			assetId = 80422040172950,
 		},
 		{
 			name = "generator_pull_fail",
 			group = "warehouse",
+			assetId = 72697015980486,
 		},
 		{
 			name = "generator_run_loop",
 			group = "warehouse",
+			assetId = 123277260469654,
 		},
 		{
 			name = "generator_sputter",
 			group = "warehouse",
+			assetId = 93463788451350,
 		},
 		{
 			name = "generator_start",
 			group = "warehouse",
+			assetId = 110211245713173,
 		},
 		{
 			name = "lights_out_clunk",
 			group = "warehouse",
+			assetId = 80322198967476,
 		},
 		{
 			name = "night_ambience_loop",
 			group = "warehouse",
+			assetId = 119360086608840,
 		},
 		{
 			name = "pa_chime",
 			group = "warehouse",
+			assetId = 85184878348005,
 		},
 		{
 			name = "pa_glitch",
 			group = "warehouse",
+			assetId = 112824249892167,
 		},
 		{
 			name = "phone_ring_far",
 			group = "warehouse",
+			assetId = 90757242321502,
 		},
 		{
 			name = "rain_roof_loop",
 			group = "warehouse",
+			assetId = 104249857948529,
 		},
 		{
 			name = "shelf_scrape_far",
 			group = "warehouse",
+			assetId = 73152638072735,
 		},
 		{
 			name = "shelf_thud_far",
 			group = "warehouse",
+			assetId = 125507085637552,
 		},
 		{
 			name = "siren",
 			group = "warehouse",
+			assetId = 115848691634968,
 		},
 		{
 			name = "store_jingle",
 			group = "warehouse",
+			assetId = 80666929600073,
 		},
 		{
 			name = "tape_hiss_loop",
 			group = "warehouse",
+			assetId = 100063270008484,
 		},
 		{
 			name = "tape_insert",
 			group = "warehouse",
+			assetId = 109652635121648,
 		},
 		{
 			name = "thunder_far",
 			group = "warehouse",
+			assetId = 71928739040178,
 		},
 		{
 			name = "thunder_near",
 			group = "warehouse",
+			assetId = 80574621582869,
 		},
 	},
 	images = {
 		{
 			name = "dont_panic",
 			kind = "poster",
+			assetId = 75491104287499,
 		},
 		{
 			name = "dont_panic_defaced",
 			kind = "poster",
+			assetId = 89021569586654,
 		},
 		{
 			name = "helper_of_the_month",
 			kind = "poster",
+			assetId = 136188557892874,
 		},
 		{
 			name = "helper_of_the_month_defaced",
 			kind = "poster",
+			assetId = 82411890227298,
 		},
 		{
 			name = "hug_your_toaster",
 			kind = "poster",
+			assetId = 85883961435903,
 		},
 		{
 			name = "lost_dog",
 			kind = "poster",
+			assetId = 78941218244031,
 		},
 		{
 			name = "mega_sale",
 			kind = "poster",
+			assetId = 139662013003254,
 		},
 		{
 			name = "sleep_2",
 			kind = "poster",
+			assetId = 109623902009770,
 		},
 		{
 			name = "smile_on_camera",
 			kind = "poster",
+			assetId = 90518661406169,
 		},
 		{
 			name = "smile_on_camera_defaced",
 			kind = "poster",
+			assetId = 114740375537696,
 		},
 		{
 			name = "think_less",
 			kind = "poster",
+			assetId = 70664505796458,
 		},
 		{
 			name = "think_less_defaced",
 			kind = "poster",
+			assetId = 81695723930834,
 		},
 		{
 			name = "arcade_title",
 			kind = "screen",
+			assetId = 72734869387833,
 		},
 		{
 			name = "blob_lamp_ad",
 			kind = "screen",
+			assetId = 71683186696134,
 		},
 		{
 			name = "clock_face",
 			kind = "screen",
+			assetId = 128789687272787,
 		},
 		{
 			name = "cooking_with_toast",
 			kind = "screen",
+			assetId = 74913710181923,
 		},
 		{
 			name = "desktop",
 			kind = "screen",
+			assetId = 105980722110478,
 		},
 		{
 			name = "helpbot_ad",
 			kind = "screen",
+			assetId = 107747803856675,
 		},
 		{
 			name = "lore_2026",
 			kind = "screen",
+			assetId = 106924953710273,
 		},
 		{
 			name = "lore_2027",
 			kind = "screen",
+			assetId = 100869224558312,
 		},
 		{
 			name = "lore_2028",
 			kind = "screen",
+			assetId = 110027079242634,
 		},
 		{
 			name = "lore_2029",
 			kind = "screen",
+			assetId = 94686119588005,
 		},
 		{
 			name = "monitor_view",
 			kind = "screen",
+			assetId = 129669410909005,
 		},
 		{
 			name = "painting",
 			kind = "screen",
+			assetId = 98497443509080,
 		},
 		{
 			name = "right_back",
 			kind = "screen",
+			assetId = 81069026280357,
 		},
 		{
 			name = "static",
 			kind = "screen",
+			assetId = 92151181684703,
 		},
 		{
 			name = "test_pattern",
 			kind = "screen",
+			assetId = 116447589254228,
 		},
 		{
 			name = "weather",
 			kind = "screen",
+			assetId = 76624712044665,
 		},
 		{
 			name = "whiteboard",
 			kind = "screen",
+			assetId = 122897741093993,
 		},
 		{
 			name = "arrow",
 			kind = "scrawl",
+			assetId = 93147158965829,
 		},
 		{
 			name = "claw_marks",
 			kind = "scrawl",
+			assetId = 73077803721385,
 		},
 		{
 			name = "dont_sleep",
 			kind = "scrawl",
+			assetId = 95663634849546,
 		},
 		{
 			name = "fog_found_you",
 			kind = "scrawl",
+			assetId = 72388168445404,
 		},
 		{
 			name = "hide",
 			kind = "scrawl",
+			assetId = 71318735173166,
 		},
 		{
 			name = "lights_lie",
 			kind = "scrawl",
+			assetId = 99887901215181,
 		},
 		{
 			name = "no_way_out",
 			kind = "scrawl",
+			assetId = 126848188596888,
 		},
 		{
 			name = "not_safe",
 			kind = "scrawl",
+			assetId = 102648410663722,
 		},
 		{
 			name = "oil_drag_mark",
 			kind = "scrawl",
+			assetId = 103762612444002,
 		},
 		{
 			name = "oil_handprint",
 			kind = "scrawl",
+			assetId = 119900773926848,
 		},
 		{
 			name = "oil_handprints_sliding",
 			kind = "scrawl",
+			assetId = 92297475863499,
 		},
 		{
 			name = "oil_splat",
 			kind = "scrawl",
+			assetId = 76796354821604,
 		},
 		{
 			name = "question_mark",
 			kind = "scrawl",
+			assetId = 95266703130989,
 		},
 		{
 			name = "run",
 			kind = "scrawl",
+			assetId = 103837306615212,
 		},
 		{
 			name = "stay_quiet",
 			kind = "scrawl",
+			assetId = 131408620313488,
 		},
 		{
 			name = "tally",
 			kind = "scrawl",
+			assetId = 77511991259122,
 		},
 		{
 			name = "they_hear_you",
 			kind = "scrawl",
+			assetId = 96843149761935,
 		},
 	},
 }

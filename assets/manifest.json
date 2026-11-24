@@ -1356,7 +1356,7 @@
      "does": "Heavy, two hands. Hit it to split it into watermelon slices."
     }
    ],
-   "assetId": null,
+   "assetId": 115190648582879,
    "textureId": 133944026823147,
    "screenId": null
   },
@@ -1707,7 +1707,7 @@
    ],
    "assetId": 115813202082524,
    "textureId": 100130423674922,
-   "screenId": null
+   "screenId": 71723007920596
   },
   {
    "name": "boombox",
@@ -1809,8 +1809,8 @@
      "does": "Play or stop music (loud). Tape door opens. Lights bounce to the beat."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 121473903517230,
+   "textureId": 126039977728908,
    "screenId": null
   },
   {
@@ -1913,8 +1913,8 @@
      "does": "Crank to charge it (makes a little noise). Turn the knob to tune: old broadcasts, a hint where a supply drop lands, bits of the story. Dial glows while it has charge."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 104004832727058,
+   "textureId": 139823303971519,
    "screenId": null
   },
   {
@@ -1995,9 +1995,9 @@
      "does": "Turn the knob: next channel, with a burst of static."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 94385029060120,
+   "textureId": 114907403269178,
+   "screenId": 89468817660646
   },
   {
    "name": "desk_lamp",
@@ -2077,8 +2077,8 @@
      "does": "Light on or off. The arm can be aimed."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 128209076054396,
+   "textureId": 111249710790276,
    "screenId": null
   },
   {
@@ -2137,8 +2137,8 @@
      "does": "Spins and throws light spots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 135725987354198,
+   "textureId": 109128529338427,
    "screenId": null
   },
   {
@@ -2241,8 +2241,8 @@
      "does": "Crank plays a tune, then the lid pops and Jack springs out (loud)."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 128837224895970,
+   "textureId": 71915364881829,
    "screenId": null
   },
   {
@@ -2323,8 +2323,8 @@
      "does": "Switch on: glass glows (see-through Neon), blobs drift slowly up and down."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 107572267133242,
+   "textureId": 82546656070061,
    "screenId": null
   },
   {
@@ -2449,8 +2449,8 @@
      "does": "Door opens, plate spins, light on, ding at the end (loud). Heat up food for a bigger refill."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 89910651310387,
+   "textureId": 83024326109278,
    "screenId": null
   },
   {
@@ -2531,8 +2531,8 @@
      "does": "Open: the little robot dancer spins and a tune plays (quiet)."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 99449329306390,
+   "textureId": 127883389526382,
    "screenId": null
   },
   {
@@ -2591,8 +2591,8 @@
      "does": "On or off. Flickers."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 129820221419408,
+   "textureId": 114756976306626,
    "screenId": null
   },
   {
@@ -2651,9 +2651,9 @@
      "does": "Shows any poster."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 117093425773213,
+   "textureId": 125539404981061,
+   "screenId": 128285107242157
   },
   {
    "name": "press_button",
@@ -2711,8 +2711,8 @@
      "does": "Press: it says something cheerful and useless (\"Good job!\", \"Task complete!\", \"You did it!\")."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 85312231448869,
+   "textureId": 124337358320928,
    "screenId": null
   },
   {
@@ -2815,8 +2815,8 @@
      "does": "Lid opens, record spins, arm swings over. Plays a record."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 113593402076755,
+   "textureId": 79837567721471,
    "screenId": null
   },
   {
@@ -2897,8 +2897,8 @@
      "does": "Rings now and then (loud). Pick up: a creepy cheerful message. Dial spins."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 90477799070705,
+   "textureId": 84719587037042,
    "screenId": null
   },
   {
@@ -2939,8 +2939,8 @@
      "does": "Squeaks when pressed or stepped on. A quiet tripwire for your fort."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 111181777436668,
+   "textureId": 137288499812962,
    "screenId": null
   },
   {
@@ -2999,8 +2999,8 @@
      "does": "Hold to spray. Pick a warning from a short list (RUN, HIDE, NOT SAFE, arrow, tally...) and it lands on the wall as a red decal. You become the survivor who wrote it. Limited paint per can."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 113266689016626,
+   "textureId": 71837726781042,
    "screenId": null
   },
   {
@@ -3059,8 +3059,8 @@
      "does": "Blades spin when on."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 125068717817166,
+   "textureId": 129770007434268,
    "screenId": null
   },
   {
@@ -3141,8 +3141,8 @@
      "does": "Push the lever, wait, toast pops up. Toast is food."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 109209845345125,
+   "textureId": 113710060956913,
    "screenId": null
   },
   {
@@ -3223,8 +3223,8 @@
      "does": "Lid flips up. Flush (loud)."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 138901676486276,
+   "textureId": 100387998694001,
    "screenId": null
   },
   {
@@ -3327,8 +3327,8 @@
      "does": "Press a button: a random snack drops into the flap. A few per round."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 139794971167204,
+   "textureId": 126098820996572,
    "screenId": null
   },
   {
@@ -3431,8 +3431,8 @@
      "does": "Spawns in pairs across the map. Hold the side button to talk to whoever has the other one. Knob picks the channel. Light blinks when someone talks. You never know who's on the other end."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 104892786102834,
+   "textureId": 117294609548957,
    "screenId": null
   },
   {
@@ -3535,9 +3535,9 @@
      "does": "Hands count down to lights out. A survivor sprayed the danger zone on the face."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 98879066979671,
+   "textureId": 106413014605697,
+   "screenId": 98148237360457
   },
   {
    "name": "armchair",
@@ -3577,8 +3577,8 @@
      "does": "Sit. Search the cushions for loose ammo now and then."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 117716490518171,
+   "textureId": 113144858296387,
    "screenId": null
   },
   {
@@ -3641,8 +3641,8 @@
      "does": "Lie down to hide."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 92921271340115,
+   "textureId": 107323140677737,
    "screenId": null
   },
   {
@@ -3683,8 +3683,8 @@
      "does": "Hide under. Sleep to refill energy by day."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 127158076569961,
+   "textureId": 97682581226948,
    "screenId": null
   },
   {
@@ -3720,8 +3720,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 102448233785502,
+   "textureId": 126243217189783,
    "screenId": null
   },
   {
@@ -3762,8 +3762,8 @@
      "does": "Hide under. Sleep to refill energy by day."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 128802945127045,
+   "textureId": 125924504857685,
    "screenId": null
   },
   {
@@ -3799,8 +3799,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 93771520223614,
+   "textureId": 73330211078195,
    "screenId": null
   },
   {
@@ -3841,8 +3841,8 @@
      "does": "Sit. Search the cushions for loose ammo now and then."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 106118060167242,
+   "textureId": 112034539849498,
    "screenId": null
   },
   {
@@ -3945,8 +3945,8 @@
      "does": "Swing open on a side hinge. Small loot inside."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 118867265931840,
+   "textureId": 71881378423173,
    "screenId": null
   },
   {
@@ -4071,9 +4071,9 @@
      "does": "Old computer screen. Press: a pop up asks \"Are you still there?\""
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 127781155954767,
+   "textureId": 108531153725487,
+   "screenId": 74705613891615
   },
   {
    "name": "door_frame",
@@ -4131,8 +4131,8 @@
      "does": "EXIT? sign flickers."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 83841659111837,
+   "textureId": 100255959540358,
    "screenId": null
   },
   {
@@ -4235,8 +4235,8 @@
      "does": "Slide out. Small loot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 91515768760660,
+   "textureId": 112437823139012,
    "screenId": null
   },
   {
@@ -4339,8 +4339,8 @@
      "does": "Slide out. Papers inside, sometimes a key card or ammo."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 96366930286517,
+   "textureId": 75055810076238,
    "screenId": null
   },
   {
@@ -4421,8 +4421,8 @@
      "does": "Pull the chain: light on or off. A lit lamp is seen from far away at night."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 94068582779104,
+   "textureId": 87897411764120,
    "screenId": null
   },
   {
@@ -4525,8 +4525,8 @@
      "does": "Inside light turns on while a door is open."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 113400552852025,
+   "textureId": 73919002595556,
    "screenId": null
   },
   {
@@ -4567,8 +4567,8 @@
      "does": "Hide under. Sleep to refill energy by day."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 133813044575635,
+   "textureId": 93341718301825,
    "screenId": null
   },
   {
@@ -4604,8 +4604,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 128171138316414,
+   "textureId": 111669670352860,
    "screenId": null
   },
   {
@@ -4641,8 +4641,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 107262214495327,
+   "textureId": 108650593216679,
    "screenId": null
   },
   {
@@ -4723,8 +4723,8 @@
      "does": "Alarm clock face. Rings at lights out (loud)."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 125454974672066,
+   "textureId": 94343632114761,
    "screenId": null
   },
   {
@@ -4783,8 +4783,8 @@
      "does": "Sit and spin."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 114565850779815,
+   "textureId": 81594191302169,
    "screenId": null
   },
   {
@@ -4843,8 +4843,8 @@
      "does": "Swings open. Cans on the shelves are food loot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 117400091282786,
+   "textureId": 99875391115063,
    "screenId": null
   },
   {
@@ -4880,8 +4880,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 78327640548391,
+   "textureId": 113207334103976,
    "screenId": null
   },
   {
@@ -4917,8 +4917,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 123689010531574,
+   "textureId": 137664253831886,
    "screenId": null
   },
   {
@@ -4977,8 +4977,8 @@
      "does": "Glass slides sideways along x."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 120066429518654,
+   "textureId": 124479134560077,
    "screenId": null
   },
   {
@@ -5081,8 +5081,8 @@
      "does": "Turn on: water runs (particles from the spout). Refill a water bottle at the sink."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 79848344536881,
+   "textureId": 104756568700871,
    "screenId": null
   },
   {
@@ -5163,8 +5163,8 @@
      "does": "Oven door drops open. Loot or a hiding spot for small stuff."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 123258052992198,
+   "textureId": 133836842160306,
    "screenId": null
   },
   {
@@ -5223,8 +5223,8 @@
      "does": "Opens up. Plays a little tune (quiet). Hide inside."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 138221772637988,
+   "textureId": 106212440537614,
    "screenId": null
   },
   {
@@ -5327,9 +5327,9 @@
      "does": "Cabinet doors swing open."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 95297890487217,
+   "textureId": 137030200774950,
+   "screenId": 112825953415930
   },
   {
    "name": "wall_panel",
@@ -5387,9 +5387,9 @@
      "does": "Picture in the frame. Swappable."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 100415972061736,
+   "textureId": 135191728346314,
+   "screenId": 73573944822437
   },
   {
    "name": "wardrobe",
@@ -5469,8 +5469,8 @@
      "does": "Swing open. Hide inside with the doors shut."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 96860664831863,
+   "textureId": 116906260804371,
    "screenId": null
   },
   {
@@ -5529,9 +5529,9 @@
      "does": "Shows scribbles. Later: pick a message to write on it."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 106207596129385,
+   "textureId": 111394664008937,
+   "screenId": 113290953328343
   },
   {
    "name": "ammo_cell",
@@ -5584,8 +5584,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 135725013076661,
+   "textureId": 123750688224861,
    "screenId": null
   },
   {
@@ -5621,8 +5621,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 102963650788270,
+   "textureId": 129202932379153,
    "screenId": null
   },
   {
@@ -5658,8 +5658,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 79203504213196,
+   "textureId": 96552112943836,
    "screenId": null
   },
   {
@@ -5695,8 +5695,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 98483993945122,
+   "textureId": 76586830664062,
    "screenId": null
   },
   {
@@ -5732,8 +5732,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 117908978607393,
+   "textureId": 91800297683740,
    "screenId": null
   },
   {
@@ -5769,8 +5769,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 136784187523883,
+   "textureId": 114487812819829,
    "screenId": null
   },
   {
@@ -5806,8 +5806,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 93967241443978,
+   "textureId": 133474140368869,
    "screenId": null
   },
   {
@@ -5843,8 +5843,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 83331125686576,
+   "textureId": 132174635828758,
    "screenId": null
   },
   {
@@ -5898,8 +5898,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 80908029403382,
+   "textureId": 113989211888953,
    "screenId": null
   },
   {
@@ -5958,8 +5958,8 @@
      "does": "Opens when you look in your bag. Bigger bag, more slots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 119990172266169,
+   "textureId": 76163713775205,
    "screenId": null
   },
   {
@@ -5995,8 +5995,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 133653924109970,
+   "textureId": 136901914999021,
    "screenId": null
   },
   {
@@ -6077,8 +6077,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 106017262777137,
+   "textureId": 86596558772533,
    "screenId": null
   },
   {
@@ -6167,8 +6167,8 @@
      "does": "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 138889223319629,
+   "textureId": 124673194279639,
    "screenId": null
   },
   {
@@ -6227,8 +6227,8 @@
      "does": "Pull the tab, throw it: robots nearby freeze for a few seconds."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 88107885646374,
+   "textureId": 93178975652285,
    "screenId": null
   },
   {
@@ -6313,8 +6313,8 @@
      "does": "The flare round. A fired flare lights an area for a while and pulls robots to it."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 112578027908242,
+   "textureId": 131741208023562,
    "screenId": null
   },
   {
@@ -6373,8 +6373,8 @@
      "does": "On or off. Seen from far away at night."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 72596757265423,
+   "textureId": 129378628230291,
    "screenId": null
   },
   {
@@ -6455,8 +6455,8 @@
      "does": "Cuff swings shut. Red lights blink while locked on a robot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 122236429732295,
+   "textureId": 129190712168961,
    "screenId": null
   },
   {
@@ -6515,8 +6515,8 @@
      "does": "Headlamp on or off, hands free."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 77278260057344,
+   "textureId": 90487638687739,
    "screenId": null
   },
   {
@@ -6597,8 +6597,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 102144810785054,
+   "textureId": 103549855514516,
    "screenId": null
   },
   {
@@ -6657,8 +6657,8 @@
      "does": "Opens when you look in your bag. Bigger bag, more slots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 70398984947606,
+   "textureId": 88032775051361,
    "screenId": null
   },
   {
@@ -6735,8 +6735,8 @@
      "does": "Flips open. Loot inside."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 121357723730596,
+   "textureId": 128744556243204,
    "screenId": null
   },
   {
@@ -6821,8 +6821,8 @@
      "does": "Scope lens glints. Players far away can spot it."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 102830101894773,
+   "textureId": 120718372931449,
    "screenId": null
   },
   {
@@ -6876,8 +6876,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 98985221347810,
+   "textureId": 90357756530224,
    "screenId": null
   },
   {
@@ -6958,8 +6958,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 100816911723406,
+   "textureId": 106851564377767,
    "screenId": null
   },
   {
@@ -7036,8 +7036,8 @@
      "does": "Wind the key, it ticks, then rings (loud). Throw it to pull robots or players away. The key turns around y, not z."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 119122368344710,
+   "textureId": 79737074825864,
    "screenId": null
   },
   {
@@ -7122,8 +7122,8 @@
      "does": "The hex drum. Swings out to reload."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 91581629052288,
+   "textureId": 124721509166054,
    "screenId": null
   },
   {
@@ -7204,8 +7204,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 77827548145553,
+   "textureId": 111407526802604,
    "screenId": null
   },
   {
@@ -7264,8 +7264,8 @@
      "does": "Flips down for more protection, up to see better."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 101937813649158,
+   "textureId": 95588885691873,
    "screenId": null
   },
   {
@@ -7324,8 +7324,8 @@
      "does": "Opens when you look in your bag. Bigger bag, more slots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 115375465409443,
+   "textureId": 95354089854738,
    "screenId": null
   },
   {
@@ -7406,8 +7406,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 94928714082997,
+   "textureId": 75036603340008,
    "screenId": null
   },
   {
@@ -7488,8 +7488,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 80751014582583,
+   "textureId": 105641416382031,
    "screenId": null
   },
   {
@@ -7530,8 +7530,8 @@
      "does": "Throw it: a smoke cloud blocks sight for a while."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 85154947044066,
+   "textureId": 130543034496164,
    "screenId": null
   },
   {
@@ -7612,8 +7612,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 78842474579257,
+   "textureId": 98225233382806,
    "screenId": null
   },
   {
@@ -7690,8 +7690,8 @@
      "does": "Swings open. Better loot, locked by day."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 130845385297842,
+   "textureId": 78075084267181,
    "screenId": null
   },
   {
@@ -7750,9 +7750,9 @@
      "does": "Kids' drawings, happy at the start, darker by the end."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 104248767078144,
+   "textureId": 100202167399652,
+   "screenId": 110143136329209
   },
   {
    "name": "greeter",
@@ -7846,9 +7846,9 @@
      "does": "Waves on a loop. Head and Screen tilt together. Plays the welcome line, worse each night."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 106003449299742,
+   "textureId": 99606564508422,
+   "screenId": 107049133518408
   },
   {
    "name": "kid_ball",
@@ -7888,8 +7888,8 @@
      "does": "Rolls slowly toward you out of the dark. Quiet."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 125419663246690,
+   "textureId": 76875416429614,
    "screenId": null
   },
   {
@@ -8141,8 +8141,8 @@
      "does": "`posters/scrawls/fog_found_you.png` goes on a freezer door after it was there."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 78109738403958,
+   "textureId": 91707246416159,
    "screenId": null
   },
   {
@@ -8387,8 +8387,8 @@
      "does": "stand, reach, turn, crouch, face. Snap to a new pose only while no player's camera can see it."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 116598981932838,
+   "textureId": 113079198131964,
    "screenId": null
   },
   {
@@ -8465,8 +8465,8 @@
      "does": "The arm jerks now and then. Glow eyes flicker."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 79577555409750,
+   "textureId": 102454783537024,
    "screenId": null
   },
   {
@@ -8547,8 +8547,8 @@
      "does": "Cam turns slowly to face the nearest player in range. Glow red light on."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 136507808536186,
+   "textureId": 108754110416429,
    "screenId": null
   },
   {
@@ -8629,8 +8629,8 @@
      "does": "Arm swings down, Shirt flips its half over, back to start. Forever. Quiet whir."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 127631141607732,
+   "textureId": 131478703177806,
    "screenId": null
   },
   {
@@ -8666,8 +8666,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 132430799341655,
+   "textureId": 93874340106596,
    "screenId": null
   },
   {
@@ -8703,8 +8703,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 120751298064108,
+   "textureId": 80345553515544,
    "screenId": null
   },
   {
@@ -8763,8 +8763,8 @@
      "does": "Robot arm sways back and forth, picking up nothing."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 74295746098212,
+   "textureId": 113398120418099,
    "screenId": null
   },
   {
@@ -8823,8 +8823,8 @@
      "does": "On by day, off at lights out."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 122439420331906,
+   "textureId": 99796815296662,
    "screenId": null
   },
   {
@@ -8883,8 +8883,8 @@
      "does": "Pulses while a robot is docked."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 126216686452987,
+   "textureId": 90821132165745,
    "screenId": null
   },
   {
@@ -8943,8 +8943,8 @@
      "does": "Off by day, red at night."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 118865800605039,
+   "textureId": 95380985464755,
    "screenId": null
   },
   {
@@ -9025,8 +9025,8 @@
      "does": "Lamps blink, the grate slides up at round start."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 81410629534317,
+   "textureId": 112764550333358,
    "screenId": null
   },
   {
@@ -9062,8 +9062,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 104974329204745,
+   "textureId": 132581442995363,
    "screenId": null
   },
   {
@@ -9099,8 +9099,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 123548154225630,
+   "textureId": 108789728432042,
    "screenId": null
   },
   {
@@ -9181,8 +9181,8 @@
      "does": "Glows and the mirror spins during the lights out siren."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 131809747119311,
+   "textureId": 73874846701133,
    "screenId": null
   },
   {
@@ -9223,8 +9223,8 @@
      "does": "Plays store announcements and the day music."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 101826676509600,
+   "textureId": 127368442856885,
    "screenId": null
   },
   {
@@ -9484,8 +9484,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 93683239385577,
+   "textureId": 118910722607673,
    "screenId": null
   },
   {
@@ -9745,8 +9745,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 98734512884471,
+   "textureId": 75975705997098,
    "screenId": null
   },
   {
@@ -10005,8 +10005,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 74033957110044,
+   "textureId": 80630883818984,
    "screenId": null
   },
   {
@@ -10265,8 +10265,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 102337433800821,
+   "textureId": 133970543198248,
    "screenId": null
   },
   {
@@ -10525,8 +10525,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 127299973966857,
+   "textureId": 91894467413722,
    "screenId": null
   },
   {
@@ -10785,8 +10785,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 94019097787771,
+   "textureId": 103553643326463,
    "screenId": null
   },
   {
@@ -11045,8 +11045,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 100354870322242,
+   "textureId": 113617239610120,
    "screenId": null
   },
   {
@@ -11305,8 +11305,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 116605579345924,
+   "textureId": 109804464914016,
    "screenId": null
   },
   {
@@ -11620,8 +11620,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 102066396945971,
+   "textureId": 85225935373490,
    "screenId": null
   },
   {
@@ -11935,8 +11935,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 97066319557719,
+   "textureId": 101212385809777,
    "screenId": null
   },
   {
@@ -12196,8 +12196,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 105532146113692,
+   "textureId": 74837508279462,
    "screenId": null
   },
   {
@@ -12457,8 +12457,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 120900154224628,
+   "textureId": 98841042454765,
    "screenId": null
   },
   {
@@ -12499,8 +12499,8 @@
      "does": "Lay it out once a day, during the day: a ghost outline your pieces snap into."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 71635188852308,
+   "textureId": 122818935350068,
    "screenId": null
   },
   {
@@ -12559,8 +12559,8 @@
      "does": "Set see-through. Moonlight comes down through it at night."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 132081003068999,
+   "textureId": 138883091335012,
    "screenId": null
   },
   {
@@ -12619,8 +12619,8 @@
      "does": "Flames flicker. Light seen from far at night. Press to blow out."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 84316851312461,
+   "textureId": 111060936953542,
    "screenId": null
   },
   {
@@ -12661,8 +12661,8 @@
      "does": "Play in a walkie_talkie: a survivor's recording. Lore."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 97918055093473,
+   "textureId": 120687768689006,
    "screenId": null
   },
   {
@@ -12703,8 +12703,8 @@
      "does": "Put food in it near the dog. Each fill builds trust."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 110349248312848,
+   "textureId": 72755791858258,
    "screenId": null
   },
   {
@@ -12745,8 +12745,8 @@
      "does": "Pour into a generator. Loot, rare deep in."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 83907684370397,
+   "textureId": 99846392613270,
    "screenId": null
   },
   {
@@ -12827,8 +12827,8 @@
      "does": "Pull Handle to start (can fail a few times). Glow on while running. Lights a section. Burns fuel, sputters when low, then dies: refuel with fuel_can and pull again. The hum pulls robots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 84327884210757,
+   "textureId": 87584128614452,
    "screenId": null
   },
   {
@@ -12869,8 +12869,8 @@
      "does": "Read a survivor's pages. Lore."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 131957726590458,
+   "textureId": 94297355193638,
    "screenId": null
   },
   {
@@ -12911,8 +12911,8 @@
      "does": "Drip sound loop."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 96388991574948,
+   "textureId": 92863723630650,
    "screenId": null
   },
   {
@@ -12971,8 +12971,8 @@
      "does": "Swings open on its left hinge. Your saved stash, the only thing that comes with you to every server."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 106467824813921,
+   "textureId": 100957243089403,
    "screenId": null
   },
   {
@@ -13031,9 +13031,9 @@
      "does": "Survivor notes with hints (siren timer, pigeons, the kid, mannequins)."
     }
    ],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 116919854860880,
+   "textureId": 104461320658573,
+   "screenId": 102603016166267
   },
   {
    "name": "paper_and_pen",
@@ -13073,8 +13073,8 @@
      "does": "Pick up to draw a blueprint of your fort. Used up when you do."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 103051690125776,
+   "textureId": 112109562821961,
    "screenId": null
   },
   {
@@ -13115,8 +13115,8 @@
      "does": "A little shiny and see-through. Splash sound when you walk through, pulls robots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 85832976802621,
+   "textureId": 112612572925946,
    "screenId": null
   },
   {
@@ -13157,8 +13157,8 @@
      "does": "Set dressing. The tent is a hiding spot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 101146685799440,
+   "textureId": 99271840614163,
    "screenId": null
   },
   {
@@ -13199,8 +13199,8 @@
      "does": "Set dressing. The tent is a hiding spot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 132001437022345,
+   "textureId": 93353061233670,
    "screenId": null
   },
   {
@@ -13241,8 +13241,8 @@
      "does": "Set dressing. The tent is a hiding spot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 119864004439215,
+   "textureId": 97171774837098,
    "screenId": null
   },
   {
@@ -13283,8 +13283,8 @@
      "does": "Set dressing. The tent is a hiding spot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 127089374479753,
+   "textureId": 134017373179736,
    "screenId": null
   },
   {
@@ -13356,9 +13356,9 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 84178335797432,
+   "textureId": 130519814410740,
+   "screenId": 120872877800972
   },
   {
    "name": "bollard",
@@ -13393,8 +13393,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 140729694162139,
+   "textureId": 88330782700430,
    "screenId": null
   },
   {
@@ -13430,8 +13430,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 111151246663019,
+   "textureId": 106682711633594,
    "screenId": null
   },
   {
@@ -13467,8 +13467,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 124955974408885,
+   "textureId": 93386093621265,
    "screenId": null
   },
   {
@@ -13504,8 +13504,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 83970025852589,
+   "textureId": 132373588888690,
    "screenId": null
   },
   {
@@ -13541,8 +13541,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 109207796625969,
+   "textureId": 74848887791794,
    "screenId": null
   },
   {
@@ -13578,8 +13578,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 110463394087449,
+   "textureId": 107108859792865,
    "screenId": null
   },
   {
@@ -13615,8 +13615,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 91399503865791,
+   "textureId": 113979743661086,
    "screenId": null
   },
   {
@@ -13652,8 +13652,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 76261311944579,
+   "textureId": 88638707055221,
    "screenId": null
   },
   {
@@ -13689,8 +13689,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 111581030265741,
+   "textureId": 71386772221137,
    "screenId": null
   },
   {
@@ -13717,6 +13717,43 @@
       4.633,
       6.6,
       3.868
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 104201434506466,
+   "textureId": 93263719453333,
+   "screenId": null
+  },
+  {
+   "name": "culdesac_end",
+   "group": "warehouse",
+   "fbx": "art/warehouse/culdesac_end/culdesac_end.fbx",
+   "texture": "art/warehouse/culdesac_end/culdesac_end_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.7,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.35,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.7,
+      32.0
      ],
      "pivot": [
       0,
@@ -13763,8 +13800,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 97674923992410,
+   "textureId": 135314110053972,
    "screenId": null
   },
   {
@@ -13800,8 +13837,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 91675264711286,
+   "textureId": 102931792190712,
    "screenId": null
   },
   {
@@ -13873,9 +13910,9 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 135597341177010,
+   "textureId": 90603120537626,
+   "screenId": 91433696410832
   },
   {
    "name": "dock_door",
@@ -13928,8 +13965,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 120518229677085,
+   "textureId": 132822125190642,
    "screenId": null
   },
   {
@@ -14001,6 +14038,43 @@
     }
    ],
    "moves": [],
+   "assetId": 80589363525283,
+   "textureId": 130256341458642,
+   "screenId": null
+  },
+  {
+   "name": "driveway",
+   "group": "warehouse",
+   "fbx": "art/warehouse/driveway/driveway.fbx",
+   "texture": "art/warehouse/driveway/driveway_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    0.71,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.355,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      0.71,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
    "assetId": null,
    "textureId": null,
    "screenId": null
@@ -14056,8 +14130,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 136809441514087,
+   "textureId": 109218570786360,
    "screenId": null
   },
   {
@@ -14129,8 +14203,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 138760931764272,
+   "textureId": 103056250018867,
    "screenId": null
   },
   {
@@ -14179,6 +14253,43 @@
      "pivot": [
       0.0,
       3.3,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 106421149051807,
+   "textureId": 88321345501543,
+   "screenId": null
+  },
+  {
+   "name": "fake_tree",
+   "group": "warehouse",
+   "fbx": "art/warehouse/fake_tree/fake_tree.fbx",
+   "texture": "art/warehouse/fake_tree/fake_tree_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    9.0,
+    12.88,
+    8.2
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      6.44,
+      -0.0
+     ],
+     "size": [
+      9.0,
+      12.88,
+      8.2
+     ],
+     "pivot": [
+      0,
+      0.0,
       0.0
      ]
     }
@@ -14239,8 +14350,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 95100592201139,
+   "textureId": 110805007184835,
    "screenId": null
   },
   {
@@ -14294,8 +14405,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 124002803775600,
+   "textureId": 139201605605092,
    "screenId": null
   },
   {
@@ -14331,8 +14442,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 90331878442924,
+   "textureId": 126594803759754,
    "screenId": null
   },
   {
@@ -14368,8 +14479,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 112081262448783,
+   "textureId": 86411725544260,
    "screenId": null
   },
   {
@@ -14405,8 +14516,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 137972106777725,
+   "textureId": 97596015862285,
    "screenId": null
   },
   {
@@ -14442,8 +14553,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 87156507899728,
+   "textureId": 117102394630391,
    "screenId": null
   },
   {
@@ -14479,8 +14590,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 97952611455753,
+   "textureId": 125465654976101,
    "screenId": null
   },
   {
@@ -14516,8 +14627,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 119082833827813,
+   "textureId": 116463271365481,
    "screenId": null
   },
   {
@@ -14553,8 +14664,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 120544965588230,
+   "textureId": 117017556990280,
    "screenId": null
   },
   {
@@ -14608,8 +14719,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 80996368980128,
+   "textureId": 137577800434251,
    "screenId": null
   },
   {
@@ -14645,8 +14756,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 97583195091122,
+   "textureId": 111615681835639,
    "screenId": null
   },
   {
@@ -14682,8 +14793,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 103852862038158,
+   "textureId": 98006653946954,
    "screenId": null
   },
   {
@@ -14719,8 +14830,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 105160562931988,
+   "textureId": 93461064421632,
    "screenId": null
   },
   {
@@ -14756,8 +14867,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 115439997208703,
+   "textureId": 106670091884224,
    "screenId": null
   },
   {
@@ -14811,8 +14922,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 110071140965915,
+   "textureId": 117007099908681,
    "screenId": null
   },
   {
@@ -14848,8 +14959,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 128685991436804,
+   "textureId": 123295850911251,
    "screenId": null
   },
   {
@@ -14885,6 +14996,61 @@
     }
    ],
    "moves": [],
+   "assetId": 115000999291786,
+   "textureId": 104840207754913,
+   "screenId": null
+  },
+  {
+   "name": "garden_sprinkler",
+   "group": "warehouse",
+   "fbx": "art/warehouse/garden_sprinkler/garden_sprinkler.fbx",
+   "texture": "art/warehouse/garden_sprinkler/garden_sprinkler_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    1.425,
+    0.688,
+    1.55
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      -0.0,
+      0.26,
+      -0.0
+     ],
+     "size": [
+      1.039,
+      0.52,
+      1.55
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Spin",
+     "center": [
+      -0.0,
+      0.59,
+      0.004
+     ],
+     "size": [
+      1.425,
+      0.196,
+      1.234
+     ],
+     "pivot": [
+      -0.0,
+      0.55,
+      0.175
+     ]
+    }
+   ],
+   "moves": [],
    "assetId": null,
    "textureId": null,
    "screenId": null
@@ -14897,22 +15063,22 @@
    "screen": null,
    "clips": [],
    "size": [
-    8.75,
-    17.742,
-    10.032
+    8.888,
+    17.792,
+    9.873
    ],
    "parts": [
     {
      "name": "Body",
      "center": [
       0.0,
-      8.871,
+      8.896,
       -0.0
      ],
      "size": [
-      8.75,
-      17.742,
-      10.032
+      8.888,
+      17.792,
+      9.873
      ],
      "pivot": [
       0,
@@ -14959,8 +15125,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 79377586258248,
+   "textureId": 77960379225650,
    "screenId": null
   },
   {
@@ -14996,8 +15162,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 74077569437298,
+   "textureId": 95163217269753,
    "screenId": null
   },
   {
@@ -15033,8 +15199,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 134885308780776,
+   "textureId": 92722392883830,
    "screenId": null
   },
   {
@@ -15070,8 +15236,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 96648414340721,
+   "textureId": 76161108153121,
    "screenId": null
   },
   {
@@ -15107,8 +15273,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 123869899802987,
+   "textureId": 118390060427874,
    "screenId": null
   },
   {
@@ -15144,8 +15310,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 97624871358470,
+   "textureId": 102424287885836,
    "screenId": null
   },
   {
@@ -15181,8 +15347,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 96414834396648,
+   "textureId": 136482623436369,
    "screenId": null
   },
   {
@@ -15209,6 +15375,281 @@
       6.0,
       3.51,
       2.5
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 74656484478208,
+   "textureId": 125403734568487,
+   "screenId": null
+  },
+  {
+   "name": "hedge",
+   "group": "warehouse",
+   "fbx": "art/warehouse/hedge/hedge.fbx",
+   "texture": "art/warehouse/hedge/hedge_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    6.0,
+    3.1,
+    2.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.55,
+      -0.0
+     ],
+     "size": [
+      6.0,
+      3.1,
+      2.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "house_garage",
+   "group": "warehouse",
+   "fbx": "art/warehouse/house_garage/house_garage.fbx",
+   "texture": "art/warehouse/house_garage/house_garage_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    26.2,
+    14.325,
+    7.938
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      7.162,
+      -0.0
+     ],
+     "size": [
+      26.2,
+      14.325,
+      7.938
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Door",
+     "center": [
+      -5.5,
+      4.7,
+      2.189
+     ],
+     "size": [
+      9.9,
+      8.0,
+      0.39
+     ],
+     "pivot": [
+      -5.5,
+      8.7,
+      2.094
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      8.6,
+      4.9,
+      2.214
+     ],
+     "size": [
+      4.0,
+      3.8,
+      0.04
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "house_ranch",
+   "group": "warehouse",
+   "fbx": "art/warehouse/house_ranch/house_ranch.fbx",
+   "texture": "art/warehouse/house_ranch/house_ranch_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    26.2,
+    13.425,
+    7.977
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      6.712,
+      -0.0
+     ],
+     "size": [
+      26.2,
+      13.425,
+      7.977
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      4.9,
+      2.208
+     ],
+     "size": [
+      17.8,
+      3.8,
+      0.04
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "house_tiny",
+   "group": "warehouse",
+   "fbx": "art/warehouse/house_tiny/house_tiny.fbx",
+   "texture": "art/warehouse/house_tiny/house_tiny_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    11.04,
+    9.537,
+    5.325
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      4.769,
+      -0.0
+     ],
+     "size": [
+      11.04,
+      9.537,
+      5.325
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      -2.9,
+      2.65,
+      1.537
+     ],
+     "size": [
+      1.4,
+      1.5,
+      0.04
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "house_twostory",
+   "group": "warehouse",
+   "fbx": "art/warehouse/house_twostory/house_twostory.fbx",
+   "texture": "art/warehouse/house_twostory/house_twostory_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    22.99,
+    24.432,
+    9.4
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      12.216,
+      -0.0
+     ],
+     "size": [
+      22.99,
+      24.432,
+      9.4
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      -6.0,
+      12.7,
+      2.32
+     ],
+     "size": [
+      3.2,
+      4.2,
+      0.04
      ],
      "pivot": [
       0,
@@ -15246,6 +15687,43 @@
       8.047,
       2.793,
       7.296
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 135297210129440,
+   "textureId": 87935447205088,
+   "screenId": null
+  },
+  {
+   "name": "lawn_flamingo",
+   "group": "warehouse",
+   "fbx": "art/warehouse/lawn_flamingo/lawn_flamingo.fbx",
+   "texture": "art/warehouse/lawn_flamingo/lawn_flamingo_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    2.17,
+    3.77,
+    0.165
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.885,
+      -0.0
+     ],
+     "size": [
+      2.17,
+      3.77,
+      0.165
      ],
      "pivot": [
       0,
@@ -15310,8 +15788,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 117638753682569,
+   "textureId": 72291038390089,
    "screenId": null
   },
   {
@@ -15365,8 +15843,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 136004835284753,
+   "textureId": 98118611407076,
    "screenId": null
   },
   {
@@ -15420,8 +15898,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 80691897650595,
+   "textureId": 130013543810325,
    "screenId": null
   },
   {
@@ -15475,8 +15953,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 72780610896326,
+   "textureId": 98610234876238,
    "screenId": null
   },
   {
@@ -15512,8 +15990,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 110144362114741,
+   "textureId": 82944732803453,
    "screenId": null
   },
   {
@@ -15567,8 +16045,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 101751659700023,
+   "textureId": 80212229048357,
    "screenId": null
   },
   {
@@ -15595,6 +16073,43 @@
       3.3,
       4.08,
       3.3
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 98106197007917,
+   "textureId": 127946145953897,
+   "screenId": null
+  },
+  {
+   "name": "mailbox",
+   "group": "warehouse",
+   "fbx": "art/warehouse/mailbox/mailbox.fbx",
+   "texture": "art/warehouse/mailbox/mailbox_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    1.0,
+    4.18,
+    1.9
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      2.09,
+      -0.0
+     ],
+     "size": [
+      1.0,
+      4.18,
+      1.9
      ],
      "pivot": [
       0,
@@ -15659,8 +16174,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 119651827720346,
+   "textureId": 106988665200794,
    "screenId": null
   },
   {
@@ -15696,8 +16211,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 90393416795501,
+   "textureId": 78895259088275,
    "screenId": null
   },
   {
@@ -15733,8 +16248,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 101710688020691,
+   "textureId": 85815709828334,
    "screenId": null
   },
   {
@@ -15770,8 +16285,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 139734809773906,
+   "textureId": 110262609371710,
    "screenId": null
   },
   {
@@ -15807,8 +16322,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 90974272676098,
+   "textureId": 102646556769699,
    "screenId": null
   },
   {
@@ -15844,8 +16359,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 80954878115310,
+   "textureId": 75121407582066,
    "screenId": null
   },
   {
@@ -15881,8 +16396,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 127458698464418,
+   "textureId": 117695221816518,
    "screenId": null
   },
   {
@@ -15918,8 +16433,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 81373470286523,
+   "textureId": 86253118966942,
    "screenId": null
   },
   {
@@ -15955,8 +16470,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 120291665735191,
+   "textureId": 126387426496269,
    "screenId": null
   },
   {
@@ -16010,9 +16525,9 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 80895329900868,
+   "textureId": 100311015207971,
+   "screenId": 74806796822016
   },
   {
    "name": "pink_bench",
@@ -16043,6 +16558,61 @@
       0,
       0.0,
       0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 131737023328354,
+   "textureId": 135532535345690,
+   "screenId": null
+  },
+  {
+   "name": "porch_light",
+   "group": "warehouse",
+   "fbx": "art/warehouse/porch_light/porch_light.fbx",
+   "texture": "art/warehouse/porch_light/porch_light_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    0.84,
+    1.11,
+    1.17
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.555,
+      -0.0
+     ],
+     "size": [
+      0.84,
+      1.11,
+      1.17
+     ],
+     "pivot": [
+      0.0,
+      0.5,
+      -0.585
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      0.5,
+      0.165
+     ],
+     "size": [
+      0.5,
+      0.74,
+      0.5
+     ],
+     "pivot": [
+      0.0,
+      0.5,
+      -0.585
      ]
     }
    ],
@@ -16084,8 +16654,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 118592985941342,
+   "textureId": 91445745953734,
    "screenId": null
   },
   {
@@ -16121,8 +16691,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 79406942480593,
+   "textureId": 84706936023092,
    "screenId": null
   },
   {
@@ -16158,8 +16728,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 74690118958860,
+   "textureId": 77360714477730,
    "screenId": null
   },
   {
@@ -16195,8 +16765,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 113680175272241,
+   "textureId": 93048937937259,
    "screenId": null
   },
   {
@@ -16232,8 +16802,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 72653360557769,
+   "textureId": 81343772129847,
    "screenId": null
   },
   {
@@ -16269,8 +16839,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 95977609403934,
+   "textureId": 78377008643248,
    "screenId": null
   },
   {
@@ -16306,8 +16876,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 116676442512292,
+   "textureId": 83801207807629,
    "screenId": null
   },
   {
@@ -16343,8 +16913,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 131019707088159,
+   "textureId": 108863435321233,
    "screenId": null
   },
   {
@@ -16398,9 +16968,9 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 124270080763385,
+   "textureId": 102107365398796,
+   "screenId": 139540082934902
   },
   {
    "name": "rolling_ladder",
@@ -16435,8 +17005,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 107260178733678,
+   "textureId": 106516742258996,
    "screenId": null
   },
   {
@@ -16472,8 +17042,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 97335407477812,
+   "textureId": 104211206857830,
    "screenId": null
   },
   {
@@ -16527,8 +17097,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 102340785392657,
+   "textureId": 126953693762095,
    "screenId": null
   },
   {
@@ -16564,8 +17134,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 105936748788458,
+   "textureId": 134168619154789,
    "screenId": null
   },
   {
@@ -16619,9 +17189,9 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 85406824206016,
+   "textureId": 131513366993339,
+   "screenId": 75838151120212
   },
   {
    "name": "shopping_cart",
@@ -16656,8 +17226,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 96321729807646,
+   "textureId": 137850480994282,
    "screenId": null
   },
   {
@@ -16729,6 +17299,43 @@
     }
    ],
    "moves": [],
+   "assetId": 133694863654682,
+   "textureId": 126216850264472,
+   "screenId": 134097269425358
+  },
+  {
+   "name": "sidewalk",
+   "group": "warehouse",
+   "fbx": "art/warehouse/sidewalk/sidewalk.fbx",
+   "texture": "art/warehouse/sidewalk/sidewalk_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.71,
+    5.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.355,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.71,
+      5.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
    "assetId": null,
    "textureId": null,
    "screenId": null
@@ -16766,8 +17373,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 125308621987363,
+   "textureId": 102441944204073,
    "screenId": null
   },
   {
@@ -16799,6 +17406,264 @@
       -0.12,
       1.694,
       -0.025
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 106976117447284,
+   "textureId": 132320518605674,
+   "screenId": null
+  },
+  {
+   "name": "street_curb",
+   "group": "warehouse",
+   "fbx": "art/warehouse/street_curb/street_curb.fbx",
+   "texture": "art/warehouse/street_curb/street_curb_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.71,
+    6.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.355,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.71,
+      6.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "street_tile",
+   "group": "warehouse",
+   "fbx": "art/warehouse/street_tile/street_tile.fbx",
+   "texture": "art/warehouse/street_tile/street_tile_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.305,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.152,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.305,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "streetlamp",
+   "group": "warehouse",
+   "fbx": "art/warehouse/streetlamp/streetlamp.fbx",
+   "texture": "art/warehouse/streetlamp/streetlamp_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    1.848,
+    13.125,
+    2.255
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      6.562,
+      -0.0
+     ],
+     "size": [
+      1.848,
+      13.125,
+      2.255
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      -0.024,
+      11.4,
+      -0.227
+     ],
+     "size": [
+      1.16,
+      1.8,
+      1.16
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "sun_panel",
+   "group": "warehouse",
+   "fbx": "art/warehouse/sun_panel/sun_panel.fbx",
+   "texture": "art/warehouse/sun_panel/sun_panel_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    2.4,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.2,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      2.4,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      0.35,
+      -0.0
+     ],
+     "size": [
+      29.6,
+      0.1,
+      29.6
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "tricycle",
+   "group": "warehouse",
+   "fbx": "art/warehouse/tricycle/tricycle.fbx",
+   "texture": "art/warehouse/tricycle/tricycle_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    1.6,
+    1.87,
+    2.7
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.935,
+      -0.0
+     ],
+     "size": [
+      1.6,
+      1.87,
+      2.7
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "turf_tile",
+   "group": "warehouse",
+   "fbx": "art/warehouse/turf_tile/turf_tile.fbx",
+   "texture": "art/warehouse/turf_tile/turf_tile_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.015,
+    1.3,
+    32.013
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.65,
+      -0.0
+     ],
+     "size": [
+      32.015,
+      1.3,
+      32.013
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
      ]
     }
    ],
@@ -16840,8 +17705,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 74240023708770,
+   "textureId": 121433940412191,
    "screenId": null
   },
   {
@@ -16877,8 +17742,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 108146955630289,
+   "textureId": 92302178083880,
    "screenId": null
   },
   {
@@ -16914,8 +17779,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 118389458078732,
+   "textureId": 130538310662155,
    "screenId": null
   },
   {
@@ -16951,8 +17816,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 138643512145047,
+   "textureId": 101323323349718,
    "screenId": null
   },
   {
@@ -16988,8 +17853,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 101574068687602,
+   "textureId": 130594850324252,
    "screenId": null
   },
   {
@@ -17025,8 +17890,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 80161921367661,
+   "textureId": 74701815535439,
    "screenId": null
   },
   {
@@ -17080,9 +17945,9 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
-   "screenId": null
+   "assetId": 99385919471297,
+   "textureId": 87623452813789,
+   "screenId": 80234883027233
   },
   {
    "name": "wall_tile",
@@ -17117,8 +17982,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 76273811454816,
+   "textureId": 138330215929954,
    "screenId": null
   },
   {
@@ -17154,8 +18019,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 133301378934463,
+   "textureId": 136477020116418,
    "screenId": null
   },
   {
@@ -17209,6 +18074,43 @@
     }
    ],
    "moves": [],
+   "assetId": 123658591235742,
+   "textureId": 90427501875534,
+   "screenId": null
+  },
+  {
+   "name": "welcome_mat",
+   "group": "warehouse",
+   "fbx": "art/warehouse/welcome_mat/welcome_mat.fbx",
+   "texture": "art/warehouse/welcome_mat/welcome_mat_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    3.2,
+    0.13,
+    2.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.065,
+      -0.0
+     ],
+     "size": [
+      3.2,
+      0.13,
+      2.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
    "assetId": null,
    "textureId": null,
    "screenId": null
@@ -17246,8 +18148,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 112478026697907,
+   "textureId": 78131107726716,
    "screenId": null
   }
  ],
@@ -17256,1099 +18158,1099 @@
    "name": "bite",
    "group": "food",
    "file": "art/sounds/food/bite.mp3",
-   "assetId": null
+   "assetId": 74035063593872
   },
   {
    "name": "can_pop",
    "group": "food",
    "file": "art/sounds/food/can_pop.mp3",
-   "assetId": null
+   "assetId": 80842310888843
   },
   {
    "name": "cap_twist",
    "group": "food",
    "file": "art/sounds/food/cap_twist.mp3",
-   "assetId": null
+   "assetId": 102506635223771
   },
   {
    "name": "cardboard_lid",
    "group": "food",
    "file": "art/sounds/food/cardboard_lid.mp3",
-   "assetId": null
+   "assetId": 117307294020575
   },
   {
    "name": "cereal_rattle",
    "group": "food",
    "file": "art/sounds/food/cereal_rattle.mp3",
-   "assetId": null
+   "assetId": 90978133954993
   },
   {
    "name": "chew",
    "group": "food",
    "file": "art/sounds/food/chew.mp3",
-   "assetId": null
+   "assetId": 91316975557460
   },
   {
    "name": "chips_crinkle",
    "group": "food",
    "file": "art/sounds/food/chips_crinkle.mp3",
-   "assetId": null
+   "assetId": 82743555378085
   },
   {
    "name": "crunch",
    "group": "food",
    "file": "art/sounds/food/crunch.mp3",
-   "assetId": null
+   "assetId": 120675928475930
   },
   {
    "name": "energy_crack_fizz",
    "group": "food",
    "file": "art/sounds/food/energy_crack_fizz.mp3",
-   "assetId": null
+   "assetId": 95955570597852
   },
   {
    "name": "glug",
    "group": "food",
    "file": "art/sounds/food/glug.mp3",
-   "assetId": null
+   "assetId": 123687712457194
   },
   {
    "name": "jar_twist",
    "group": "food",
    "file": "art/sounds/food/jar_twist.mp3",
-   "assetId": null
+   "assetId": 115707546882285
   },
   {
    "name": "popcorn_popping",
    "group": "food",
    "file": "art/sounds/food/popcorn_popping.mp3",
-   "assetId": null
+   "assetId": 88257664877546
   },
   {
    "name": "straw_slurp",
    "group": "food",
    "file": "art/sounds/food/straw_slurp.mp3",
-   "assetId": null
+   "assetId": 123438455960495
   },
   {
    "name": "tin_lid",
    "group": "food",
    "file": "art/sounds/food/tin_lid.mp3",
-   "assetId": null
+   "assetId": 114506936464686
   },
   {
    "name": "wrapper_crinkle",
    "group": "food",
    "file": "art/sounds/food/wrapper_crinkle.mp3",
-   "assetId": null
+   "assetId": 103974099512545
   },
   {
    "name": "arcade_coin",
    "group": "fun",
    "file": "art/sounds/fun/arcade_coin.mp3",
-   "assetId": null
+   "assetId": 126188234773698
   },
   {
    "name": "arcade_joystick",
    "group": "fun",
    "file": "art/sounds/fun/arcade_joystick.mp3",
-   "assetId": null
+   "assetId": 90774637494272
   },
   {
    "name": "boombox_button",
    "group": "fun",
    "file": "art/sounds/fun/boombox_button.mp3",
-   "assetId": null
+   "assetId": 136293554222185
   },
   {
    "name": "boombox_tape_door",
    "group": "fun",
    "file": "art/sounds/fun/boombox_tape_door.mp3",
-   "assetId": null
+   "assetId": 79659932862126
   },
   {
    "name": "cam_servo",
    "group": "fun",
    "file": "art/sounds/fun/cam_servo.mp3",
-   "assetId": null
+   "assetId": 120281273877437
   },
   {
    "name": "clock_tick_fast_loop",
    "group": "fun",
    "file": "art/sounds/fun/clock_tick_fast_loop.mp3",
-   "assetId": null
+   "assetId": 103792042396963
   },
   {
    "name": "clock_tick_loop",
    "group": "fun",
    "file": "art/sounds/fun/clock_tick_loop.mp3",
-   "assetId": null
+   "assetId": 70971992443741
   },
   {
    "name": "disco_motor_loop",
    "group": "fun",
    "file": "art/sounds/fun/disco_motor_loop.mp3",
-   "assetId": null
+   "assetId": 82391510165873
   },
   {
    "name": "duck_squeak",
    "group": "fun",
    "file": "art/sounds/fun/duck_squeak.mp3",
-   "assetId": null
+   "assetId": 106049357435185
   },
   {
    "name": "fan_click",
    "group": "fun",
    "file": "art/sounds/fun/fan_click.mp3",
-   "assetId": null
+   "assetId": 80716471100665
   },
   {
    "name": "fan_whir_loop",
    "group": "fun",
    "file": "art/sounds/fun/fan_whir_loop.mp3",
-   "assetId": null
+   "assetId": 73053670907602
   },
   {
    "name": "jack_boing",
    "group": "fun",
    "file": "art/sounds/fun/jack_boing.mp3",
-   "assetId": null
+   "assetId": 84551387710836
   },
   {
    "name": "jack_crank",
    "group": "fun",
    "file": "art/sounds/fun/jack_crank.mp3",
-   "assetId": null
+   "assetId": 85171393209890
   },
   {
    "name": "lava_bubble_loop",
    "group": "fun",
    "file": "art/sounds/fun/lava_bubble_loop.mp3",
-   "assetId": null
+   "assetId": 89999670695113
   },
   {
    "name": "lava_switch",
    "group": "fun",
    "file": "art/sounds/fun/lava_switch.mp3",
-   "assetId": null
+   "assetId": 124983365245360
   },
   {
    "name": "monitor_static_loop",
    "group": "fun",
    "file": "art/sounds/fun/monitor_static_loop.mp3",
-   "assetId": null
+   "assetId": 133111438650185
   },
   {
    "name": "neon_buzz_loop",
    "group": "fun",
    "file": "art/sounds/fun/neon_buzz_loop.mp3",
-   "assetId": null
+   "assetId": 88350401332940
   },
   {
    "name": "neon_crackle",
    "group": "fun",
    "file": "art/sounds/fun/neon_crackle.mp3",
-   "assetId": null
+   "assetId": 101243588226703
   },
   {
    "name": "phone_dial",
    "group": "fun",
    "file": "art/sounds/fun/phone_dial.mp3",
-   "assetId": null
+   "assetId": 72248705828828
   },
   {
    "name": "phone_handset",
    "group": "fun",
    "file": "art/sounds/fun/phone_handset.mp3",
-   "assetId": null
+   "assetId": 127332493314883
   },
   {
    "name": "phone_ring",
    "group": "fun",
    "file": "art/sounds/fun/phone_ring.mp3",
-   "assetId": null
+   "assetId": 98352064383272
   },
   {
    "name": "press_button_click",
    "group": "fun",
    "file": "art/sounds/fun/press_button_click.mp3",
-   "assetId": null
+   "assetId": 74254999349324
   },
   {
    "name": "radio_crank",
    "group": "fun",
    "file": "art/sounds/fun/radio_crank.mp3",
-   "assetId": null
+   "assetId": 112937178186379
   },
   {
    "name": "radio_tune_squeal",
    "group": "fun",
    "file": "art/sounds/fun/radio_tune_squeal.mp3",
-   "assetId": null
+   "assetId": 106082274105236
   },
   {
    "name": "record_crackle_loop",
    "group": "fun",
    "file": "art/sounds/fun/record_crackle_loop.mp3",
-   "assetId": null
+   "assetId": 98764602625004
   },
   {
    "name": "record_lid",
    "group": "fun",
    "file": "art/sounds/fun/record_lid.mp3",
-   "assetId": null
+   "assetId": 75197969327930
   },
   {
    "name": "spray_hiss",
    "group": "fun",
    "file": "art/sounds/fun/spray_hiss.mp3",
-   "assetId": null
+   "assetId": 83922723451344
   },
   {
    "name": "spray_rattle",
    "group": "fun",
    "file": "art/sounds/fun/spray_rattle.mp3",
-   "assetId": null
+   "assetId": 118121924250350
   },
   {
    "name": "vending_beep",
    "group": "fun",
    "file": "art/sounds/fun/vending_beep.mp3",
-   "assetId": null
+   "assetId": 113158629971728
   },
   {
    "name": "vending_thud",
    "group": "fun",
    "file": "art/sounds/fun/vending_thud.mp3",
-   "assetId": null
+   "assetId": 77018662809441
   },
   {
    "name": "vending_whirr",
    "group": "fun",
    "file": "art/sounds/fun/vending_whirr.mp3",
-   "assetId": null
+   "assetId": 118181853266663
   },
   {
    "name": "walkie_beep",
    "group": "fun",
    "file": "art/sounds/fun/walkie_beep.mp3",
-   "assetId": null
+   "assetId": 102930852745587
   },
   {
    "name": "walkie_click",
    "group": "fun",
    "file": "art/sounds/fun/walkie_click.mp3",
-   "assetId": null
+   "assetId": 127794356310506
   },
   {
    "name": "walkie_static",
    "group": "fun",
    "file": "art/sounds/fun/walkie_static.mp3",
-   "assetId": null
+   "assetId": 81092598687695
   },
   {
    "name": "blaster_thump",
    "group": "gear",
    "file": "art/sounds/gear/blaster_thump.mp3",
-   "assetId": null
+   "assetId": 99926890758788
   },
   {
    "name": "blaster_zap",
    "group": "gear",
    "file": "art/sounds/gear/blaster_zap.mp3",
-   "assetId": null
+   "assetId": 120417259136225
   },
   {
    "name": "cell_eject",
    "group": "gear",
    "file": "art/sounds/gear/cell_eject.mp3",
-   "assetId": null
+   "assetId": 126220538349952
   },
   {
    "name": "crate_lid",
    "group": "gear",
    "file": "art/sounds/gear/crate_lid.mp3",
-   "assetId": null
+   "assetId": 111803348458144
   },
   {
    "name": "cuffs_lock",
    "group": "gear",
    "file": "art/sounds/gear/cuffs_lock.mp3",
-   "assetId": null
+   "assetId": 131831089968798
   },
   {
    "name": "cuffs_rattle",
    "group": "gear",
    "file": "art/sounds/gear/cuffs_rattle.mp3",
-   "assetId": null
+   "assetId": 102275371977321
   },
   {
    "name": "dart_pop",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop.mp3",
-   "assetId": null
+   "assetId": 113579670455801
   },
   {
    "name": "disruptor_charge",
    "group": "gear",
    "file": "art/sounds/gear/disruptor_charge.mp3",
-   "assetId": null
+   "assetId": 97223815402988
   },
   {
    "name": "disruptor_crack",
    "group": "gear",
    "file": "art/sounds/gear/disruptor_crack.mp3",
-   "assetId": null
+   "assetId": 88423742913011
   },
   {
    "name": "emp_charge",
    "group": "gear",
    "file": "art/sounds/gear/emp_charge.mp3",
-   "assetId": null
+   "assetId": 126413029210368
   },
   {
    "name": "emp_tab",
    "group": "gear",
    "file": "art/sounds/gear/emp_tab.mp3",
-   "assetId": null
+   "assetId": 131050271599128
   },
   {
    "name": "emp_thump",
    "group": "gear",
    "file": "art/sounds/gear/emp_thump.mp3",
-   "assetId": null
+   "assetId": 134486222542363
   },
   {
    "name": "flare_burn_loop",
    "group": "gear",
    "file": "art/sounds/gear/flare_burn_loop.mp3",
-   "assetId": null
+   "assetId": 87871535597138
   },
   {
    "name": "flare_pop",
    "group": "gear",
    "file": "art/sounds/gear/flare_pop.mp3",
-   "assetId": null
+   "assetId": 78612957490661
   },
   {
    "name": "flashlight_click",
    "group": "gear",
    "file": "art/sounds/gear/flashlight_click.mp3",
-   "assetId": null
+   "assetId": 102480904694272
   },
   {
    "name": "locker_clang",
    "group": "gear",
    "file": "art/sounds/gear/locker_clang.mp3",
-   "assetId": null
+   "assetId": 121925049267035
   },
   {
    "name": "medkit_latch",
    "group": "gear",
    "file": "art/sounds/gear/medkit_latch.mp3",
-   "assetId": null
+   "assetId": 96606344747817
   },
   {
    "name": "nail_gun",
    "group": "gear",
    "file": "art/sounds/gear/nail_gun.mp3",
-   "assetId": null
+   "assetId": 75343123704751
   },
   {
    "name": "noise_maker_bell",
    "group": "gear",
    "file": "art/sounds/gear/noise_maker_bell.mp3",
-   "assetId": null
+   "assetId": 102487629512904
   },
   {
    "name": "noise_maker_tick_loop",
    "group": "gear",
    "file": "art/sounds/gear/noise_maker_tick_loop.mp3",
-   "assetId": null
+   "assetId": 111748463886452
   },
   {
    "name": "noise_maker_wind",
    "group": "gear",
    "file": "art/sounds/gear/noise_maker_wind.mp3",
-   "assetId": null
+   "assetId": 100551821077199
   },
   {
    "name": "shell_clink",
    "group": "gear",
    "file": "art/sounds/gear/shell_clink.mp3",
-   "assetId": null
+   "assetId": 76846330256831
   },
   {
    "name": "smoke_hiss",
    "group": "gear",
    "file": "art/sounds/gear/smoke_hiss.mp3",
-   "assetId": null
+   "assetId": 108431207436427
   },
   {
    "name": "smoke_pin",
    "group": "gear",
    "file": "art/sounds/gear/smoke_pin.mp3",
-   "assetId": null
+   "assetId": 90886832369753
   },
   {
    "name": "tape_rip",
    "group": "gear",
    "file": "art/sounds/gear/tape_rip.mp3",
-   "assetId": null
+   "assetId": 72274835656543
   },
   {
    "name": "velcro",
    "group": "gear",
    "file": "art/sounds/gear/velcro.mp3",
-   "assetId": null
+   "assetId": 108936515870959
   },
   {
    "name": "visor_clack",
    "group": "gear",
    "file": "art/sounds/gear/visor_clack.mp3",
-   "assetId": null
+   "assetId": 78998585615256
   },
   {
    "name": "zipper",
    "group": "gear",
    "file": "art/sounds/gear/zipper.mp3",
-   "assetId": null
+   "assetId": 127186175908670
   },
   {
    "name": "cabinet_creak",
    "group": "kitchen",
    "file": "art/sounds/kitchen/cabinet_creak.mp3",
-   "assetId": null
+   "assetId": 76656595491198
   },
   {
    "name": "cabinet_shut",
    "group": "kitchen",
    "file": "art/sounds/kitchen/cabinet_shut.mp3",
-   "assetId": null
+   "assetId": 130509130333035
   },
   {
    "name": "fridge_hum_loop",
    "group": "kitchen",
    "file": "art/sounds/kitchen/fridge_hum_loop.mp3",
-   "assetId": null
+   "assetId": 99946316584987
   },
   {
    "name": "fridge_jars",
    "group": "kitchen",
    "file": "art/sounds/kitchen/fridge_jars.mp3",
-   "assetId": null
+   "assetId": 112195041072360
   },
   {
    "name": "fridge_open",
    "group": "kitchen",
    "file": "art/sounds/kitchen/fridge_open.mp3",
-   "assetId": null
+   "assetId": 88446456559568
   },
   {
    "name": "microwave_ding",
    "group": "kitchen",
    "file": "art/sounds/kitchen/microwave_ding.mp3",
-   "assetId": null
+   "assetId": 126234727100929
   },
   {
    "name": "microwave_door",
    "group": "kitchen",
    "file": "art/sounds/kitchen/microwave_door.mp3",
-   "assetId": null
+   "assetId": 135456291788396
   },
   {
    "name": "microwave_hum_loop",
    "group": "kitchen",
    "file": "art/sounds/kitchen/microwave_hum_loop.mp3",
-   "assetId": null
+   "assetId": 95665276213978
   },
   {
    "name": "microwave_plate_squeak",
    "group": "kitchen",
    "file": "art/sounds/kitchen/microwave_plate_squeak.mp3",
-   "assetId": null
+   "assetId": 136681113120551
   },
   {
    "name": "oven_door",
    "group": "kitchen",
    "file": "art/sounds/kitchen/oven_door.mp3",
-   "assetId": null
+   "assetId": 119366863396919
   },
   {
    "name": "stove_burner_loop",
    "group": "kitchen",
    "file": "art/sounds/kitchen/stove_burner_loop.mp3",
-   "assetId": null
+   "assetId": 123370701402352
   },
   {
    "name": "stove_ignite",
    "group": "kitchen",
    "file": "art/sounds/kitchen/stove_ignite.mp3",
-   "assetId": null
+   "assetId": 129761374352119
   },
   {
    "name": "toaster_lever",
    "group": "kitchen",
    "file": "art/sounds/kitchen/toaster_lever.mp3",
-   "assetId": null
+   "assetId": 135940137866730
   },
   {
    "name": "toaster_pop",
    "group": "kitchen",
    "file": "art/sounds/kitchen/toaster_pop.mp3",
-   "assetId": null
+   "assetId": 95524108625979
   },
   {
    "name": "toaster_tick_loop",
    "group": "kitchen",
    "file": "art/sounds/kitchen/toaster_tick_loop.mp3",
-   "assetId": null
+   "assetId": 80527761877324
   },
   {
    "name": "alarm_clock_beep",
    "group": "living",
    "file": "art/sounds/living/alarm_clock_beep.mp3",
-   "assetId": null
+   "assetId": 135187731463503
   },
   {
    "name": "bulb_buzz_loop",
    "group": "living",
    "file": "art/sounds/living/bulb_buzz_loop.mp3",
-   "assetId": null
+   "assetId": 129506106566538
   },
   {
    "name": "cushion_squish",
    "group": "living",
    "file": "art/sounds/living/cushion_squish.mp3",
-   "assetId": null
+   "assetId": 109258976846604
   },
   {
    "name": "drawer_metal",
    "group": "living",
    "file": "art/sounds/living/drawer_metal.mp3",
-   "assetId": null
+   "assetId": 78289484197332
   },
   {
    "name": "drawer_wood",
    "group": "living",
    "file": "art/sounds/living/drawer_wood.mp3",
-   "assetId": null
+   "assetId": 92547828134610
   },
   {
    "name": "hangers_clink",
    "group": "living",
    "file": "art/sounds/living/hangers_clink.mp3",
-   "assetId": null
+   "assetId": 133929877190545
   },
   {
    "name": "lamp_chain_click",
    "group": "living",
    "file": "art/sounds/living/lamp_chain_click.mp3",
-   "assetId": null
+   "assetId": 102417335634740
   },
   {
    "name": "sheets_rustle",
    "group": "living",
    "file": "art/sounds/living/sheets_rustle.mp3",
-   "assetId": null
+   "assetId": 132580411255280
   },
   {
    "name": "spring_creak",
    "group": "living",
    "file": "art/sounds/living/spring_creak.mp3",
-   "assetId": null
+   "assetId": 100951354035073
   },
   {
    "name": "tv_channel_thunk",
    "group": "living",
    "file": "art/sounds/living/tv_channel_thunk.mp3",
-   "assetId": null
+   "assetId": 75415973034816
   },
   {
    "name": "tv_static_burst",
    "group": "living",
    "file": "art/sounds/living/tv_static_burst.mp3",
-   "assetId": null
+   "assetId": 110182470813163
   },
   {
    "name": "wardrobe_creak",
    "group": "living",
    "file": "art/sounds/living/wardrobe_creak.mp3",
-   "assetId": null
+   "assetId": 135797634448660
   },
   {
    "name": "night_sampler",
    "group": "misc",
    "file": "art/sounds/night_sampler.mp3",
-   "assetId": null
+   "assetId": 120134863745629
   },
   {
    "name": "night_tricks_sampler",
    "group": "misc",
    "file": "art/sounds/night_tricks_sampler.mp3",
-   "assetId": null
+   "assetId": 112661227635903
   },
   {
    "name": "chair_roll",
    "group": "office",
    "file": "art/sounds/office/chair_roll.mp3",
-   "assetId": null
+   "assetId": 90406977427902
   },
   {
    "name": "chair_squeak",
    "group": "office",
    "file": "art/sounds/office/chair_squeak.mp3",
-   "assetId": null
+   "assetId": 135660904505712
   },
   {
    "name": "computer_chime",
    "group": "office",
    "file": "art/sounds/office/computer_chime.mp3",
-   "assetId": null
+   "assetId": 122222628282347
   },
   {
    "name": "computer_fan_loop",
    "group": "office",
    "file": "art/sounds/office/computer_fan_loop.mp3",
-   "assetId": null
+   "assetId": 80048157917139
   },
   {
    "name": "marker_squeak",
    "group": "office",
    "file": "art/sounds/office/marker_squeak.mp3",
-   "assetId": null
+   "assetId": 84255778059192
   },
   {
    "name": "pipe_knock",
    "group": "office",
    "file": "art/sounds/office/pipe_knock.mp3",
-   "assetId": null
+   "assetId": 81041940346591
   },
   {
    "name": "shower_rattle",
    "group": "office",
    "file": "art/sounds/office/shower_rattle.mp3",
-   "assetId": null
+   "assetId": 120469852177125
   },
   {
    "name": "shower_slide",
    "group": "office",
    "file": "art/sounds/office/shower_slide.mp3",
-   "assetId": null
+   "assetId": 96467006786289
   },
   {
    "name": "tap_squeak",
    "group": "office",
    "file": "art/sounds/office/tap_squeak.mp3",
-   "assetId": null
+   "assetId": 97496123438186
   },
   {
    "name": "toilet_flush",
    "group": "office",
    "file": "art/sounds/office/toilet_flush.mp3",
-   "assetId": null
+   "assetId": 113346758341630
   },
   {
    "name": "toilet_lid",
    "group": "office",
    "file": "art/sounds/office/toilet_lid.mp3",
-   "assetId": null
+   "assetId": 140447397972630
   },
   {
    "name": "toy_chest_creak",
    "group": "office",
    "file": "art/sounds/office/toy_chest_creak.mp3",
-   "assetId": null
+   "assetId": 97241359251323
   },
   {
    "name": "water_running_loop",
    "group": "office",
    "file": "art/sounds/office/water_running_loop.mp3",
-   "assetId": null
+   "assetId": 101092214961658
   },
   {
    "name": "breath_heavy_loop",
    "group": "players",
    "file": "art/sounds/players/breath_heavy_loop.mp3",
-   "assetId": null
+   "assetId": 85034685595467
   },
   {
    "name": "breath_release",
    "group": "players",
    "file": "art/sounds/players/breath_release.mp3",
-   "assetId": null
+   "assetId": 137820624424400
   },
   {
    "name": "crouch_step",
    "group": "players",
    "file": "art/sounds/players/crouch_step.mp3",
-   "assetId": null
+   "assetId": 122955771425890
   },
   {
    "name": "down_zap",
    "group": "players",
    "file": "art/sounds/players/down_zap.mp3",
-   "assetId": null
+   "assetId": 124005521249911
   },
   {
    "name": "flashlight_flicker",
    "group": "players",
    "file": "art/sounds/players/flashlight_flicker.mp3",
-   "assetId": null
+   "assetId": 132927815848716
   },
   {
    "name": "heartbeat_loop",
    "group": "players",
    "file": "art/sounds/players/heartbeat_loop.mp3",
-   "assetId": null
+   "assetId": 103991414368753
   },
   {
    "name": "hide_creak",
    "group": "players",
    "file": "art/sounds/players/hide_creak.mp3",
-   "assetId": null
+   "assetId": 87195278594381
   },
   {
    "name": "hold_breath",
    "group": "players",
    "file": "art/sounds/players/hold_breath.mp3",
-   "assetId": null
+   "assetId": 134199168949384
   },
   {
    "name": "land_thud",
    "group": "players",
    "file": "art/sounds/players/land_thud.mp3",
-   "assetId": null
+   "assetId": 89594629170099
   },
   {
    "name": "prop_cardboard_thump",
    "group": "players",
    "file": "art/sounds/players/prop_cardboard_thump.mp3",
-   "assetId": null
+   "assetId": 75357468509096
   },
   {
    "name": "prop_metal_clang",
    "group": "players",
    "file": "art/sounds/players/prop_metal_clang.mp3",
-   "assetId": null
+   "assetId": 136402674764729
   },
   {
    "name": "prop_wood_knock",
    "group": "players",
    "file": "art/sounds/players/prop_wood_knock.mp3",
-   "assetId": null
+   "assetId": 113887023982926
   },
   {
    "name": "psst",
    "group": "players",
    "file": "art/sounds/players/psst.mp3",
-   "assetId": null
+   "assetId": 72532151909609
   },
   {
    "name": "run_concrete",
    "group": "players",
    "file": "art/sounds/players/run_concrete.mp3",
-   "assetId": null
+   "assetId": 133127962563066
   },
   {
    "name": "run_metal",
    "group": "players",
    "file": "art/sounds/players/run_metal.mp3",
-   "assetId": null
+   "assetId": 96318332527490
   },
   {
    "name": "run_wood",
    "group": "players",
    "file": "art/sounds/players/run_wood.mp3",
-   "assetId": null
+   "assetId": 93997249723795
   },
   {
    "name": "stack_crash",
    "group": "players",
    "file": "art/sounds/players/stack_crash.mp3",
-   "assetId": null
+   "assetId": 135942616474184
   },
   {
    "name": "walk_concrete",
    "group": "players",
    "file": "art/sounds/players/walk_concrete.mp3",
-   "assetId": null
+   "assetId": 124747520110728
   },
   {
    "name": "walk_metal",
    "group": "players",
    "file": "art/sounds/players/walk_metal.mp3",
-   "assetId": null
+   "assetId": 86576641643211
   },
   {
    "name": "walk_wood",
    "group": "players",
    "file": "art/sounds/players/walk_wood.mp3",
-   "assetId": null
+   "assetId": 74261871337584
   },
   {
    "name": "brute_groan",
    "group": "robots",
    "file": "art/sounds/robots/brute_groan.mp3",
-   "assetId": null
+   "assetId": 121926839372187
   },
   {
    "name": "brute_thud",
    "group": "robots",
    "file": "art/sounds/robots/brute_thud.mp3",
-   "assetId": null
+   "assetId": 119263010523639
   },
   {
    "name": "chase_servo_scream",
    "group": "robots",
    "file": "art/sounds/robots/chase_servo_scream.mp3",
-   "assetId": null
+   "assetId": 110349771813157
   },
   {
    "name": "chase_steps",
    "group": "robots",
    "file": "art/sounds/robots/chase_steps.mp3",
-   "assetId": null
+   "assetId": 132579789546999
   },
   {
    "name": "crawler_skitter_loop",
    "group": "robots",
    "file": "art/sounds/robots/crawler_skitter_loop.mp3",
-   "assetId": null
+   "assetId": 129177683325847
   },
   {
    "name": "curious_beep_1",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_1.mp3",
-   "assetId": null
+   "assetId": 80640581588348
   },
   {
    "name": "curious_beep_2",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_2.mp3",
-   "assetId": null
+   "assetId": 113981036217790
   },
   {
    "name": "curious_beep_3",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_3.mp3",
-   "assetId": null
+   "assetId": 80152316730961
   },
   {
    "name": "drag",
    "group": "robots",
    "file": "art/sounds/robots/drag.mp3",
-   "assetId": null
+   "assetId": 109214577972447
   },
   {
    "name": "emp_shutdown",
    "group": "robots",
    "file": "art/sounds/robots/emp_shutdown.mp3",
-   "assetId": null
+   "assetId": 116219883482597
   },
   {
    "name": "error_stall",
    "group": "robots",
    "file": "art/sounds/robots/error_stall.mp3",
-   "assetId": null
+   "assetId": 140013043287739
   },
   {
    "name": "fumble",
    "group": "robots",
    "file": "art/sounds/robots/fumble.mp3",
-   "assetId": null
+   "assetId": 127226965760038
   },
   {
    "name": "grab_clank",
    "group": "robots",
    "file": "art/sounds/robots/grab_clank.mp3",
-   "assetId": null
+   "assetId": 126545407886948
   },
   {
    "name": "heavy_step",
    "group": "robots",
    "file": "art/sounds/robots/heavy_step.mp3",
-   "assetId": null
+   "assetId": 140278800213667
   },
   {
    "name": "hum_loop",
    "group": "robots",
    "file": "art/sounds/robots/hum_loop.mp3",
-   "assetId": null
+   "assetId": 134796717209411
   },
   {
    "name": "jingle_distorted",
    "group": "robots",
    "file": "art/sounds/robots/jingle_distorted.mp3",
-   "assetId": null
+   "assetId": 97656652677433
   },
   {
    "name": "scanner_ping",
    "group": "robots",
    "file": "art/sounds/robots/scanner_ping.mp3",
-   "assetId": null
+   "assetId": 89116867981817
   },
   {
    "name": "scout_eye_whine",
    "group": "robots",
    "file": "art/sounds/robots/scout_eye_whine.mp3",
-   "assetId": null
+   "assetId": 126453422207456
   },
   {
    "name": "scout_step",
    "group": "robots",
    "file": "art/sounds/robots/scout_step.mp3",
-   "assetId": null
+   "assetId": 98987923375500
   },
   {
    "name": "scrape",
    "group": "robots",
    "file": "art/sounds/robots/scrape.mp3",
-   "assetId": null
+   "assetId": 140381889758100
   },
   {
    "name": "servo_whirr_1",
    "group": "robots",
    "file": "art/sounds/robots/servo_whirr_1.mp3",
-   "assetId": null
+   "assetId": 96495886367795
   },
   {
    "name": "servo_whirr_2",
    "group": "robots",
    "file": "art/sounds/robots/servo_whirr_2.mp3",
-   "assetId": null
+   "assetId": 118321188591677
   },
   {
    "name": "spot_alert",
    "group": "robots",
    "file": "art/sounds/robots/spot_alert.mp3",
-   "assetId": null
+   "assetId": 95338565831027
   },
   {
    "name": "distant_hum_loop",
    "group": "warehouse",
    "file": "art/sounds/warehouse/distant_hum_loop.mp3",
-   "assetId": null
+   "assetId": 91293495891472
   },
   {
    "name": "fuel_pour",
    "group": "warehouse",
    "file": "art/sounds/warehouse/fuel_pour.mp3",
-   "assetId": null
+   "assetId": 75391890770342
   },
   {
    "name": "generator_die",
    "group": "warehouse",
    "file": "art/sounds/warehouse/generator_die.mp3",
-   "assetId": null
+   "assetId": 80422040172950
   },
   {
    "name": "generator_pull_fail",
    "group": "warehouse",
    "file": "art/sounds/warehouse/generator_pull_fail.mp3",
-   "assetId": null
+   "assetId": 72697015980486
   },
   {
    "name": "generator_run_loop",
    "group": "warehouse",
    "file": "art/sounds/warehouse/generator_run_loop.mp3",
-   "assetId": null
+   "assetId": 123277260469654
   },
   {
    "name": "generator_sputter",
    "group": "warehouse",
    "file": "art/sounds/warehouse/generator_sputter.mp3",
-   "assetId": null
+   "assetId": 93463788451350
   },
   {
    "name": "generator_start",
    "group": "warehouse",
    "file": "art/sounds/warehouse/generator_start.mp3",
-   "assetId": null
+   "assetId": 110211245713173
   },
   {
    "name": "lights_out_clunk",
    "group": "warehouse",
    "file": "art/sounds/warehouse/lights_out_clunk.mp3",
-   "assetId": null
+   "assetId": 80322198967476
   },
   {
    "name": "night_ambience_loop",
    "group": "warehouse",
    "file": "art/sounds/warehouse/night_ambience_loop.mp3",
-   "assetId": null
+   "assetId": 119360086608840
   },
   {
    "name": "pa_chime",
    "group": "warehouse",
    "file": "art/sounds/warehouse/pa_chime.mp3",
-   "assetId": null
+   "assetId": 85184878348005
   },
   {
    "name": "pa_glitch",
    "group": "warehouse",
    "file": "art/sounds/warehouse/pa_glitch.mp3",
-   "assetId": null
+   "assetId": 112824249892167
   },
   {
    "name": "phone_ring_far",
    "group": "warehouse",
    "file": "art/sounds/warehouse/phone_ring_far.mp3",
-   "assetId": null
+   "assetId": 90757242321502
   },
   {
    "name": "rain_roof_loop",
    "group": "warehouse",
    "file": "art/sounds/warehouse/rain_roof_loop.mp3",
-   "assetId": null
+   "assetId": 104249857948529
   },
   {
    "name": "shelf_scrape_far",
    "group": "warehouse",
    "file": "art/sounds/warehouse/shelf_scrape_far.mp3",
-   "assetId": null
+   "assetId": 73152638072735
   },
   {
    "name": "shelf_thud_far",
    "group": "warehouse",
    "file": "art/sounds/warehouse/shelf_thud_far.mp3",
-   "assetId": null
+   "assetId": 125507085637552
   },
   {
    "name": "siren",
    "group": "warehouse",
    "file": "art/sounds/warehouse/siren.mp3",
-   "assetId": null
+   "assetId": 115848691634968
   },
   {
    "name": "store_jingle",
    "group": "warehouse",
    "file": "art/sounds/warehouse/store_jingle.mp3",
-   "assetId": null
+   "assetId": 80666929600073
   },
   {
    "name": "tape_hiss_loop",
    "group": "warehouse",
    "file": "art/sounds/warehouse/tape_hiss_loop.mp3",
-   "assetId": null
+   "assetId": 100063270008484
   },
   {
    "name": "tape_insert",
    "group": "warehouse",
    "file": "art/sounds/warehouse/tape_insert.mp3",
-   "assetId": null
+   "assetId": 109652635121648
   },
   {
    "name": "thunder_far",
    "group": "warehouse",
    "file": "art/sounds/warehouse/thunder_far.mp3",
-   "assetId": null
+   "assetId": 71928739040178
   },
   {
    "name": "thunder_near",
    "group": "warehouse",
    "file": "art/sounds/warehouse/thunder_near.mp3",
-   "assetId": null
+   "assetId": 80574621582869
   }
  ],
  "images": [
@@ -18356,277 +19258,277 @@
    "name": "dont_panic",
    "kind": "poster",
    "file": "art/posters/dont_panic.png",
-   "assetId": null
+   "assetId": 75491104287499
   },
   {
    "name": "dont_panic_defaced",
    "kind": "poster",
    "file": "art/posters/dont_panic_defaced.png",
-   "assetId": null
+   "assetId": 89021569586654
   },
   {
    "name": "helper_of_the_month",
    "kind": "poster",
    "file": "art/posters/helper_of_the_month.png",
-   "assetId": null
+   "assetId": 136188557892874
   },
   {
    "name": "helper_of_the_month_defaced",
    "kind": "poster",
    "file": "art/posters/helper_of_the_month_defaced.png",
-   "assetId": null
+   "assetId": 82411890227298
   },
   {
    "name": "hug_your_toaster",
    "kind": "poster",
    "file": "art/posters/hug_your_toaster.png",
-   "assetId": null
+   "assetId": 85883961435903
   },
   {
    "name": "lost_dog",
    "kind": "poster",
    "file": "art/posters/lost_dog.png",
-   "assetId": null
+   "assetId": 78941218244031
   },
   {
    "name": "mega_sale",
    "kind": "poster",
    "file": "art/posters/mega_sale.png",
-   "assetId": null
+   "assetId": 139662013003254
   },
   {
    "name": "sleep_2",
    "kind": "poster",
    "file": "art/posters/sleep_2.png",
-   "assetId": null
+   "assetId": 109623902009770
   },
   {
    "name": "smile_on_camera",
    "kind": "poster",
    "file": "art/posters/smile_on_camera.png",
-   "assetId": null
+   "assetId": 90518661406169
   },
   {
    "name": "smile_on_camera_defaced",
    "kind": "poster",
    "file": "art/posters/smile_on_camera_defaced.png",
-   "assetId": null
+   "assetId": 114740375537696
   },
   {
    "name": "think_less",
    "kind": "poster",
    "file": "art/posters/think_less.png",
-   "assetId": null
+   "assetId": 70664505796458
   },
   {
    "name": "think_less_defaced",
    "kind": "poster",
    "file": "art/posters/think_less_defaced.png",
-   "assetId": null
+   "assetId": 81695723930834
   },
   {
    "name": "arcade_title",
    "kind": "screen",
    "file": "art/posters/screens/arcade_title.png",
-   "assetId": null
+   "assetId": 72734869387833
   },
   {
    "name": "blob_lamp_ad",
    "kind": "screen",
    "file": "art/posters/screens/blob_lamp_ad.png",
-   "assetId": null
+   "assetId": 71683186696134
   },
   {
    "name": "clock_face",
    "kind": "screen",
    "file": "art/posters/screens/clock_face.png",
-   "assetId": null
+   "assetId": 128789687272787
   },
   {
    "name": "cooking_with_toast",
    "kind": "screen",
    "file": "art/posters/screens/cooking_with_toast.png",
-   "assetId": null
+   "assetId": 74913710181923
   },
   {
    "name": "desktop",
    "kind": "screen",
    "file": "art/posters/screens/desktop.png",
-   "assetId": null
+   "assetId": 105980722110478
   },
   {
    "name": "helpbot_ad",
    "kind": "screen",
    "file": "art/posters/screens/helpbot_ad.png",
-   "assetId": null
+   "assetId": 107747803856675
   },
   {
    "name": "lore_2026",
    "kind": "screen",
    "file": "art/posters/screens/lore_2026.png",
-   "assetId": null
+   "assetId": 106924953710273
   },
   {
    "name": "lore_2027",
    "kind": "screen",
    "file": "art/posters/screens/lore_2027.png",
-   "assetId": null
+   "assetId": 100869224558312
   },
   {
    "name": "lore_2028",
    "kind": "screen",
    "file": "art/posters/screens/lore_2028.png",
-   "assetId": null
+   "assetId": 110027079242634
   },
   {
    "name": "lore_2029",
    "kind": "screen",
    "file": "art/posters/screens/lore_2029.png",
-   "assetId": null
+   "assetId": 94686119588005
   },
   {
    "name": "monitor_view",
    "kind": "screen",
    "file": "art/posters/screens/monitor_view.png",
-   "assetId": null
+   "assetId": 129669410909005
   },
   {
    "name": "painting",
    "kind": "screen",
    "file": "art/posters/screens/painting.png",
-   "assetId": null
+   "assetId": 98497443509080
   },
   {
    "name": "right_back",
    "kind": "screen",
    "file": "art/posters/screens/right_back.png",
-   "assetId": null
+   "assetId": 81069026280357
   },
   {
    "name": "static",
    "kind": "screen",
    "file": "art/posters/screens/static.png",
-   "assetId": null
+   "assetId": 92151181684703
   },
   {
    "name": "test_pattern",
    "kind": "screen",
    "file": "art/posters/screens/test_pattern.png",
-   "assetId": null
+   "assetId": 116447589254228
   },
   {
    "name": "weather",
    "kind": "screen",
    "file": "art/posters/screens/weather.png",
-   "assetId": null
+   "assetId": 76624712044665
   },
   {
    "name": "whiteboard",
    "kind": "screen",
    "file": "art/posters/screens/whiteboard.png",
-   "assetId": null
+   "assetId": 122897741093993
   },
   {
    "name": "arrow",
    "kind": "scrawl",
    "file": "art/posters/scrawls/arrow.png",
-   "assetId": null
+   "assetId": 93147158965829
   },
   {
    "name": "claw_marks",
    "kind": "scrawl",
    "file": "art/posters/scrawls/claw_marks.png",
-   "assetId": null
+   "assetId": 73077803721385
   },
   {
    "name": "dont_sleep",
    "kind": "scrawl",
    "file": "art/posters/scrawls/dont_sleep.png",
-   "assetId": null
+   "assetId": 95663634849546
   },
   {
    "name": "fog_found_you",
    "kind": "scrawl",
    "file": "art/posters/scrawls/fog_found_you.png",
-   "assetId": null
+   "assetId": 72388168445404
   },
   {
    "name": "hide",
    "kind": "scrawl",
    "file": "art/posters/scrawls/hide.png",
-   "assetId": null
+   "assetId": 71318735173166
   },
   {
    "name": "lights_lie",
    "kind": "scrawl",
    "file": "art/posters/scrawls/lights_lie.png",
-   "assetId": null
+   "assetId": 99887901215181
   },
   {
    "name": "no_way_out",
    "kind": "scrawl",
    "file": "art/posters/scrawls/no_way_out.png",
-   "assetId": null
+   "assetId": 126848188596888
   },
   {
    "name": "not_safe",
    "kind": "scrawl",
    "file": "art/posters/scrawls/not_safe.png",
-   "assetId": null
+   "assetId": 102648410663722
   },
   {
    "name": "oil_drag_mark",
    "kind": "scrawl",
    "file": "art/posters/scrawls/oil_drag_mark.png",
-   "assetId": null
+   "assetId": 103762612444002
   },
   {
    "name": "oil_handprint",
    "kind": "scrawl",
    "file": "art/posters/scrawls/oil_handprint.png",
-   "assetId": null
+   "assetId": 119900773926848
   },
   {
    "name": "oil_handprints_sliding",
    "kind": "scrawl",
    "file": "art/posters/scrawls/oil_handprints_sliding.png",
-   "assetId": null
+   "assetId": 92297475863499
   },
   {
    "name": "oil_splat",
    "kind": "scrawl",
    "file": "art/posters/scrawls/oil_splat.png",
-   "assetId": null
+   "assetId": 76796354821604
   },
   {
    "name": "question_mark",
    "kind": "scrawl",
    "file": "art/posters/scrawls/question_mark.png",
-   "assetId": null
+   "assetId": 95266703130989
   },
   {
    "name": "run",
    "kind": "scrawl",
    "file": "art/posters/scrawls/run.png",
-   "assetId": null
+   "assetId": 103837306615212
   },
   {
    "name": "stay_quiet",
    "kind": "scrawl",
    "file": "art/posters/scrawls/stay_quiet.png",
-   "assetId": null
+   "assetId": 131408620313488
   },
   {
    "name": "tally",
    "kind": "scrawl",
    "file": "art/posters/scrawls/tally.png",
-   "assetId": null
+   "assetId": 77511991259122
   },
   {
    "name": "they_hear_you",
    "kind": "scrawl",
    "file": "art/posters/scrawls/they_hear_you.png",
-   "assetId": null
+   "assetId": 96843149761935
   }
  ]
 }
