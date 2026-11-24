@@ -1,6 +1,5 @@
 -- Robot gear keys (EMP G / D-pad down, disruptor V / D-pad right) and the local-only life of stalled
 -- robots: flickering eyes, twitches and the odd "ERROR. NEEDS MORE TRAINING." over the nearest one.
-local ContextActionService = game:GetService("ContextActionService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,6 +10,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Hints = require(script.Parent.Hints)
+local Input = require(script.Parent.Input)
 
 local settings = Config.Robots
 local player = Players.LocalPlayer
@@ -23,11 +23,10 @@ local nextTwitch: { [Model]: number } = {}
 local nextLineAt = 0
 
 local function useGear(action: string)
-	return function(_, inputState: Enum.UserInputState)
-		if inputState == Enum.UserInputState.Begin then
+	return function(began: boolean)
+		if began then
 			gearRemote:FireServer(action, workspace.CurrentCamera.CFrame.LookVector)
 		end
-		return Enum.ContextActionResult.Sink
 	end
 end
 
@@ -204,13 +203,8 @@ end
 function Robots.Start()
 	Net.event("RobotCaught").OnClientEvent:Connect(caught)
 	gearRemote = Net.event("RobotGear")
-	ContextActionService:BindAction("RobotEmp", useGear("Emp"), false, table.unpack(settings.EmpKeys))
-	ContextActionService:BindAction(
-		"RobotDisruptor",
-		useGear("Disruptor"),
-		false,
-		table.unpack(settings.DisruptorKeys)
-	)
+	Input.bind("Emp", useGear("Emp"))
+	Input.bind("Disruptor", useGear("Disruptor"))
 
 	task.spawn(function()
 		local folder = workspace:WaitForChild("Robots")

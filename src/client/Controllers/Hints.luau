@@ -1,12 +1,13 @@
 -- On-screen help so nobody has to guess the keys: short hint lines under the crosshair that other
--- controllers set and clear (Hints.set("grab", "[F] Grab")), a controls card on H, and a few
--- first-time nudges (the controls card itself, the flashlight when it gets dark).
+-- controllers set and clear (Hints.set("grab", "[F] Grab")), a controls card (Controls action, or
+-- the ? button on a phone) that lists the keys of the device in use, and a few first-time nudges
+-- (the controls card itself, the flashlight when it gets dark).
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Input = require(script.Parent.Input)
 
 local settings = Config.Hints
 local player = Players.LocalPlayer
@@ -16,6 +17,7 @@ local Hints = {}
 local lines: { [string]: { text: string, order: number } } = {}
 local list: Frame
 local card: Frame
+local cardRows: { TextLabel } = {}
 local flashlightUsed = false
 
 local function redraw()
@@ -70,9 +72,10 @@ function Hints.set(id: string, text: string?, order: number?)
 	redraw()
 end
 
--- A hint's wording from Config.Hints, so every controller shows the same text
+-- A hint's wording from Config.Hints for the device in use, so every controller shows the same text
 function Hints.text(name: string): string
-	return settings[name]
+	local wording = settings[name]
+	return if type(wording) == "table" then wording[Input.lastDevice()] else wording
 end
 
 -- Shows a hint for a few seconds, then clears it
@@ -117,22 +120,46 @@ local function buildCard(parent: ScreenGui): Frame
 	title.Text = settings.CardTitle
 	title.Parent = frame
 	for index, row in settings.Controls do
+		local heading = #row == 1
 		local label = Instance.new("TextLabel")
 		label.LayoutOrder = index
 		label.Size = UDim2.new(1, 0, 0, 22)
 		label.BackgroundTransparency = 1
-		label.Font = if row[2] == "" then Enum.Font.GothamBold else Enum.Font.Gotham
+		label.Font = if heading then Enum.Font.GothamBold else Enum.Font.Gotham
 		label.TextSize = 16
 		label.TextXAlignment = Enum.TextXAlignment.Left
-		label.TextColor3 = if row[2] == ""
-			then Color3.fromRGB(150, 146, 136)
-			else Color3.fromRGB(236, 232, 222)
+		label.TextColor3 = if heading then Color3.fromRGB(150, 146, 136) else Color3.fromRGB(236, 232, 222)
 		label.RichText = true
-		label.Text = if row[2] == "" then row[1] else `<b>{row[1]}</b>   {row[2]}`
+		label.Text = row[1]
 		label.Parent = frame
+		cardRows[index] = label
 	end
 	frame.Parent = parent
 	return frame
+end
+
+local DEVICE_COLUMN = { Keyboard = 1, Gamepad = 2, Touch = 3 }
+
+-- Fills the card with the keys of the device in use; rows that device has no key for are hidden.
+local function fillCard()
+	local column = DEVICE_COLUMN[Input.lastDevice()]
+	for index, row in settings.Controls do
+		local label = cardRows[index]
+		if #row > 1 then
+			local keys = row[column]
+			label.Visible = keys ~= ""
+			label.Text = `<b>{keys}</b>   {row[4]}`
+		end
+	end
+end
+
+function Hints.toggleCard()
+	if not card then
+		return
+	end
+	fillCard()
+	card.Visible = not card.Visible
+	Hints.set("controls", nil)
 end
 
 -- Truly dark: it's night and no emergency light is close by
@@ -164,7 +191,7 @@ local function watchFlashlight()
 			flashlightUsed = true
 		end
 		if isDark() and player:GetAttribute("FlashlightOn") ~= true and not flashlightUsed then
-			Hints.set("flashlight", settings.FlashlightHint, 1)
+			Hints.set("flashlight", Hints.text("FlashlightHint"), 1)
 		else
 			Hints.set("flashlight", nil)
 		end
@@ -193,13 +220,12 @@ function Hints.Start()
 	list.Parent = gui
 
 	card = buildCard(gui)
-	UserInputService.InputBegan:Connect(function(input, processed)
-		if not processed and input.KeyCode == settings.CardKey then
-			card.Visible = not card.Visible
-			Hints.set("controls", nil)
+	Input.bind("Controls", function(began)
+		if began then
+			Hints.toggleCard()
 		end
 	end)
-	Hints.flash("controls", settings.StartHint, settings.StartHintSeconds)
+	Hints.flash("controls", Hints.text("StartHint"), settings.StartHintSeconds)
 	task.spawn(watchFlashlight)
 end
 
