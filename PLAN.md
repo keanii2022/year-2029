@@ -293,7 +293,7 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - The lost kid, pigeons, rats, moths, mannequins, greeter, cameras, story spots. Done when a player alone at night jumps at least once.
 
 ### 14. Saves and scores
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 3, 4, 9
 - **Scope:** `src/server/Systems/Saves.luau`, `src/server/Systems/Scores.luau`, `src/client/Controllers/Locker.luau`, `src/shared/Config/Saves.luau`, `src/shared/Logic/Saves*.luau`, `tests/Saves*.spec.luau`
 - Locker, blueprints (paper and pen, once per day), stats, leaderboards, cosmetics. Done when a full server plays a few nights with no breaks.
@@ -411,3 +411,12 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 8: A destroyed robot leaves a wreck, a black oil puddle and sparks; its room's loot spills out and the destroyer gets 2 EMP charges.
 - Step 8: Eyes are pale cyan by day, dim flickering red when stalled, bright red at night with a red scanner light. "ERROR. NEEDS MORE TRAINING." is on-screen text until you record it.
 - Gamepad map after merging: D-pad up flashlight, D-pad down EMP, D-pad right disruptor, D-pad left eat, L1 drink, touchpad bandage. Every button gets one job (Grab takes the D-pad and L1 only while carrying).
+- Step 14: A locker with "STASH" sprayed on it stands at every spawn; any locker opens your own 12-slot stash (anything but the Starter Blaster). Click a stack to move it.
+- Step 14: M / touchpad opens "YOUR RECORD": stats, looks, and "LAY OUT HERE" for your blueprint. Bandage moved to Triangle (free when not carrying) to make room.
+- Step 14: Hunger and energy aren't saved; every session starts full.
+- Step 14: 8 paper-and-pen pickups each morning. Using one draws every grabbable prop within 30 studs (max 40) as your one blueprint. Laying it out works once a day in daylight; matching props snap into the ghosts within 3 studs. Server hopping doesn't reset the daily limit.
+- Step 14: Leaderboards are all-time and global (top 10), refreshed every 5 minutes, so they never reveal who's on your server. Board "BEST OF US" in red spray: MOST NIGHTS SURVIVED / MOST TAKEDOWNS / MOST ROBOTS DISABLED.
+- Step 14: Kid-friendly wording: "Takedowns" for player kills, "Robots disabled" for robot kills. Lowest age rating.
+- Step 14: Cosmetics are earned only, never sold: hats (Hard Hat at 1 night, Foil Cap at 5, Salvaged Antenna at 1 robot), colours (Concrete, Hazard Yellow, Oil Black, Spray Red, Exit Green), trails (Dust at a 20-minute life, Sparks at 10 robots, Oil Drip at 25 nights).
+- Step 14: A night only counts if you were alive before it started and still alive at dawn.
+- Step 14: If a save can't load or is open on another server, you play a no-save session with a message and the locker stays locked. Your real save is never overwritten.
