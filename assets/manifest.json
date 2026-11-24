@@ -13412,7 +13412,7 @@
    ],
    "moves": [],
    "assetId": 71994118633748,
-   "textureId": null,
+   "textureId": 123393837923702,
    "screenId": null
   },
   {
@@ -13873,7 +13873,7 @@
    ],
    "moves": [],
    "assetId": 98309985651816,
-   "textureId": null,
+   "textureId": 131432653242697,
    "screenId": null
   },
   {
@@ -15919,7 +15919,7 @@
    ],
    "moves": [],
    "assetId": 129653975047431,
-   "textureId": null,
+   "textureId": 94160538414821,
    "screenId": null
   },
   {
@@ -18478,7 +18478,7 @@
     }
    ],
    "moves": [],
-   "assetId": null,
+   "assetId": 106435843199989,
    "textureId": 131632119302524,
    "screenId": null
   },
@@ -18516,7 +18516,7 @@
    ],
    "moves": [],
    "assetId": 138478155199531,
-   "textureId": null,
+   "textureId": 106477712376647,
    "screenId": null
   },
   {
@@ -20337,6 +20337,30 @@
    "group": "misc",
    "file": "art/sounds/night_tricks_sampler.mp3",
    "assetId": 112661227635903
+  },
+  {
+   "name": "music_dawn_loop",
+   "group": "music",
+   "file": "art/sounds/music/music_dawn_loop.mp3",
+   "assetId": 140291326450705
+  },
+  {
+   "name": "music_day_loop",
+   "group": "music",
+   "file": "art/sounds/music/music_day_loop.mp3",
+   "assetId": 112942872225068
+  },
+  {
+   "name": "music_installation_loop",
+   "group": "music",
+   "file": "art/sounds/music/music_installation_loop.mp3",
+   "assetId": 70753294514410
+  },
+  {
+   "name": "music_night_loop",
+   "group": "music",
+   "file": "art/sounds/music/music_night_loop.mp3",
+   "assetId": 86699606534941
   },
   {
    "name": "chair_roll",

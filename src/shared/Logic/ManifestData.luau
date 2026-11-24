@@ -5916,6 +5916,7 @@ return {
 			clips = {},
 			moves = {},
 			assetId = 71994118633748,
+			textureId = 123393837923702,
 		},
 		{
 			name = "bollard",
@@ -6120,6 +6121,7 @@ return {
 			clips = {},
 			moves = {},
 			assetId = 98309985651816,
+			textureId = 131432653242697,
 		},
 		{
 			name = "chrome_orb",
@@ -7026,6 +7028,7 @@ return {
 			clips = {},
 			moves = {},
 			assetId = 129653975047431,
+			textureId = 94160538414821,
 		},
 		{
 			name = "house_garage",
@@ -8152,6 +8155,7 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 106435843199989,
 			textureId = 131632119302524,
 		},
 		{
@@ -8169,6 +8173,7 @@ return {
 			clips = {},
 			moves = {},
 			assetId = 138478155199531,
+			textureId = 106477712376647,
 		},
 		{
 			name = "sodium_lamp",
@@ -9231,6 +9236,26 @@ return {
 			name = "night_tricks_sampler",
 			group = "misc",
 			assetId = 112661227635903,
+		},
+		{
+			name = "music_dawn_loop",
+			group = "music",
+			assetId = 140291326450705,
+		},
+		{
+			name = "music_day_loop",
+			group = "music",
+			assetId = 112942872225068,
+		},
+		{
+			name = "music_installation_loop",
+			group = "music",
+			assetId = 70753294514410,
+		},
+		{
+			name = "music_night_loop",
+			group = "music",
+			assetId = 86699606534941,
 		},
 		{
 			name = "chair_roll",
