@@ -4,6 +4,7 @@ return {
 	StartHint = "[H] Controls      [L] Flashlight",
 	StartHintSeconds = 20,
 	FlashlightHint = "It's dark. [L] Flashlight",
+	LitRadius = 40, -- studs from a red emergency light (its strip hangs high) that still count as lit
 	GrabTargetHint = "[F] Grab",
 	CarryHint = "[F] Drop   [R] Turn   [T] Turn / Tip / Roll   [Scroll] Closer / farther   [Alt + R] Spin",
 	-- Rows of the controls card: { keys, what it does }. An empty second column makes a heading.

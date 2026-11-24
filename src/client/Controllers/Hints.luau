@@ -1,6 +1,7 @@
 -- On-screen help so nobody has to guess the keys: short hint lines under the crosshair that other
 -- controllers set and clear (Hints.set("grab", "[F] Grab")), a controls card on H, and a few
 -- first-time nudges (the controls card itself, the flashlight when it gets dark).
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -134,9 +135,26 @@ local function buildCard(parent: ScreenGui): Frame
 	return frame
 end
 
+-- Truly dark: it's night and no emergency light is close by
 local function isDark(): boolean
-	local phase = ReplicatedStorage:GetAttribute("Phase")
-	return phase == "Night" or phase == "Siren"
+	if ReplicatedStorage:GetAttribute("Phase") ~= "Night" then
+		return false
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then
+		return false
+	end
+	for _, strip in CollectionService:GetTagged("WarehouseLight") do
+		if
+			strip:IsA("BasePart")
+			and strip:GetAttribute("Emergency") == true
+			and (strip.Position - root.Position).Magnitude < settings.LitRadius
+		then
+			return false
+		end
+	end
+	return true
 end
 
 local function watchFlashlight()

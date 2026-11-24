@@ -547,18 +547,49 @@ local function buildRack(shelf: WarehouseGen.Shelf)
 	model.Parent = chunkFor(centre, shelf.z)
 end
 
+-- An aisle number hanging over the end of a rack row on a cable. The number goes on the sign's
+-- Screen faces (or its Body) so it fits the sign, not the world.
 local function buildSign(sign: WarehouseGen.Sign)
-	local model = ModelLibrary.get("aisle_sign")
+	local name = if hasKit("aisle_sign_hanging") then "aisle_sign_hanging" else "aisle_sign"
+	local model = ModelLibrary.get(name)
 	if not model then
 		return
 	end
 	placeModel(model, sign.x, sign.z, Vector3.new(-1, 0, 0), false)
-	local body = model:FindFirstChild("Body", true)
-	if body and body:IsA("BasePart") then
-		local color = Color3.fromRGB(230, 226, 214)
-		textGui(body, Enum.NormalId.Front, tostring(sign.number), color, Enum.Font.Oswald)
-		textGui(body, Enum.NormalId.Back, tostring(sign.number), color, Enum.Font.Oswald)
+	local _, size = model:GetBoundingBox()
+	local top = settings.RackHeight + settings.AisleSignGap
+	model:PivotTo(model:GetPivot() + Vector3.new(0, top - size.Y, 0))
+	local color = Color3.fromRGB(230, 226, 214)
+	local text = tostring(sign.number)
+	local screens = {}
+	for _, partName in { "Screen", "Screen2" } do
+		local screen = model:FindFirstChild(partName, true)
+		if screen and screen:IsA("BasePart") then
+			table.insert(screens, screen)
+		end
 	end
+	if #screens > 0 then
+		for _, screen in screens do
+			textGui(screen, Enum.NormalId.Front, text, color, Enum.Font.Oswald)
+			textGui(screen, Enum.NormalId.Back, text, color, Enum.Font.Oswald)
+		end
+	else
+		local body = model:FindFirstChild("Body", true)
+		if body and body:IsA("BasePart") then
+			textGui(body, Enum.NormalId.Front, text, color, Enum.Font.Oswald)
+			textGui(body, Enum.NormalId.Back, text, color, Enum.Font.Oswald)
+		end
+	end
+	local cable = settings.CeilingHeight - top
+	local wire = block(
+		model,
+		"Cable",
+		Vector3.new(0.1, cable, 0.1),
+		CFrame.new(toWorld(sign.x, sign.z, top + cable / 2)),
+		settings.CableColor,
+		Enum.Material.Metal
+	)
+	detail(wire)
 	model.Parent = chunkFor(sign.x, sign.z)
 	noteBuilt()
 end

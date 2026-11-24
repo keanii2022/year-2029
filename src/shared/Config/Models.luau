@@ -26,4 +26,17 @@ return {
 		greeter = { Arm = "Z" }, -- waves side to side
 		security_cam = { Cam = "Y" },
 	},
+
+	-- Models that hang from a point at their top (signs, lights) rather than sitting on the floor
+	HangingModels = {
+		aisle_sign = true,
+		aisle_sign_hanging = true,
+		dept_sign = true,
+		light_dangling = true,
+		light_strip = true,
+		light_strip_dead = true,
+		light_highbay = true,
+		light_troffer = true,
+		sale_banner = true,
+	},
 }

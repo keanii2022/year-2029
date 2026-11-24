@@ -91,9 +91,9 @@ local function standUpright(model: Model, entry: Manifest.ModelEntry)
 	if near(extents.Y) or not (near(extents.Z) or near(extents.X)) then
 		return
 	end
-	local axis = if near(extents.Z) then Vector3.xAxis else Vector3.zAxis
-	-- Of the two quarter turns, keep the one that leaves most of the model's weight low, the way
-	-- furniture and racks sit
+	local axis = if near(extents.Z) then Vector3.xAxis else Vector3.zAxis -- Of the two quarter turns, keep the one that leaves most of the model's weight low, the way
+	-- furniture and racks sit; hanging things (signs, lights) hang from their top, so the reverse
+	local hangs = Config.Models.HangingModels[entry.name] == true
 	local best, bestScore = nil, math.huge
 	for _, sign in { 1, -1 } do
 		local turn = CFrame.fromAxisAngle(axis, sign * math.pi / 2)
@@ -102,6 +102,9 @@ local function standUpright(model: Model, entry: Manifest.ModelEntry)
 		local tLow, tHigh = worldExtents(trial)
 		local root = trial.PrimaryPart
 		local score = if root then (root.Position.Y - tLow.Y) / math.max(tHigh.Y - tLow.Y, 0.01) else 0
+		if hangs then
+			score = -score
+		end
 		trial:Destroy()
 		if score < bestScore then
 			best, bestScore = turn, score

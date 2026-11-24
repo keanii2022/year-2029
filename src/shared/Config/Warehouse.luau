@@ -86,6 +86,7 @@ return {
 	RackDecks = { 0.4, 6.5, 13, 19.5 },
 	RackStock = { 2, 3 }, -- runs of boxed stock per deck
 	TapeChance = 0.12,
+	AisleSignGap = 3, -- aisle number signs hang with their top this far above the racks
 	RackWreckChance = 0.03, -- kit only: a collapsed or toppled bay now and then
 
 	-- Strip lights on cables, cold over racking, warm over the store departments
@@ -96,7 +97,7 @@ return {
 	LightDead = 0.22,
 	LightFlicker = 0.1,
 	LightEvery = 2, -- every Nth working strip actually casts light, the rest only glow
-	EmergencyEvery = 6, -- every Nth working strip stays on at night as a dim red emergency light
+	EmergencyEvery = 12, -- every Nth working strip stays on at night as a small red pool of light
 	ExitSignChance = 0.35,
 
 	-- Store departments: a floor under a hanging sign on long cables, furniture staged in little sets
