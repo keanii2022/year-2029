@@ -369,6 +369,24 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Scope:** `src/client/Controllers/Hotbar.luau`, `src/client/Controllers/Hands.luau`, `src/client/Controllers/Viewmodel.luau`, `src/server/Systems/Inventory.luau` (selected item only), `src/shared/Config/Hotbar.luau`, `src/shared/Logic/Hotbar*.luau`, `tests/Hotbar*.spec.luau`
 - Keani: "we need to be able to see everything in hand." A hotbar of what's in your bag (number keys / scroll, D-pad on gamepad, tap on phone): the selected item shows on the gloves in first person (food, drinks, bandage, medkit, flashlight, batteries, every gun, handcuffs), and the use button does what that item does. Guns use their Muzzle marker, two-handed guns put the left glove on the Foregrip marker, the flashlight beam comes from its Lens. Done when you can look down and always see what you're holding.
 
+### 26. Robots out on chores
+- **Status:** current
+- **Dependencies:** 17, 23
+- **Scope:** `src/server/Systems/Robots.luau`, `src/shared/Config/Robots.luau`, `src/shared/Logic/Robot*.luau`, `tests/Robot*.spec.luau`, `src/server/Systems/Life.luau`
+- By day, chore bots leave their installations on errands you can see: carrying boxes down aisles, sweeping, restocking racks, then walking home. Done when you run into robots at work without hunting for them.
+
+### 27. Reload, medkit, psst
+- **Status:** current
+- **Dependencies:** 20, 25
+- **Scope:** combat, inventory items, supplies, a new Psst system (see the brief)
+- A reload moment with the mag dropping out (you're exposed for a beat), a rare medkit that heals fully over a few seconds, and Psst: a quiet whisper other players nearby hear with a direction. Done when a fight has a reload rhythm and strangers can psst each other.
+
+### 28. The store at night, and lighter on phones
+- **Status:** current
+- **Dependencies:** 15, 7
+- **Scope:** a new Rearrange system, the phone handler in Interact, `default.project.json` streaming settings, a new client quality module
+- Overnight the store rearranges itself: loose junk, carts and signs move so the morning layout is different (forts and lockers stay). Night phones play breathing and a giggle or the jingle slowed down. Streaming and effects tuned so phones and slow devices keep up. Done when mornings feel different and a phone can play.
+
 ## Later ideas
 
 - Hard night every 10th night. Foggy days where robots stay awake.
