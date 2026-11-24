@@ -11,3 +11,4 @@ Packages/*
 !Packages/.gitkeep
 sourcemap.json
 roblox.yml
+.claude/worktrees/

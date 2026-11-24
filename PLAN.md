@@ -206,42 +206,42 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Rojo project, loaders that start every system and controller, Config folder, Net remotes, Lune test runner.
 
 ### 1. First person feel
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 0
 - **Scope:** `src/client/Controllers/Movement.luau`, `src/client/Controllers/Camera.luau`, `src/client/Controllers/Input.luau`, `src/server/Systems/TestRoom.luau`, `src/server/Systems/PlayerSetup.luau`, `src/shared/Config/Movement.luau`, `src/shared/Logic/Movement*.luau`, `tests/Movement*.spec.luau`
 - **Out of scope:** grabbing, guns, the real warehouse.
 - Movement and camera from Systems above (first person, sprint, crouch, jump, head bob, keyboard + PS controller). Hide the player list. Greybox test room built from code. Done when it feels good on keyboard and PS controller.
 
 ### 2. Bring in the models
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 0
 - **Scope:** `tools/upload_assets.py`, `assets/manifest.json`, `src/shared/ModelLibrary.luau`, `src/shared/ModelRig.luau`, `src/server/Systems/Showroom.luau`, `src/shared/Config/Models.luau`, `src/shared/Logic/Manifest*.luau`, `tests/Manifest*.spec.luau`; read-only: `art/` (MOVES.md, each model's folder, `sounds/`)
 - **Out of scope:** changing anything in `art/`, running Blender.
 - An upload script (Open Cloud, key from an env var, never saved) that sends every FBX, texture and sound and writes asset ids into the manifest. ModelLibrary loads a model by name (greybox stand-in when not uploaded yet). ModelRig wires moving parts on their hinges, Glow parts to Neon, Screen parts to swappable images. A showroom places every model in rows. Done when every model sits in a test room, looks right, and its parts move.
 
 ### 3. Grab and build
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 0
 - **Scope:** `src/server/Systems/Grab.luau`, `src/client/Controllers/Grab.luau`, `src/shared/Config/Grab.luau`, `src/shared/Logic/Grab*.luau`, `tests/Grab*.spec.luau`
 - **Out of scope:** guns, using objects (step 7).
 - Grab, carry, drop, rotate, stack, grid snap and freeze on drop, with the placing controls above. Server decides every move. Spawns a few greybox props for testing. Done when a kid builds a walled fort in a few minutes and a friend can tear it down.
 
 ### 4. Guns
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 1, 3
 - **Scope:** `src/server/Systems/Combat.luau`, `src/server/Systems/Inventory.luau`, `src/client/Controllers/Gun.luau`, `src/client/Controllers/Hud.luau`, `src/shared/Config/Guns.luau`, `src/shared/Logic/Combat*.luau`, `src/shared/Logic/Inventory*.luau`, `tests/Combat*.spec.luau`, `tests/Inventory*.spec.luau`
 - **Out of scope:** robots, handcuffs, supplies beyond ammo.
 - Basic blaster (sparks, no blood), ammo, health, going down drops everything as a loot pile, respawn. Server-side hits. Done when a 1 v 1 over a fort is fair and fun. (First playable.)
 
 ### 5. The giant warehouse
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 1, 2
 - **Scope:** `src/server/Systems/Warehouse.luau`, `src/shared/Config/Warehouse.luau`, `src/shared/Logic/WarehouseGen*.luau`, `tests/WarehouseGen*.spec.luau`
 - **Out of scope:** lighting changes (step 6), robots.
 - Code-built aisles, junk stacks and randomly placed robot rooms (seeded), tall ceiling lost in haze, streaming on. Spawns move into it; the test room stays reachable by a Config flag. Done when walking two minutes one way still feels endless.
 
 ### 6. Lights on, siren, lights out
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 1, 2
 - **Scope:** `src/server/Systems/DayNight.luau`, `src/client/Controllers/Lighting.luau`, `src/client/Controllers/Flashlight.luau`, `src/client/Controllers/Music.luau`, `src/shared/Config/DayNight.luau`, `src/shared/Logic/Clock*.luau`, `tests/Clock*.spec.luau`
 - **Out of scope:** robots, generators (step 12).
@@ -337,3 +337,21 @@ The Blender run is done. Every model lives in `art/` with its FBX, texture, prev
 - Robbing can feel mean. Cuff and kill cooldowns, and robot-only rewards, keep it fun.
 - Moving hundreds of physics props with many players can lag. Props snap to a grid and freeze when dropped.
 - Giant maps can be slow on phones and consoles. Streaming and simple greybox art first.
+
+## Calls to review
+
+Best guesses made during the /parallel run. Change any of them in the step's Config file.
+
+- Step 1: walk 14, sprint 22, crouch 7, jump height 5, view 72 widening to 80 on sprint. A middle ground that leaves room to outrun a robot.
+- Step 1: Sprint = hold Shift / L3 toggle; Crouch = toggle C / R3; jumping or sprinting stands you up. Standard shooter habits.
+- Step 1: Buttons: Use E/Square, Grab F/R1, Fire click/R2, Aim right-click/L2, Rotate R/Triangle, Psst Q/Circle, Jump Space/Cross. Common console layout, Grab on a bumper so you can grab and aim together.
+- Step 1: Test room 160x160, grey walls 24 high, blue shelving rows, crates for jump tests, four corner spawns. Big enough for a 1v1 over a fort.
+- Step 3: Grab/drop on F / R1, since E and Square stay free for using objects.
+- Step 3: Free rotate is hold Left Alt + R on keyboard (the plan only gave L1 for the pad). Gamepad gets no closer/farther control because the plan only named the mouse wheel.
+- Step 3: Ghost is soft green when the spot's OK and red when it's blocked; the rotate arrow is yellow for turn, light blue for tip, purple for roll. Readable in a dim room.
+- Step 3: Limits: stack up to 12 studs above your feet, grab from 12, place up to 18, hold 4-12 out. Heavy props slow you down to 55% (a couch is about 72%). A fort's walls end up roughly double your height.
+- Step 2: Showroom at (2000, 0, 0) on dark concrete, rows by group with uppercase labels and name tags within 60 studs. Kept far from the test room so they never overlap.
+- Step 2: You spawn in the test room; set `Config.Models.ShowroomSpawnPlayers = true` to spawn in the showroom instead. Keeps step 1 testing clean.
+- Step 2: Demo motion is on: every moving part opens and closes on a 4-second loop (doors 100°, slides 80%, levers 30°). Lets you check the hinges at a glance.
+- Step 2: Stand-ins before upload are grey blocks, with Glow in warm orange and Screen near-black. You can still read what's what.
+- Step 2: Images upload as Decals and sounds as Audio; the two sampler mp3s go in a "misc" group.
