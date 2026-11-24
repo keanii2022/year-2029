@@ -85,7 +85,8 @@ function Movement.Start()
 			sprintToggled = false
 		end
 
-		stance = MovementLogic.stance(sprintHeld or sprintToggled, crouched, moveAmount)
+		local canSprint = player:GetAttribute("Exhausted") ~= true
+		stance = MovementLogic.stance((sprintHeld or sprintToggled) and canSprint, crouched, moveAmount)
 		local target = MovementLogic.targetSpeed(settings, stance)
 		currentSpeed = Clamp.approach(currentSpeed, target, settings.SpeedEase * dt)
 		local carryMultiplier = player:GetAttribute("CarrySpeedMultiplier")
