@@ -26,7 +26,6 @@ type Carry = {
 	angles: Vector3, -- tip, turn, roll in degrees
 	aim: Vector3?,
 	humanoid: Humanoid?,
-	baseSpeed: number?,
 	lastGhost: number,
 }
 
@@ -152,9 +151,6 @@ local function release(player: Player, carry: Carry, pivot: CFrame?)
 		part.Anchored = true -- frozen where it lands until the server resets
 		part.CanCollide = carry.collide[part]
 	end
-	if carry.humanoid and carry.baseSpeed then
-		carry.humanoid.WalkSpeed = carry.baseSpeed
-	end
 	player:SetAttribute("CarrySpeedMultiplier", nil)
 	carriers[player] = nil
 	carriedBy[carry.prop] = nil
@@ -233,10 +229,9 @@ local function onGrabRequest(player: Player, prop: any)
 		),
 		aim = nil,
 		humanoid = humanoid,
-		baseSpeed = humanoid.WalkSpeed,
 		lastGhost = 0,
 	}
-	humanoid.WalkSpeed *= multiplier
+	-- The client Movement controller owns WalkSpeed and multiplies by this attribute.
 	player:SetAttribute("CarrySpeedMultiplier", multiplier)
 	carriers[player] = carry
 	carriedBy[prop] = player

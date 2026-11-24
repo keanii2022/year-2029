@@ -88,7 +88,8 @@ function Movement.Start()
 		stance = MovementLogic.stance(sprintHeld or sprintToggled, crouched, moveAmount)
 		local target = MovementLogic.targetSpeed(settings, stance)
 		currentSpeed = Clamp.approach(currentSpeed, target, settings.SpeedEase * dt)
-		humanoid.WalkSpeed = currentSpeed
+		local carryMultiplier = player:GetAttribute("CarrySpeedMultiplier")
+		humanoid.WalkSpeed = currentSpeed * (if type(carryMultiplier) == "number" then carryMultiplier else 1)
 
 		local now = os.clock()
 		if stance ~= sentStance and now - lastSentAt >= settings.StanceMinInterval then
