@@ -197,22 +197,106 @@ One big room, props, a few players, guns. Move, grab, build, shoot. If dragging 
 
 ## Build steps
 
-Each step is one session, tested in Studio before moving on.
+Each step is one session. Code rules for every step: see "Code layout" in CLAUDE.md. Every step adds its own files (`src/server/Systems/<Name>.luau`, `src/client/Controllers/<Name>.luau`, `src/shared/Config/<Name>.luau`, pure logic in `src/shared/Logic/` with Lune tests in `tests/<Name>.spec.luau`), so steps never edit the same file. `./scripts/check.sh` must pass. Studio testing happens in the Year 2029 place only.
 
-1. **First person feel.** Movement and camera above. Greybox test room. Done when it feels good on keyboard and PS controller.
-2. **Bring in the models.** Upload the Blender library to the Year 2029 place. Wire moving parts on their hinges, Glow parts to Neon, Screen parts to swappable images. Done when every model sits in a test room, looks right, and its parts move.
-3. **Grab and build.** Grab, carry, drop, rotate, stack, with the placing controls above. Done when a kid builds a walled fort in a few minutes and a friend can tear it down.
-4. **Guns.** Basic gun, ammo, health, going down, loot piles, respawn. Done when a 1 v 1 over a fort is fair and fun. (First playable.)
-5. **The giant warehouse.** Code-built aisles, junk stacks and randomly placed robot rooms, tall ceiling, haze, streaming. Done when walking two minutes one way still feels endless.
-6. **Lights on, siren, lights out.** Clock, lighting flip, music, voice lines, flashlights. Done when the mood flips hard.
-7. **Objects come to life and sound.** Press to use, hide inside, switch on and off, screens, the loudness system. Done when a boombox at your fort pulls in a stranger.
-8. **Robots.** Day: chore bots study in rooms, room-only sight, chase, steal your best item. Night: swap to night models, sweep the aisles, take loose stuff and players, walk to loud sounds. EMP and disruptor. Done when sneaking into a room is tense and a night is scary with no other players around.
-9. **Supplies.** Hunger, energy, food, ammo boxes, bandages, loot by depth. Done when day has a clear shopping list.
-10. **Handcuffs.** Cuff, rob, break free, cooldown. Done when getting cuffed feels bad but not unfair.
-11. **The dog.** Spawn, trust over visits with food, follow, guard, bark, bite. Done when finding one feels like a big deal.
-12. **Night tricks.** Store rearranging, hiding inside furniture with breath holding, room sound, rain and lightning, PA lines, phones, flashlight battery, generators with fuel, lore. Done when a night alone has a plan, not just hiding.
-13. **Haunts and life.** The lost kid, pigeons, rats, moths, mannequins, greeter, cameras, story spots. Done when a player alone at night jumps at least once.
-14. **Saves and scores.** Locker, blueprints (paper and pen, once per day), stats, leaderboards, cosmetics. Done when a full server plays a few nights with no breaks.
+### 0. Rojo scaffold
+- **Status:** done
+- **Dependencies:** none
+- **Scope:** `default.project.json`, `rokit.toml`, `wally.toml`, `selene.toml`, `stylua.toml`, `scripts/check.sh`, `tests/run.luau`, `tests/expect.luau`, `src/shared/Config/init.luau`, `src/shared/Net.luau`, `src/shared/Loader.luau`, `src/server/init.server.luau`, `src/client/init.client.luau`
+- Rojo project, loaders that start every system and controller, Config folder, Net remotes, Lune test runner.
+
+### 1. First person feel
+- **Status:** pending
+- **Dependencies:** 0
+- **Scope:** `src/client/Controllers/Movement.luau`, `src/client/Controllers/Camera.luau`, `src/client/Controllers/Input.luau`, `src/server/Systems/TestRoom.luau`, `src/server/Systems/PlayerSetup.luau`, `src/shared/Config/Movement.luau`, `src/shared/Logic/Movement*.luau`, `tests/Movement*.spec.luau`
+- **Out of scope:** grabbing, guns, the real warehouse.
+- Movement and camera from Systems above (first person, sprint, crouch, jump, head bob, keyboard + PS controller). Hide the player list. Greybox test room built from code. Done when it feels good on keyboard and PS controller.
+
+### 2. Bring in the models
+- **Status:** pending
+- **Dependencies:** 0
+- **Scope:** `tools/upload_assets.py`, `assets/manifest.json`, `src/shared/ModelLibrary.luau`, `src/shared/ModelRig.luau`, `src/server/Systems/Showroom.luau`, `src/shared/Config/Models.luau`, `src/shared/Logic/Manifest*.luau`, `tests/Manifest*.spec.luau`; read-only: `art/` (MOVES.md, each model's folder, `sounds/`)
+- **Out of scope:** changing anything in `art/`, running Blender.
+- An upload script (Open Cloud, key from an env var, never saved) that sends every FBX, texture and sound and writes asset ids into the manifest. ModelLibrary loads a model by name (greybox stand-in when not uploaded yet). ModelRig wires moving parts on their hinges, Glow parts to Neon, Screen parts to swappable images. A showroom places every model in rows. Done when every model sits in a test room, looks right, and its parts move.
+
+### 3. Grab and build
+- **Status:** pending
+- **Dependencies:** 0
+- **Scope:** `src/server/Systems/Grab.luau`, `src/client/Controllers/Grab.luau`, `src/shared/Config/Grab.luau`, `src/shared/Logic/Grab*.luau`, `tests/Grab*.spec.luau`
+- **Out of scope:** guns, using objects (step 7).
+- Grab, carry, drop, rotate, stack, grid snap and freeze on drop, with the placing controls above. Server decides every move. Spawns a few greybox props for testing. Done when a kid builds a walled fort in a few minutes and a friend can tear it down.
+
+### 4. Guns
+- **Status:** pending
+- **Dependencies:** 1, 3
+- **Scope:** `src/server/Systems/Combat.luau`, `src/server/Systems/Inventory.luau`, `src/client/Controllers/Gun.luau`, `src/client/Controllers/Hud.luau`, `src/shared/Config/Guns.luau`, `src/shared/Logic/Combat*.luau`, `src/shared/Logic/Inventory*.luau`, `tests/Combat*.spec.luau`, `tests/Inventory*.spec.luau`
+- **Out of scope:** robots, handcuffs, supplies beyond ammo.
+- Basic blaster (sparks, no blood), ammo, health, going down drops everything as a loot pile, respawn. Server-side hits. Done when a 1 v 1 over a fort is fair and fun. (First playable.)
+
+### 5. The giant warehouse
+- **Status:** pending
+- **Dependencies:** 1, 2
+- **Scope:** `src/server/Systems/Warehouse.luau`, `src/shared/Config/Warehouse.luau`, `src/shared/Logic/WarehouseGen*.luau`, `tests/WarehouseGen*.spec.luau`
+- **Out of scope:** lighting changes (step 6), robots.
+- Code-built aisles, junk stacks and randomly placed robot rooms (seeded), tall ceiling lost in haze, streaming on. Spawns move into it; the test room stays reachable by a Config flag. Done when walking two minutes one way still feels endless.
+
+### 6. Lights on, siren, lights out
+- **Status:** pending
+- **Dependencies:** 1, 2
+- **Scope:** `src/server/Systems/DayNight.luau`, `src/client/Controllers/Lighting.luau`, `src/client/Controllers/Flashlight.luau`, `src/client/Controllers/Music.luau`, `src/shared/Config/DayNight.luau`, `src/shared/Logic/Clock*.luau`, `tests/Clock*.spec.luau`
+- **Out of scope:** robots, generators (step 12).
+- Server clock, day and night phases, lighting flip, siren, music and voice line hooks (sound ids from the manifest), flashlights. Done when the mood flips hard.
+
+### 7. Objects come to life and sound
+- **Status:** pending
+- **Dependencies:** 2, 3
+- **Scope:** `src/server/Systems/Interact.luau`, `src/server/Systems/Loudness.luau`, `src/client/Controllers/Interact.luau`, `src/shared/Config/Interact.luau`, `src/shared/Logic/Loudness*.luau`, `tests/Loudness*.spec.luau`
+- **Out of scope:** robots reacting to sound (step 8 reads the loudness system).
+- Press to use, hide inside, switch on and off, screens, the loudness system. Done when a boombox at your fort pulls in a stranger.
+
+### 8. Robots
+- **Status:** pending
+- **Dependencies:** 5, 6, 7
+- **Scope:** `src/server/Systems/Robots.luau`, `src/server/Systems/RobotGear.luau`, `src/shared/Config/Robots.luau`, `src/shared/Logic/Robot*.luau`, `tests/Robot*.spec.luau`
+- **Out of scope:** the dog, haunts.
+- Day: chore bots study in rooms, room-only sight, chase, steal your best item. Night: swap to night models, sweep the aisles, take loose stuff and players, walk to loud sounds. EMP and disruptor. Done when sneaking into a room is tense and a night is scary with no other players around.
+
+### 9. Supplies
+- **Status:** pending
+- **Dependencies:** 4, 5, 7
+- **Scope:** `src/server/Systems/Supplies.luau`, `src/client/Controllers/Needs.luau`, `src/shared/Config/Supplies.luau`, `src/shared/Logic/Needs*.luau`, `src/shared/Logic/Loot*.luau`, `tests/Needs*.spec.luau`, `tests/Loot*.spec.luau`
+- **Out of scope:** saving (step 14).
+- Hunger, energy, food, ammo boxes, bandages, loot by depth. Done when day has a clear shopping list.
+
+### 10. Handcuffs
+- **Status:** pending
+- **Dependencies:** 4
+- **Scope:** `src/server/Systems/Cuffs.luau`, `src/client/Controllers/Cuffs.luau`, `src/shared/Config/Cuffs.luau`, `src/shared/Logic/Cuffs*.luau`, `tests/Cuffs*.spec.luau`
+- Cuff, rob, break free, cooldown. Done when getting cuffed feels bad but not unfair.
+
+### 11. The dog
+- **Status:** pending
+- **Dependencies:** 4, 8, 9
+- **Scope:** `src/server/Systems/Dog.luau`, `src/shared/Config/Dog.luau`, `src/shared/Logic/Dog*.luau`, `tests/Dog*.spec.luau`
+- Spawn, trust over visits with food, follow, guard, bark, bite. Done when finding one feels like a big deal.
+
+### 12. Night tricks
+- **Status:** pending
+- **Dependencies:** 6, 7, 8
+- **Scope:** `src/server/Systems/NightTricks.luau`, `src/client/Controllers/NightTricks.luau`, `src/shared/Config/NightTricks.luau`, `src/shared/Logic/NightTricks*.luau`, `tests/NightTricks*.spec.luau`
+- Store rearranging, hiding inside furniture with breath holding, room sound, rain and lightning, PA lines, phones, flashlight battery, generators with fuel, lore. Done when a night alone has a plan, not just hiding.
+
+### 13. Haunts and life
+- **Status:** pending
+- **Dependencies:** 6, 7
+- **Scope:** `src/server/Systems/Haunts.luau`, `src/client/Controllers/Haunts.luau`, `src/shared/Config/Haunts.luau`, `src/shared/Logic/Haunt*.luau`, `tests/Haunt*.spec.luau`
+- The lost kid, pigeons, rats, moths, mannequins, greeter, cameras, story spots. Done when a player alone at night jumps at least once.
+
+### 14. Saves and scores
+- **Status:** pending
+- **Dependencies:** 3, 4, 9
+- **Scope:** `src/server/Systems/Saves.luau`, `src/server/Systems/Scores.luau`, `src/client/Controllers/Locker.luau`, `src/shared/Config/Saves.luau`, `src/shared/Logic/Saves*.luau`, `tests/Saves*.spec.luau`
+- Locker, blueprints (paper and pen, once per day), stats, leaderboards, cosmetics. Done when a full server plays a few nights with no breaks.
 
 ## Later ideas
 

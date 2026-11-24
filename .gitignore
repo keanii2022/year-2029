@@ -6,3 +6,8 @@ art/**/anim/_frames/
 *.blend1
 *.rbxl.lock
 *.rbxlx.lock
+build/
+Packages/*
+!Packages/.gitkeep
+sourcemap.json
+roblox.yml

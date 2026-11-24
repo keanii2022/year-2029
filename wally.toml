@@ -1,0 +1,7 @@
+[package]
+name = "keanii2022/year-2029"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
