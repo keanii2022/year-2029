@@ -11,6 +11,8 @@ export type Gun = {
 	range: number,
 	fireInterval: number,
 	automatic: boolean,
+	magSize: number,
+	reloadTime: number,
 }
 
 export type FireCheck = {
@@ -18,6 +20,7 @@ export type FireCheck = {
 	carrying: boolean,
 	cuffed: boolean?,
 	hasGun: boolean,
+	reloading: boolean?,
 	ammo: number,
 	sinceLastShot: number,
 	minInterval: number,
@@ -63,6 +66,9 @@ function Combat.canFire(check: FireCheck): (boolean, string?)
 	end
 	if not check.hasGun then
 		return false, "no gun"
+	end
+	if check.reloading then
+		return false, "reloading"
 	end
 	if check.ammo <= 0 then
 		return false, "no ammo"

@@ -253,6 +253,13 @@ function Hotbar.Start()
 		end
 	end)
 	Input.bind("Fire", onFire)
+	-- The medkit has no quick-use button, so its slot asks Supplies directly.
+	local supplyRemote = Net.event("SupplyUse")
+	Hotbar.onUse("Medkit", function(began)
+		if began then
+			supplyRemote:FireServer("Medkit")
+		end
+	end)
 	UserInputService.InputChanged:Connect(onWheel)
 	UserInputService.LastInputTypeChanged:Connect(redraw)
 	rebuild()

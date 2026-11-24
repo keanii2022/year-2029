@@ -25,6 +25,7 @@ local items: { [string]: ItemDef } = {
 	FlashlightBattery = { id = "FlashlightBattery", name = "Flashlight Battery", value = 6, stackSize = 6 },
 	EmpCharge = { id = "EmpCharge", name = "EMP Charge", value = 200, stackSize = 3 },
 	Disruptor = { id = "Disruptor", name = "Disruptor", value = 300, stackSize = 1 },
+	Medkit = { id = "Medkit", name = "Medkit", value = 40, stackSize = 2 },
 }
 
 return table.freeze(items)

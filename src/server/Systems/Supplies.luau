@@ -21,9 +21,9 @@ local Warehouse = require(script.Parent.Warehouse)
 local Settings = Config.Supplies
 local NeedSettings = Settings.Needs
 
-local KINDS = { Eat = "Eating", Drink = "Drinking", Heal = "Patching up" }
-local NOTHING = { Eat = "No food", Drink = "Nothing to drink", Heal = "No bandages" }
-local FULL = { Eat = "Not hungry", Drink = "Not thirsty", Heal = "Not hurt" }
+local KINDS = { Eat = "Eating", Drink = "Drinking", Heal = "Patching up", Medkit = "Using the medkit" }
+local NOTHING = { Eat = "No food", Drink = "Nothing to drink", Heal = "No bandages", Medkit = "No medkit" }
+local FULL = { Eat = "Not hungry", Drink = "Not thirsty", Heal = "Not hurt", Medkit = "Not hurt" }
 -- Pickups are spread over frames so a restock doesn't hitch the server
 local PICKUPS_PER_FRAME = 60
 

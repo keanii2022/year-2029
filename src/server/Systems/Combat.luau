@@ -1,10 +1,12 @@
 -- Server side of guns: checks every shot, does the hit raycast, deals damage, and handles
--- going down (everything drops as a loot pile) and the spawn kit.
+-- going down (everything drops as a loot pile) and the spawn kit. Tracks each player's mag and
+-- reload, published as the "Mag" and "Reloading" attributes for the client's HUD.
 -- Only players take damage; anything else a shot hits just throws sparks and stops the shot.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
+local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -16,6 +18,9 @@ local settings = Config.Guns
 local Combat = {}
 
 local lastShotAt: { [Player]: number } = {}
+-- reloadId tells a finished reload's timer apart from a newer reload or a respawn.
+type MagState = { mag: number, reloadStartedAt: number?, reloadId: number }
+local mags: { [Player]: MagState } = {}
 local hitRemote: RemoteEvent
 local fxRemote: UnreliableRemoteEvent
 local viewmodels: Folder
@@ -47,6 +52,78 @@ local function excludeParams(character: Model): RaycastParams
 	return params
 end
 
+local function heldGun(player: Player): CombatLogic.Gun?
+	local gunId = CombatLogic.pickGun(settings.Blasters, function(id)
+		return Inventory.has(player, id)
+	end)
+	return if gunId then settings.Blasters[gunId] else nil
+end
+
+local function magState(player: Player): MagState
+	local state = mags[player]
+	if not state then
+		state = { mag = 0, reloadId = 0 }
+		mags[player] = state
+	end
+	return state
+end
+
+local function publishMag(player: Player, state: MagState)
+	player:SetAttribute("Mag", state.mag)
+	player:SetAttribute("Reloading", if state.reloadStartedAt then true else nil)
+end
+
+local function finishReload(player: Player, state: MagState, gun: CombatLogic.Gun?)
+	state.reloadStartedAt = nil
+	if gun then
+		state.mag = CombatReload.refill(gun.magSize, Inventory.count(player, gun.ammo))
+	end
+	publishMag(player, state)
+end
+
+-- A reload whose time is up counts as done right away, even if its timer hasn't fired yet.
+local function settleReload(player: Player, state: MagState, gun: CombatLogic.Gun?, now: number)
+	local startedAt = state.reloadStartedAt
+	if
+		startedAt
+		and gun
+		and CombatReload.isDone(startedAt, now, gun.reloadTime, settings.ReloadTimeSlack)
+	then
+		finishReload(player, state, gun)
+	end
+end
+
+local function onReload(player: Player)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local gun = heldGun(player)
+	local state = magState(player)
+	local now = os.clock()
+	settleReload(player, state, gun, now)
+	local ok = CombatReload.canReload({
+		alive = humanoid ~= nil and humanoid.Health > 0,
+		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
+		cuffed = player:GetAttribute("Cuffed") == true,
+		hasGun = gun ~= nil,
+		reloading = state.reloadStartedAt ~= nil,
+		mag = state.mag,
+		magSize = if gun then gun.magSize else 0,
+		bag = if gun then Inventory.count(player, gun.ammo) else 0,
+	})
+	if not ok or not gun then
+		return
+	end
+	state.reloadId += 1
+	local reloadId = state.reloadId
+	state.reloadStartedAt = now
+	publishMag(player, state)
+	task.delay(gun.reloadTime, function()
+		if mags[player] == state and state.reloadId == reloadId and state.reloadStartedAt then
+			finishReload(player, state, heldGun(player))
+		end
+	end)
+end
+
 local function onFire(player: Player, origin: any, direction: any)
 	if not isFiniteVector(origin) or not isFiniteVector(direction) then
 		return
@@ -58,17 +135,18 @@ local function onFire(player: Player, origin: any, direction: any)
 		return
 	end
 
-	local gunId = CombatLogic.pickGun(settings.Blasters, function(id)
-		return Inventory.has(player, id)
-	end)
-	local gun = gunId and settings.Blasters[gunId]
+	local gun = heldGun(player)
 	local now = os.clock()
+	local state = magState(player)
+	settleReload(player, state, gun, now)
+	local mag = if gun then CombatReload.loaded(state.mag, Inventory.count(player, gun.ammo)) else 0
 	local ok = CombatLogic.canFire({
 		alive = humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
 		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = gun ~= nil,
-		ammo = if gun then Inventory.count(player, gun.ammo) else 0,
+		reloading = state.reloadStartedAt ~= nil,
+		ammo = mag,
 		sinceLastShot = now - (lastShotAt[player] or 0),
 		minInterval = if gun then gun.fireInterval * settings.FireIntervalSlack else 0,
 	})
@@ -86,6 +164,8 @@ local function onFire(player: Player, origin: any, direction: any)
 
 	lastShotAt[player] = now
 	Inventory.remove(player, gun.ammo, 1)
+	state.mag = mag - 1
+	publishMag(player, state)
 
 	local params = excludeParams(character)
 	local aim = direction.Unit
@@ -145,6 +225,10 @@ local function setUpCharacter(player: Player, character: Model)
 	for _, item in settings.StartingLoadout do
 		Inventory.add(player, item.id, item.count)
 	end
+	-- Every spawn starts with a full mag and no reload in progress.
+	local state = magState(player)
+	state.reloadId += 1
+	finishReload(player, state, heldGun(player))
 	if not settings.HealthRegen then
 		-- Roblox adds a "Health" regen script to every character; removing it turns regen off.
 		local regen = character:WaitForChild("Health", 5)
@@ -168,9 +252,11 @@ function Combat.Init()
 	hitRemote = Net.event("GunHit")
 	fxRemote = Net.unreliable("GunFx")
 	Net.event("GunFire").OnServerEvent:Connect(onFire)
+	Net.event("GunReload").OnServerEvent:Connect(onReload)
 	Players.PlayerAdded:Connect(setUpPlayer)
 	Players.PlayerRemoving:Connect(function(player)
 		lastShotAt[player] = nil
+		mags[player] = nil
 	end)
 	for _, player in Players:GetPlayers() do
 		setUpPlayer(player)

@@ -21,6 +21,8 @@ return {
 			range = 300,
 			fireInterval = 0.22,
 			automatic = false,
+			magSize = 12,
+			reloadTime = 1.6,
 		},
 	},
 
@@ -28,6 +30,19 @@ return {
 	FireIntervalSlack = 0.8, -- shots may arrive this fraction of the interval apart (network jitter)
 	MaxOriginOffset = 6, -- studs between the client's camera and its head
 	LineOfSightSlack = 0.5,
+	ReloadTimeSlack = 0.8, -- the server may finish a reload this fraction of the time in (network jitter)
+
+	-- Reload look: the blaster dips over the first share of the reload and rises over the last;
+	-- the old mag drops out at the start and fades on the floor.
+	ReloadDipShare = 0.25,
+	ReloadRiseShare = 0.2,
+	ReloadDropPitch = 35, -- degrees the blaster tips down mid-reload
+	ReloadDropRoll = 25,
+	ReloadDropSink = 0.25, -- studs
+	MagFallTime = 1.5, -- seconds a dropped mag lies there before fading
+	MagFadeTime = 0.6,
+	MagStandInSize = Vector3.new(0.1, 0.22, 0.16),
+	MagStandInColor = Color3.fromRGB(38, 40, 44),
 
 	-- Look and feel. The bullet is only a picture; the hit was already decided by the server's
 	-- instant raycast. Its flight time is clamped so it lands about when the server answers.
@@ -84,6 +99,8 @@ return {
 		ImpactVolume = 0.35,
 		ImpactPitch = 1.3,
 		Empty = "flashlight_click",
+		Reload = "cell_eject",
+		ReloadVolume = 0.8,
 	},
 	SoundRollOff = { 8, 120 },
 	SoundPitchJitter = 0.12,

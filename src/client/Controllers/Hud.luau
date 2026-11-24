@@ -181,12 +181,14 @@ local function buildDownScreen()
 end
 
 local function refreshAmmo()
-	local ammo = Gun.getAmmo()
-	ammoPanel.Visible = ammo ~= nil
-	if ammo then
-		ammoLabel.Text = if ammo > 0 then tostring(ammo) else "EMPTY"
-		ammoLabel.Font = if ammo > 0 then Enum.Font.GothamBold else Enum.Font.PermanentMarker
-		ammoLabel.TextColor3 = if ammo > 0 then TEXT else SPRAY_RED
+	local mag, reserve, reloading = Gun.getMagazine()
+	ammoPanel.Visible = mag ~= nil
+	if mag and reserve then
+		local empty = mag + reserve <= 0
+		ammoLabel.Text = if reloading then "RELOADING" elseif empty then "EMPTY" else `{mag} / {reserve}`
+		ammoLabel.TextSize = if reloading then 22 else 34
+		ammoLabel.Font = if empty then Enum.Font.PermanentMarker else Enum.Font.GothamBold
+		ammoLabel.TextColor3 = if empty or (mag <= 0 and not reloading) then SPRAY_RED else TEXT
 	end
 end
 
