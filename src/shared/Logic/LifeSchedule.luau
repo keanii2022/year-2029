@@ -3,7 +3,8 @@
 local LifeSchedule = {}
 
 export type Range = { Min: number, Max: number }
-export type Event = { weight: number, phases: { [string]: boolean } }
+-- phases: true for full weight, or a number to scale the weight in that phase
+export type Event = { weight: number, phases: { [string]: boolean | number } }
 export type Bag = { order: { number }, last: number? }
 export type Blink = { lit: boolean, seconds: number }
 
@@ -19,24 +20,34 @@ function LifeSchedule.gap(range: Range, rate: number?, roll: () -> number): numb
 	return between(range.Min, range.Max, roll) / rate
 end
 
+local function weightIn(event: Event, phase: string): number
+	local scale = event.phases[phase]
+	if scale == true then
+		return event.weight
+	elseif type(scale) == "number" then
+		return event.weight * scale
+	end
+	return 0
+end
+
 -- Weighted pick among events allowed in this phase. Names are sorted so a seed always gives the same pick.
 function LifeSchedule.pick(events: { [string]: Event }, phase: string, roll: () -> number): string?
 	local names, total = {}, 0
 	for name, event in events do
-		if event.phases[phase] and event.weight > 0 then
+		if weightIn(event, phase) > 0 then
 			table.insert(names, name)
 		end
 	end
 	table.sort(names)
 	for _, name in names do
-		total += events[name].weight
+		total += weightIn(events[name], phase)
 	end
 	if total <= 0 then
 		return nil
 	end
 	local target = roll() * total
 	for _, name in names do
-		target -= events[name].weight
+		target -= weightIn(events[name], phase)
 		if target < 0 then
 			return name
 		end
