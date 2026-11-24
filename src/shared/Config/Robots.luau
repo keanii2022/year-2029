@@ -78,6 +78,7 @@ return {
 	MaxHaulSize = 14, -- longest side of a prop a robot will carry
 	RevealRange = 10,
 	RevealChance = 0.4,
+	HoldingBreathRevealFactor = 0.25, -- step 12: holding your breath while hidden
 
 	-- Pathfinding: kept cheap on a giant map
 	PathRecompute = 1.5,

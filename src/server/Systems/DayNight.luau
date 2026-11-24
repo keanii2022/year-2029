@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local Clock = require(ReplicatedStorage.Shared.Logic.Clock)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Inventory = require(script.Parent.Inventory)
 
 local Settings = Config.DayNight
 
@@ -59,6 +60,12 @@ local function onFlashlight(player: Player, on: unknown)
 		return
 	end
 	lastToggle[player] = now
+	-- Battery is owned by NightTricks; a dead light only turns on when a spare is in the bag (NightTricks swaps it in).
+	local battery = player:GetAttribute("Battery")
+	local dead = type(battery) == "number" and battery <= 0
+	if on and dead and not Inventory.has(player, "FlashlightBattery") then
+		return
+	end
 	player:SetAttribute("FlashlightOn", on and hasLiveCharacter(player))
 end
 

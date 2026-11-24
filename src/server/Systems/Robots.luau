@@ -774,7 +774,11 @@ local function tryReveal(robot: Robot, alive: { Alive })
 	for _, target in alive do
 		local spot = Interact.isHidden(target.player) and Interact.hidingSpot(target.player)
 		if spot and flatDistance(spot:GetPivot().Position, robot.position) <= settings.RevealRange then
-			if random:NextNumber() < settings.RevealChance then
+			local chance = settings.RevealChance
+			if target.player:GetAttribute("HoldingBreath") == true then
+				chance *= settings.HoldingBreathRevealFactor
+			end
+			if random:NextNumber() < chance then
 				Interact.reveal(spot)
 			end
 		end
