@@ -36,6 +36,8 @@ return {
 					does = "flutter, rest. Circle working lights.",
 				},
 			},
+			assetId = 122486186790312,
+			textureId = 113323464843162,
 		},
 		{
 			name = "pigeon",
@@ -86,6 +88,8 @@ return {
 					does = "idle, peck, walk, fly, takeoff. Sprint near a flock and they all take off at once: loud, pulls robots. Peck at dropped food.",
 				},
 			},
+			assetId = 70814086741426,
+			textureId = 123982608773078,
 		},
 		{
 			name = "rat",
@@ -116,6 +120,8 @@ return {
 					does = "idle, scurry, rear. Scurry away when a flashlight hits them. Rear up to sniff a still player.",
 				},
 			},
+			assetId = 87509319364955,
+			textureId = 81684806964873,
 		},
 		{
 			name = "dog",
@@ -180,6 +186,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 87616756008429,
+			textureId = 72051665956202,
 		},
 		{
 			name = "apple",
@@ -195,6 +203,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 107337229758227,
+			textureId = 106309885847121,
 		},
 		{
 			name = "canned_food",
@@ -210,6 +220,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 107093623644491,
+			textureId = 70805932852946,
 		},
 		{
 			name = "cereal_box",
@@ -236,6 +248,8 @@ return {
 					does = "Top flap opens. Rattles when shaken.",
 				},
 			},
+			assetId = 70533987627588,
+			textureId = 138759622531240,
 		},
 		{
 			name = "cheese_wedge",
@@ -251,6 +265,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 107254960737201,
+			textureId = 107221961846118,
 		},
 		{
 			name = "chips_bag",
@@ -266,6 +282,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 77686622920824,
+			textureId = 97646428887589,
 		},
 		{
 			name = "cupcake",
@@ -281,6 +299,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 135925452453985,
+			textureId = 79371431363657,
 		},
 		{
 			name = "dog_treats",
@@ -296,6 +316,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 92985159054951,
+			textureId = 82473193099641,
 		},
 		{
 			name = "egg_carton",
@@ -322,6 +344,8 @@ return {
 					does = "Opens. Eggs break if you drop the carton.",
 				},
 			},
+			assetId = 122674620372789,
+			textureId = 94868984690097,
 		},
 		{
 			name = "energy_drink",
@@ -337,6 +361,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 116958681408227,
+			textureId = 74223720963736,
 		},
 		{
 			name = "juice_box",
@@ -352,6 +378,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 89209056135204,
+			textureId = 137198373011268,
 		},
 		{
 			name = "lunchbox",
@@ -378,6 +406,8 @@ return {
 					does = "Opens. Holds a few small foods, like a mini backpack.",
 				},
 			},
+			assetId = 74690970264157,
+			textureId = 75329444973798,
 		},
 		{
 			name = "milk_carton",
@@ -393,6 +423,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 103095953677978,
+			textureId = 116954360469131,
 		},
 		{
 			name = "noodle_cup",
@@ -419,6 +451,8 @@ return {
 					does = "Peels back. Better refill with hot water from the stove.",
 				},
 			},
+			assetId = 76293124703991,
+			textureId = 104513865767004,
 		},
 		{
 			name = "peanut_butter",
@@ -445,6 +479,8 @@ return {
 					does = "Twists off.",
 				},
 			},
+			assetId = 120566044223343,
+			textureId = 120700609492058,
 		},
 		{
 			name = "pizza_box",
@@ -471,6 +507,8 @@ return {
 					does = "Flips open. Take one slice at a time, the box empties as players eat.",
 				},
 			},
+			assetId = 72436883664410,
+			textureId = 121757854533813,
 		},
 		{
 			name = "popcorn_bag",
@@ -491,6 +529,8 @@ return {
 					does = "Put it in the microwave: it puffs up and pops (loud).",
 				},
 			},
+			assetId = 97575607104699,
+			textureId = 129350089557227,
 		},
 		{
 			name = "ration_pack",
@@ -506,6 +546,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 117641768177011,
+			textureId = 110999999743612,
 		},
 		{
 			name = "sandwich",
@@ -521,6 +563,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 128981446243886,
+			textureId = 72925389704309,
 		},
 		{
 			name = "snack_bar",
@@ -536,6 +580,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 130763235158114,
+			textureId = 78131090180131,
 		},
 		{
 			name = "water_bottle",
@@ -551,6 +597,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 114668006726058,
+			textureId = 95232484579076,
 		},
 		{
 			name = "watermelon",
@@ -571,6 +619,7 @@ return {
 					does = "Heavy, two hands. Hit it to split it into watermelon slices.",
 				},
 			},
+			textureId = 133944026823147,
 		},
 		{
 			name = "watermelon_slice",
@@ -586,6 +635,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 94352175922431,
+			textureId = 92897850967467,
 		},
 		{
 			name = "arcade_cabinet",
@@ -642,6 +693,9 @@ return {
 					does = "Title screen, joystick wiggles. Later: a tiny game.",
 				},
 			},
+			assetId = 116821815429533,
+			textureId = 125590054268840,
+			screenId = 105651749616331,
 		},
 		{
 			name = "baby_monitor_cam",
@@ -678,6 +732,8 @@ return {
 					does = "Set it down anywhere. Head slowly pans. Red light means it's live. Other players can find it and smash it.",
 				},
 			},
+			assetId = 118119362386737,
+			textureId = 84026888938415,
 		},
 		{
 			name = "baby_monitor_screen",
@@ -724,6 +780,8 @@ return {
 					does = "Shows the cam's view in night vision. Sound bars light up when robots or players make noise near the cam.",
 				},
 			},
+			assetId = 115813202082524,
+			textureId = 100130423674922,
 		},
 		{
 			name = "boombox",
@@ -5526,6 +5584,1575 @@ return {
 					does = "Set dressing. The tent is a hiding spot.",
 				},
 			},
+		},
+		{
+			name = "aisle_sign_hanging",
+			group = "warehouse",
+			size = { 3.4, 5.85, 0.48 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.925, 0.0 },
+					size = { 3.4, 5.85, 0.48 },
+					pivot = { 0.0, 5.85, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 1.75, 0.19 },
+					size = { 2.8, 3.0, 0.04 },
+					pivot = { 0.0, 5.85, 0.0 },
+				},
+				{
+					name = "Screen2",
+					center = { 0.0, 1.75, -0.19 },
+					size = { 2.8, 3.0, 0.04 },
+					pivot = { 0.0, 5.85, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "bollard",
+			group = "warehouse",
+			size = { 1.6, 3.58, 1.6 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.79, -0.0 },
+					size = { 1.6, 3.58, 1.6 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "bookshelf_empty",
+			group = "warehouse",
+			size = { 6.18, 7.66, 2.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.83, -0.0 },
+					size = { 6.18, 7.66, 2.2 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "bookshelf_wall",
+			group = "warehouse",
+			size = { 32.18, 7.66, 2.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.83, -0.0 },
+					size = { 32.18, 7.66, 2.2 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "box_pile_big",
+			group = "warehouse",
+			size = { 8.663, 3.668, 6.327 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.834, -0.0 },
+					size = { 8.663, 3.668, 6.327 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "box_pile_small",
+			group = "warehouse",
+			size = { 5.704, 2.449, 4.024 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.225, -0.0 },
+					size = { 5.704, 2.449, 4.024 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "caution_tape",
+			group = "warehouse",
+			size = { 17.3, 4.074, 1.79 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.037, -0.0 },
+					size = { 17.3, 4.074, 1.79 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "column",
+			group = "warehouse",
+			size = { 1.6, 32.0, 1.88 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 16.0, -0.0 },
+					size = { 1.6, 32.0, 1.88 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "column_base",
+			group = "warehouse",
+			size = { 3.2, 32.0, 3.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 16.0, -0.0 },
+					size = { 3.2, 32.0, 3.2 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "crate_stack",
+			group = "warehouse",
+			size = { 7.324, 5.4, 3.451 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.7, -0.0 },
+					size = { 7.324, 5.4, 3.451 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "cubbies",
+			group = "warehouse",
+			size = { 4.633, 6.6, 3.868 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.3, -0.0 },
+					size = { 4.633, 6.6, 3.868 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "curb",
+			group = "warehouse",
+			size = { 32.0, 1.0, 1.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.5, -0.0 },
+					size = { 32.0, 1.0, 1.2 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "curtains",
+			group = "warehouse",
+			size = { 17.4, 14.55, 1.359 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 7.275, -0.0 },
+					size = { 17.4, 14.55, 1.359 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "dept_sign",
+			group = "warehouse",
+			size = { 8.4, 4.85, 0.5 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.425, 0.0 },
+					size = { 8.4, 4.85, 0.5 },
+					pivot = { 0.0, 4.85, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 1.15, 0.21 },
+					size = { 7.7, 1.85, 0.04 },
+					pivot = { 0.0, 4.85, 0.0 },
+				},
+				{
+					name = "Screen2",
+					center = { 0.0, 1.15, -0.21 },
+					size = { 7.7, 1.85, 0.04 },
+					pivot = { 0.0, 4.85, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "dock_door",
+			group = "warehouse",
+			size = { 16.0, 16.0, 2.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 2.2 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Door",
+					center = { 0.0, 6.0, 0.13 },
+					size = { 12.4, 12.0, 0.66 },
+					pivot = { 0.0, 12.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "door_frame_lone",
+			group = "warehouse",
+			size = { 4.45, 8.16, 1.6 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.08, -0.0 },
+					size = { 4.45, 8.16, 1.6 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Door",
+					center = { 0.0, 3.5, 0.077 },
+					size = { 3.44, 6.94, 0.305 },
+					pivot = { -1.75, 3.5, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 7.85, 0.44 },
+					size = { 1.18, 0.5, 0.04 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "drop_ceiling",
+			group = "warehouse",
+			size = { 16.0, 1.41, 16.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.705, -0.0 },
+					size = { 16.0, 1.41, 16.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -1.0, 0.34, -2.0 },
+					size = { 1.7, 0.04, 3.7 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "electrical_panel",
+			group = "warehouse",
+			size = { 2.4, 5.8, 0.79 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.9, -0.075 },
+					size = { 2.4, 5.8, 0.64 },
+					pivot = { 0.0, 1.9, -0.395 },
+				},
+				{
+					name = "Door",
+					center = { 0.0, 1.65, 0.3 },
+					size = { 2.4, 3.3, 0.19 },
+					pivot = { -1.2, 1.9, 0.245 },
+				},
+				{
+					name = "Glow",
+					center = { 0.75, 3.55, 0.265 },
+					size = { 0.32, 0.22, 0.1 },
+					pivot = { 0.0, 1.9, -0.395 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "exit_sign",
+			group = "warehouse",
+			size = { 3.0, 3.3, 0.63 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.65, 0.0 },
+					size = { 3.0, 3.3, 0.63 },
+					pivot = { 0.0, 3.3, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.65, 0.0 },
+					size = { 2.6, 0.96, 0.56 },
+					pivot = { 0.0, 3.3, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "fire_cabinet",
+			group = "warehouse",
+			size = { 2.8, 3.8, 1.12 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.9, -0.11 },
+					size = { 2.8, 3.8, 0.9 },
+					pivot = { 0.0, 1.9, -0.56 },
+				},
+				{
+					name = "Door",
+					center = { 0.0, 1.9, 0.45 },
+					size = { 2.8, 3.8, 0.22 },
+					pivot = { -1.4, 1.9, 0.39 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_cage",
+			group = "warehouse",
+			size = { 8.0, 8.0, 8.169 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.0, -0.085 },
+					size = { 8.0, 8.0, 8.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Door",
+					center = { -0.213, 3.6, 3.912 },
+					size = { 3.565, 6.8, 0.345 },
+					pivot = { -2.0, 3.6, 3.815 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_carpet",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_carpet_blue",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_carpet_wild",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_checker",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_checker_color",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_cracked",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_grass",
+			group = "warehouse",
+			size = { 32.0, 0.3, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.15, -0.0 },
+					size = { 32.0, 0.3, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_hatch",
+			group = "warehouse",
+			size = { 32.0, 6.58, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.2, -0.0 },
+					size = { 32.0, 6.4, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Door",
+					center = { 0.0, 6.45, -0.0 },
+					size = { 5.4, 0.26, 5.4 },
+					pivot = { 0.0, 6.39, -2.7 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_lane",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_marble",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_pool",
+			group = "warehouse",
+			size = { 32.0, 0.25, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.125, -0.0 },
+					size = { 32.0, 0.25, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_tile",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_wet",
+			group = "warehouse",
+			size = { 32.0, 0.215, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Wet",
+					center = { -1.065, 0.205, -1.443 },
+					size = { 15.873, 0.02, 17.051 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "floor_wood",
+			group = "warehouse",
+			size = { 32.0, 0.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.1, -0.0 },
+					size = { 32.0, 0.2, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "furniture_heap",
+			group = "warehouse",
+			size = { 14.1, 5.767, 6.398 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.883, -0.0 },
+					size = { 14.1, 5.767, 6.398 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "giant_chair",
+			group = "warehouse",
+			size = { 8.75, 17.742, 10.032 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.871, -0.0 },
+					size = { 8.75, 17.742, 10.032 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "giant_cloud",
+			group = "warehouse",
+			size = { 33.638, 18.2, 15.534 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 9.1, -0.0 },
+					size = { 33.638, 18.2, 15.534 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "giant_pillar",
+			group = "warehouse",
+			size = { 24.0, 32.0, 24.08 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 16.0, -0.0 },
+					size = { 24.0, 32.0, 24.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "giant_pillar_base",
+			group = "warehouse",
+			size = { 30.0, 32.0, 30.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 16.0, -0.0 },
+					size = { 30.0, 32.0, 30.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "gondola_empty",
+			group = "warehouse",
+			size = { 8.0, 7.043, 5.153 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.521, -0.0 },
+					size = { 8.0, 7.043, 5.153 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "gondola_end",
+			group = "warehouse",
+			size = { 4.268, 8.559, 3.283 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.279, -0.0 },
+					size = { 4.268, 8.559, 3.283 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "gondola_shelf",
+			group = "warehouse",
+			size = { 8.01, 7.0, 5.983 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.5, -0.0 },
+					size = { 8.01, 7.0, 5.983 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "handrail",
+			group = "warehouse",
+			size = { 8.0, 0.806, 0.734 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.403, 0.0 },
+					size = { 8.0, 0.806, 0.734 },
+					pivot = { 0.0, 0.65, -0.367 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "hazard_barrier",
+			group = "warehouse",
+			size = { 6.0, 3.51, 2.5 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.755, -0.0 },
+					size = { 6.0, 3.51, 2.5 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "junk_pile",
+			group = "warehouse",
+			size = { 8.047, 2.793, 7.296 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.396, -0.0 },
+					size = { 8.047, 2.793, 7.296 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "light_dangling",
+			group = "warehouse",
+			size = { 7.548, 9.786, 1.389 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.893, 0.0 },
+					size = { 7.548, 9.786, 1.389 },
+					pivot = { -2.812, 9.786, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -0.383, 4.328, 0.0 },
+					size = { 6.34, 4.474, 1.02 },
+					pivot = { -2.812, 9.786, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "light_emergency",
+			group = "warehouse",
+			size = { 2.389, 2.6, 1.183 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.3, -0.0 },
+					size = { 2.389, 2.6, 1.183 },
+					pivot = { 0.0, 0.65, -0.591 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 1.394, 0.223 },
+					size = { 2.104, 0.432, 0.419 },
+					pivot = { 0.0, 0.65, -0.591 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "light_highbay",
+			group = "warehouse",
+			size = { 3.4, 5.32, 3.4 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.66, 0.0 },
+					size = { 3.4, 5.32, 3.4 },
+					pivot = { 0.0, 5.32, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.12, 0.0 },
+					size = { 3.0, 0.1, 3.0 },
+					pivot = { 0.0, 5.32, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "light_strip",
+			group = "warehouse",
+			size = { 8.2, 3.743, 1.389 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.872, 0.0 },
+					size = { 8.2, 3.743, 1.389 },
+					pivot = { 0.0, 3.743, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.123, 0.0 },
+					size = { 7.7, 0.1, 1.02 },
+					pivot = { 0.0, 3.743, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "light_strip_dead",
+			group = "warehouse",
+			size = { 8.2, 4.585, 1.389 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.293, 0.0 },
+					size = { 8.2, 4.585, 1.389 },
+					pivot = { 0.0, 4.585, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "light_troffer",
+			group = "warehouse",
+			size = { 4.2, 0.465, 2.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.233, 0.0 },
+					size = { 4.2, 0.465, 2.2 },
+					pivot = { 0.0, 0.465, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.075, 0.0 },
+					size = { 3.8, 0.05, 1.8 },
+					pivot = { 0.0, 0.465, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "lone_display",
+			group = "warehouse",
+			size = { 3.3, 4.08, 3.3 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.04, -0.0 },
+					size = { 3.3, 4.08, 3.3 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "moon_window",
+			group = "warehouse",
+			size = { 3.4, 3.54, 0.9 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.77, 0.0 },
+					size = { 3.4, 3.54, 0.9 },
+					pivot = { 0.0, 1.84, -0.45 },
+				},
+				{
+					name = "Glow",
+					center = { 0.55, 2.59, -0.1 },
+					size = { 0.64, 0.64, 0.04 },
+					pivot = { 0.0, 1.84, -0.45 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "oil_drum",
+			group = "warehouse",
+			size = { 2.625, 2.95, 3.694 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.475, -0.0 },
+					size = { 2.625, 2.95, 3.694 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "pallet",
+			group = "warehouse",
+			size = { 5.0, 0.719, 4.4 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.36, -0.0 },
+					size = { 5.0, 0.719, 4.4 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "pallet_boxes",
+			group = "warehouse",
+			size = { 5.217, 3.94, 4.573 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.97, -0.0 },
+					size = { 5.217, 3.94, 4.573 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "pallet_jack",
+			group = "warehouse",
+			size = { 2.05, 4.65, 6.907 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.325, -0.0 },
+					size = { 2.05, 4.65, 6.907 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "pallet_sacks",
+			group = "warehouse",
+			size = { 5.75, 3.123, 6.51 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.561, -0.0 },
+					size = { 5.75, 3.123, 6.51 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "pallet_tower",
+			group = "warehouse",
+			size = { 5.435, 7.68, 5.189 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.84, -0.0 },
+					size = { 5.435, 7.68, 5.189 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "pallet_wrapped",
+			group = "warehouse",
+			size = { 5.26, 4.38, 5.062 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.19, -0.0 },
+					size = { 5.26, 4.38, 5.062 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "picket_fence",
+			group = "warehouse",
+			size = { 8.1, 3.62, 0.5 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.81, -0.0 },
+					size = { 8.1, 3.62, 0.5 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "picture_frame",
+			group = "warehouse",
+			size = { 2.4, 3.0, 0.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.5, -0.0 },
+					size = { 2.4, 3.0, 0.2 },
+					pivot = { 0.0, 1.5, -0.1 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 1.5, -0.0 },
+					size = { 1.92, 2.52, 0.02 },
+					pivot = { 0.0, 1.5, -0.1 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "pink_bench",
+			group = "warehouse",
+			size = { 8.2, 2.85, 2.288 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.425, -0.0 },
+					size = { 8.2, 2.85, 2.288 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rack_bay_bulk",
+			group = "warehouse",
+			size = { 12.079, 26.0, 4.8 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.0, -0.0 },
+					size = { 12.079, 26.0, 4.8 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rack_bay_full",
+			group = "warehouse",
+			size = { 12.077, 26.0, 5.092 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.0, -0.0 },
+					size = { 12.077, 26.0, 5.092 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rack_bay_furniture",
+			group = "warehouse",
+			size = { 12.07, 26.047, 4.8 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.024, -0.0 },
+					size = { 12.07, 26.047, 4.8 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rack_bay_sparse",
+			group = "warehouse",
+			size = { 12.077, 26.0, 4.8 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.0, -0.0 },
+					size = { 12.077, 26.0, 4.8 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rack_collapsed",
+			group = "warehouse",
+			size = { 12.402, 26.049, 12.725 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.024, -0.0 },
+					size = { 12.402, 26.049, 12.725 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rack_end",
+			group = "warehouse",
+			size = { 2.988, 26.0, 5.7 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.0, -0.0 },
+					size = { 2.988, 26.0, 5.7 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rack_toppled_beam",
+			group = "warehouse",
+			size = { 12.294, 26.047, 9.255 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.023, -0.0 },
+					size = { 12.294, 26.047, 9.255 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "ramp",
+			group = "warehouse",
+			size = { 16.0, 4.6, 16.005 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.3, -0.0 },
+					size = { 16.0, 4.6, 16.005 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "road_sign",
+			group = "warehouse",
+			size = { 2.546, 7.473, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.737, -0.0 },
+					size = { 2.546, 7.473, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 6.2, 0.21 },
+					size = { 2.402, 2.402, 0.03 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "rolling_ladder",
+			group = "warehouse",
+			size = { 2.75, 9.175, 6.35 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.587, -0.0 },
+					size = { 2.75, 9.175, 6.35 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "roof_panel",
+			group = "warehouse",
+			size = { 32.0, 1.8, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.9, -0.0 },
+					size = { 32.0, 1.8, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "roof_skylight",
+			group = "warehouse",
+			size = { 32.0, 2.6, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.3, -0.0 },
+					size = { 32.0, 2.6, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 2.47, -0.0 },
+					size = { 7.4, 0.06, 15.4 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "roof_truss",
+			group = "warehouse",
+			size = { 32.0, 4.0, 0.7 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.0, -0.0 },
+					size = { 32.0, 4.0, 0.7 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "sale_banner",
+			group = "warehouse",
+			size = { 9.6, 5.719, 0.34 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.861, 0.0 },
+					size = { 9.6, 5.719, 0.34 },
+					pivot = { 0.0, 5.72, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 1.612, 0.04 },
+					size = { 8.0, 2.316, 0.26 },
+					pivot = { 0.0, 5.72, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "shopping_cart",
+			group = "warehouse",
+			size = { 2.057, 3.71, 3.535 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.855, -0.0 },
+					size = { 2.057, 3.71, 3.535 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "shutter_front",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.02 },
+					size = { 16.0, 16.0, 0.96 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Door",
+					center = { 0.0, 5.5, 0.0 },
+					size = { 13.0, 11.0, 0.32 },
+					pivot = { 0.0, 11.0, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 13.9, 0.49 },
+					size = { 14.0, 2.3, 0.02 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "stair_flight",
+			group = "warehouse",
+			size = { 8.0, 11.391, 16.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 5.695, -0.0 },
+					size = { 8.0, 11.391, 16.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "star_decal",
+			group = "warehouse",
+			size = { 6.658, 3.632, 0.05 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.816, -0.0 },
+					size = { 6.658, 3.632, 0.05 },
+					pivot = { -0.12, 1.694, -0.025 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_corner",
+			group = "warehouse",
+			size = { 1.4, 16.0, 1.4 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 1.4, 16.0, 1.4 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_curved",
+			group = "warehouse",
+			size = { 16.0, 16.0, 16.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 16.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_lower",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_lower_damaged",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_oily",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_pastel",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_sky",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Screen",
+					center = { 0.0, 8.2, 0.48 },
+					size = { 15.6, 15.0, 0.02 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_tile",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_upper",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wall_windows",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 8.0, -0.12 },
+					size = { 14.0, 14.0, 0.04 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
+			name = "wet_floor_sign",
+			group = "warehouse",
+			size = { 1.102, 2.576, 1.148 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.288, -0.0 },
+					size = { 1.102, 2.576, 1.148 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
 		},
 	},
 	sounds = {
