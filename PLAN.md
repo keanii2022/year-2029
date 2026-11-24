@@ -262,7 +262,7 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Day: chore bots study in rooms, room-only sight, chase, steal your best item. Night: swap to night models, sweep the aisles, take loose stuff and players, walk to loud sounds. EMP and disruptor. Done when sneaking into a room is tense and a night is scary with no other players around.
 
 ### 9. Supplies
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 4, 5, 7
 - **Scope:** `src/server/Systems/Supplies.luau`, `src/client/Controllers/Needs.luau`, `src/shared/Config/Supplies.luau`, `src/shared/Logic/Needs*.luau`, `src/shared/Logic/Loot*.luau`, `tests/Needs*.spec.luau`, `tests/Loot*.spec.luau`
 - **Out of scope:** saving (step 14).
@@ -287,13 +287,13 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - Store rearranging, hiding inside furniture with breath holding, room sound, rain and lightning, PA lines, phones, flashlight battery, generators with fuel, lore. Done when a night alone has a plan, not just hiding.
 
 ### 13. Haunts and life
-- **Status:** current
+- **Status:** done
 - **Dependencies:** 6, 7
 - **Scope:** `src/server/Systems/Haunts.luau`, `src/client/Controllers/Haunts.luau`, `src/shared/Config/Haunts.luau`, `src/shared/Logic/Haunt*.luau`, `tests/Haunt*.spec.luau`
 - The lost kid, pigeons, rats, moths, mannequins, greeter, cameras, story spots. Done when a player alone at night jumps at least once.
 
 ### 14. Saves and scores
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 3, 4, 9
 - **Scope:** `src/server/Systems/Saves.luau`, `src/server/Systems/Scores.luau`, `src/client/Controllers/Locker.luau`, `src/shared/Config/Saves.luau`, `src/shared/Logic/Saves*.luau`, `tests/Saves*.spec.luau`
 - Locker, blueprints (paper and pen, once per day), stats, leaderboards, cosmetics. Done when a full server plays a few nights with no breaks.
@@ -386,3 +386,17 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 7: Lamps throw warm light (range 18), so a lit fort shows at night, like the plan says.
 - Step 7: Hearing ranges: quiet 20 for players (robots only in the same room), normal 45 / 25, loud 120 / 80.
 - Step 7: `Config.Interact.BoomboxMusicId` is empty: there's no boombox song in the pack yet, so it's your pick.
+- Step 9: Foods are generic: Snack Bar, Chips, Apple, Sandwich, Juice Box, Pizza Box/Slice, Popcorn, Noodle Cup, Watermelon/Slice, Lunchbox, Ration Pack, Energy Drink, plus Bandage, Flashlight Battery, EMP Charge, Disruptor. No real brands.
+- Step 9: Ammo boxes give 8-20 Blaster Cells on pickup instead of being their own item.
+- Step 9: Pizza box, watermelon and lunchbox open into slices / a sandwich + apple + juice box. Chips are loud to eat.
+- Step 9: A full belly lasts about a day and a night; sprinting empties energy in ~90s, and resting only refills energy to 35, so drinks matter. Starving does 0.5 damage a second.
+- Step 9: Quick use is 1 Eat, 2 Drink, 3 Bandage (1-4s to use, not while cuffed). It picks the smallest item that covers what you're missing.
+- Step 9: HUD: thin Hunger/Energy bars above health (red spray paint HUNGRY/STARVING, TIRED/EXHAUSTED when low) and a "SUPPLIES" list (Food 3, Drinks 2, Bandages 2, Cells 30, Batteries 1) where anything under target turns red. That's the day's shopping list.
+- Step 9: Loot gets better with depth: ration packs past 40%, EMP past 75%, Disruptor past 85% of the way in. Restocks every morning.
+- Step 13: Private scares (only you see them): the lost kid at the edge of your flashlight, a giggle behind you, a mannequin behind you with arms out that's gone when you look away, a ball rolling to your feet, a pigeon flock bursting up. The kid leaves its stuffed robot behind for 60s.
+- Step 13: The lost kid shows at most once a night per server. If you're alone at night for 100s with no scare, you get one, so "jumps at least once" holds. Hidden players only get the giggle.
+- Step 13: The greeter uses the announcer welcome line, slower and more distorted each night, and stands just inside the entrance.
+- Step 13: Pigeons sit on the floor in open spots (the rafters are lost in haze); rats run along the aisles. Both scatter and come back when nobody's near.
+- Step 13: Security cams on pillars 16 studs up with a red glow. Mannequin poses: stand, reach, point, crouch, look back, hug.
+- Step 13: Counts: 12 camps, 10 drawing walls, 25 leaks, 15 skylights, 40 weed patches, 30 pigeon flocks, 30 rat nests, moths at 30 lamps, 40 cams.
+- Step 13: Scare odds when alone at night are about 35% a minute (10% of that by day, 40% during the siren), with at least 75s between scares.
