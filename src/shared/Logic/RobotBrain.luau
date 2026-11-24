@@ -2,8 +2,10 @@
 -- back an intent (where to go, how fast, which pose, and any action). No Roblox here.
 --
 -- Chore bots by day: study -> suspicious -> chase -> return. Caught = catch, then return.
+-- A calm chore bot can be sent on an errand by day: walk out, do the chore, walk home.
 -- Everyone by night: sweep -> investigate / chase / carry. Caught at night = catch (the player goes down).
 -- Hunters by day: stalled, harmless. Any robot hit by an EMP: disabled until it wears off.
+local RobotChores = if script then require(script.Parent.RobotChores) else require("./RobotChores")
 local RobotSenses = if script then require(script.Parent.RobotSenses) else require("./RobotSenses")
 
 local RobotBrain = {}
@@ -19,7 +21,9 @@ export type State =
 	| "disabled"
 	| "sweep"
 	| "investigate"
+	| "errand"
 export type Point = { x: number, z: number }
+export type Errand = { x: number, z: number, face: Point?, chore: string, workSeconds: number }
 export type Brain = {
 	role: Role,
 	state: State,
@@ -30,6 +34,7 @@ export type Brain = {
 	lastSeenAt: number,
 	arrivedAt: number?,
 	disabledUntil: number,
+	errand: Errand?, -- set from leaving on an errand until back home
 }
 export type Seen = { id: any, x: number, z: number, distance: number, range: number }
 export type Loose = { id: any, distance: number }
@@ -39,12 +44,13 @@ export type Input = {
 	atHome: boolean,
 	homeDistance: number,
 	focusDistance: number?,
+	errandDistance: number?,
 	carrying: boolean,
 	seen: Seen?,
 	heard: Point?,
 	loose: Loose?,
 }
-export type Goal = "home" | "focus" | "loose" | "wander" | "study"
+export type Goal = "home" | "focus" | "loose" | "wander" | "study" | "errand"
 export type Intent = {
 	goal: Goal?,
 	speed: ("walk" | "chase")?,
@@ -68,6 +74,7 @@ function RobotBrain.new(role: Role, phase: string, now: number): Brain
 		lastSeenAt = -math.huge,
 		arrivedAt = nil,
 		disabledUntil = -math.huge,
+		errand = nil,
 	}
 end
 
@@ -75,6 +82,9 @@ local function enter(brain: Brain, state: State, now: number)
 	brain.state = state
 	brain.since = now
 	brain.arrivedAt = nil
+	if state == "study" or state == "sweep" then
+		brain.errand = nil
+	end
 end
 
 local function calm(brain: Brain)
@@ -82,9 +92,20 @@ local function calm(brain: Brain)
 	brain.targetId = nil
 end
 
--- By day a calm robot only sees inside its room; once chasing, or at night, it sees anywhere.
+-- By day a calm robot only sees inside its room; once chasing, out on an errand, or at night, it
+-- sees anywhere.
 function RobotBrain.seesOutsideRoom(brain: Brain, phase: string): boolean
-	return phase == "Night" or brain.state == "chase"
+	return phase == "Night" or brain.state == "chase" or brain.errand ~= nil
+end
+
+-- Only a chore bot studying quietly at home, by day, takes an errand.
+function RobotBrain.sendOnErrand(brain: Brain, errand: Errand, phase: string, now: number): boolean
+	if brain.role ~= "chore" or phase ~= "Day" or brain.state ~= "study" or now < brain.disabledUntil then
+		return false
+	end
+	enter(brain, "errand", now)
+	brain.errand = errand
+	return true
 end
 
 function RobotBrain.disable(brain: Brain, untilTime: number)
@@ -150,9 +171,12 @@ local function day(brain: Brain, input: Input, settings: any, now: number): Inte
 		calm(brain)
 		enter(brain, "return", now)
 		state = "return"
+	elseif state == "errand" and input.phase ~= "Day" then
+		enter(brain, "return", now)
+		state = "return"
 	end
 
-	if state == "study" or state == "suspicious" or state == "return" then
+	if state == "study" or state == "suspicious" or state == "return" or state == "errand" then
 		watch(brain, input, settings, false)
 		if input.seen and brain.alert >= 1 then
 			startChase(brain, input.seen, now)
@@ -193,6 +217,24 @@ local function day(brain: Brain, input: Input, settings: any, now: number): Inte
 			return { pose = "idle", drop = input.carrying }
 		end
 		return { goal = "home", speed = "walk", pose = "walk" }
+	elseif state == "errand" then
+		local errand = brain.errand :: Errand
+		local outPose, workPose = RobotChores.poses(errand.chore)
+		if brain.arrivedAt == nil then
+			if (input.errandDistance or math.huge) <= settings.ArriveRange then
+				brain.arrivedAt = now
+			elseif now - brain.since > settings.Chores.GiveUpSeconds then
+				enter(brain, "return", now) -- couldn't get there
+				return { goal = "home", speed = "walk", pose = "walk" }
+			else
+				return { goal = "errand", speed = "walk", pose = outPose }
+			end
+		end
+		if now - (brain.arrivedAt :: number) >= errand.workSeconds then
+			enter(brain, "return", now)
+			return { goal = "home", speed = "walk", pose = "walk" }
+		end
+		return { pose = workPose, face = errand.face }
 	elseif state == "return" then
 		if input.atHome then
 			enter(brain, "study", now)

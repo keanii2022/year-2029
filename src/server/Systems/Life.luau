@@ -1,5 +1,6 @@
 -- Feeds each player's Life controller: a short list of aisle spots near them (the rack layout is
 -- server only), and real copies of the props it animates (clients can't load uploaded models).
+-- By day the same spots send a calm chore bot or two out to work where each player can see them.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -7,10 +8,15 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local LifeSpots = require(ReplicatedStorage.Shared.Logic.LifeSpots)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
+local RobotChores = require(ReplicatedStorage.Shared.Logic.RobotChores)
+local DayNight = require(script.Parent.DayNight)
+local Robots = require(script.Parent.Robots)
 local Warehouse = require(script.Parent.Warehouse)
 
 local Settings = Config.Life
 local Origin = Config.Warehouse.Origin
+local Chores = Config.Robots.Chores
+local random = Random.new()
 
 local Life = {}
 
@@ -26,6 +32,29 @@ local function publishProps()
 			if model then
 				model.Parent = folder
 			end
+		end
+	end
+end
+
+local function sendChores(position: Vector3, spots: { LifeSpots.Spot })
+	local out, idle = Robots.choresNear(position, Chores.CallRadius)
+	local need = RobotChores.needed(out, Chores.PerPlayer)
+	local viewer = { x = position.X, z = position.Z }
+	for _, robot in idle do
+		if need <= 0 then
+			return
+		end
+		local home = { x = robot.home.X, z = robot.home.Z }
+		local goal, face = RobotChores.pickSpot(spots, home, viewer, Chores, random:NextNumber())
+		if
+			goal
+			and Robots.sendOnChore(
+				robot,
+				Vector3.new(goal.x, 0, goal.z),
+				face and Vector3.new(face.x, 0, face.z)
+			)
+		then
+			need -= 1
 		end
 	end
 end
@@ -49,6 +78,9 @@ local function sendSpots(spots: { LifeSpots.Spot })
 				}
 			end
 			spotsEvent:FireClient(player, world)
+			if DayNight.phase() == "Day" then
+				sendChores(root.Position, world)
+			end
 		end
 	end
 end

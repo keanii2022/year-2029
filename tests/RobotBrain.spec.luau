@@ -14,6 +14,7 @@ local SETTINGS = {
 	DayLeash = 120,
 	ArriveRange = 3,
 	PickupRange = 5,
+	Chores = { GiveUpSeconds = 30 },
 }
 
 local function input(overrides: { [string]: any }?)
@@ -45,6 +46,16 @@ local function runWhile(brain, state, makeInput, now, maxTicks)
 		end
 	end
 	return intent, now
+end
+
+local function errand(chore: string?)
+	return { x = 50, z = 0, face = { x = 50, z = 3 }, chore = chore or "carry", workSeconds = 10 }
+end
+
+local function sentOut(chore: string?)
+	local brain = RobotBrain.new("chore", "Day", 0)
+	expect(RobotBrain.sendOnErrand(brain, errand(chore), "Day", 1)).toBeTruthy()
+	return brain
 end
 
 return {
@@ -235,5 +246,85 @@ return {
 		expect(RobotBrain.seesOutsideRoom(brain, "Night")).toBeTruthy()
 		brain.state = "chase"
 		expect(RobotBrain.seesOutsideRoom(brain, "Day")).toBeTruthy()
+	end,
+	["a calm chore bot walks out on an errand carrying a box"] = function()
+		local brain = sentOut("carry")
+		local intent = RobotBrain.update(
+			brain,
+			input({ atHome = false, homeDistance = 10, errandDistance = 40 }),
+			SETTINGS,
+			1.2
+		)
+		expect(brain.state).toBe("errand")
+		expect(intent.goal).toBe("errand")
+		expect(intent.speed).toBe("walk")
+		expect(intent.pose).toBe("carry")
+	end,
+	["at the spot it works, then walks home"] = function()
+		local brain = sentOut("sweep")
+		local at = input({ atHome = false, homeDistance = 50, errandDistance = 1 })
+		local intent = RobotBrain.update(brain, at, SETTINGS, 2)
+		expect(intent.pose).toBe("sweep")
+		expect(intent.goal).toBe(nil)
+		expect(intent.face.z).toBe(3)
+		intent = RobotBrain.update(brain, at, SETTINGS, 11)
+		expect(intent.pose).toBe("sweep")
+		intent = RobotBrain.update(brain, at, SETTINGS, 12.5)
+		expect(brain.state).toBe("return")
+		expect(intent.goal).toBe("home")
+		expect(RobotBrain.seesOutsideRoom(brain, "Day")).toBeTruthy()
+		RobotBrain.update(brain, input(), SETTINGS, 20)
+		expect(brain.state).toBe("study")
+		expect(brain.errand).toBe(nil)
+		expect(RobotBrain.seesOutsideRoom(brain, "Day")).toBeFalsy()
+	end,
+	["only a calm chore bot by day takes an errand"] = function()
+		local hunter = RobotBrain.new("hunter", "Day", 0)
+		expect(RobotBrain.sendOnErrand(hunter, errand(), "Day", 1)).toBeFalsy()
+		local brain = RobotBrain.new("chore", "Day", 0)
+		expect(RobotBrain.sendOnErrand(brain, errand(), "Siren", 1)).toBeFalsy()
+		expect(RobotBrain.sendOnErrand(brain, errand(), "Night", 1)).toBeFalsy()
+		brain.state = "chase"
+		expect(RobotBrain.sendOnErrand(brain, errand(), "Day", 1)).toBeFalsy()
+		local stunned = RobotBrain.new("chore", "Day", 0)
+		RobotBrain.disable(stunned, 5)
+		expect(RobotBrain.sendOnErrand(stunned, errand(), "Day", 1)).toBeFalsy()
+	end,
+	["out on an errand it sees players outside its room and still charges"] = function()
+		local brain = sentOut()
+		expect(RobotBrain.seesOutsideRoom(brain, "Day")).toBeTruthy()
+		local out = function()
+			return input({ atHome = false, homeDistance = 30, errandDistance = 20, seen = seenAt(10) })
+		end
+		runWhile(brain, "errand", out, 1, 5)
+		expect(brain.state).toBe("suspicious")
+		runWhile(brain, "suspicious", out, 2, 20)
+		expect(brain.state).toBe("chase")
+	end,
+	["an errand it can't reach gives up and heads home"] = function()
+		local brain = sentOut()
+		local far = input({ atHome = false, homeDistance = 5, errandDistance = 40 })
+		RobotBrain.update(brain, far, SETTINGS, 20)
+		expect(brain.state).toBe("errand")
+		local intent = RobotBrain.update(brain, far, SETTINGS, 32)
+		expect(brain.state).toBe("return")
+		expect(intent.goal).toBe("home")
+	end,
+	["the siren sends errand bots home and night turns them into sweepers"] = function()
+		local brain = sentOut()
+		RobotBrain.phaseChanged(brain, "Siren", 5)
+		expect(brain.state).toBe("return")
+		local other = sentOut()
+		local intent = RobotBrain.update(
+			other,
+			input({ phase = "Siren", atHome = false, homeDistance = 30, errandDistance = 20 }),
+			SETTINGS,
+			5
+		)
+		expect(other.state).toBe("return")
+		expect(intent.goal).toBe("home")
+		RobotBrain.phaseChanged(other, "Night", 6)
+		expect(other.state).toBe("sweep")
+		expect(other.errand).toBe(nil)
 	end,
 }

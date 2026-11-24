@@ -55,6 +55,31 @@ function RobotPoses.limbs(name: string, stride: number, clock: number, moving: b
 			pose.Hand = 0.5 * math.sin(clock * 4)
 			pose.Head = 0.8 * math.sin(clock * 0.5)
 		end
+	elseif name == "carry" then
+		-- both arms out front, holding a box at chest height
+		legs(pose, stride, if moving then 0.8 else 0)
+		pose.UpperArm, pose.LeftUpperArm = 2.2, 2.2
+		pose.Forearm, pose.LeftForearm = 0.8, 0.8
+	elseif name == "sweep" then
+		-- arms low and together, pushing a broom side to side, head down at the floor
+		local swing = math.sin(clock * 3)
+		legs(pose, stride, if moving then 0.6 else 0)
+		pose.UpperArm = 1.2 + 0.6 * swing
+		pose.LeftUpperArm = 1.0 + 0.6 * swing
+		pose.Forearm, pose.LeftForearm = 0.6, 0.6
+		pose.Hand = 0.3 * swing
+		pose.Head = -0.5
+		pose.Legs = 0.1 * math.sin(clock * 6)
+	elseif name == "restock" then
+		-- reaching up to a high shelf, hands taking turns
+		legs(pose, stride, if moving then 0.9 else 0)
+		if not moving then
+			pose.UpperArm = 4.4 + 0.4 * math.sin(clock * 1.6)
+			pose.LeftUpperArm = 4.2 + 0.4 * math.sin(clock * 1.6 + 1.5)
+			pose.Forearm, pose.LeftForearm = 0.5, 0.5
+			pose.Hand = 0.5 * math.sin(clock * 3)
+			pose.Head = 0.8
+		end
 	elseif name == "grab" then
 		pose.UpperArm, pose.LeftUpperArm = 2.6, 2.6
 		pose.Forearm, pose.LeftForearm = 1, 1

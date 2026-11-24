@@ -1,4 +1,5 @@
 -- Robots: a chore bot in every room near a player by day, hunters in the aisles by night.
+-- By day Life sends calm chore bots out on errands near players (sendOnChore).
 -- Brains live in Logic/RobotBrain; this file senses the world for them, moves the models and carries
 -- out what they decide (steal, haul, take players down). Robots are anchored and moved with PivotTo,
 -- so nothing here touches physics. Limbs are procedural until the real clips are imported in Studio.
@@ -15,6 +16,7 @@ local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RobotBrain = require(ReplicatedStorage.Shared.Logic.RobotBrain)
+local RobotChores = require(ReplicatedStorage.Shared.Logic.RobotChores)
 local RobotPoses = require(ReplicatedStorage.Shared.Logic.RobotPoses)
 local RobotRooms = require(ReplicatedStorage.Shared.Logic.RobotRooms)
 local RobotSenses = require(ReplicatedStorage.Shared.Logic.RobotSenses)
@@ -28,6 +30,7 @@ local Warehouse = require(script.Parent.Warehouse)
 
 local settings = Config.Robots
 local sense = settings.Sense
+local chores = settings.Chores
 
 type Carry = { instance: PVInstance, kind: "prop" | "pile", collide: { [BasePart]: boolean } }
 type Loose = { instance: PVInstance, kind: "prop" | "pile", position: Vector3 }
@@ -60,6 +63,7 @@ export type Robot = {
 	wander: Vector3?,
 	wanderAt: number,
 	carrying: Carry?,
+	choreBox: PVInstance?,
 	loose: Loose?,
 	looseAt: number,
 	heardUpTo: number,
@@ -298,20 +302,58 @@ local function makeModel(name: string): (Model?, number)
 	return model, height
 end
 
+local function holdInFront(robot: Robot, instance: PVInstance)
+	local box, size = boxOf(instance)
+	local held = robot.position + robot.facing * (2 + size.Z / 2) + Vector3.yAxis * (robot.pivotHeight + 1)
+	local pivotFromBox = box:ToObjectSpace(instance:GetPivot())
+	instance:PivotTo(CFrame.lookAt(held, held - robot.facing) * pivotFromBox)
+end
+
 local function place(robot: Robot)
 	local pivot = robot.position + Vector3.yAxis * robot.pivotHeight
 	-- the art faces +z, lookAt points -z, so look away from the way we want to face
 	local cframe = CFrame.lookAt(pivot, pivot - robot.facing)
 	robot.model:PivotTo(cframe)
-	local carry = robot.carrying
-	if carry then
-		local _, size = boxOf(carry.instance)
-		local held = robot.position
-			+ robot.facing * (2 + size.Z / 2)
-			+ Vector3.yAxis * (robot.pivotHeight + 1)
-		local box = boxOf(carry.instance)
-		local pivotFromBox = box:ToObjectSpace(carry.instance:GetPivot())
-		carry.instance:PivotTo(CFrame.lookAt(held, held - robot.facing) * pivotFromBox)
+	if robot.carrying then
+		holdInFront(robot, robot.carrying.instance)
+	end
+	if robot.choreBox then
+		holdInFront(robot, robot.choreBox)
+	end
+end
+
+local function makeChoreBox(): PVInstance
+	local box: PVInstance
+	local model = ModelLibrary.uploaded(chores.BoxModel) and ModelLibrary.get(chores.BoxModel)
+	if model then
+		box = model
+	else
+		local part = Instance.new("Part")
+		part.Size = chores.BoxSize
+		part.Color = chores.BoxColor
+		part.Material = Enum.Material.Cardboard
+		box = part
+	end
+	box.Name = "ChoreBox"
+	for _, part in partsOf(box) do
+		part.Anchored = true
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = false
+	end
+	return box
+end
+
+-- The box a carrier brings out on its errand: in its hands only while the pose says so.
+local function holdChoreBox(robot: Robot, holding: boolean)
+	if holding and not robot.choreBox then
+		local box = makeChoreBox()
+		robot.choreBox = box
+		holdInFront(robot, box)
+		box.Parent = folder -- inside the robots folder, so sight rays pass through it
+	elseif not holding and robot.choreBox then
+		robot.choreBox:Destroy()
+		robot.choreBox = nil
 	end
 end
 
@@ -394,6 +436,7 @@ local function spawnRobot(typeName: string, room: any?, position: Vector3, facin
 		wander = nil,
 		wanderAt = 0,
 		carrying = nil,
+		choreBox = nil,
 		loose = nil,
 		looseAt = 0,
 		heardUpTo = now,
@@ -677,12 +720,14 @@ local function senseRobot(
 	local night = phase == "Night"
 	local roomOnly = not RobotBrain.seesOutsideRoom(robot.brain, phase)
 	local info = settings.Types[robot.typeName]
+	local outOnErrand = robot.brain.errand ~= nil and robot.brain.state ~= "chase"
+	local sightRange = if outOnErrand then math.min(info.sightRange, chores.SightRange) else info.sightRange
 	local eye = {
 		x = robot.position.X,
 		z = robot.position.Z,
 		fx = robot.facing.X,
 		fz = robot.facing.Z,
-		range = info.sightRange,
+		range = sightRange,
 	}
 	local reach = math.max(info.sightRange * 1.5, sense.BeamRange, sense.FootstepRadius.Sprint)
 	local seen: RobotBrain.Seen? = nil
@@ -709,7 +754,7 @@ local function senseRobot(
 		end
 		if visible then
 			if not seen or d < seen.distance then
-				seen = { id = target.player, x = view.x, z = view.z, distance = d, range = info.sightRange }
+				seen = { id = target.player, x = view.x, z = view.z, distance = d, range = sightRange }
 			end
 		elseif RobotSenses.hearsSteps(eye.x, eye.z, view, sense, roomOnly) then
 			local rank = if view.stance == "Sprint" then 2 else 1
@@ -854,6 +899,7 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 	end
 
 	robot.pose = intent.pose
+	holdChoreBox(robot, robot.pose == "carry")
 	robot.face = if intent.face then onFloor(Vector3.new(intent.face.x, 0, intent.face.z)) else nil
 	robot.speed = if intent.speed == "chase"
 		then info.chaseSpeed
@@ -865,6 +911,8 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 		goal = robot.home
 	elseif intent.goal == "focus" and brain.focus then
 		goal = onFloor(Vector3.new(brain.focus.x, 0, brain.focus.z))
+	elseif intent.goal == "errand" and brain.errand then
+		goal = onFloor(Vector3.new(brain.errand.x, 0, brain.errand.z))
 	elseif intent.goal == "loose" and robot.loose then
 		goal = onFloor(robot.loose.position)
 	elseif intent.goal == "wander" then
@@ -904,6 +952,7 @@ end
 
 local function despawn(robot: Robot)
 	dropCarried(robot, robot.position)
+	holdChoreBox(robot, false)
 	robot.dead = true
 	robots[robot.id] = nil
 	byModel[robot.model] = nil
@@ -946,6 +995,7 @@ local function tick(dt: number)
 			robot.carrying = nil
 		end
 		local focus = robot.brain.focus
+		local errand = robot.brain.errand
 		local input: RobotBrain.Input = {
 			phase = phase,
 			dt = dt,
@@ -953,6 +1003,9 @@ local function tick(dt: number)
 			homeDistance = flatDistance(robot.home, robot.position),
 			focusDistance = if focus
 				then flatDistance(Vector3.new(focus.x, 0, focus.z), robot.position)
+				else nil,
+			errandDistance = if errand
+				then flatDistance(Vector3.new(errand.x, 0, errand.z), robot.position)
 				else nil,
 			carrying = robot.carrying ~= nil,
 			seen = seen,
@@ -992,7 +1045,11 @@ local function spawnHunter(near: Vector3)
 end
 
 local function calmState(state: string): boolean
-	return state == "study" or state == "return" or state == "suspicious" or state == "stalled"
+	return state == "study"
+		or state == "return"
+		or state == "suspicious"
+		or state == "stalled"
+		or state == "errand"
 end
 
 local function activate()
@@ -1090,6 +1147,56 @@ function Robots.inRadius(position: Vector3, radius: number): { Robot }
 		table.insert(found, robots[id])
 	end
 	return found
+end
+
+local function errandsOut(): number
+	local count = 0
+	for _, robot in robots do
+		if robot.brain.errand then
+			count += 1
+		end
+	end
+	return count
+end
+
+-- Chore bots near position: how many are out on errands, and the calm ones at home that could go,
+-- nearest first.
+function Robots.choresNear(position: Vector3, radius: number): (number, { Robot })
+	local out, idle = 0, {}
+	for _, robot in Robots.inRadius(position, radius) do
+		if robot.role ~= "chore" or not robot.room then
+			continue
+		end
+		if robot.brain.errand then
+			out += 1
+		elseif robot.brain.state == "study" and not robot.carrying then
+			table.insert(idle, robot)
+		end
+	end
+	table.sort(idle, function(a, b)
+		return flatDistance(a.position, position) < flatDistance(b.position, position)
+	end)
+	return out, idle
+end
+
+-- Sends a calm chore bot out to work at goal (facing face), then home. Day only, live robots only,
+-- at most Chores.MaxErrands at once. False if it can't go right now.
+function Robots.sendOnChore(robot: Robot, goal: Vector3, face: Vector3?): boolean
+	if robot.dead or not robot.room or robot.carrying or errandsOut() >= chores.MaxErrands then
+		return false
+	end
+	local errand: RobotBrain.Errand = {
+		x = goal.X,
+		z = goal.Z,
+		face = if face then { x = face.X, z = face.Z } else nil,
+		chore = RobotChores.choreFor(robot.typeName, chores.ChoreFor),
+		workSeconds = randomIn(chores.WorkSeconds),
+	}
+	if not RobotBrain.sendOnErrand(robot.brain, errand, DayNight.phase(), os.clock()) then
+		return false
+	end
+	robot.studySpot = nil
+	return true
 end
 
 function Robots.disable(robot: Robot, seconds: number)
