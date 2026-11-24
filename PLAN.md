@@ -303,26 +303,26 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 First playtest, 2026-11-24: running feels good. Everything else felt wrong: open sky instead of a building, everything too far apart to be scary, pitch black nights, no robots by day and one instantly on you at night, a laser instead of bullets, storage that holds nothing, eating that's only text, buttons scattered.
 
 ### 15. A real warehouse
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 5
 - **Scope:** `src/server/Systems/Warehouse.luau`, `src/shared/Config/Warehouse.luau`, `src/shared/Logic/WarehouseGen*.luau`, `tests/WarehouseGen*.spec.luau`
 - Fully enclosed (roof and walls tiled from pieces Roblox allows, no sky anywhere), much tighter and denser: tall shelving packed close, narrow aisles, clutter and junk everywhere, ceiling light fixtures. Done when it feels like being lost inside a huge, cramped, abandoned store.
 - Look (from Keani's references): store departments (furniture zones on wood, carpet and tile under department signs on long cables) mixed with tall racking aisles packed with boxes; thick fog for depth; rows of cold fluorescent strips; dark wet concrete that reflects light; caution tape; furniture piled up; giant pillars vanishing into fog that players can build forts up. Dreamcore pockets slip in between: drop-ceiling halls with buzzing light panels, flooded tile corridors, painted skies on walls, fake grass and picket fences indoors, doors that open onto a painted hill, walls of little windows, bright checker floors, pastel colours, lone glowing machines in empty rooms. Quiet, too clean, wrong. Uses the Blender kit in `art/warehouse/` (sizes in `art/warehouse/KIT.md`).
 
 ### 16. Nights you can read
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 6
 - **Scope:** `src/client/Controllers/Lighting.luau`, `src/shared/Config/DayNight.luau`, `src/shared/Logic/Clock*.luau`, `tests/Clock*.spec.luau`
 - Dark and scary, never pitch black: dim emergency lights, glowing exit signs, light pools you move between, the flashlight matters. Done when night is terrifying but you can still find your way.
 
 ### 17. Robots you can see coming
-- **Status:** pending
+- **Status:** done
 - **Dependencies:** 8
 - **Scope:** `src/server/Systems/Robots.luau`, `src/client/Controllers/Robots.luau`, `src/shared/Config/Robots.luau`, `src/shared/Logic/Robot*.luau`, `tests/Robot*.spec.luau`
 - By day you find chore bots busy in rooms around you. At night hunters start far away and sweep toward noise and light, with warning signs (scanner light, footsteps, hum) before they reach you. Done when a night alone builds dread instead of an instant catch.
 
 ### 18. Storage that works
-- **Status:** pending
+- **Status:** current
 - **Dependencies:** 7
 - **Scope:** `src/server/Systems/Interact.luau`, `src/server/Systems/Containers.luau`, `src/client/Controllers/Containers.luau`, `src/shared/Config/Interact.luau`, `src/shared/Logic/Container*.luau`, `tests/Container*.spec.luau`
 - Every drawer, cabinet, fridge, chest and crate holds items: open it, see what's inside, put stuff in, take stuff out. Some start with loot. Nothing you can open is just for show. Done when hiding your stash in a dresser is a real choice.
@@ -350,6 +350,18 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Dependencies:** 18, 19, 20, 21
 - **Scope:** `src/client/Controllers/Input.luau`, `src/client/Controllers/TouchButtons.luau`, every controller's key binding lines only, `src/shared/Config/Supplies.luau`
 - One button map for keyboard, controller and phone. Eat and drink share the D-pad. Phone players get clean on-screen buttons for everything. Done when each device feels made for it.
+
+### 23. A livelier warehouse
+- **Status:** pending
+- **Dependencies:** 15, 17
+- **Scope:** `src/server/Systems/Life.luau`, `src/client/Controllers/Life.luau`, `src/shared/Config/Life.luau`, `src/shared/Logic/Life*.luau`, `tests/Life*.spec.luau`
+- Second playtest: it felt like landing in a dead game. Fill it with life even with nobody else on: chore bots out doing things where you can see them, the announcer talking, distant machinery, carts rolling, lights buzzing, things falling off shelves somewhere far off. Done when walking alone feels like the place is busy and wrong, not empty.
+
+### 24. Daily missions
+- **Status:** pending
+- **Dependencies:** 23
+- **Scope:** `src/server/Systems/Missions.luau`, `src/client/Controllers/Missions.luau`, `src/shared/Config/Missions.luau`, `src/shared/Logic/Missions*.luau`, `tests/Missions*.spec.luau`
+- Each morning a short list (find something, reach a certain installation, survive the night) with a reward, so there's always a reason to go explore alone. Done when a solo day has a goal.
 
 ## Later ideas
 
@@ -498,3 +510,19 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 11: Bite does 18 damage every 2.5s; a bitten robot is stunned 3s. Guards within 14 studs, chases raiders up to 25 studs out. Strays hide at night; an owned dog stays near you and whimpers.
 - Step 11: Lines: "It snatches the food and backs off, growling." / "It eats while you watch." / "Its tail wags." / "It trusts you now. It's yours." / "It needs time. Come back tomorrow." / "It likes you, but it already has someone."
 - Step 11: Trust resets when the server restarts. The grey stand-in is tinted warm tan until the model's uploaded.
+- Step 15: The warehouse is now 3200 studs across (just under 4 minutes wall to wall) with a 70-stud roof, instead of 8000 with a 600 roof. Packed instead of empty; the haze still hides the far end.
+- Step 15: Zone mix: racking 30%, store departments 18%, robot homes 12%, dreamcore rooms 15%, stock rooms 10%, furniture piles 7%, giant pillar halls 5%. The zones by the entrance are always store departments.
+- Step 15: Department signs: SLEEP, SIT, COOK, WORK, PLAY, BATH. Dead-mall store names are made up: GLOMO, SNAKZ, TOYVA, BEDLO, HAPPI, ZOOMR, NUBBY, SOFTO.
+- Step 15: Dreamcore rooms: pool under a painted sky, flooded tile tunnel with lavender light, office maze under a drop ceiling, bright checker floor with white pillars, fake outdoors (pastel house, picket fence, painted sky, one glowing "sun"), dead mall with grates, court of little windows. Some have a door that opens onto a painted hill.
+- Step 15: About a fifth of the strip lights are dead and a tenth flicker. A third of the giant pillars carry a green EXIT sign that leads nowhere.
+- Step 16: At night most strips go dark; one in six stays on as a dim red emergency light, and exit signs stay green. Dark, but you can still make out shapes.
+- Step 17: After lights out there's a 25-second quiet stretch, then hunters spawn 200-260 studs away instead of 90-140. Chore bots wake in rooms within 320 studs, so you run into them by day.
+- Step 15: Robot homes and dreamcore pockets became installations (about 60 per warehouse): you step into a pitch-dark hall that reaches the roof, and inside is a lit set built after one of your references. A robot lives in each. 16 kinds: sky door hallway, kids' party corner, sky with a hatch and ladders, flooded tile maze, giant cloud on a hill, foggy lawn, basement with stairs to nowhere, poolroom, dead mall, endless light grid over water, yellow backroom, lime hall with a giant chair, pastel houses under a purple sky, curtain room with the moon inside, grass-floor store with growing shelves, night window courtyard.
+- Step 15: Every installation also gets 3-5 extra weird details from a shared pool: a lone door frame, a giant wall socket, a clock with no hands stuck at 4:44, a TV face down glowing, a row of chairs facing a wall, a window in the floor, one balloon, a doll-sized table, an exit sign pointing at a wall, a sealed WC door, footprints walking in a circle, a phone off the hook, three steps up to nothing, a mannequin facing the wall.
+- Step 15: Installation lights stay on all night, so at night each one is a glowing island, and that's where the robots are.
+- Step 15: Once the art is uploaded, the Blender warehouse kit takes over from the plain shapes: real racking bays (with the odd collapsed one), giant concrete pillars stacked into the haze, block-and-steel wall panels with dock doors round the outside, pallet stacks in the stock rooms, kit floors in the store departments and installations, and the installation hero pieces (giant cloud, giant chair, cubbies, curtains, pink benches, storefront shutters, picket fences, picture frames, moon window, lone door frames). Cross aisles widened to fit the bigger pillars.
+- Step 15: Nothing clumps: store departments, stock rooms, junk piles, installations, neighborhoods and pillar halls never sit right next to the same kind, long runs of racking get broken up, and about one installation in six swallows four zones and becomes giant (cloud hill, light grid, foggy lawn, pastel houses, window court, sky hatch), built up to the roof.
+- Step 15: New zone: an indoor cul-de-sac. A ring road round a grass island, identical houses with no doors, driveways, mailboxes, one parked car, streetlights that stay on all night. The Blender cul-de-sac kit can replace it later.
+- Step 15: 27 installation kinds now (the Blender chat's 22 recipes plus the earlier ones): new are catwalk void, black sun, orb dunes, night parking lot, playground, stairs to nowhere, soft play, floating block, grandma's room, giant nursery, hedge maze. About 64 per warehouse, and the same kind never repeats within 4 zones, so you don't see one twice nearby.
+- Step 4: Blaster sounds: a zap when you fire, a thump where it lands, a dry click when empty. Other players hear your shots from up to 120 studs away.
+- Playtest 2 fixes: imported models are stood upright and turned flat before placing (racks and furniture were lying on their sides); on-screen hints ("[F] Grab", the carry controls while holding, "[H] Controls" at start, "[L] Flashlight" when it gets dark) and a controls card on H; couch searching says what you found; the siren comes in 4-second blasts with 6 seconds of quiet, the siren phase is 45 seconds and it says why ("NIGHT IS COMING"); robots hum, scream when they start a chase, beep when curious; getting grabbed flashes red, clanks and says what the robot took.
