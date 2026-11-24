@@ -16,6 +16,7 @@ local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rules = require(ReplicatedStorage.Shared.Logic.Interact)
+local DayNight = require(script.Parent.DayNight)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
 
@@ -608,15 +609,40 @@ local function stopRinging(model: Model, behaviour: Behaviour, state: State)
 	setRunning(model, "", behaviour, state, false)
 end
 
-function handlers.phone(_player, model, behaviour, _key, parts)
+-- At night whoever answers hears something wrong on the line, with a subtitle only they see.
+-- Returns the looping sound, if any, for the hang-up to stop.
+local function nightCall(player: Player, model: Model): Sound?
+	local line = Rules.pick(Settings.NightPhoneLines, random:NextNumber())
+	if not line then
+		return nil
+	end
+	Net.event("SupplyFeedback"):FireClient(player, line.text)
+	local loop = line.loop and playSound(model, ModelLibrary.soundId(line.loop), "quiet", true)
+	task.delay(line.soundDelay or 0, function()
+		local sound = playSound(model, ModelLibrary.soundId(line.sound), "quiet", false)
+		if sound then
+			sound.PlaybackSpeed = line.speed or 1
+		end
+	end)
+	return loop
+end
+
+function handlers.phone(player, model, behaviour, _key, parts)
 	local state = stateOf(model, "")
 	if state.on then
 		stopRinging(model, behaviour, state)
 		state.running = true
 		tweenPose(model, parts, 1, Settings.OpenTime)
 		makeNoise(model, behaviour.offSound, behaviour.loudness)
-		say(model, "PhoneLine")
+		local night = DayNight.isNight()
+		local loop = if night then nightCall(player, model) else nil
+		if not night then
+			say(model, "PhoneLine")
+		end
 		task.delay(Settings.PhoneTalkTime, function()
+			if loop then
+				loop:Destroy()
+			end
 			tweenPose(model, parts, 0, Settings.OpenTime)
 			if model:IsDescendantOf(workspace) then
 				makeNoise(model, behaviour.offSound, behaviour.loudness)
