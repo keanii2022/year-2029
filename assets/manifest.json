@@ -13361,6 +13361,61 @@
    "screenId": 120872877800972
   },
   {
+   "name": "black_sun",
+   "group": "warehouse",
+   "fbx": "art/warehouse/black_sun/black_sun.fbx",
+   "texture": "art/warehouse/black_sun/black_sun_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    40.0,
+    40.0,
+    1.08
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      20.0,
+      -0.0
+     ],
+     "size": [
+      40.0,
+      40.0,
+      1.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      20.0,
+      -0.0
+     ],
+     "size": [
+      39.76,
+      39.76,
+      1.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 71994118633748,
+   "textureId": null,
+   "screenId": null
+  },
+  {
    "name": "bollard",
    "group": "warehouse",
    "fbx": "art/warehouse/bollard/bollard.fbx",
@@ -13546,6 +13601,172 @@
    "screenId": null
   },
   {
+   "name": "carpet_office",
+   "group": "warehouse",
+   "fbx": "art/warehouse/carpet_office/carpet_office.fbx",
+   "texture": "art/warehouse/carpet_office/carpet_office_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.05,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.025,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.05,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 129989794208371,
+   "textureId": 113198244926625,
+   "screenId": null
+  },
+  {
+   "name": "carpet_party",
+   "group": "warehouse",
+   "fbx": "art/warehouse/carpet_party/carpet_party.fbx",
+   "texture": "art/warehouse/carpet_party/carpet_party_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.06,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.03,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.06,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 121203783193562,
+   "textureId": 136971022767782,
+   "screenId": null
+  },
+  {
+   "name": "cart_corral",
+   "group": "warehouse",
+   "fbx": "art/warehouse/cart_corral/cart_corral.fbx",
+   "texture": "art/warehouse/cart_corral/cart_corral_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    10.3,
+    3.5,
+    4.3
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.75,
+      -0.0
+     ],
+     "size": [
+      10.3,
+      3.5,
+      4.3
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 110658107828862,
+   "textureId": 115322394591559,
+   "screenId": null
+  },
+  {
+   "name": "catwalk",
+   "group": "warehouse",
+   "fbx": "art/warehouse/catwalk/catwalk.fbx",
+   "texture": "art/warehouse/catwalk/catwalk_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    8.0,
+    3.71,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.855,
+      -0.0
+     ],
+     "size": [
+      8.0,
+      3.71,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      1.22,
+      -0.0
+     ],
+     "size": [
+      7.0,
+      0.04,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 82487666216442,
+   "textureId": 95122346837288,
+   "screenId": null
+  },
+  {
    "name": "caution_tape",
    "group": "warehouse",
    "fbx": "art/warehouse/caution_tape/caution_tape.fbx",
@@ -13580,6 +13801,116 @@
    "moves": [],
    "assetId": 110463394087449,
    "textureId": 107108859792865,
+   "screenId": null
+  },
+  {
+   "name": "ceiling_fan",
+   "group": "warehouse",
+   "fbx": "art/warehouse/ceiling_fan/ceiling_fan.fbx",
+   "texture": "art/warehouse/ceiling_fan/ceiling_fan_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    8.95,
+    2.97,
+    9.411
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      -0.375,
+      1.485,
+      0.0
+     ],
+     "size": [
+      1.6,
+      2.97,
+      1.6
+     ],
+     "pivot": [
+      -0.375,
+      2.97,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      -0.375,
+      0.77,
+      0.0
+     ],
+     "size": [
+      1.1,
+      0.32,
+      1.1
+     ],
+     "pivot": [
+      -0.375,
+      2.97,
+      0.0
+     ]
+    },
+    {
+     "name": "Spin",
+     "center": [
+      -0.0,
+      1.122,
+      0.0
+     ],
+     "size": [
+      8.95,
+      0.336,
+      9.411
+     ],
+     "pivot": [
+      -0.375,
+      1.17,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 98309985651816,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "chrome_orb",
+   "group": "warehouse",
+   "fbx": "art/warehouse/chrome_orb/chrome_orb.fbx",
+   "texture": "art/warehouse/chrome_orb/chrome_orb_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    30.0,
+    30.1,
+    30.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      15.05,
+      -0.0
+     ],
+     "size": [
+      30.0,
+      30.1,
+      30.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 114931021216605,
+   "textureId": 111519968681869,
    "screenId": null
   },
   {
@@ -13694,6 +14025,43 @@
    "screenId": null
   },
   {
+   "name": "crate_stack_plastic",
+   "group": "warehouse",
+   "fbx": "art/warehouse/crate_stack_plastic/crate_stack_plastic.fbx",
+   "texture": "art/warehouse/crate_stack_plastic/crate_stack_plastic_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    4.347,
+    6.122,
+    3.2
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      3.061,
+      -0.0
+     ],
+     "size": [
+      4.347,
+      6.122,
+      3.2
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 76487074653224,
+   "textureId": 111520544998638,
+   "screenId": null
+  },
+  {
    "name": "cubbies",
    "group": "warehouse",
    "fbx": "art/warehouse/cubbies/cubbies.fbx",
@@ -13763,8 +14131,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 101727493570789,
+   "textureId": 116848203194494,
    "screenId": null
   },
   {
@@ -14043,6 +14411,61 @@
    "screenId": null
   },
   {
+   "name": "doorway_blue",
+   "group": "warehouse",
+   "fbx": "art/warehouse/doorway_blue/doorway_blue.fbx",
+   "texture": "art/warehouse/doorway_blue/doorway_blue_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    5.6,
+    8.2,
+    6.3
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      4.1,
+      -0.0
+     ],
+     "size": [
+      5.6,
+      8.2,
+      6.3
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      3.9,
+      -2.93
+     ],
+     "size": [
+      3.7,
+      7.8,
+      0.05
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 74023077929285,
+   "textureId": 102090139434635,
+   "screenId": null
+  },
+  {
    "name": "driveway",
    "group": "warehouse",
    "fbx": "art/warehouse/driveway/driveway.fbx",
@@ -14075,8 +14498,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 70877354046103,
+   "textureId": 83317576212943,
    "screenId": null
   },
   {
@@ -14295,8 +14718,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 126425720497352,
+   "textureId": 131589124319200,
    "screenId": null
   },
   {
@@ -15051,8 +15474,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 131658031999087,
+   "textureId": 74044012605194,
    "screenId": null
   },
   {
@@ -15088,8 +15511,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 117197569702950,
+   "textureId": 71209905724688,
    "screenId": null
   },
   {
@@ -15315,6 +15738,43 @@
    "screenId": null
   },
   {
+   "name": "grid_floor",
+   "group": "warehouse",
+   "fbx": "art/warehouse/grid_floor/grid_floor.fbx",
+   "texture": "art/warehouse/grid_floor/grid_floor_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.7,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.35,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.7,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 112902609158835,
+   "textureId": 75491156774084,
+   "screenId": null
+  },
+  {
    "name": "handrail",
    "group": "warehouse",
    "fbx": "art/warehouse/handrail/handrail.fbx",
@@ -15421,7 +15881,44 @@
     }
    ],
    "moves": [],
-   "assetId": null,
+   "assetId": 140224356500716,
+   "textureId": 89226231914830,
+   "screenId": null
+  },
+  {
+   "name": "hedge_wall",
+   "group": "warehouse",
+   "fbx": "art/warehouse/hedge_wall/hedge_wall.fbx",
+   "texture": "art/warehouse/hedge_wall/hedge_wall_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    24.0,
+    3.01
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      12.0,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      24.0,
+      3.01
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 129653975047431,
    "textureId": null,
    "screenId": null
   },
@@ -15494,8 +15991,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 122212818110469,
+   "textureId": 111322541671170,
    "screenId": null
   },
   {
@@ -15549,8 +16046,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 134341164464312,
+   "textureId": 119417175818125,
    "screenId": null
   },
   {
@@ -15604,8 +16101,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 140583757835535,
+   "textureId": 111578053152634,
    "screenId": null
   },
   {
@@ -15659,8 +16156,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 115911429914468,
+   "textureId": 109619275386775,
    "screenId": null
   },
   {
@@ -15733,8 +16230,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 131318325336634,
+   "textureId": 94282138504452,
    "screenId": null
   },
   {
@@ -16119,8 +16616,192 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 130077006447221,
+   "textureId": 129056743977966,
+   "screenId": null
+  },
+  {
+   "name": "mall_kiosk",
+   "group": "warehouse",
+   "fbx": "art/warehouse/mall_kiosk/mall_kiosk.fbx",
+   "texture": "art/warehouse/mall_kiosk/mall_kiosk_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    10.42,
+    8.0,
+    7.529
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      4.0,
+      -0.0
+     ],
+     "size": [
+      10.42,
+      8.0,
+      7.529
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 75558536020804,
+   "textureId": 128384216432993,
+   "screenId": null
+  },
+  {
+   "name": "mall_planter",
+   "group": "warehouse",
+   "fbx": "art/warehouse/mall_planter/mall_planter.fbx",
+   "texture": "art/warehouse/mall_planter/mall_planter_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    9.664,
+    9.45,
+    9.89
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      4.725,
+      -0.0
+     ],
+     "size": [
+      9.664,
+      9.45,
+      9.89
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 137479282784374,
+   "textureId": 102433788295351,
+   "screenId": null
+  },
+  {
+   "name": "mall_shutter",
+   "group": "warehouse",
+   "fbx": "art/warehouse/mall_shutter/mall_shutter.fbx",
+   "texture": "art/warehouse/mall_shutter/mall_shutter_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    16.0,
+    1.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      8.0,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      16.0,
+      1.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Door",
+     "center": [
+      0.0,
+      5.475,
+      0.15
+     ],
+     "size": [
+      12.7,
+      10.95,
+      0.32
+     ],
+     "pivot": [
+      0.0,
+      11.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 80268725069191,
+   "textureId": 114437349700742,
+   "screenId": null
+  },
+  {
+   "name": "monolith",
+   "group": "warehouse",
+   "fbx": "art/warehouse/monolith/monolith.fbx",
+   "texture": "art/warehouse/monolith/monolith_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    20.02,
+    40.0,
+    6.037
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      20.0,
+      -0.009
+     ],
+     "size": [
+      20.02,
+      40.0,
+      6.02
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      -3.5,
+      24.0,
+      3.003
+     ],
+     "size": [
+      13.0,
+      0.06,
+      0.03
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 90210990698779,
+   "textureId": 104413554559568,
    "screenId": null
   },
   {
@@ -16179,6 +16860,43 @@
    "screenId": null
   },
   {
+   "name": "mulch_tile",
+   "group": "warehouse",
+   "fbx": "art/warehouse/mulch_tile/mulch_tile.fbx",
+   "texture": "art/warehouse/mulch_tile/mulch_tile_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.7,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.35,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.7,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 111990647651553,
+   "textureId": 139063325109211,
+   "screenId": null
+  },
+  {
    "name": "oil_drum",
    "group": "warehouse",
    "fbx": "art/warehouse/oil_drum/oil_drum.fbx",
@@ -16213,6 +16931,80 @@
    "moves": [],
    "assetId": 90393416795501,
    "textureId": 78895259088275,
+   "screenId": null
+  },
+  {
+   "name": "padded_floor",
+   "group": "warehouse",
+   "fbx": "art/warehouse/padded_floor/padded_floor.fbx",
+   "texture": "art/warehouse/padded_floor/padded_floor_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    1.891,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.946,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      1.891,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 78620702641602,
+   "textureId": 75208269202569,
+   "screenId": null
+  },
+  {
+   "name": "padded_wall",
+   "group": "warehouse",
+   "fbx": "art/warehouse/padded_wall/padded_wall.fbx",
+   "texture": "art/warehouse/padded_wall/padded_wall_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    16.0,
+    2.367
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      8.0,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      16.0,
+      2.367
+     ],
+     "pivot": [
+      0.0,
+      0.0,
+      -0.683
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 111998984637200,
+   "textureId": 72473904244269,
    "screenId": null
   },
   {
@@ -16438,6 +17230,43 @@
    "screenId": null
   },
   {
+   "name": "parking_tile",
+   "group": "warehouse",
+   "fbx": "art/warehouse/parking_tile/parking_tile.fbx",
+   "texture": "art/warehouse/parking_tile/parking_tile_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.7,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.35,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.7,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 132630292570461,
+   "textureId": 92147524303079,
+   "screenId": null
+  },
+  {
    "name": "picket_fence",
    "group": "warehouse",
    "fbx": "art/warehouse/picket_fence/picket_fence.fbx",
@@ -16567,6 +17396,98 @@
    "screenId": null
   },
   {
+   "name": "pool_edge",
+   "group": "warehouse",
+   "fbx": "art/warehouse/pool_edge/pool_edge.fbx",
+   "texture": "art/warehouse/pool_edge/pool_edge_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    3.117,
+    3.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.558,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      3.117,
+      3.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 87747702408566,
+   "textureId": 127920163102102,
+   "screenId": null
+  },
+  {
+   "name": "pool_floor",
+   "group": "warehouse",
+   "fbx": "art/warehouse/pool_floor/pool_floor.fbx",
+   "texture": "art/warehouse/pool_floor/pool_floor_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    2.2,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.14,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.28,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Wet",
+     "center": [
+      0.0,
+      2.15,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.1,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 118112985152329,
+   "textureId": 136573458455053,
+   "screenId": null
+  },
+  {
    "name": "porch_light",
    "group": "warehouse",
    "fbx": "art/warehouse/porch_light/porch_light.fbx",
@@ -16617,8 +17538,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 81608722970883,
+   "textureId": 98923117196396,
    "screenId": null
   },
   {
@@ -16918,6 +17839,61 @@
    "screenId": null
   },
   {
+   "name": "reading_desk",
+   "group": "warehouse",
+   "fbx": "art/warehouse/reading_desk/reading_desk.fbx",
+   "texture": "art/warehouse/reading_desk/reading_desk_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    12.0,
+    4.52,
+    6.623
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      2.26,
+      -0.0
+     ],
+     "size": [
+      12.0,
+      4.52,
+      6.623
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      -3.0,
+      4.08,
+      -1.262
+     ],
+     "size": [
+      1.3,
+      0.06,
+      0.7
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 116684685617970,
+   "textureId": 137614043853786,
+   "screenId": null
+  },
+  {
    "name": "road_sign",
    "group": "warehouse",
    "fbx": "art/warehouse/road_sign/road_sign.fbx",
@@ -16971,6 +17947,43 @@
    "assetId": 124270080763385,
    "textureId": 102107365398796,
    "screenId": 139540082934902
+  },
+  {
+   "name": "rocking_horse_giant",
+   "group": "warehouse",
+   "fbx": "art/warehouse/rocking_horse_giant/rocking_horse_giant.fbx",
+   "texture": "art/warehouse/rocking_horse_giant/rocking_horse_giant_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    7.899,
+    23.064,
+    24.758
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      11.532,
+      -0.0
+     ],
+     "size": [
+      7.899,
+      23.064,
+      24.758
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 84125338650301,
+   "textureId": 94114337764684,
+   "screenId": null
   },
   {
    "name": "rolling_ladder",
@@ -17194,6 +18207,43 @@
    "screenId": 75838151120212
   },
   {
+   "name": "sand_floor",
+   "group": "warehouse",
+   "fbx": "art/warehouse/sand_floor/sand_floor.fbx",
+   "texture": "art/warehouse/sand_floor/sand_floor_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    2.332,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.166,
+      0.0
+     ],
+     "size": [
+      32.0,
+      2.332,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 116292627538609,
+   "textureId": 139685790214565,
+   "screenId": null
+  },
+  {
    "name": "shopping_cart",
    "group": "warehouse",
    "fbx": "art/warehouse/shopping_cart/shopping_cart.fbx",
@@ -17336,8 +18386,192 @@
     }
    ],
    "moves": [],
+   "assetId": 85083781394400,
+   "textureId": 102359230319261,
+   "screenId": null
+  },
+  {
+   "name": "sky_ceiling",
+   "group": "warehouse",
+   "fbx": "art/warehouse/sky_ceiling/sky_ceiling.fbx",
+   "texture": "art/warehouse/sky_ceiling/sky_ceiling_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    32.0,
+    0.309,
+    32.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      0.154,
+      -0.0
+     ],
+     "size": [
+      32.0,
+      0.309,
+      32.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 114045733662611,
+   "textureId": 132887474757396,
+   "screenId": null
+  },
+  {
+   "name": "sky_hatch",
+   "group": "warehouse",
+   "fbx": "art/warehouse/sky_hatch/sky_hatch.fbx",
+   "texture": "art/warehouse/sky_hatch/sky_hatch_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    6.0,
+    3.812,
+    4.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      1.906,
+      -0.0
+     ],
+     "size": [
+      6.0,
+      3.812,
+      4.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      0.01,
+      -0.0
+     ],
+     "size": [
+      4.4,
+      0.02,
+      2.4
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
    "assetId": null,
+   "textureId": 131632119302524,
+   "screenId": null
+  },
+  {
+   "name": "slide",
+   "group": "warehouse",
+   "fbx": "art/warehouse/slide/slide.fbx",
+   "texture": "art/warehouse/slide/slide_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    3.35,
+    9.077,
+    12.738
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      4.539,
+      -0.0
+     ],
+     "size": [
+      3.35,
+      9.077,
+      12.738
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 138478155199531,
    "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "sodium_lamp",
+   "group": "warehouse",
+   "fbx": "art/warehouse/sodium_lamp/sodium_lamp.fbx",
+   "texture": "art/warehouse/sodium_lamp/sodium_lamp_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    2.6,
+    25.986,
+    7.6
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      12.993,
+      -0.0
+     ],
+     "size": [
+      2.6,
+      25.986,
+      7.6
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      24.64,
+      2.1
+     ],
+     "size": [
+      1.6,
+      0.1,
+      2.8
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 95320109343104,
+   "textureId": 79852882480526,
    "screenId": null
   },
   {
@@ -17375,6 +18609,117 @@
    "moves": [],
    "assetId": 125308621987363,
    "textureId": 102441944204073,
+   "screenId": null
+  },
+  {
+   "name": "stairs_down",
+   "group": "warehouse",
+   "fbx": "art/warehouse/stairs_down/stairs_down.fbx",
+   "texture": "art/warehouse/stairs_down/stairs_down_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    8.0,
+    13.525,
+    26.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      6.762,
+      -0.0
+     ],
+     "size": [
+      8.0,
+      13.525,
+      26.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 98306208741324,
+   "textureId": 109707414842280,
+   "screenId": null
+  },
+  {
+   "name": "stairs_nowhere",
+   "group": "warehouse",
+   "fbx": "art/warehouse/stairs_nowhere/stairs_nowhere.fbx",
+   "texture": "art/warehouse/stairs_nowhere/stairs_nowhere_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    7.292,
+    9.133,
+    12.085
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      4.566,
+      -0.0
+     ],
+     "size": [
+      7.292,
+      9.133,
+      12.085
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 120509163426477,
+   "textureId": 127258972523482,
+   "screenId": null
+  },
+  {
+   "name": "stairs_to_wall",
+   "group": "warehouse",
+   "fbx": "art/warehouse/stairs_to_wall/stairs_to_wall.fbx",
+   "texture": "art/warehouse/stairs_to_wall/stairs_to_wall_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    6.0,
+    20.0,
+    25.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      10.0,
+      -0.0
+     ],
+     "size": [
+      6.0,
+      20.0,
+      25.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 134690226111443,
+   "textureId": 121958212882703,
    "screenId": null
   },
   {
@@ -17447,8 +18792,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 73067535708596,
+   "textureId": 104274580328100,
    "screenId": null
   },
   {
@@ -17484,8 +18829,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 118200047869323,
+   "textureId": 88620365992538,
    "screenId": null
   },
   {
@@ -17539,8 +18884,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 93869497249898,
+   "textureId": 88628941987379,
    "screenId": null
   },
   {
@@ -17594,8 +18939,45 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 109235532441735,
+   "textureId": 123350608846701,
+   "screenId": null
+  },
+  {
+   "name": "swing_set",
+   "group": "warehouse",
+   "fbx": "art/warehouse/swing_set/swing_set.fbx",
+   "texture": "art/warehouse/swing_set/swing_set_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    14.8,
+    10.226,
+    7.6
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      5.113,
+      -0.0
+     ],
+     "size": [
+      14.8,
+      10.226,
+      7.6
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 100387631111753,
+   "textureId": 136621167129900,
    "screenId": null
   },
   {
@@ -17631,8 +19013,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 108458981136093,
+   "textureId": 131139106905178,
    "screenId": null
   },
   {
@@ -17668,8 +19050,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 88432947788434,
+   "textureId": 102663022793304,
    "screenId": null
   },
   {
@@ -17821,6 +19203,43 @@
    "screenId": null
   },
   {
+   "name": "wall_office",
+   "group": "warehouse",
+   "fbx": "art/warehouse/wall_office/wall_office.fbx",
+   "texture": "art/warehouse/wall_office/wall_office_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    16.0,
+    1.31
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      8.0,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      16.0,
+      1.31
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 134064909798134,
+   "textureId": 117317745162844,
+   "screenId": null
+  },
+  {
    "name": "wall_oily",
    "group": "warehouse",
    "fbx": "art/warehouse/wall_oily/wall_oily.fbx",
@@ -17855,6 +19274,43 @@
    "moves": [],
    "assetId": 101574068687602,
    "textureId": 130594850324252,
+   "screenId": null
+  },
+  {
+   "name": "wall_party",
+   "group": "warehouse",
+   "fbx": "art/warehouse/wall_party/wall_party.fbx",
+   "texture": "art/warehouse/wall_party/wall_party_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    16.0,
+    1.36
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      8.0,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      16.0,
+      1.36
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 75700928883427,
+   "textureId": 127071825939332,
    "screenId": null
   },
   {
@@ -17987,6 +19443,43 @@
    "screenId": null
   },
   {
+   "name": "wall_tile_doorway",
+   "group": "warehouse",
+   "fbx": "art/warehouse/wall_tile_doorway/wall_tile_doorway.fbx",
+   "texture": "art/warehouse/wall_tile_doorway/wall_tile_doorway_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    16.0,
+    1.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      8.0,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      16.0,
+      1.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 113449024706834,
+   "textureId": 131608294454697,
+   "screenId": null
+  },
+  {
    "name": "wall_upper",
    "group": "warehouse",
    "fbx": "art/warehouse/wall_upper/wall_upper.fbx",
@@ -18111,8 +19604,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 114546027860845,
+   "textureId": 122746584738876,
    "screenId": null
   },
   {
@@ -18150,6 +19643,61 @@
    "moves": [],
    "assetId": 112478026697907,
    "textureId": 78131107726716,
+   "screenId": null
+  },
+  {
+   "name": "window_grid_wall",
+   "group": "warehouse",
+   "fbx": "art/warehouse/window_grid_wall/window_grid_wall.fbx",
+   "texture": "art/warehouse/window_grid_wall/window_grid_wall_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    16.0,
+    16.0,
+    1.0
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      8.0,
+      -0.0
+     ],
+     "size": [
+      16.0,
+      16.0,
+      1.0
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Glow",
+     "center": [
+      0.0,
+      9.2,
+      0.12
+     ],
+     "size": [
+      10.0,
+      10.0,
+      0.04
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": 130692170305407,
+   "textureId": 104392039623901,
    "screenId": null
   }
  ],

@@ -135,3 +135,12 @@ Rules
 | the store at night | shelving dragged and set down somewhere far off, PA ding dong (detuned), PA feedback squeal, old phone ringing far away | normal, PA loud |
 | generator | pull cord fail, start, running loop, sputter when low on fuel, winds down and ticks, fuel glugging from a jerry can | normal |
 | tapes | cassette clacks in with a play thunk, old tape hiss loop | normal, hiss quiet |
+
+## Music
+Keani's own track, made in GarageBand, cut into four 48-second loops in `sounds/music/`. One plays at a time, crossfading over about 2 seconds when the moment changes.
+| Loop | When | Loudness |
+|---|---|---|
+| music_day_loop | lights on | quiet bed under everything |
+| music_night_loop | night (lights out) | quiet bed |
+| music_installation_loop | a player is close to an installation; overrides day or night while they're near | normal |
+| music_dawn_loop | lights come back on after a night, until the day loop takes over | normal |

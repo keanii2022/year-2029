@@ -5896,6 +5896,28 @@ return {
 			screenId = 120872877800972,
 		},
 		{
+			name = "black_sun",
+			group = "warehouse",
+			size = { 40.0, 40.0, 1.08 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 20.0, -0.0 },
+					size = { 40.0, 40.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 20.0, -0.0 },
+					size = { 39.76, 39.76, 1.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 71994118633748,
+		},
+		{
 			name = "bollard",
 			group = "warehouse",
 			size = { 1.6, 3.58, 1.6 },
@@ -5981,6 +6003,80 @@ return {
 			textureId = 74848887791794,
 		},
 		{
+			name = "carpet_office",
+			group = "warehouse",
+			size = { 32.0, 0.05, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.025, -0.0 },
+					size = { 32.0, 0.05, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 129989794208371,
+			textureId = 113198244926625,
+		},
+		{
+			name = "carpet_party",
+			group = "warehouse",
+			size = { 32.0, 0.06, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.03, -0.0 },
+					size = { 32.0, 0.06, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 121203783193562,
+			textureId = 136971022767782,
+		},
+		{
+			name = "cart_corral",
+			group = "warehouse",
+			size = { 10.3, 3.5, 4.3 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.75, -0.0 },
+					size = { 10.3, 3.5, 4.3 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 110658107828862,
+			textureId = 115322394591559,
+		},
+		{
+			name = "catwalk",
+			group = "warehouse",
+			size = { 8.0, 3.71, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.855, -0.0 },
+					size = { 8.0, 3.71, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 1.22, -0.0 },
+					size = { 7.0, 0.04, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 82487666216442,
+			textureId = 95122346837288,
+		},
+		{
 			name = "caution_tape",
 			group = "warehouse",
 			size = { 17.3, 4.074, 1.79 },
@@ -5996,6 +6092,51 @@ return {
 			moves = {},
 			assetId = 110463394087449,
 			textureId = 107108859792865,
+		},
+		{
+			name = "ceiling_fan",
+			group = "warehouse",
+			size = { 8.95, 2.97, 9.411 },
+			parts = {
+				{
+					name = "Body",
+					center = { -0.375, 1.485, 0.0 },
+					size = { 1.6, 2.97, 1.6 },
+					pivot = { -0.375, 2.97, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -0.375, 0.77, 0.0 },
+					size = { 1.1, 0.32, 1.1 },
+					pivot = { -0.375, 2.97, 0.0 },
+				},
+				{
+					name = "Spin",
+					center = { -0.0, 1.122, 0.0 },
+					size = { 8.95, 0.336, 9.411 },
+					pivot = { -0.375, 1.17, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 98309985651816,
+		},
+		{
+			name = "chrome_orb",
+			group = "warehouse",
+			size = { 30.0, 30.1, 30.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 15.05, -0.0 },
+					size = { 30.0, 30.1, 30.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 114931021216605,
+			textureId = 111519968681869,
 		},
 		{
 			name = "column",
@@ -6049,6 +6190,23 @@ return {
 			textureId = 71386772221137,
 		},
 		{
+			name = "crate_stack_plastic",
+			group = "warehouse",
+			size = { 4.347, 6.122, 3.2 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 3.061, -0.0 },
+					size = { 4.347, 6.122, 3.2 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 76487074653224,
+			textureId = 111520544998638,
+		},
+		{
 			name = "cubbies",
 			group = "warehouse",
 			size = { 4.633, 6.6, 3.868 },
@@ -6079,6 +6237,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 101727493570789,
+			textureId = 116848203194494,
 		},
 		{
 			name = "curb",
@@ -6197,6 +6357,29 @@ return {
 			textureId = 130256341458642,
 		},
 		{
+			name = "doorway_blue",
+			group = "warehouse",
+			size = { 5.6, 8.2, 6.3 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.1, -0.0 },
+					size = { 5.6, 8.2, 6.3 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 3.9, -2.93 },
+					size = { 3.7, 7.8, 0.05 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 74023077929285,
+			textureId = 102090139434635,
+		},
+		{
 			name = "driveway",
 			group = "warehouse",
 			size = { 16.0, 0.71, 32.0 },
@@ -6210,6 +6393,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 70877354046103,
+			textureId = 83317576212943,
 		},
 		{
 			name = "drop_ceiling",
@@ -6300,6 +6485,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 126425720497352,
+			textureId = 131589124319200,
 		},
 		{
 			name = "fire_cabinet",
@@ -6634,6 +6821,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 131658031999087,
+			textureId = 74044012605194,
 		},
 		{
 			name = "giant_chair",
@@ -6649,6 +6838,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 117197569702950,
+			textureId = 71209905724688,
 		},
 		{
 			name = "giant_cloud",
@@ -6753,6 +6944,23 @@ return {
 			textureId = 102424287885836,
 		},
 		{
+			name = "grid_floor",
+			group = "warehouse",
+			size = { 32.0, 0.7, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.35, -0.0 },
+					size = { 32.0, 0.7, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 112902609158835,
+			textureId = 75491156774084,
+		},
+		{
 			name = "handrail",
 			group = "warehouse",
 			size = { 8.0, 0.806, 0.734 },
@@ -6800,6 +7008,24 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 140224356500716,
+			textureId = 89226231914830,
+		},
+		{
+			name = "hedge_wall",
+			group = "warehouse",
+			size = { 16.0, 24.0, 3.01 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 12.0, -0.0 },
+					size = { 16.0, 24.0, 3.01 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 129653975047431,
 		},
 		{
 			name = "house_garage",
@@ -6827,6 +7053,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 122212818110469,
+			textureId = 111322541671170,
 		},
 		{
 			name = "house_ranch",
@@ -6848,6 +7076,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 134341164464312,
+			textureId = 119417175818125,
 		},
 		{
 			name = "house_tiny",
@@ -6869,6 +7099,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 140583757835535,
+			textureId = 111578053152634,
 		},
 		{
 			name = "house_twostory",
@@ -6890,6 +7122,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 115911429914468,
+			textureId = 109619275386775,
 		},
 		{
 			name = "junk_pile",
@@ -6922,6 +7156,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 131318325336634,
+			textureId = 94282138504452,
 		},
 		{
 			name = "light_dangling",
@@ -7086,6 +7322,88 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 130077006447221,
+			textureId = 129056743977966,
+		},
+		{
+			name = "mall_kiosk",
+			group = "warehouse",
+			size = { 10.42, 8.0, 7.529 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.0, -0.0 },
+					size = { 10.42, 8.0, 7.529 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 75558536020804,
+			textureId = 128384216432993,
+		},
+		{
+			name = "mall_planter",
+			group = "warehouse",
+			size = { 9.664, 9.45, 9.89 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.725, -0.0 },
+					size = { 9.664, 9.45, 9.89 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 137479282784374,
+			textureId = 102433788295351,
+		},
+		{
+			name = "mall_shutter",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Door",
+					center = { 0.0, 5.475, 0.15 },
+					size = { 12.7, 10.95, 0.32 },
+					pivot = { 0.0, 11.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 80268725069191,
+			textureId = 114437349700742,
+		},
+		{
+			name = "monolith",
+			group = "warehouse",
+			size = { 20.02, 40.0, 6.037 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 20.0, -0.009 },
+					size = { 20.02, 40.0, 6.02 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -3.5, 24.0, 3.003 },
+					size = { 13.0, 0.06, 0.03 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 90210990698779,
+			textureId = 104413554559568,
 		},
 		{
 			name = "moon_window",
@@ -7111,6 +7429,23 @@ return {
 			textureId = 106988665200794,
 		},
 		{
+			name = "mulch_tile",
+			group = "warehouse",
+			size = { 32.0, 0.7, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.35, -0.0 },
+					size = { 32.0, 0.7, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 111990647651553,
+			textureId = 139063325109211,
+		},
+		{
 			name = "oil_drum",
 			group = "warehouse",
 			size = { 2.625, 2.95, 3.694 },
@@ -7126,6 +7461,40 @@ return {
 			moves = {},
 			assetId = 90393416795501,
 			textureId = 78895259088275,
+		},
+		{
+			name = "padded_floor",
+			group = "warehouse",
+			size = { 32.0, 1.891, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.946, -0.0 },
+					size = { 32.0, 1.891, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 78620702641602,
+			textureId = 75208269202569,
+		},
+		{
+			name = "padded_wall",
+			group = "warehouse",
+			size = { 16.0, 16.0, 2.367 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 2.367 },
+					pivot = { 0.0, 0.0, -0.683 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 111998984637200,
+			textureId = 72473904244269,
 		},
 		{
 			name = "pallet",
@@ -7230,6 +7599,23 @@ return {
 			textureId = 86253118966942,
 		},
 		{
+			name = "parking_tile",
+			group = "warehouse",
+			size = { 32.0, 0.7, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.35, -0.0 },
+					size = { 32.0, 0.7, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 132630292570461,
+			textureId = 92147524303079,
+		},
+		{
 			name = "picket_fence",
 			group = "warehouse",
 			size = { 8.1, 3.62, 0.5 },
@@ -7288,6 +7674,46 @@ return {
 			textureId = 135532535345690,
 		},
 		{
+			name = "pool_edge",
+			group = "warehouse",
+			size = { 32.0, 3.117, 3.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.558, -0.0 },
+					size = { 32.0, 3.117, 3.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 87747702408566,
+			textureId = 127920163102102,
+		},
+		{
+			name = "pool_floor",
+			group = "warehouse",
+			size = { 32.0, 2.2, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.14, -0.0 },
+					size = { 32.0, 0.28, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Wet",
+					center = { 0.0, 2.15, -0.0 },
+					size = { 32.0, 0.1, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 118112985152329,
+			textureId = 136573458455053,
+		},
+		{
 			name = "porch_light",
 			group = "warehouse",
 			size = { 0.84, 1.11, 1.17 },
@@ -7307,6 +7733,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 81608722970883,
+			textureId = 98923117196396,
 		},
 		{
 			name = "rack_bay_bulk",
@@ -7445,6 +7873,29 @@ return {
 			textureId = 108863435321233,
 		},
 		{
+			name = "reading_desk",
+			group = "warehouse",
+			size = { 12.0, 4.52, 6.623 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 2.26, -0.0 },
+					size = { 12.0, 4.52, 6.623 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { -3.0, 4.08, -1.262 },
+					size = { 1.3, 0.06, 0.7 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 116684685617970,
+			textureId = 137614043853786,
+		},
+		{
 			name = "road_sign",
 			group = "warehouse",
 			size = { 2.546, 7.473, 1.0 },
@@ -7467,6 +7918,23 @@ return {
 			assetId = 124270080763385,
 			textureId = 102107365398796,
 			screenId = 139540082934902,
+		},
+		{
+			name = "rocking_horse_giant",
+			group = "warehouse",
+			size = { 7.899, 23.064, 24.758 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 11.532, -0.0 },
+					size = { 7.899, 23.064, 24.758 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 84125338650301,
+			textureId = 94114337764684,
 		},
 		{
 			name = "rolling_ladder",
@@ -7567,6 +8035,23 @@ return {
 			screenId = 75838151120212,
 		},
 		{
+			name = "sand_floor",
+			group = "warehouse",
+			size = { 32.0, 2.332, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.166, 0.0 },
+					size = { 32.0, 2.332, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 116292627538609,
+			textureId = 139685790214565,
+		},
+		{
 			name = "shopping_cart",
 			group = "warehouse",
 			size = { 2.057, 3.71, 3.535 },
@@ -7627,6 +8112,86 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 85083781394400,
+			textureId = 102359230319261,
+		},
+		{
+			name = "sky_ceiling",
+			group = "warehouse",
+			size = { 32.0, 0.309, 32.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 0.154, -0.0 },
+					size = { 32.0, 0.309, 32.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 114045733662611,
+			textureId = 132887474757396,
+		},
+		{
+			name = "sky_hatch",
+			group = "warehouse",
+			size = { 6.0, 3.812, 4.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 1.906, -0.0 },
+					size = { 6.0, 3.812, 4.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 0.01, -0.0 },
+					size = { 4.4, 0.02, 2.4 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			textureId = 131632119302524,
+		},
+		{
+			name = "slide",
+			group = "warehouse",
+			size = { 3.35, 9.077, 12.738 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.539, -0.0 },
+					size = { 3.35, 9.077, 12.738 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 138478155199531,
+		},
+		{
+			name = "sodium_lamp",
+			group = "warehouse",
+			size = { 2.6, 25.986, 7.6 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 12.993, -0.0 },
+					size = { 2.6, 25.986, 7.6 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 24.64, 2.1 },
+					size = { 1.6, 0.1, 2.8 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 95320109343104,
+			textureId = 79852882480526,
 		},
 		{
 			name = "stair_flight",
@@ -7644,6 +8209,57 @@ return {
 			moves = {},
 			assetId = 125308621987363,
 			textureId = 102441944204073,
+		},
+		{
+			name = "stairs_down",
+			group = "warehouse",
+			size = { 8.0, 13.525, 26.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 6.762, -0.0 },
+					size = { 8.0, 13.525, 26.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 98306208741324,
+			textureId = 109707414842280,
+		},
+		{
+			name = "stairs_nowhere",
+			group = "warehouse",
+			size = { 7.292, 9.133, 12.085 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 4.566, -0.0 },
+					size = { 7.292, 9.133, 12.085 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 120509163426477,
+			textureId = 127258972523482,
+		},
+		{
+			name = "stairs_to_wall",
+			group = "warehouse",
+			size = { 6.0, 20.0, 25.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 10.0, -0.0 },
+					size = { 6.0, 20.0, 25.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 134690226111443,
+			textureId = 121958212882703,
 		},
 		{
 			name = "star_decal",
@@ -7676,6 +8292,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 73067535708596,
+			textureId = 104274580328100,
 		},
 		{
 			name = "street_tile",
@@ -7691,6 +8309,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 118200047869323,
+			textureId = 88620365992538,
 		},
 		{
 			name = "streetlamp",
@@ -7712,6 +8332,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 93869497249898,
+			textureId = 88628941987379,
 		},
 		{
 			name = "sun_panel",
@@ -7733,6 +8355,25 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 109235532441735,
+			textureId = 123350608846701,
+		},
+		{
+			name = "swing_set",
+			group = "warehouse",
+			size = { 14.8, 10.226, 7.6 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 5.113, -0.0 },
+					size = { 14.8, 10.226, 7.6 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 100387631111753,
+			textureId = 136621167129900,
 		},
 		{
 			name = "tricycle",
@@ -7748,6 +8389,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 108458981136093,
+			textureId = 131139106905178,
 		},
 		{
 			name = "turf_tile",
@@ -7763,6 +8406,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 88432947788434,
+			textureId = 102663022793304,
 		},
 		{
 			name = "wall_corner",
@@ -7833,6 +8478,23 @@ return {
 			textureId = 101323323349718,
 		},
 		{
+			name = "wall_office",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.31 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.31 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 134064909798134,
+			textureId = 117317745162844,
+		},
+		{
 			name = "wall_oily",
 			group = "warehouse",
 			size = { 16.0, 16.0, 1.0 },
@@ -7848,6 +8510,23 @@ return {
 			moves = {},
 			assetId = 101574068687602,
 			textureId = 130594850324252,
+		},
+		{
+			name = "wall_party",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.36 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.36 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 75700928883427,
+			textureId = 127071825939332,
 		},
 		{
 			name = "wall_pastel",
@@ -7908,6 +8587,23 @@ return {
 			textureId = 138330215929954,
 		},
 		{
+			name = "wall_tile_doorway",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 113449024706834,
+			textureId = 131608294454697,
+		},
+		{
 			name = "wall_upper",
 			group = "warehouse",
 			size = { 16.0, 16.0, 1.0 },
@@ -7961,6 +8657,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 114546027860845,
+			textureId = 122746584738876,
 		},
 		{
 			name = "wet_floor_sign",
@@ -7978,6 +8676,29 @@ return {
 			moves = {},
 			assetId = 112478026697907,
 			textureId = 78131107726716,
+		},
+		{
+			name = "window_grid_wall",
+			group = "warehouse",
+			size = { 16.0, 16.0, 1.0 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 8.0, -0.0 },
+					size = { 16.0, 16.0, 1.0 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Glow",
+					center = { 0.0, 9.2, 0.12 },
+					size = { 10.0, 10.0, 0.04 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+			assetId = 130692170305407,
+			textureId = 104392039623901,
 		},
 	},
 	sounds = {
