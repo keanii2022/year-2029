@@ -180,15 +180,29 @@ function Combat.Init()
 	viewmodels.Parent = ReplicatedStorage
 end
 
--- Uploaded models only load on the server, so put a copy of the held blaster where clients can
--- clone it. Loading yields, so it runs on its own thread.
+local function publishViewmodel(name: string)
+	if viewmodels:FindFirstChild(name) or not ModelLibrary.uploaded(name) then
+		return
+	end
+	local template = ModelLibrary.get(name)
+	if template then
+		template.Name = name
+		template.Parent = viewmodels
+	end
+end
+
+-- Uploaded models only load on the server, so put copies of the held blaster, the first-person
+-- arms and the items they hold where clients can clone them. Loading yields, so it runs on its
+-- own thread.
 function Combat.Start()
 	task.spawn(function()
-		if ModelLibrary.uploaded("viewmodel_blaster") then
-			local blaster = ModelLibrary.get("viewmodel_blaster")
-			if blaster then
-				blaster.Name = "viewmodel_blaster"
-				blaster.Parent = viewmodels
+		publishViewmodel("viewmodel_blaster")
+		for _, name in Config.Hands.Arms do
+			publishViewmodel(name)
+		end
+		for _, item in Config.Hands.Items do
+			if item.model then
+				publishViewmodel(item.model)
 			end
 		end
 	end)

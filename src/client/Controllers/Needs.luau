@@ -130,10 +130,11 @@ local function buildFeedback()
 	feedbackLabel = label({
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -110),
-		Size = UDim2.fromOffset(400, 24),
+		Size = UDim2.fromOffset(400, 18),
 		Text = "",
-		TextSize = 18,
-		TextStrokeTransparency = 0.6,
+		TextSize = 14, -- the hands show what's happening; this is just a quiet caption
+		TextTransparency = 0.25,
+		TextStrokeTransparency = 0.7,
 		Visible = false,
 	}, gui)
 end
