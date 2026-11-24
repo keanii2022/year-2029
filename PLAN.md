@@ -298,6 +298,58 @@ Each step is one session. Code rules for every step: see "Code layout" in CLAUDE
 - **Scope:** `src/server/Systems/Saves.luau`, `src/server/Systems/Scores.luau`, `src/client/Controllers/Locker.luau`, `src/shared/Config/Saves.luau`, `src/shared/Logic/Saves*.luau`, `tests/Saves*.spec.luau`
 - Locker, blueprints (paper and pen, once per day), stats, leaderboards, cosmetics. Done when a full server plays a few nights with no breaks.
 
+## Feel pass (after the first playtest)
+
+First playtest, 2026-11-24: running feels good. Everything else felt wrong: open sky instead of a building, everything too far apart to be scary, pitch black nights, no robots by day and one instantly on you at night, a laser instead of bullets, storage that holds nothing, eating that's only text, buttons scattered.
+
+### 15. A real warehouse
+- **Status:** pending
+- **Dependencies:** 5
+- **Scope:** `src/server/Systems/Warehouse.luau`, `src/shared/Config/Warehouse.luau`, `src/shared/Logic/WarehouseGen*.luau`, `tests/WarehouseGen*.spec.luau`
+- Fully enclosed (roof and walls tiled from pieces Roblox allows, no sky anywhere), much tighter and denser: tall shelving packed close, narrow aisles, clutter and junk everywhere, ceiling light fixtures. Done when it feels like being lost inside a huge, cramped, abandoned store.
+
+### 16. Nights you can read
+- **Status:** pending
+- **Dependencies:** 6
+- **Scope:** `src/client/Controllers/Lighting.luau`, `src/shared/Config/DayNight.luau`, `src/shared/Logic/Clock*.luau`, `tests/Clock*.spec.luau`
+- Dark and scary, never pitch black: dim emergency lights, glowing exit signs, light pools you move between, the flashlight matters. Done when night is terrifying but you can still find your way.
+
+### 17. Robots you can see coming
+- **Status:** pending
+- **Dependencies:** 8
+- **Scope:** `src/server/Systems/Robots.luau`, `src/client/Controllers/Robots.luau`, `src/shared/Config/Robots.luau`, `src/shared/Logic/Robot*.luau`, `tests/Robot*.spec.luau`
+- By day you find chore bots busy in rooms around you. At night hunters start far away and sweep toward noise and light, with warning signs (scanner light, footsteps, hum) before they reach you. Done when a night alone builds dread instead of an instant catch.
+
+### 18. Storage that works
+- **Status:** pending
+- **Dependencies:** 7
+- **Scope:** `src/server/Systems/Interact.luau`, `src/server/Systems/Containers.luau`, `src/client/Controllers/Containers.luau`, `src/shared/Config/Interact.luau`, `src/shared/Logic/Container*.luau`, `tests/Container*.spec.luau`
+- Every drawer, cabinet, fridge, chest and crate holds items: open it, see what's inside, put stuff in, take stuff out. Some start with loot. Nothing you can open is just for show. Done when hiding your stash in a dresser is a real choice.
+
+### 19. You see what you do
+- **Status:** pending
+- **Dependencies:** 18
+- **Scope:** `src/client/Controllers/Needs.luau`, `src/client/Controllers/Interact.luau`, `src/client/Controllers/Hands.luau`, `src/shared/Config/Hands.luau`
+- First-person hands: food comes up and you take bites, drinks tip back, bandages wrap. Opening things visibly swings and slides. Text only as a small extra. Done when using anything feels physical.
+
+### 20. Gun feel
+- **Status:** pending
+- **Dependencies:** 4
+- **Scope:** `src/client/Controllers/Gun.luau`, `src/server/Systems/Combat.luau`, `src/shared/Config/Guns.luau`, `src/shared/Logic/Combat*.luau`, `tests/Combat*.spec.luau`
+- A bullet you see fly (short glowing streak), muzzle flash, impact sparks and dents, the blaster in your hands with recoil. Done when one shot feels punchy.
+
+### 21. Fort raids take effort
+- **Status:** pending
+- **Dependencies:** 3
+- **Scope:** `src/server/Systems/Grab.luau`, `src/client/Controllers/Grab.luau`, `src/shared/Config/Grab.luau`, `src/shared/Logic/Grab*.luau`, `tests/Grab*.spec.luau`
+- Pulling a piece out of someone else's fort takes a few seconds of prying and makes noise, so the owner hears it. Your own pieces stay instant. Done when raiding a fort is a commitment.
+
+### 22. Controls for every player
+- **Status:** pending
+- **Dependencies:** 18, 19, 20, 21
+- **Scope:** `src/client/Controllers/Input.luau`, `src/client/Controllers/TouchButtons.luau`, every controller's key binding lines only, `src/shared/Config/Supplies.luau`
+- One button map for keyboard, controller and phone. Eat and drink share the D-pad. Phone players get clean on-screen buttons for everything. Done when each device feels made for it.
+
 ## Later ideas
 
 - Hard night every 10th night. Foggy days where robots stay awake.
