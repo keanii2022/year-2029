@@ -23,4 +23,19 @@ return {
 		expect(pose.LeftForearm).toBe(0)
 		expect(pose.Leg6).toBe(0)
 	end,
+	["carrying holds both arms out front"] = function()
+		local pose = RobotPoses.limbs("carry", 0, 0, true)
+		expect(pose.UpperArm).toBeNear(2.2)
+		expect(pose.LeftUpperArm).toBeNear(2.2)
+	end,
+	["restocking reaches up higher than studying"] = function()
+		local reach = RobotPoses.limbs("restock", 0, 0, false)
+		local study = RobotPoses.limbs("study", 0, 0, false)
+		expect(reach.UpperArm > study.UpperArm + 1).toBeTruthy()
+	end,
+	["sweeping swings the arms side to side"] = function()
+		local a = RobotPoses.limbs("sweep", 0, 0.5, false)
+		local b = RobotPoses.limbs("sweep", 0, 1.5, false)
+		expect(math.abs(a.UpperArm - b.UpperArm) > 0.3).toBeTruthy()
+	end,
 }

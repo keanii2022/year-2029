@@ -78,6 +78,24 @@ return {
 	StudySeconds = { 4, 9 },
 	StudyReach = 3.5, -- stands this far in front of the furniture it studies
 
+	-- Day errands: calm chore bots walk out of their rooms to work in the aisles near players, then
+	-- walk home. Life hands out the spots every few seconds; never by night.
+	Chores = {
+		PerPlayer = 2, -- robots out (going, working or heading home) near each player
+		MaxErrands = 8, -- out at once across the whole server
+		CallRadius = 160, -- only live robots this close to a player get sent
+		MinDistance = 20, -- the spot is this far from the player, so you see it working
+		MaxDistance = 75,
+		Reach = 85, -- and this close to the robot's room (under DayLeash, so a chase still holds)
+		WorkSeconds = { 12, 22 },
+		GiveUpSeconds = 30, -- couldn't reach the spot: head home
+		SightRange = 24, -- a short cone while out, so walking past one isn't instant trouble
+		ChoreFor = { carrier = "carry", cleaner = "sweep", cook = "restock" },
+		BoxModel = "box_loose",
+		BoxSize = Vector3.new(2.4, 1.8, 2.4), -- stand-in until the model is uploaded
+		BoxColor = Color3.fromRGB(170, 130, 85),
+	},
+
 	-- Night sweeping and hauling
 	SweepRadius = 70, -- wander points are picked this close to the nearest player
 	SweepMinStep = 20,
