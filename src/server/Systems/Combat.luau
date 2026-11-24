@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local Config = require(ReplicatedStorage.Shared.Config)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Inventory = require(script.Parent.Inventory)
 local Scores = require(script.Parent.Scores)
@@ -17,6 +18,7 @@ local Combat = {}
 local lastShotAt: { [Player]: number } = {}
 local hitRemote: RemoteEvent
 local fxRemote: UnreliableRemoteEvent
+local viewmodels: Folder
 
 local function isFiniteVector(value: any): boolean
 	if typeof(value) ~= "Vector3" then
@@ -173,6 +175,23 @@ function Combat.Init()
 	for _, player in Players:GetPlayers() do
 		setUpPlayer(player)
 	end
+	viewmodels = Instance.new("Folder")
+	viewmodels.Name = "Viewmodels"
+	viewmodels.Parent = ReplicatedStorage
+end
+
+-- Uploaded models only load on the server, so put a copy of the held blaster where clients can
+-- clone it. Loading yields, so it runs on its own thread.
+function Combat.Start()
+	task.spawn(function()
+		if ModelLibrary.uploaded("viewmodel_blaster") then
+			local blaster = ModelLibrary.get("viewmodel_blaster")
+			if blaster then
+				blaster.Name = "viewmodel_blaster"
+				blaster.Parent = viewmodels
+			end
+		end
+	end)
 end
 
 return Combat

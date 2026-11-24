@@ -29,11 +29,38 @@ return {
 	MaxOriginOffset = 6, -- studs between the client's camera and its head
 	LineOfSightSlack = 0.5,
 
-	-- Look and feel.
-	MuzzleOffset = Vector3.new(0.7, -0.6, -1.5), -- from the camera, where your own tracer starts
-	TracerColor = Color3.fromRGB(255, 120, 90),
-	TracerWidth = 0.07,
-	TracerTime = 0.08,
+	-- Look and feel. The bullet is only a picture; the hit was already decided by the server's
+	-- instant raycast. Its flight time is clamped so it lands about when the server answers.
+	MuzzleOffset = Vector3.new(0.7, -0.6, -1.5), -- from the camera, where your shot starts with no held blaster
+	OthersMuzzleForward = 1.8, -- studs ahead of another player's camera where their bullet starts
+	BulletSpeed = 650, -- studs per second
+	BulletMinTravel = 0.05,
+	BulletMaxTravel = 0.2,
+	BulletLength = 7,
+	BulletWidth = 0.16,
+	BulletColor = Color3.fromRGB(255, 150, 80),
+	BulletImage = "bullet_tracer", -- manifest image, head at the right end; Neon streak until uploaded
+	MuzzleFlashTime = 0.05,
+	MuzzleFlashSize = 1.4,
+	MuzzleFlashColor = Color3.fromRGB(255, 190, 120),
+	MuzzleFlashImage = "muzzle_flash_card",
+	ScorchSize = 0.55,
+	ScorchColor = Color3.fromRGB(28, 24, 22),
+	ScorchTime = 8, -- seconds before a scorch mark fades
+	MaxScorches = 40,
+	CameraKick = 1.2, -- degrees the view tips up per shot
+
+	-- Held blaster, relative to the camera. Recoil snaps in over RecoilRise, settles over RecoilSettle.
+	ViewmodelOffset = Vector3.new(0.75, -0.72, -1.45),
+	ViewmodelAimOffset = Vector3.new(0, -0.42, -1.2), -- centred under the crosshair while aiming
+	ViewmodelLoweredDrop = 1.1, -- studs it sinks when carrying a prop or holding no blaster
+	ViewmodelLoweredPitch = 40, -- degrees it tips down when lowered
+	ViewmodelLowerEase = 10,
+	ViewmodelBobScale = 0.6, -- share of the head bob the blaster follows
+	RecoilRise = 0.03,
+	RecoilSettle = 0.18,
+	RecoilKickBack = 0.22, -- studs toward you
+	RecoilKickPitch = 7, -- degrees muzzle up
 	SparkColor = Color3.fromRGB(255, 190, 110),
 	SparkCount = 10,
 	PlayerSparkCount = 18,
