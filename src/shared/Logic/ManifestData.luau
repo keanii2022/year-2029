@@ -2831,6 +2831,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 98236222357278,
+			textureId = 133723989312234,
 		},
 		{
 			name = "disruptor",
@@ -2887,6 +2889,8 @@ return {
 					does = "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots.",
 				},
 			},
+			assetId = 76776026129505,
+			textureId = 128581704842237,
 		},
 		{
 			name = "emp_charge",
@@ -2961,6 +2965,8 @@ return {
 					does = "The flare round. A fired flare lights an area for a while and pulls robots to it.",
 				},
 			},
+			assetId = 100631328731014,
+			textureId = 87426853648377,
 		},
 		{
 			name = "flashlight",
@@ -2993,6 +2999,8 @@ return {
 					does = "On or off. Seen from far away at night.",
 				},
 			},
+			assetId = 135930530982992,
+			textureId = 130386550280500,
 		},
 		{
 			name = "handcuffs",
@@ -3107,6 +3115,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 100260432207388,
+			textureId = 85741295872563,
 		},
 		{
 			name = "hiking_pack",
@@ -3221,6 +3231,8 @@ return {
 					does = "Scope lens glints. Players far away can spot it.",
 				},
 			},
+			assetId = 119121322354778,
+			textureId = 75265716975454,
 		},
 		{
 			name = "medkit",
@@ -3286,6 +3298,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 110536695399772,
+			textureId = 93698328874013,
 		},
 		{
 			name = "noise_maker",
@@ -3366,6 +3380,8 @@ return {
 					does = "The hex drum. Swings out to reload.",
 				},
 			},
+			assetId = 102573011027598,
+			textureId = 109565473599742,
 		},
 		{
 			name = "rifle",
@@ -3414,6 +3430,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 90213081785246,
+			textureId = 116308336300439,
 		},
 		{
 			name = "riot_helmet",
@@ -3518,6 +3536,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 125387910119984,
+			textureId = 134192798188934,
 		},
 		{
 			name = "smg",
@@ -3566,6 +3586,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 120674634717715,
+			textureId = 96512146664212,
 		},
 		{
 			name = "smoke_can",
@@ -3630,6 +3652,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 82255035726900,
+			textureId = 96834737584255,
 		},
 		{
 			name = "supply_locker",
@@ -6049,6 +6073,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 127127969333746,
+			textureId = 101529185016241,
 		},
 		{
 			name = "viewmodel_arm_left_open",
@@ -6070,6 +6096,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 82341178168656,
+			textureId = 96418775857248,
 		},
 		{
 			name = "viewmodel_arm_right",
@@ -6091,6 +6119,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 113066533716983,
+			textureId = 116893574379550,
 		},
 		{
 			name = "viewmodel_blaster",
@@ -6124,6 +6154,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 102694943719323,
+			textureId = 74926724098437,
 		},
 		{
 			name = "aisle_sign_hanging",
