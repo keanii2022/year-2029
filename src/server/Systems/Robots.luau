@@ -19,6 +19,7 @@ local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RobotBrain = require(ReplicatedStorage.Shared.Logic.RobotBrain)
 local RobotChores = require(ReplicatedStorage.Shared.Logic.RobotChores)
+local RobotHunt = require(ReplicatedStorage.Shared.Logic.RobotHunt)
 local RobotPoses = require(ReplicatedStorage.Shared.Logic.RobotPoses)
 local RobotRooms = require(ReplicatedStorage.Shared.Logic.RobotRooms)
 local RobotSenses = require(ReplicatedStorage.Shared.Logic.RobotSenses)
@@ -90,6 +91,13 @@ export type Robot = {
 	shooter: any?,
 	grudge: any?,
 	grudgeUntil: number,
+	-- the installation's doorway robot: stands just inside a door, facing out
+	guard: { spot: Vector3, face: Vector3 }?,
+	-- hunting as a pack
+	callAt: number, -- no new alert before this
+	shareAt: number, -- next time it tells the others where its target is
+	lastTarget: any?, -- who it last chased, for searching hiding spots after losing them
+	searchFrom: Vector3?, -- where it lost them; its searches circle this spot
 }
 type Alive = { player: Player, character: Model, root: BasePart, humanoid: Humanoid, position: Vector3 }
 
@@ -116,6 +124,9 @@ local floorY = 0
 local random = Random.new()
 local watcher = settings.Watcher
 local shot = settings.Shot
+local prowl = settings.Prowl
+local hunt = settings.Hunt
+local catchFeel = settings.Catch
 local fxRemote: RemoteEvent
 
 local function flat(v: Vector3): Vector3
@@ -541,7 +552,7 @@ local function dress(robot: Robot)
 	local model = robot.model
 	local eyes = model:FindFirstChild(settings.EyePart, true)
 	if eyes and eyes:IsA("BasePart") then
-		if robot.night then
+		if robot.night or robot.role == "prowler" then
 			eyes.Material = Enum.Material.Neon
 			eyes.Color = settings.NightEyeColor
 		elseif robot.role == "hunter" then
@@ -565,6 +576,15 @@ local function dress(robot: Robot)
 			scanner.Shadows = false
 			scanner.Parent = head
 		end
+		if eyes and eyes:IsA("BasePart") then
+			local glow = Instance.new("PointLight")
+			glow.Name = "EyeGlow"
+			glow.Color = settings.NightEyeColor
+			glow.Range = settings.EyeGlow.Range
+			glow.Brightness = settings.EyeGlow.Brightness
+			glow.Shadows = false
+			glow.Parent = eyes
+		end
 	end
 	model:SetAttribute("RobotId", robot.id)
 	model:SetAttribute("RobotType", robot.typeName)
@@ -578,7 +598,13 @@ local function modelName(typeName: string, night: boolean): string
 	return if night then typeName .. settings.NightSuffix else typeName
 end
 
-local function spawnRobot(typeName: string, room: any?, position: Vector3, facing: Vector3): Robot?
+local function spawnRobot(
+	typeName: string,
+	room: any?,
+	position: Vector3,
+	facing: Vector3,
+	role: RobotBrain.Role?
+): Robot?
 	local info = settings.Types[typeName]
 	local night = DayNight.isNight()
 	local model, height = makeModel(modelName(typeName, night))
@@ -587,14 +613,15 @@ local function spawnRobot(typeName: string, room: any?, position: Vector3, facin
 	end
 	nextId += 1
 	local now = os.clock()
+	local robotRole: RobotBrain.Role = role or info.role
 	local robot: Robot = {
 		id = nextId,
 		typeName = typeName,
-		role = info.role,
+		role = robotRole,
 		room = room,
 		home = if room then Warehouse.toWorld(room.cx, room.cz) else onFloor(position),
 		model = model,
-		brain = RobotBrain.new(info.role, DayNight.phase(), now),
+		brain = RobotBrain.new(robotRole, DayNight.phase(), now),
 		night = night,
 		pivotHeight = height,
 		position = onFloor(position),
@@ -638,6 +665,11 @@ local function spawnRobot(typeName: string, room: any?, position: Vector3, facin
 		shooter = nil,
 		grudge = nil,
 		grudgeUntil = 0,
+		guard = nil,
+		callAt = 0,
+		shareAt = 0,
+		lastTarget = nil,
+		searchFrom = nil,
 	}
 	model.Name = typeName
 	dress(robot)
@@ -942,6 +974,11 @@ local function sameRoomAs(robot: Robot, position: Vector3): boolean
 	return robot.room ~= nil and insideRoom(robot.room, position, 0)
 end
 
+local function calmGuard(robot: Robot): boolean
+	local state = robot.brain.state
+	return state == "study" or state == "suspicious"
+end
+
 local function senseRobot(
 	robot: Robot,
 	phase: string,
@@ -953,6 +990,11 @@ local function senseRobot(
 	local info = settings.Types[robot.typeName]
 	local outOnErrand = robot.brain.errand ~= nil and robot.brain.state ~= "chase"
 	local sightRange = if outOnErrand then math.min(info.sightRange, chores.SightRange) else info.sightRange
+	if robot.role == "prowler" and not night then
+		sightRange *= prowl.SightFactor
+	end
+	-- the doorway robot hears anyone walking about its room by day
+	local guardEars = robot.guard ~= nil and not night and calmGuard(robot)
 	local eye = {
 		x = robot.position.X,
 		z = robot.position.Z,
@@ -987,7 +1029,16 @@ local function senseRobot(
 			if not seen or d < seen.distance then
 				seen = { id = target.player, x = view.x, z = view.z, distance = d, range = sightRange }
 			end
-		elseif RobotSenses.hearsSteps(eye.x, eye.z, view, sense, roomOnly) then
+		elseif
+			RobotSenses.hearsSteps(eye.x, eye.z, view, sense, roomOnly)
+			or (
+				guardEars
+				and view.sameRoom
+				and not view.hidden
+				and view.stance ~= "Crouch"
+				and d <= settings.Guard.HearRange
+			)
+		then
 			local rank = if view.stance == "Sprint" then 2 else 1
 			table.insert(heard, { position = target.position, rank = rank, time = now })
 		end
@@ -1035,27 +1086,32 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 		return
 	end
 	local isPlayer = typeof(player) == "Instance" -- false for a simulated player's stand-in
+	local caughtRemote = Net.event("RobotCaught")
 	fxRemote:FireAllClients(robot.model, "catch", target.position)
 	if DayNight.isNight() then
 		-- caught at night counts as going down: Combat drops their bag when the Humanoid dies
 		if isPlayer then
-			Net.event("RobotCaught"):FireClient(player, "night", nil)
+			caughtRemote:FireClient(player, "night", nil, robot.position)
 		end
 		target.humanoid.Health = 0
 		return
 	end
 	robot.ignore[player] = now + settings.CaughtGraceSeconds
+	-- the client throws itself down (it owns its body); the server only takes the health
+	local humanoid = target.humanoid
+	humanoid.Health = math.max(0, humanoid.Health - catchFeel.DayDamage)
+	-- going down drops the bag anyway (Combat), so only a survivor gets robbed
 	local itemId = Inventory.bestItem(player)
-	if not itemId or not robot.room then
-		return
-	end
-	local taken = Inventory.remove(player, itemId, Inventory.count(player, itemId))
-	if taken > 0 then
-		placeStash(robot.room.id, itemId, taken, shelfSpot(robot.room))
-		local item = Inventory.Items[itemId]
-		if isPlayer then
-			Net.event("RobotCaught"):FireClient(player, "day", if item then item.name else itemId)
+	local takenName = nil
+	if itemId and robot.room and humanoid.Health > 0 then
+		local taken = Inventory.remove(player, itemId, Inventory.count(player, itemId))
+		if taken > 0 then
+			placeStash(robot.room.id, itemId, taken, shelfSpot(robot.room))
+			takenName = itemName(itemId)
 		end
+	end
+	if isPlayer then
+		caughtRemote:FireClient(player, "day", takenName, robot.position)
 	end
 end
 
@@ -1099,6 +1155,12 @@ local function pickWander(robot: Robot, alive: { Alive }): Vector3
 end
 
 local function studyTarget(robot: Robot, now: number): (Vector3?, boolean)
+	local guard = robot.guard
+	if guard then
+		robot.studySpot, robot.studyFace, robot.studyPose = guard.spot, guard.face, "scan"
+		robot.studyUntil = math.huge
+		return guard.spot, flatDistance(guard.spot, robot.position) <= settings.ArriveRange
+	end
 	local room = robot.room
 	if not room or #room.items == 0 then
 		return nil, false
@@ -1139,6 +1201,88 @@ local function studyTarget(robot: Robot, now: number): (Vector3?, boolean)
 	return spot, arrived
 end
 
+-- The next spot to check round where it lost its target. If they're tucked in a hiding spot close
+-- by it sometimes heads straight for it, stopping in front so the reveal can reach.
+local function searchSpot(robot: Robot, alive: { Alive }): Vector3?
+	local from = robot.searchFrom
+	if not from then
+		return nil
+	end
+	local hiding = nil
+	for _, target in alive do
+		local spot = target.player == robot.lastTarget
+			and Interact.isHidden(target.player)
+			and Interact.hidingSpot(target.player)
+		if spot then
+			local at = spot:GetPivot().Position
+			local toward = flat(from - at)
+			local front = if toward.Magnitude > 0.01 then at + toward.Unit * 3.5 else at
+			hiding = { x = front.X, z = front.Z }
+		end
+	end
+	local around = { x = from.X, z = from.Z }
+	for _ = 1, 4 do
+		local point = RobotHunt.searchPoint(
+			around,
+			hiding,
+			hunt,
+			random:NextNumber(),
+			random:NextNumber(0, math.pi * 2),
+			random:NextNumber()
+		)
+		local spot = onFloor(Vector3.new(point.x, 0, point.z))
+		if spotIsClear(spot, Vector3.new(3, 6, 3)) then
+			return spot
+		end
+	end
+	return nil
+end
+
+-- It has eyes on someone: tell the nearest awake robots where, and they run in from the sides. A
+-- fresh sighting is loud (an alert and answers everyone hears); updates while chasing are silent.
+local function callPack(caller: Robot, seen: RobotBrain.Seen, now: number, fresh: boolean)
+	caller.shareAt = now + hunt.ShareEvery
+	local loud = fresh and now >= caller.callAt
+	if loud then
+		caller.callAt = now + hunt.CallCooldown
+		fxRemote:FireAllClients(caller.model, "alert", caller.position)
+	end
+	local night = DayNight.isNight()
+	local candidates = {}
+	for id, other in robots do
+		local state = other.brain.state
+		local awake = night or other.role == "prowler"
+		if
+			other ~= caller
+			and awake
+			and not other.knockedUntil
+			and (state == "sweep" or state == "investigate")
+		then
+			table.insert(candidates, { id = id, x = other.position.X, z = other.position.Z })
+		end
+	end
+	local target = { x = seen.x, z = seen.z }
+	local from = { x = caller.position.X, z = caller.position.Z }
+	local targetSpot = onFloor(Vector3.new(seen.x, 0, seen.z))
+	local side = 1
+	for _, id in RobotHunt.responders(target, candidates, hunt.CallRadius, hunt.MaxResponders) do
+		local other = robots[id]
+		local flank = RobotHunt.flankPoint(from, target, hunt.FlankOffset, side)
+		side = -side
+		local spot = onFloor(Vector3.new(flank.x, 0, flank.z))
+		if not spotIsClear(spot, Vector3.new(3, 6, 3)) then
+			spot = targetSpot
+		end
+		if RobotBrain.answerCall(other.brain, { x = spot.X, z = spot.Z }, hunt.Searches, now) then
+			other.lastTarget = seen.id
+			other.searchFrom = targetSpot
+			if loud then
+				fxRemote:FireAllClients(other.model, "answer", other.position)
+			end
+		end
+	end
+end
+
 local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, now: number, inView: boolean)
 	local brain = robot.brain
 	local info = settings.Types[robot.typeName]
@@ -1157,6 +1301,12 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 	end
 	if intent.reveal then
 		tryReveal(robot, alive)
+	end
+	if intent.search then
+		local spot = searchSpot(robot, alive)
+		if spot then
+			brain.focus = { x = spot.X, z = spot.Z }
+		end
 	end
 
 	robot.pose = intent.pose
@@ -1333,7 +1483,7 @@ local function tick(dt: number)
 			reboot(robot, now)
 		end
 		local seen, heard = nil, nil
-		if robot.role == "chore" or phase == "Night" then -- stalled hunters sense nothing
+		if robot.role ~= "hunter" or phase == "Night" then -- stalled hunters sense nothing
 			seen, heard = senseRobot(robot, phase, alive, now)
 		end
 		local angryAt = grudgeTarget(robot, alive, now)
@@ -1341,6 +1491,7 @@ local function tick(dt: number)
 			seen = angryAt
 			-- by day it gives up at the leash like any chase; no flapping back and forth at the edge
 			local leashOk = phase == "Night"
+				or robot.role == "prowler"
 				or flatDistance(robot.home, robot.position) <= settings.DayLeash * 0.6
 			if robot.brain.state ~= "chase" and leashOk then
 				RobotBrain.provoke(robot.brain, angryAt, now)
@@ -1351,7 +1502,8 @@ local function tick(dt: number)
 			continue
 		end
 		local state = robot.brain.state
-		local hunting = phase == "Night" and (state == "sweep" or state == "investigate")
+		local awake = phase == "Night" or robot.role == "prowler"
+		local hunting = awake and (state == "sweep" or state == "investigate")
 		if hunting and not robot.carrying and now >= robot.looseAt then
 			robot.looseAt = now + settings.LooseSearchEvery
 			robot.loose = findLoose(robot)
@@ -1387,6 +1539,17 @@ local function tick(dt: number)
 				else nil,
 		}
 		act(robot, RobotBrain.update(robot.brain, input, settings, now), alive, now, seen ~= nil)
+
+		local brain = robot.brain
+		if brain.targetId then
+			robot.lastTarget = brain.targetId
+		end
+		if state == "chase" and brain.state == "investigate" and brain.focus then
+			robot.searchFrom = onFloor(Vector3.new(brain.focus.x, 0, brain.focus.z))
+		end
+		if awake and brain.state == "chase" and seen and (state ~= "chase" or now >= robot.shareAt) then
+			callPack(robot, seen, now, state ~= "chase")
+		end
 	end
 end
 
@@ -1409,7 +1572,7 @@ local function roomSpawnSpot(room: any): Vector3
 	return if pick then onFloor(Vector3.new(pick.x, 0, pick.z)) else randomRoomPoint(room, 5)
 end
 
-local function spawnChoreBot(room: any, corner: boolean)
+local function spawnChoreBot(room: any, corner: boolean, guard: boolean)
 	local typeName = RobotRooms.botFor(room.kind, settings.RoomBots, "cleaner")
 	local position = roomSpawnSpot(room)
 	local facing = Vector3.new(random:NextNumber(-1, 1), 0, 1)
@@ -1423,9 +1586,18 @@ local function spawnChoreBot(room: any, corner: boolean)
 			then Vector3.new(if east then 1 else -1, 0, 0)
 			else Vector3.new(0, 0, if south then 1 else -1)
 	end
+	local door = room.doors and room.doors[1]
+	local post = nil
+	if guard and door then
+		local at, out = RobotRooms.doorPost(room, door, settings.Guard.Inset)
+		position = Warehouse.toWorld(at.x, at.z)
+		facing = Vector3.new(out.x, 0, out.z)
+		post = { spot = onFloor(position), face = onFloor(position + facing * 10) }
+	end
 	local robot = spawnRobot(typeName, room, position, facing)
 	if robot then
 		robot.corner, robot.watching = corner, corner
+		robot.guard = post
 		roomRobots[room.id] = roomRobots[room.id] or {}
 		table.insert(roomRobots[room.id], robot)
 	end
@@ -1446,16 +1618,33 @@ local function robotsFor(room: any): number
 end
 
 local nightStartedAt = 0
+local dayStartedAt = 0
 
-local function spawnHunter(near: Vector3)
-	local typeName = settings.HunterTypes[random:NextInteger(1, #settings.HunterTypes)]
+local function spawnHunter(near: Vector3, role: RobotBrain.Role, types: { string }, distance: { number })
+	local typeName = types[random:NextInteger(1, #types)]
 	for _ = 1, 8 do
 		local angle = random:NextNumber(0, math.pi * 2)
 		local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
-		local spot = onFloor(near + direction * randomIn(settings.HunterSpawnDistance))
+		local spot = onFloor(near + direction * randomIn(distance))
 		if not inAnyRoom(spot) and spotIsClear(spot, Vector3.new(4, 7, 4)) then
-			spawnRobot(typeName, nearestRoom(spot), spot, -direction)
+			spawnRobot(typeName, nearestRoom(spot), spot, -direction, role)
 			return
+		end
+	end
+end
+
+local function spawnNear(
+	need: { any },
+	alive: { Alive },
+	role: RobotBrain.Role,
+	types: { string },
+	distance: { number }
+)
+	for _, player in need do
+		for _, target in alive do
+			if target.player == player then
+				spawnHunter(target.position, role, types, distance)
+			end
 		end
 	end
 end
@@ -1512,42 +1701,50 @@ local function activate()
 		local room = roomsById[id]
 		roomWant[id] = roomWant[id] or robotsFor(room)
 		local list = roomRobots[id] or {}
-		local hasCorner = false
+		local hasCorner, hasGuard = false, false
 		for _, robot in list do
 			hasCorner = hasCorner or robot.corner
+			hasGuard = hasGuard or robot.guard ~= nil
 		end
 		for _ = #list + 1, roomWant[id] do
 			if live >= settings.MaxLiveChoreBots then
 				break
 			end
-			spawnChoreBot(room, not hasCorner)
+			-- the first watches from a corner, the next minds the door
+			local guard = hasCorner and not hasGuard
+			spawnChoreBot(room, not hasCorner, guard)
 			hasCorner = true
+			hasGuard = hasGuard or guard
 			live += 1
 		end
 	end
 	activeRooms = wanted
 
-	local hunters = {}
+	local hunters, prowlers = {}, {}
 	for _, robot in robots do
-		if robot.role == "hunter" then
+		if robot.role ~= "chore" then
 			local d = RobotRooms.distanceToNearest(robot.position.X, robot.position.Z, points)
 			if d > settings.HunterDespawnRadius then
 				despawn(robot)
 			else
-				table.insert(hunters, { x = robot.position.X, z = robot.position.Z })
-			end
-		end
-	end
-	-- A quiet stretch after lights out, then hunters start far off and work their way in
-	if DayNight.isNight() and os.clock() - nightStartedAt >= settings.HunterGrace then
-		local need = RobotRooms.needHunters(points, hunters, settings.HunterNearRadius, settings.MaxHunters)
-		for _, player in need do
-			for _, target in alive do
-				if target.player == player then
-					spawnHunter(target.position)
+				local spot = { x = robot.position.X, z = robot.position.Z }
+				table.insert(hunters, spot)
+				if robot.role == "prowler" then
+					table.insert(prowlers, spot)
 				end
 			end
 		end
+	end
+	-- A quiet stretch after lights out, then hunters start far off and work their way in.
+	-- By day a few prowlers turn up once the morning has settled.
+	local now = os.clock()
+	local phase = DayNight.phase()
+	if phase == "Night" and now - nightStartedAt >= settings.HunterGrace then
+		local need = RobotRooms.needHunters(points, hunters, settings.HunterNearRadius, settings.MaxHunters)
+		spawnNear(need, alive, "hunter", settings.HunterTypes, settings.HunterSpawnDistance)
+	elseif phase == "Day" and now - dayStartedAt >= prowl.Grace then
+		local need = RobotRooms.needHunters(points, prowlers, prowl.NearRadius, prowl.Max)
+		spawnNear(need, alive, "prowler", prowl.Types, prowl.SpawnDistance)
 	end
 end
 
@@ -1557,6 +1754,7 @@ local function onPhaseChanged(phase: string)
 		nightStartedAt = now
 	end
 	if phase == "Day" then
+		dayStartedAt = now
 		table.clear(destroyedRooms)
 		table.clear(roomWant) -- rooms you thinned out overnight fill back up
 	end
@@ -1614,7 +1812,7 @@ end
 function Robots.choresNear(position: Vector3, radius: number): (number, { Robot })
 	local out, idle = 0, {}
 	for _, robot in Robots.inRadius(position, radius) do
-		if robot.role ~= "chore" or not robot.room or robot.watching then
+		if robot.role ~= "chore" or not robot.room or robot.watching or robot.guard then
 			continue
 		end
 		if robot.brain.errand then
@@ -1812,6 +2010,7 @@ function Robots.Start()
 	end
 	origin = Warehouse.toWorld(0, 0)
 	floorY = origin.Y
+	dayStartedAt = os.clock()
 	for _, room in Warehouse.rooms() do
 		roomsById[room.id] = room
 		local center = Warehouse.toWorld(room.cx, room.cz)

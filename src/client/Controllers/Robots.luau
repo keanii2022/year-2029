@@ -4,23 +4,34 @@
 -- when one notices you, when it gets back to work, and when it errors out.
 -- Every robot sound is 3D on the robot: footsteps that speed up with it, a hum, a notice alert, a
 -- chase loop with a climbing whine, the catch clank, and the clank and sparks when a shot hits one.
+-- One that spots you lets out an alert and the others answer from the dark.
+-- Dread: a heartbeat and a drained screen as hunting robots close in, lights stuttering near them,
+-- and far-off robot noises at night and through the siren. Getting caught throws you to the floor.
 local Debris = game:GetService("Debris")
+local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
+local RobotHunt = require(ReplicatedStorage.Shared.Logic.RobotHunt)
 local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
 local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
+local LightingController = require(script.Parent.Lighting)
 
 local settings = Config.Robots
 local voiceLines = settings.Voice
 local sounds = settings.Sounds
+local hunt = settings.Hunt
+local dread = settings.Dread
+local ambience = settings.Ambience
+local catchFeel = settings.Catch
 local player = Players.LocalPlayer
 
 type Talker = {
@@ -43,6 +54,9 @@ local random = Random.new()
 local nextTwitch: { [Model]: number } = {}
 local nextLineAt = 0
 local talkers: { [Model]: Talker } = {}
+local dreadLevel = 0
+local heartbeat: Sound?
+local grade: ColorCorrectionEffect?
 
 local function useGear(action: string)
 	return function(began: boolean)
@@ -209,8 +223,9 @@ local function playOnce(parent: Instance, name: string, volume: number, night: b
 	end
 end
 
-local function isNight(model: Model): boolean
-	return model:GetAttribute("Night") == true
+-- Night robots, and prowlers at any hour, carry far: you hear them through the racks.
+local function isLoud(model: Model): boolean
+	return model:GetAttribute("Night") == true or model:GetAttribute("Role") == "prowler"
 end
 
 -- One footstep per stride walked, so steps quicken as it speeds up; skitterers loop while moving.
@@ -223,7 +238,7 @@ local function footsteps(model: Model, talker: Talker)
 	if not stepSound then
 		return
 	end
-	local night = isNight(model)
+	local night = isLoud(model)
 	local volume = if night then sounds.NightStepVolume else sounds.StepVolume
 	local walking = moved > 0.05 and moved < 20 -- a jump that big is a teleport, not a stride
 	if stepSound.stride <= 0 then
@@ -271,7 +286,7 @@ end
 -- It spotted you: an alert (and its own cry for scouts and brutes), then the chase loops.
 local function startChase(model: Model, talker: Talker)
 	stopChase(talker)
-	local night = isNight(model)
+	local night = isLoud(model)
 	talker.chaseSince = os.clock()
 	playOnce(talker.body, sounds.Notice, sounds.CueVolume, night)
 	local typeNotice = sounds.NoticeByType[model:GetAttribute("RobotType")]
@@ -291,18 +306,102 @@ local function startChase(model: Model, talker: Talker)
 	talker.whine = whine
 end
 
+-- A sound heard a long way off, at a set pitch.
+local function playFar(parent: Instance, name: string, volume: number, pitch: number, rollOff: { number })
+	local id = ModelLibrary.soundId(name)
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = volume
+	sound.PlaybackSpeed = pitch * random:NextNumber(0.95, 1.05)
+	sound.RollOffMode = Enum.RollOffMode.InverseTapered
+	sound.RollOffMinDistance = rollOff[1]
+	sound.RollOffMaxDistance = rollOff[2]
+	sound.Parent = parent
+	sound:Play()
+	Debris:AddItem(sound, 10)
+end
+
+-- Somewhere off in the dark, from a random direction: a crash, a scrape, a groan.
+local function distantNoise(list: { string })
+	local camera = workspace.CurrentCamera
+	if not camera then
+		return
+	end
+	local angle = random:NextNumber(0, math.pi * 2)
+	local at = camera.CFrame.Position
+		+ Vector3.new(math.cos(angle), 0, math.sin(angle))
+			* random:NextNumber(table.unpack(ambience.Distance))
+	local anchor = Instance.new("Attachment")
+	anchor.WorldPosition = at
+	anchor.Parent = workspace.Terrain
+	local pitch = random:NextNumber(table.unpack(ambience.Pitch))
+	playFar(anchor, list[random:NextInteger(1, #list)], ambience.Volume, pitch, ambience.RollOff)
+	Debris:AddItem(anchor, 10)
+end
+
+-- Eases dread toward target and shows it: heartbeat louder and faster, colour drained and reddened.
+local function feelDread(target: number, dt: number)
+	local rate = if target > dreadLevel then dread.Rise else dread.Fall
+	dreadLevel = if target > dreadLevel
+		then math.min(target, dreadLevel + rate * dt)
+		else math.max(target, dreadLevel - rate * dt)
+	if not grade then
+		grade = Instance.new("ColorCorrectionEffect")
+		grade.Name = "RobotDread"
+		grade.Parent = Lighting
+	end
+	local effect = grade :: ColorCorrectionEffect
+	effect.Saturation = dread.Saturation * dreadLevel
+	effect.Contrast = dread.Contrast * dreadLevel
+	effect.TintColor = Color3.new(1, 1, 1):Lerp(dread.Tint, dreadLevel)
+	if dreadLevel > 0.02 and not heartbeat then
+		local id = ModelLibrary.soundId(dread.Heartbeat)
+		if id then
+			local sound = Instance.new("Sound")
+			sound.SoundId = id
+			sound.Looped = true
+			sound.Volume = 0
+			sound.Parent = SoundService
+			sound:Play()
+			heartbeat = sound
+		end
+	elseif dreadLevel <= 0.02 and heartbeat then
+		heartbeat:Destroy()
+		heartbeat = nil
+	end
+	if heartbeat then
+		local pitch = dread.HeartbeatPitch
+		heartbeat.Volume = dread.HeartbeatVolume * dreadLevel
+		heartbeat.PlaybackSpeed = pitch[1] + (pitch[2] - pitch[1]) * dreadLevel
+	end
+end
+
 local function step(folder: Instance)
 	local now = os.clock()
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local nearest, nearestDistance = nil, settings.StallLineRange
+	local fear, fearAt = 0, nil
+	local alive = character and character:FindFirstChildOfClass("Humanoid")
+	local hasBody = root and root:IsA("BasePart") and alive and alive.Health > 0
 	for _, model in folder:GetChildren() do
 		-- the folder also holds the boxes and brooms chore bots carry
 		if not model:IsA("Model") or model:GetAttribute("RobotId") == nil then
 			continue
 		end
 		if root and root:IsA("BasePart") then
-			talk(model, (model:GetPivot().Position - root.Position).Magnitude, now)
+			local d = (model:GetPivot().Position - root.Position).Magnitude
+			talk(model, d, now)
+			local awake = isLoud(model)
+			local weight = if hasBody
+				then RobotHunt.dread(d, model:GetAttribute("State"), awake, dread)
+				else 0
+			if weight > fear then
+				fear, fearAt = weight, model:GetPivot().Position
+			end
 		end
 		local talker = talkers[model]
 		if talker then
@@ -333,6 +432,8 @@ local function step(folder: Instance)
 			end
 		end
 	end
+	feelDread(fear, 0.1)
+	LightingController.disturb(fearAt)
 	if nearest and now >= nextLineAt then
 		nextLineAt = now + random:NextNumber(table.unpack(settings.StallLineEvery))
 		sayLine(nearest)
@@ -354,7 +455,7 @@ local function voice(model: Model)
 	if not body or model:GetAttribute("RobotId") == nil then
 		return
 	end
-	local night = isNight(model)
+	local night = isLoud(model)
 	local talker: Talker = {
 		body = body,
 		speaking = nil,
@@ -379,8 +480,15 @@ local function voice(model: Model)
 	end
 	-- Now and then an idle robot leaks oil or lets off pressure; at night it pings and whirrs, more often
 	task.spawn(function()
-		local gap = if night then settings.NightIdleSoundGap else settings.IdleSoundGap
-		local idle = if night then settings.NightIdleSounds else settings.IdleSounds
+		local prowler = model:GetAttribute("Role") == "prowler"
+		local gap = if prowler
+			then settings.Prowl.IdleSoundGap
+			elseif night then settings.NightIdleSoundGap
+			else settings.IdleSoundGap
+		local idle = if prowler
+			then settings.Prowl.IdleSounds
+			elseif night then settings.NightIdleSounds
+			else settings.IdleSounds
 		while model.Parent do
 			task.wait(random:NextNumber(gap[1], gap[2]))
 			if model.Parent and table.find(settings.IdleStates, model:GetAttribute("State")) then
@@ -418,7 +526,7 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 	local body = talker.body
 	local shot = settings.Shot
 	if kind == "catch" then
-		playOnce(body, sounds.Grab, 1, isNight(model))
+		playOnce(body, sounds.Grab, 1, isLoud(model))
 	elseif kind == "hit" then
 		playOnce(body, shot.Clank, shot.ClankVolume, true)
 		sparkBurst(at, 25)
@@ -430,11 +538,86 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 		sparkBurst(at, 60)
 	elseif kind == "reboot" then
 		playOnce(body, shot.Reboot, sounds.CueVolume, true)
+	elseif kind == "alert" then
+		playFar(body, hunt.AlertSound, hunt.AlertVolume, hunt.AlertPitch, hunt.RollOff)
+	elseif kind == "answer" then
+		task.delay(random:NextNumber(table.unpack(hunt.AnswerDelay)), function()
+			if body.Parent then
+				local list = hunt.AnswerSounds
+				playFar(
+					body,
+					list[random:NextInteger(1, #list)],
+					hunt.AlertVolume,
+					hunt.AnswerPitch,
+					hunt.RollOff
+				)
+			end
+		end)
 	end
 end
 
--- Getting grabbed: a red flash and words saying what happened (the claw's clank plays on the robot)
-local function caught(kind: string, itemName: string?)
+-- A jolt to the camera that dies away over ShakeSeconds.
+local function shakeCamera()
+	local name = "RobotCatchShake"
+	local started = os.clock()
+	RunService:UnbindFromRenderStep(name)
+	RunService:BindToRenderStep(name, Enum.RenderPriority.Camera.Value + 1, function()
+		local camera = workspace.CurrentCamera
+		local left = 1 - (os.clock() - started) / catchFeel.ShakeSeconds
+		if left <= 0 or not camera then
+			RunService:UnbindFromRenderStep(name)
+			return
+		end
+		local angle = math.rad(catchFeel.ShakeAngle) * left
+		camera.CFrame *= CFrame.Angles(
+			random:NextNumber(-angle, angle),
+			random:NextNumber(-angle, angle),
+			random:NextNumber(-angle, angle) * 0.5
+		)
+	end)
+end
+
+-- Thrown to the floor away from the robot, flat for DownSeconds. The client owns its body, so the
+-- shove happens here; the server already took the health.
+local function knockDown(from: Vector3?)
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not root or not root:IsA("BasePart") or not humanoid or humanoid.Health <= 0 then
+		return
+	end
+	local away = if from then root.Position - from else -root.CFrame.LookVector
+	away = Vector3.new(away.X, 0, away.Z)
+	away = if away.Magnitude > 0.01 then away.Unit else -root.CFrame.LookVector
+	humanoid.PlatformStand = true
+	root.AssemblyLinearVelocity = away * catchFeel.Shove + Vector3.yAxis * catchFeel.Lift
+	root.AssemblyAngularVelocity = away:Cross(Vector3.yAxis) * -6
+	task.delay(catchFeel.DownSeconds, function()
+		if humanoid.Parent and humanoid.Health > 0 then
+			humanoid.PlatformStand = false
+			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
+	end)
+end
+
+-- Getting grabbed: thrown down, a jolt, a hard red flash, the hit you hear, and words saying what
+-- happened (the claw's clank plays on the robot)
+local function caught(kind: string, itemName: string?, from: Vector3?)
+	shakeCamera()
+	for _, name in catchFeel.Sounds do
+		local id = ModelLibrary.soundId(name)
+		if id then
+			local sound = Instance.new("Sound")
+			sound.SoundId = id
+			sound.Volume = catchFeel.Volume
+			sound.Parent = SoundService
+			sound:Play()
+			Debris:AddItem(sound, 6)
+		end
+	end
+	if kind == "day" then
+		knockDown(from)
+	end
 	local gui = player:FindFirstChildOfClass("PlayerGui")
 	if gui then
 		local screen = Instance.new("ScreenGui")
@@ -443,7 +626,7 @@ local function caught(kind: string, itemName: string?)
 		local flash = Instance.new("Frame")
 		flash.Size = UDim2.fromScale(1, 1)
 		flash.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-		flash.BackgroundTransparency = 0.35
+		flash.BackgroundTransparency = 0.15
 		flash.Parent = screen
 		screen.Parent = gui
 		TweenService:Create(flash, TweenInfo.new(1.2), { BackgroundTransparency = 1 }):Play()
@@ -451,8 +634,10 @@ local function caught(kind: string, itemName: string?)
 	end
 	if kind == "night" then
 		Hints.flash("caught", settings.CaughtNightLine, 5)
+	elseif itemName then
+		Hints.flash("caught", string.format(settings.CaughtDayLine, itemName), 6)
 	else
-		Hints.flash("caught", string.format(settings.CaughtDayLine, itemName or "something"), 6)
+		Hints.flash("caught", settings.CaughtDayHurtLine, 4)
 	end
 end
 
@@ -475,6 +660,18 @@ function Robots.Start()
 		folder.ChildAdded:Connect(function(child)
 			if child:IsA("Model") then
 				task.defer(voice, child)
+			end
+		end)
+		task.spawn(function()
+			while true do
+				local siren = ReplicatedStorage:GetAttribute("Phase") == "Siren"
+				task.wait(
+					random:NextNumber(table.unpack(if siren then ambience.SirenGap else ambience.NightGap))
+				)
+				local phase = ReplicatedStorage:GetAttribute("Phase")
+				if phase == "Night" or phase == "Siren" then
+					distantNoise(if phase == "Siren" then ambience.Siren else ambience.Night)
+				end
 			end
 		end)
 		local elapsed = 0

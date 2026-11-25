@@ -101,6 +101,19 @@ function RobotRooms.needHunters(
 	return needing
 end
 
+-- Where a doorway robot stands: inset studs inside the door, plus the way out it faces (unit x, z).
+-- Doors sit on a side ("north" is the low z wall) at `at` studs along it, warehouse-local.
+function RobotRooms.doorPost(room: any, door: { side: string, at: number }, inset: number): (Point, Point)
+	if door.side == "north" then
+		return { x = room.x0 + door.at, z = room.z0 + inset }, { x = 0, z = -1 }
+	elseif door.side == "south" then
+		return { x = room.x0 + door.at, z = room.z1 - inset }, { x = 0, z = 1 }
+	elseif door.side == "west" then
+		return { x = room.x0 + inset, z = room.z0 + door.at }, { x = -1, z = 0 }
+	end
+	return { x = room.x1 - inset, z = room.z0 + door.at }, { x = 1, z = 0 }
+end
+
 function RobotRooms.distanceToNearest(x: number, z: number, players: { Point }): number
 	return nearestPlayer(x, z, players)
 end

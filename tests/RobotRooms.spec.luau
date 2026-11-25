@@ -80,4 +80,15 @@ return {
 		spot = RobotRooms.spreadSpot({ { x = 1, z = 0 } }, {}, 9)
 		expect(spot and spot.x).toBe(1)
 	end,
+	["a doorway robot stands just inside the door, facing out"] = function()
+		local room = { x0 = 0, z0 = 0, x1 = 40, z1 = 30 }
+		local post, out = RobotRooms.doorPost(room, { side = "north", at = 12 }, 5)
+		expect(post.x).toBe(12)
+		expect(post.z).toBe(5)
+		expect(out.z).toBe(-1)
+		post, out = RobotRooms.doorPost(room, { side = "east", at = 10 }, 5)
+		expect(post.x).toBe(35)
+		expect(post.z).toBe(10)
+		expect(out.x).toBe(1)
+	end,
 }
