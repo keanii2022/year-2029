@@ -442,11 +442,11 @@ The loop holds
 Solid
 - [ ] No known exploit from the audits is open.
 - [ ] A 20-player server with robots runs smoothly on a phone.
-- [ ] The tests pass and the build is clean.
+- [x] The tests pass and the build is clean.
 
 Launch
 - [ ] Maturity questionnaire filled in, icon, 3-5 thumbnails, description, max players set, private server price set.
-- [ ] Funnel analytics in place: joined, first loot, first grab, siren, survived night one.
+- [x] Funnel analytics in place: joined, first loot, first grab, siren, survived night one.
 - [ ] Keani flips it public.
 
 ## After launch: talk about
