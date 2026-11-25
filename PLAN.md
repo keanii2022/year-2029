@@ -405,6 +405,42 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Scope:** audits and research by read-only agents, then fixes across Grab, Robots, Combat, Inventory, Saves, Missions, Scores, Hud, Hints, TouchButtons, Locker, Music, new Dawn/Tokens/Files/Footsteps/Subtitles/MoveCheck/FortOutline systems
 - Restore point before this step: git tag `before-polish`, build copy `build/Year2029-before-polish.rbxl`. Building rework (client ghost, square snap, forts that hold), Dawn Report and Tokens, locker banking, forts pay, first day on rails, weekly boards, streaks, 2029 Files, last call and the night sweep, friends spawn together, security fixes, real footsteps, echo, PA subtitles, robot lunge and eye tells, new-player intro, phase clock, phone layout, death cause, more robots. Done when Keani plays it and keeps it, or says undo.
 
+## Definition of done
+
+Year 2029 is done when every box below is true and Keani says so. Draft for Keani to approve.
+
+Plays
+- [ ] A full day, siren and night plays start to finish on keyboard, PS controller and phone, with nothing stuck, overlapping or unreadable, in a live server with at least two real players.
+- [ ] A brand-new player knows what to do inside the first minute, sees a robot room, loots something and survives (or understands why they didn't survive) their first night.
+- [ ] Keani and their son play three full nights in a row and want "one more night".
+
+Core mechanics feel good
+- [ ] Running: the desperate dash, sneaking slow but rewarded.
+- [ ] Shooting: guns feel like a real shooter (recoil, spread, reloads, hit feedback) and fights stay scrappy.
+- [ ] Building: a whole fort goes up without fighting the controls; pieces snap and hold.
+- [ ] Hiding: hiding spots work and robots search them.
+- [ ] Relationships: the dog and a trusted robot can be won over, read through body language, and the robot can build your fort.
+
+Looks and sounds finished
+- [ ] Every model is the real uploaded model (no grey placeholders), nothing tipped or floating in a walk-through, and every picture shows.
+- [ ] Every line is voiced (Keani's recordings first, AI stand-ins for the rest), and every action has a sound.
+- [ ] The mix is scary but never overstimulating, with volume sliders and a gentler-scares switch.
+- [ ] Robots are scary: their looks, movement and sounds, as tested on Keani's son.
+
+The loop holds
+- [ ] Dawn payoff, Tokens, locker banking, streaks and weekly boards work, and saves survive leaving and rejoining.
+- [ ] Every robot room and installation has a reason to go in.
+
+Solid
+- [ ] No known exploit from the audits is open.
+- [ ] A 20-player server with robots runs smoothly on a phone.
+- [ ] The tests pass and the build is clean.
+
+Launch
+- [ ] Maturity questionnaire filled in, icon, 3-5 thumbnails, description, max players set, private server price set.
+- [ ] Funnel analytics in place: joined, first loot, first grab, siren, survived night one.
+- [ ] Keani flips it public.
+
 ## After launch: talk about
 
 Two conversations to have once the game is live and real players are in.

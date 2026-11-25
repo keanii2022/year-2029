@@ -22,6 +22,6 @@ Original Roblox PvPvE game: a warehouse full of robots. Loot and build forts by 
 - Blender only through `art/_kit/run.sh` (one Blender at a time, low priority, keeps the laptop cool). Run from `art/`.
 - Grey check every new mesh part with `_kit/solo.py`. Roblox moderation judges each MeshPart alone in flat grey. No lone round-ended rods as their own part.
 - Original only. Same genre as 3008 is fine; nothing from 3008, no real stores or brands.
-- No Mac `say` or other TTS voices. Human voice lines go in `art/sounds/VOICE_LINES.md` for Keani to record.
+- Keani's own recordings always win and are never replaced. Lines nobody recorded get AI/robot stand-in voices from `art/_kit/voice_lines.py` (Keani okayed this 2026-11-25); it never overwrites an existing clip.
 - No blood. Dark but never kiddy. Survivor writing is red spray paint.
 - No employer names, coworker names, or anyone's real names.
