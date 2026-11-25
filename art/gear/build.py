@@ -136,9 +136,9 @@ def shotgun(P):
     P.add("Handle", box((0.42, 0.1, 0.27), d, loc=(0, -1.2, 0.72), r=0.03, n=1))
     for x in (-0.095, 0.095):
         P.add("Handle", hexbarrel(0.065, 0.06, -1.27, 0.72, x))
-    P.add("Handle", box((0.32, 0.42, 0.16), d, loc=(0, -0.72, 0.53), r=0.04, n=1))
+    P.add("Pump", box((0.32, 0.42, 0.16), d, loc=(0, -0.72, 0.53), r=0.04, n=1))
     for y in (-0.86, -0.76, -0.66, -0.56):
-        P.add("Handle", box((0.33, 0.03, 0.12), plain(SHELL, grime=0.3), loc=(0, y, 0.52), r=0.01, n=1))
+        P.add("Pump", box((0.33, 0.03, 0.12), plain(SHELL, grime=0.3), loc=(0, y, 0.52), r=0.01, n=1))
     P.add("Handle", grip(0.48, 0.3, 0.44, w=0.19, d=0.25))
     P.add("Mag", box((0.2, 0.22, 0.26), plain(SHELL, grime=0.35), loc=(0, -0.1, 0.36), r=0.03, n=1))
     P.add("Mag", box((0.22, 0.24, 0.04), plain(DARK), loc=(0, -0.1, 0.23), r=0.012, n=1))
@@ -472,7 +472,7 @@ def disruptor(P):
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.83, 0.72), r=0.0, n=1))
     P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.56, 0.5), r=0.0, n=1))
 
-@item("revolver", "gear")
+@item("revolver", "gear", pivots={"Hammer": (0, 0.31, 0.75)})
 def revolver(P):
     w, g, d = shell(), plain(GREY, grime=0.45), rubber()
     P.add("Handle", box((0.2, 0.5, 0.26), w, loc=(0, 0.06, 0.62), r=0.05, n=1))
@@ -482,7 +482,7 @@ def revolver(P):
     P.add("Handle", hexbarrel(0.045, 0.05, -0.78, 0.68))
     P.add("Handle", box((0.16, 0.22, 0.42), d, loc=(0, 0.3, 0.36), rot=(22, 0, 0), r=0.05, n=1))
     P.add("Handle", box((0.18, 0.24, 0.05), plain(ORANGE, grime=0.4), loc=(0, 0.38, 0.16), rot=(22, 0, 0), r=0.015, n=1))
-    P.add("Handle", box((0.06, 0.08, 0.1), plain(ORANGE, grime=0.3), loc=(0, 0.33, 0.8), rot=(-25, 0, 0), r=0.015, n=1))
+    P.add("Hammer", box((0.06, 0.08, 0.12), plain(ORANGE, grime=0.3), loc=(0, 0.335, 0.8), rot=(-25, 0, 0), r=0.015, n=1))
     P.add("Handle", trigger(0.06, 0.47))
     P.add("Mag", cyl(0.15, 0.26, plain(LIGHT, grime=0.35), loc=(0, -0.06, 0.64), rot=(90, 30, 0), seg=6, bevel=0.02))
     for k in range(6):

@@ -109,7 +109,9 @@ Guns are one `Handle` part plus `Mag` and `Glow`. They point along -y.
 |---|---|---|
 | every gun | Mag | Drops out on reload, a fresh one slides in. |
 | every gun | Glow | Lights up while loaded, dims when empty. |
-| revolver | Mag | The hex drum. Swings out to reload. |
+| revolver | Mag | The hex drum. Turns one sixth each shot, swings out to reload. |
+| revolver | Hammer | Cocks back before each shot (pivot at its base), snaps forward on fire. |
+| shotgun | Pump | Racks back toward the grip and forward after each shot. |
 | disruptor | Mag, Glow | Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots. |
 | flare_gun | Mag | The flare round. A fired flare lights an area for a while and pulls robots to it. |
 | marksman_rifle | Glow | Scope lens glints. Players far away can spot it. |

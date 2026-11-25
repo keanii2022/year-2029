@@ -3362,7 +3362,7 @@ return {
 		{
 			name = "revolver",
 			group = "gear",
-			size = { 0.26, 0.759, 1.341 },
+			size = { 0.26, 0.769, 1.341 },
 			parts = {
 				{
 					name = "Glow",
@@ -3371,9 +3371,15 @@ return {
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
+					name = "Hammer",
+					center = { 0.0, 0.703, -0.51 },
+					size = { 0.06, 0.131, 0.112 },
+					pivot = { 0.0, 0.653, -0.485 },
+				},
+				{
 					name = "Handle",
-					center = { 0.001, 0.379, -0.017 },
-					size = { 0.216, 0.759, 1.307 },
+					center = { 0.001, 0.355, -0.017 },
+					size = { 0.216, 0.711, 1.307 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
@@ -3407,7 +3413,11 @@ return {
 				},
 				{
 					part = "Mag",
-					does = "The hex drum. Swings out to reload.",
+					does = "The hex drum. Turns one sixth each shot, swings out to reload.",
+				},
+				{
+					part = "Hammer",
+					does = "Cocks back before each shot (pivot at its base), snaps forward on fire.",
 				},
 			},
 		},
@@ -3557,6 +3567,12 @@ return {
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
+					name = "Pump",
+					center = { 0.0, 0.464, 0.675 },
+					size = { 0.33, 0.16, 0.42 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
 					name = "Rear",
 					center = { 0.0, 0.654, -0.545 },
 					size = { 0.08, 0.08, 0.08 },
@@ -3572,6 +3588,10 @@ return {
 				{
 					part = "Glow",
 					does = "Lights up while loaded, dims when empty.",
+				},
+				{
+					part = "Pump",
+					does = "Racks back toward the grip and forward after each shot.",
 				},
 			},
 		},
