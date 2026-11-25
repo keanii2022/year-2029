@@ -45,14 +45,14 @@ EXTRA = {
 SPEAKER = "highpass=f=350,lowpass=f=3300,acompressor=threshold=0.1:ratio=4,volume=1.6,aecho=0.8:0.55:140|320:0.28|0.14"
 STYLES = {
     "pa": ("Samantha", 165, SPEAKER),
-    "pa_night": ("Samantha", 138, "asetrate=44100*0.96,aresample=44100," + SPEAKER),
-    "bright": ("Samantha", 185, "highpass=f=200,lowpass=f=5000,volume=1.4"),
+    "pa_night": ("Samantha", 150, "aresample=44100,asetrate=44100*0.97,aresample=44100,atempo=1.0," + SPEAKER),
+    "bright": ("Samantha", 175, "aresample=44100,asetrate=44100*1.08,aresample=44100,highpass=f=900,lowpass=f=2600,acrusher=bits=6:mix=0.6:mode=log,volume=2.0,aecho=0.6:0.3:25:0.4"),
     "phone": ("Samantha", 160, "highpass=f=500,lowpass=f=2800,acompressor,volume=1.8"),
     "walkie": ("Daniel", 170, "highpass=f=600,lowpass=f=2600,acrusher=bits=10:mix=0.4,volume=1.8"),
-    "kid": ("Junior", 120, "asetrate=44100*1.12,aresample=44100,lowpass=f=4000,aecho=0.8:0.7:400|900:0.3|0.2,volume=1.2"),
+    "kid": ("Whisper", 80, "aresample=44100,asetrate=44100*1.06,aresample=44100,atempo=0.85,lowpass=f=3800,aecho=0.8:0.75:500|1100|1900:0.35|0.25|0.15,volume=1.6"),
     "robot": ("Ralph", 150, None),  # None: run through _kit/robotize.sh instead
     # The robots copy the voice of the ghost kid's dad, so their lines sound like a tired man, a little off
-    "dad": ("Eddy (English (US))", 148, "asetrate=44100*0.94,aresample=44100,highpass=f=90,aecho=0.8:0.4:60:0.2,loudnorm=I=-14:TP=-1.5,volume=1.15"),
+    "dad": ("Eddy (English (US))", 148, "aresample=44100,asetrate=44100*0.94,aresample=44100,highpass=f=90,aecho=0.8:0.4:60:0.2,loudnorm=I=-14:TP=-1.5,volume=1.15"),
 }
 
 
