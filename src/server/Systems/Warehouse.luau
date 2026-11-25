@@ -1075,6 +1075,7 @@ function Warehouse.Init()
 end
 
 function Warehouse.Start()
+	ModelLibrary.preloadImages()
 	local seed = if settings.Seed == 0 then Random.new():NextInteger(1, 2 ^ 31 - 1) else settings.Seed
 	layout = WarehouseGen.generate(WarehouseSizes.configFor(SizeServers.choice().size, settings), seed)
 	cosmetic = Random.new(seed)

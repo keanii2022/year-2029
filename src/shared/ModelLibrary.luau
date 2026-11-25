@@ -2,6 +2,7 @@
 -- else a greybox stand-in built from the manifest (one block per part, same names, sizes and hinges).
 -- Uploaded models only load on the server (InsertService); clients always get the greybox.
 local InsertService = game:GetService("InsertService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(script.Parent.Config)
@@ -183,8 +184,51 @@ function ModelLibrary.soundId(name: string): string?
 	return Manifest.soundId(index, name)
 end
 
+-- Pictures were uploaded as Decals, and an ImageLabel or Decal can't show a decal's own id: it
+-- needs the image inside it. The server loads each decal once (InsertService), reads the image
+-- from its Texture, and shares it with clients as an attribute on ReplicatedStorage.ImageIds.
+local function imageStore(): Instance?
+	local store = ReplicatedStorage:FindFirstChild("ImageIds")
+	if not store and RunService:IsServer() then
+		store = Instance.new("Folder")
+		store.Name = "ImageIds"
+		store.Parent = ReplicatedStorage
+	end
+	return store
+end
+
 function ModelLibrary.imageId(name: string): string?
-	return Manifest.imageId(index, name)
+	local fallback = Manifest.imageId(index, name)
+	if not fallback then
+		return nil
+	end
+	local store = imageStore()
+	local known = store and store:GetAttribute(name)
+	if type(known) == "string" then
+		return known
+	end
+	if not RunService:IsServer() or not store then
+		return fallback
+	end
+	local resolved = fallback
+	local entry = index.images[name]
+	local ok, model = pcall(InsertService.LoadAsset, InsertService, entry.assetId :: number)
+	if ok and model then
+		local decal = model:FindFirstChildWhichIsA("Decal", true)
+		if decal and decal.Texture ~= "" then
+			resolved = decal.Texture
+		end
+		model:Destroy()
+	end
+	store:SetAttribute(name, resolved)
+	return resolved
+end
+
+-- Server start: resolve every picture up front so screens, decals and clients have them ready
+function ModelLibrary.preloadImages()
+	for name in index.images do
+		task.spawn(ModelLibrary.imageId, name)
+	end
 end
 
 return ModelLibrary
