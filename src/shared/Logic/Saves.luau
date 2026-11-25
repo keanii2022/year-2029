@@ -5,7 +5,7 @@ local SavesBlueprint = if script then require(script.Parent.SavesBlueprint) else
 
 local Saves = {}
 
-Saves.VERSION = 5
+Saves.VERSION = 6
 
 type Stack = Inventory.Stack
 
@@ -18,6 +18,9 @@ export type Weekly = { week: number, nights: number }
 export type Audio = { master: number, music: number, effects: number, voice: number, gentle: boolean }
 -- The dog's rapport: highest trust stage reached (0-3) and the UTC day number it was last set (Logic/DogTrust)
 export type DogRapport = { level: number, day: number }
+-- The robot companion: the highest stage rank reached (Logic/RobotTrust, 0 = never met one) and
+-- the os.time() it was last together with its robot. The robot itself never carries over.
+export type Rapport = { stage: number, at: number }
 export type Data = {
 	version: number,
 	locker: { Stack },
@@ -35,6 +38,7 @@ export type Data = {
 	weekly: Weekly,
 	audio: Audio,
 	dog: DogRapport,
+	rapport: Rapport,
 }
 export type Rules = {
 	items: Inventory.Items,
@@ -48,6 +52,7 @@ export type Lock = { job: string, at: number }
 local MAX_EXTRAS = 32
 local MAX_KEY_LENGTH = 40
 local MAX_FILES = 200
+local MAX_RAPPORT = 4
 
 -- MIGRATIONS[n] turns a version n-1 save into version n. Version 0 is anything saved without a
 -- version; its fields already match version 1, so it only gets stamped.
@@ -82,6 +87,12 @@ local MIGRATIONS: { [number]: (any) -> any } = {
 	[5] = function(raw)
 		raw.dog = { level = 0, day = 0 }
 		raw.version = 5
+		return raw
+	end,
+	-- Version 6 adds the robot companion's rapport; nobody has met a robot yet
+	[6] = function(raw)
+		raw.rapport = { stage = 0, at = 0 }
+		raw.version = 6
 		return raw
 	end,
 }
@@ -137,6 +148,7 @@ function Saves.default(): Data
 		weekly = { week = 0, nights = 0 },
 		audio = Saves.defaultAudio(),
 		dog = { level = 0, day = 0 },
+		rapport = { stage = 0, at = 0 },
 	}
 end
 
@@ -256,6 +268,13 @@ local function cleanDog(raw: any): DogRapport
 	return { level = math.min(DOG_MAX_LEVEL, wholeCount(raw.level)), day = wholeCount(raw.day) }
 end
 
+function Saves.cleanRapport(raw: any): Rapport
+	if type(raw) ~= "table" then
+		return { stage = 0, at = 0 }
+	end
+	return { stage = math.min(wholeCount(raw.stage), MAX_RAPPORT), at = wholeCount(raw.at) }
+end
+
 -- Keeps only fields and values this build understands. Never errors on bad input.
 function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 	return {
@@ -273,6 +292,7 @@ function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 		weekly = cleanWeekly(raw.weekly),
 		audio = Saves.cleanAudio(raw.audio),
 		dog = cleanDog(raw.dog),
+		rapport = Saves.cleanRapport(raw.rapport),
 	}
 end
 

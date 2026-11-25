@@ -182,10 +182,16 @@ local function popMark(model: Model, text: string, color: Color3)
 end
 
 local function eyeColorFor(talker: Talker, state: unknown): Color3?
-	if state == "chase" then
+	if state == "companion" then
+		return Config.Companion.EyeColor -- befriended (Systems/Companion): blue-white, never red
+	elseif state == "chase" then
 		return settings.ChaseEyeColor
 	elseif state == "suspicious" then
 		return settings.SuspiciousEyeColor
+	end
+	if talker.eyeColor == Config.Companion.EyeColor then
+		-- dressed while befriended, now let go: the pack took it for the night
+		return settings.NightEyeColor
 	end
 	return talker.eyeColor
 end

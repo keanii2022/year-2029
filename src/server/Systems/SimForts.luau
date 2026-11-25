@@ -2,6 +2,8 @@
 -- furniture lying around, hands crew bots one piece and slot at a time, holds the piece in front of
 -- the bot while it walks, and sets it down through Grab's own placement check, so a bot fort is as
 -- legal as a player's and pries the same way. Walking the bots stays in SimPlayers.
+-- A robot companion (Systems/Companion) builds its player's fort through the same crews: a private
+-- crew owned by the player, which only ever hauls loose pieces and never takes in sim bots.
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -35,6 +37,7 @@ export type Crew = {
 	pieces: { [PVInstance]: string }, -- placed or on its way, to its FortPlan key
 	at: { [string]: Vector3 }, -- where each placed piece was set
 	idle: boolean, -- nothing left nearby that fits; cleared at dawn and when a piece goes missing
+	private: boolean, -- a robot companion's: loose pieces only, no sim bots joining
 }
 
 export type Job = {
@@ -197,7 +200,8 @@ local function candidates(
 		end
 		local placedBy = placedByOf(instance)
 		local pry = placedBy ~= nil and placedBy ~= owner
-		if (pry and not raid) or not instance:IsDescendantOf(workspace) then
+		local placedOff = crew ~= nil and crew.private and placedBy ~= nil
+		if (pry and not raid) or placedOff or not instance:IsDescendantOf(workspace) then
 			continue
 		end
 		local _, size, axes, sides = shape(instance)
@@ -252,8 +256,8 @@ end
 -- Crews --------------------------------------------------------------------------------------------
 
 -- A new crew fort near `near`, door facing `facing` when it stands free. nil when no spot around has
--- room for even the smallest fort.
-function SimForts.found(near: Vector3, facing: Vector3?): Crew?
+-- room for even the smallest fort. owner: a player's UserId for a robot companion's private crew.
+function SimForts.found(near: Vector3, facing: Vector3?, owner: number?): Crew?
 	local ignore = probeIgnore()
 	local front = 3
 	if facing and flat(facing).Magnitude > 0.1 then
@@ -308,7 +312,7 @@ function SimForts.found(near: Vector3, facing: Vector3?): Crew?
 			nextCrew += 1
 			local crew: Crew = {
 				id = nextCrew,
-				owner = -(settings.OwnerBase + nextCrew),
+				owner = owner or -(settings.OwnerBase + nextCrew),
 				plan = plan,
 				floorY = floorY,
 				members = {},
@@ -316,6 +320,7 @@ function SimForts.found(near: Vector3, facing: Vector3?): Crew?
 				pieces = {},
 				at = {},
 				idle = false,
+				private = owner ~= nil,
 			}
 			crews[crew.id] = crew
 			return crew
@@ -329,7 +334,12 @@ function SimForts.nearestOpen(position: Vector3): Crew?
 	local best, bestDistance = nil, settings.JoinRange
 	for _, crew in crews do
 		local distance = (flat(SimForts.center(crew)) - flat(position)).Magnitude
-		if not crew.idle and crew.size < settings.CrewSize and distance < bestDistance then
+		if
+			not crew.idle
+			and not crew.private
+			and crew.size < settings.CrewSize
+			and distance < bestDistance
+		then
 			best, bestDistance = crew, distance
 		end
 	end

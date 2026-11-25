@@ -8,6 +8,9 @@
 -- Dread: heads turn smoothly (clients animate LookAt), walking hunters hold still then burst, a hunter
 -- stares before it chases, nights get harder (Logic/RobotNights), some drop off racks, and now and
 -- then one replays a player's callout from the wrong place (the mimic).
+-- Companions: Systems/Companion befriends a few chore bots (Robots.befriend) and drives them with
+-- orders. A befriended robot keeps its room spot in the count but is never despawned, never answers
+-- the pack, never runs errands, never holds a grudge, and won't walk through walls.
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local PathfindingService = game:GetService("PathfindingService")
@@ -118,6 +121,16 @@ export type Robot = {
 	silent: boolean, -- tonight's silent hunter: no steps or hum until it lunges
 	perch: { dropAt: number, land: Vector3, dropping: boolean }?, -- on top of a rack, about to drop
 	publishedLook: Vector3?,
+	-- companions (Systems/Companion)
+	ownerId: number?, -- the player it's bonded to, while befriended
+	bonded: boolean,
+	wants: string?, -- the item id it's asking for
+	ghost: Model?, -- the wanted item it holds up
+	badge: Model?, -- worn on its head once bonded
+	lookFor: Vector3?, -- where its order says to look
+	blockedAt: number, -- last time a wall stopped its step
+	carryFn: ((Robot) -> ())?, -- holds a piece it's hauling for a fort, called whenever it's placed
+	headPart: BasePart?,
 }
 type Alive = { player: Player, character: Model, root: BasePart, humanoid: Humanoid, position: Vector3 }
 
@@ -138,6 +151,7 @@ local claimed: { [Instance]: Robot } = {}
 local pivotHeights: { [string]: number } = {}
 local gunshots: { { position: Vector3, rank: number, time: number } } = {}
 local nextId = 0
+local shotListeners: { (Robot, any, boolean) -> () } = {}
 local pathTokens = settings.PathsPerSecond
 local origin: Vector3
 local floorY = 0
@@ -503,6 +517,22 @@ local function place(robot: Robot)
 	if robot.broom then
 		holdBroom(robot, robot.broom, now)
 	end
+	local top = robot.position + Vector3.yAxis * (settings.Types[robot.typeName].agentHeight + 0.6)
+	local head = robot.headPart
+	if head and head.Parent then
+		top = head.Position + Vector3.yAxis * (head.Size.Y / 2 + 0.4)
+	end
+	if robot.badge then
+		robot.badge:PivotTo(CFrame.lookAt(top, top - facing))
+	end
+	if robot.ghost then
+		-- held up over its head, a little out front, turning slowly so you can tell what it is
+		local held = top + facing * 0.8 + Vector3.yAxis * (if robot.badge then 1.6 else 1)
+		robot.ghost:PivotTo(CFrame.new(held) * CFrame.Angles(0, (now * 0.6) % (math.pi * 2), 0))
+	end
+	if robot.carryFn then
+		robot.carryFn(robot)
+	end
 end
 
 local function gearPart(name: string, size: Vector3, color: Color3, material: Enum.Material): Part
@@ -617,6 +647,12 @@ local function choreGear(robot: Robot)
 	if not errand then
 		robot.boxPlaced = false
 	end
+	if robot.brain.companion then
+		-- whatever a companion carries is real (a fort piece or junk for its player), never chore gear
+		holdChoreBox(robot, false)
+		carryBroom(robot, false)
+		return
+	end
 	local pose = robot.pose
 	local sweeping = errand ~= nil and errand.chore == "sweep" and robot.brain.state == "errand"
 	holdChoreBox(robot, pose == "carry" or (pose == "shelve" and not robot.boxPlaced))
@@ -626,8 +662,14 @@ end
 local function dress(robot: Robot)
 	local model = robot.model
 	local eyes = model:FindFirstChild(settings.EyePart, true)
+	local befriended = robot.brain.companion
+	local headPart = model:FindFirstChild("Head", true)
+	robot.headPart = if headPart and headPart:IsA("BasePart") then headPart else nil
 	if eyes and eyes:IsA("BasePart") then
-		if robot.night or robot.role == "prowler" then
+		if befriended then
+			eyes.Material = Enum.Material.Neon
+			eyes.Color = Config.Companion.EyeColor
+		elseif robot.night or robot.role == "prowler" then
 			eyes.Material = Enum.Material.Neon
 			eyes.Color = settings.NightEyeColor
 		elseif robot.role == "hunter" then
@@ -638,28 +680,31 @@ local function dress(robot: Robot)
 			eyes.Color = settings.DayEyeColor
 		end
 	end
-	if robot.night then
-		local head = model:FindFirstChild("Head", true)
-		if head and head:IsA("BasePart") then
-			local scanner = Instance.new("SpotLight")
-			scanner.Name = "Scanner"
-			scanner.Face = Enum.NormalId.Back -- the art's front is +z
-			scanner.Color = settings.ScannerColor
-			scanner.Range = settings.ScannerRange
-			scanner.Angle = settings.ScannerAngle
-			scanner.Brightness = settings.ScannerBrightness
-			scanner.Shadows = false
-			scanner.Parent = head
-		end
-		if eyes and eyes:IsA("BasePart") then
-			local glow = Instance.new("PointLight")
-			glow.Name = "EyeGlow"
-			glow.Color = settings.NightEyeColor
-			glow.Range = settings.EyeGlow.Range
-			glow.Brightness = settings.EyeGlow.Brightness
-			glow.Shadows = false
-			glow.Parent = eyes
-		end
+	-- dress runs again when it's befriended or let go, so lights are found before they're made
+	local head = robot.headPart
+	local scanner = head and head:FindFirstChild("Scanner")
+	if scanner and (befriended or not robot.night) then
+		scanner:Destroy() -- no red scanner sweep on a friend
+	elseif head and robot.night and not befriended and not scanner then
+		local light = Instance.new("SpotLight")
+		light.Name = "Scanner"
+		light.Face = Enum.NormalId.Back -- the art's front is +z
+		light.Color = settings.ScannerColor
+		light.Range = settings.ScannerRange
+		light.Angle = settings.ScannerAngle
+		light.Brightness = settings.ScannerBrightness
+		light.Shadows = false
+		light.Parent = head
+	end
+	if robot.night and eyes and eyes:IsA("BasePart") then
+		local found = eyes:FindFirstChild("EyeGlow")
+		local glow = if found and found:IsA("PointLight") then found else Instance.new("PointLight")
+		glow.Name = "EyeGlow"
+		glow.Color = if befriended then Config.Companion.EyeColor else settings.NightEyeColor
+		glow.Range = settings.EyeGlow.Range
+		glow.Brightness = settings.EyeGlow.Brightness
+		glow.Shadows = false
+		glow.Parent = eyes
 	end
 	model:SetAttribute("RobotId", robot.id)
 	model:SetAttribute("RobotType", robot.typeName)
@@ -668,6 +713,10 @@ local function dress(robot: Robot)
 	model:SetAttribute("Silent", robot.silent or nil)
 	model:SetAttribute("State", robot.brain.state)
 	model:SetAttribute("Pose", robot.pose)
+	model:SetAttribute("Curious", befriended or nil)
+	model:SetAttribute("Owner", if befriended then robot.ownerId else nil)
+	model:SetAttribute("Wants", if befriended then robot.wants else nil)
+	model:SetAttribute("Bonded", (befriended and robot.bonded) or nil)
 end
 
 local function modelName(typeName: string, night: boolean): string
@@ -755,6 +804,15 @@ local function spawnRobot(
 		silent = false,
 		perch = nil,
 		publishedLook = nil,
+		ownerId = nil,
+		bonded = false,
+		wants = nil,
+		ghost = nil,
+		badge = nil,
+		lookFor = nil,
+		blockedAt = -math.huge,
+		carryFn = nil,
+		headPart = nil,
 	}
 	model.Name = typeName
 	dress(robot)
@@ -1012,6 +1070,40 @@ local function fortInTheWay(robot: Robot, direction: Vector3, step: number): boo
 	return prop ~= nil and prop:GetAttribute("PlacedBy") ~= nil and prop:GetAttribute("CarriedBy") == nil
 end
 
+-- A befriended robot keeps to the walkways: a straight walk (no path, or a close goal) would carry
+-- it, and whatever it's hauling, through walls. Two low rays ahead stop it at anything fixed and solid.
+local wallParams = RaycastParams.new()
+wallParams.FilterType = Enum.RaycastFilterType.Exclude
+wallParams.RespectCanCollide = true
+local WALL_HEIGHTS = { 1, 3.5 }
+
+local function wallInTheWay(robot: Robot, direction: Vector3, step: number): boolean
+	local ignore: { Instance } = { folder, stashFolder }
+	for _, player in Players:GetPlayers() do
+		if player.Character then
+			table.insert(ignore, player.Character)
+		end
+	end
+	local sims = workspace:FindFirstChild(Config.SimPlayers.FolderName)
+	if sims then
+		table.insert(ignore, sims)
+	end
+	wallParams.FilterDescendantsInstances = ignore
+	for _, height in WALL_HEIGHTS do
+		local from = robot.position + Vector3.yAxis * height
+		local hit = workspace:Raycast(from, direction * (settings.AgentRadius * 0.5 + step), wallParams)
+		local part = hit and hit.Instance
+		if part and part:IsA("BasePart") and part.Transparency < 1 then
+			local prop = grabbableOf(part)
+			-- loose junk never stops a robot; placed pieces do (fortInTheWay)
+			if not prop or prop:GetAttribute("PlacedBy") ~= nil then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 local function moveStep(robot: Robot, dt: number)
 	if robot.knockedUntil or os.clock() < robot.staggerUntil then
 		robot.moving = false
@@ -1035,6 +1127,14 @@ local function moveStep(robot: Robot, dt: number)
 		return
 	end
 	local step = math.min(offset.Magnitude, robot.speed * dt)
+	if robot.brain.companion and wallInTheWay(robot, offset.Unit, step) then
+		robot.moving = false
+		robot.blockedAt = os.clock()
+		robot.pathFor = nil -- the next goal update asks for a fresh path round it
+		turnToward(robot, offset, dt)
+		place(robot)
+		return
+	end
 	if fortInTheWay(robot, offset.Unit, step) then
 		robot.moving = false
 		turnToward(robot, offset, dt)
@@ -1476,6 +1576,8 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 		goal = onFloor(Vector3.new(brain.errand.x, 0, brain.errand.z))
 	elseif intent.goal == "loose" and robot.loose then
 		goal = onFloor(robot.loose.position)
+	elseif intent.goal == "order" and brain.order and brain.order.goal then
+		goal = onFloor(Vector3.new(brain.order.goal.x, 0, brain.order.goal.z))
 	elseif intent.goal == "wander" then
 		local reached = robot.wander and flatDistance(robot.wander, robot.position) <= settings.ArriveRange
 		if not robot.wander or reached or now - robot.wanderAt > 15 then
@@ -1557,8 +1659,10 @@ end
 local function reboot(robot: Robot, now: number)
 	robot.knockedUntil = nil
 	robot.damage = 0
-	robot.grudge = robot.shooter
-	robot.grudgeUntil = now + shot.GrudgeSeconds
+	if not robot.brain.companion then
+		robot.grudge = robot.shooter
+		robot.grudgeUntil = now + shot.GrudgeSeconds
+	end
 	place(robot)
 	fxRemote:FireAllClients(robot.model, "reboot", robot.position)
 end
@@ -1654,6 +1758,10 @@ local function lookAround(robot: Robot, alive: { Alive }, seen: RobotBrain.Seen?
 	local phase = DayNight.phase()
 	local awake = phase == "Night" or robot.role == "prowler"
 	robot.lookAt = nil
+	if brain.companion then
+		robot.lookAt = robot.lookFor
+		return
+	end
 	if robot.role == "chore" and brain.state == "study" and phase ~= "Night" then
 		local by = watchedBy(robot, alive)
 		local wasFrozen = robot.watch.frozen
@@ -1720,6 +1828,13 @@ local function despawn(robot: Robot)
 	dropCarried(robot, robot.position)
 	holdChoreBox(robot, false)
 	carryBroom(robot, false)
+	if robot.ghost then
+		robot.ghost:Destroy()
+	end
+	if robot.badge then
+		robot.badge:Destroy()
+	end
+	robot.ghost, robot.badge, robot.carryFn = nil, nil, nil
 	robot.dead = true
 	robots[robot.id] = nil
 	byModel[robot.model] = nil
@@ -1747,10 +1862,12 @@ local function tick(dt: number)
 			reboot(robot, now)
 		end
 		local seen, heard = nil, nil
-		if robot.role ~= "hunter" or phase == "Night" then -- stalled hunters sense nothing
+		local befriended = robot.brain.companion
+		-- stalled hunters sense nothing; befriended robots go by their orders
+		if (robot.role ~= "hunter" or phase == "Night") and not befriended then
 			seen, heard = senseRobot(robot, phase, alive, now)
 		end
-		local angryAt = grudgeTarget(robot, alive, now)
+		local angryAt = if befriended then nil else grudgeTarget(robot, alive, now)
 		if angryAt then
 			seen = angryAt
 			-- by day it gives up at the leash like any chase; no flapping back and forth at the edge
@@ -2011,15 +2128,22 @@ local function activate()
 		for _, robot in list do
 			local far = RobotRooms.distanceToNearest(robot.position.X, robot.position.Z, points)
 				> settings.ChoreDespawnRadius
-			busy = busy or not (calmState(robot.brain.state) or far)
+			busy = busy or not (calmState(robot.brain.state) or far or robot.brain.companion)
 		end
 		if busy then
 			wanted[id] = true -- one is out hunting near someone: keep the room until it calms down
 		else
+			local kept = 0
 			for _, robot in table.clone(list) do
-				despawn(robot)
+				if robot.brain.companion then
+					kept += 1 -- still counts toward the room, but stays with its player
+				else
+					despawn(robot)
+				end
 			end
-			roomRobots[id], roomWant[id] = nil, nil
+			if kept == 0 then
+				roomRobots[id], roomWant[id] = nil, nil
+			end
 		end
 	end
 	-- Nearest rooms first, so the cap leaves the far ones short rather than the one you're in
@@ -2304,7 +2428,9 @@ function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, 
 		end
 		robot.lastHitAt = now
 		robot.shooter = shooter
-		robot.grudge, robot.grudgeUntil = shooter, now + shot.GrudgeSeconds
+		if not robot.brain.companion then
+			robot.grudge, robot.grudgeUntil = shooter, now + shot.GrudgeSeconds
+		end
 		robot.watching, robot.lookAt, robot.stareSince = false, nil, nil
 		robot.damage += damage
 		down = robot.damage >= settings.Types[robot.typeName].armor
@@ -2317,6 +2443,9 @@ function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, 
 		robot.waypoints, robot.goal = {}, nil
 		place(robot)
 		fxRemote:FireAllClients(robot.model, "down", at)
+		for _, listener in shotListeners do
+			task.spawn(listener, robot, shooter, true)
+		end
 		return
 	end
 	if not down then
@@ -2328,6 +2457,9 @@ function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, 
 		end
 	end
 	fxRemote:FireAllClients(robot.model, "hit", at)
+	for _, listener in shotListeners do
+		task.spawn(listener, robot, shooter, false)
+	end
 end
 
 -- Puts items on a shelf in a robot room (for loot spawning). False if the room doesn't exist.
@@ -2463,6 +2595,234 @@ function Robots.heardShot(position: Vector3)
 		table.remove(gunshots, 1)
 	end
 	table.insert(gunshots, { position = position, rank = LoudnessLogic.rank("loud"), time = now })
+end
+
+-- Companions (Systems/Companion) ---------------------------------------------------------------
+
+-- Live chore bots that could turn curious: in a room, not the corner watcher or the doorway guard,
+-- not down, not already befriended.
+function Robots.choreBots(): { Robot }
+	local list = {}
+	for _, robot in robots do
+		if
+			robot.role == "chore"
+			and robot.room
+			and not robot.dead
+			and not robot.watching
+			and not robot.corner
+			and not robot.guard
+			and not robot.knockedUntil
+			and not robot.brain.companion
+		then
+			table.insert(list, robot)
+		end
+	end
+	return list
+end
+
+-- Befriended: its brain takes orders from now on, and its eyes turn blue-white.
+function Robots.befriend(robot: Robot)
+	if robot.dead or robot.brain.companion then
+		return
+	end
+	RobotBrain.befriend(robot.brain, os.clock())
+	robot.grudge, robot.shooter = nil, nil
+	robot.watching, robot.stareSince = false, nil
+	robot.studySpot, robot.wander = nil, nil
+	robot.brain.errand = nil
+	dress(robot)
+end
+
+-- Let go: its own mind again (hunting, at night), red eyes, nothing on its head.
+function Robots.release(robot: Robot)
+	if robot.dead or not robot.brain.companion then
+		return
+	end
+	RobotBrain.release(robot.brain, DayNight.phase(), os.clock())
+	robot.lookFor, robot.carryFn = nil, nil
+	robot.ownerId, robot.bonded, robot.wants = nil, false, nil
+	Robots.attach(robot, "ghost", nil)
+	Robots.attach(robot, "badge", nil)
+	robot.waypoints, robot.goal, robot.pathFor = {}, nil, nil
+	dress(robot)
+end
+
+-- Who it belongs to, whether it's bonded and what it asks for, shown on the model for clients.
+function Robots.setCompanion(robot: Robot, ownerId: number?, bonded: boolean, wants: string?)
+	if robot.ownerId == ownerId and robot.bonded == bonded and robot.wants == wants then
+		return
+	end
+	robot.ownerId, robot.bonded, robot.wants = ownerId, bonded, wants
+	local model = robot.model
+	model:SetAttribute("Owner", ownerId)
+	model:SetAttribute("Bonded", bonded or nil)
+	model:SetAttribute("Wants", wants)
+end
+
+-- Something it holds up (the wanted item's ghost) or wears on its head (its owner's badge). It is
+-- moved with the robot and destroyed with it. nil takes the current one off.
+function Robots.attach(robot: Robot, slot: "ghost" | "badge", model: Model?)
+	local current = if slot == "ghost" then robot.ghost else robot.badge
+	if current == model then
+		return
+	end
+	if current then
+		current:Destroy()
+	end
+	if slot == "ghost" then
+		robot.ghost = model
+	else
+		robot.badge = model
+	end
+	if model then
+		model.Parent = folder
+		place(robot)
+	end
+end
+
+-- Where to go, how fast, in which pose, facing and looking where. Goal nil stands still.
+export type Order = {
+	goal: Vector3?,
+	speed: ("walk" | "chase")?,
+	pose: string,
+	face: Vector3?,
+	look: Vector3?,
+}
+function Robots.drive(robot: Robot, order: Order)
+	RobotBrain.steer(robot.brain, {
+		goal = if order.goal then { x = order.goal.X, z = order.goal.Z } else nil,
+		speed = order.speed,
+		pose = order.pose,
+		face = if order.face then { x = order.face.X, z = order.face.Z } else nil,
+	})
+	robot.lookFor = order.look
+end
+
+-- Forget the current path so the next goal update plans a new one round whatever was in the way.
+function Robots.repath(robot: Robot)
+	robot.pathFor = nil
+	robot.pathAt = -math.huge
+	robot.waypoints = {}
+end
+
+-- A wall stopped it within the last `within` seconds.
+function Robots.blocked(robot: Robot, within: number): boolean
+	return os.clock() - robot.blockedAt <= within
+end
+
+-- Picks a loose prop up and holds it in front (no player can grab it out of its hands). False if
+-- something else has it.
+function Robots.hold(robot: Robot, prop: PVInstance): boolean
+	if robot.carrying or claimed[prop] or not prop:IsDescendantOf(workspace) then
+		return false
+	end
+	if prop:GetAttribute("CarriedBy") ~= nil or prop:GetAttribute("PlacedBy") ~= nil then
+		return false
+	end
+	pickUp(robot, { instance = prop, kind = "prop", position = prop:GetPivot().Position })
+	return robot.carrying ~= nil
+end
+
+function Robots.letGo(robot: Robot, position: Vector3)
+	dropCarried(robot, position)
+end
+
+function Robots.carried(robot: Robot): PVInstance?
+	return robot.carrying and robot.carrying.instance
+end
+
+-- Someone else (a robot or a player) has hold of it, or it's spoken for.
+function Robots.isClaimed(prop: Instance): boolean
+	return claimed[prop] ~= nil
+end
+
+-- Hauling a fort piece: fn holds it every time the robot is placed.
+function Robots.carryWith(robot: Robot, fn: ((Robot) -> ())?)
+	robot.carryFn = fn
+end
+
+function Robots.isDown(robot: Robot): boolean
+	return robot.knockedUntil ~= nil
+end
+
+-- Keeps a knocked-down robot down for `seconds` from now.
+function Robots.keepDown(robot: Robot, seconds: number)
+	if not robot.knockedUntil then
+		return
+	end
+	robot.knockedUntil = os.clock() + seconds
+	RobotBrain.disable(robot.brain, robot.knockedUntil)
+end
+
+-- Repaired: up again right now, with no grudge.
+function Robots.standUp(robot: Robot)
+	if not robot.knockedUntil then
+		return
+	end
+	robot.knockedUntil = nil
+	robot.damage = 0
+	robot.grudge, robot.shooter = nil, nil
+	robot.brain.disabledUntil = -math.huge
+	place(robot)
+	fxRemote:FireAllClients(robot.model, "reboot", robot.position)
+end
+
+-- Called with (robot, shooter, knockedDown) after every gun hit.
+function Robots.onShot(listener: (Robot, any, boolean) -> ())
+	table.insert(shotListeners, listener)
+end
+
+-- Its room's doorway, just inside, and the way out. nil when its room has no door.
+function Robots.doorway(robot: Robot, inset: number): (Vector3?, Vector3?)
+	local room = robot.room
+	local door = room and room.doors and room.doors[1]
+	if not room or not door then
+		return nil, nil
+	end
+	local at, out = RobotRooms.doorPost(room, door, inset)
+	local spot = onFloor(Warehouse.toWorld(at.x, at.z))
+	return spot, Vector3.new(out.x, 0, out.z)
+end
+
+-- An awake robot of the pack (not befriended, not down) within range has it in plain sight.
+function Robots.scoutSees(robot: Robot, range: number): boolean
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { folder, stashFolder }
+	local body = robot.position + Vector3.yAxis * sense.ChestHeight
+	for _, other in robots do
+		if
+			other ~= robot
+			and not other.dead
+			and not other.knockedUntil
+			and not other.brain.companion
+			and other.brain.state ~= "stalled"
+			and flatDistance(other.position, robot.position) <= range
+		then
+			local eye = other.position + Vector3.yAxis * sense.EyeHeight
+			if workspace:Raycast(eye, body - eye, params) == nil then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+-- What Grab's placement check needs from a body, made up for a robot: a root at hip height whose
+-- feet are on the floor, and eyes just in front of its face.
+function Robots.body(robot: Robot): { root: any, humanoid: any, eye: Vector3 }
+	local hip = robot.position + Vector3.yAxis * 3
+	local root = {
+		Position = hip,
+		CFrame = CFrame.lookAt(hip, hip + robot.facing),
+		Size = Vector3.new(2, 2, 1),
+		Parent = robot.model,
+	}
+	return {
+		root = root,
+		humanoid = { HipHeight = 2 },
+		eye = robot.position + Vector3.yAxis * sense.EyeHeight + robot.facing,
+	}
 end
 
 function Robots.Init()

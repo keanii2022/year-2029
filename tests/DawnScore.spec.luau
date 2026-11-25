@@ -75,4 +75,15 @@ return {
 		expect(lines[1].name).toBe("Medkit")
 		expect(lines[2].name).toBe("Cells")
 	end,
+	["a robot that made it through the night pays a small bonus"] = function()
+		local withRobot = night(1)
+		withRobot.robotMadeIt = true
+		local robotRules = table.clone(rules)
+		robotRules.RobotBonus = 6
+		local paid = DawnScore.payout(withRobot, robotRules)
+		expect(paid.robot).toBe(6)
+		expect(paid.total).toBe(16)
+		expect(DawnScore.payout(night(1), robotRules).robot).toBe(0)
+		expect(DawnScore.payout(withRobot, rules).robot).toBe(0)
+	end,
 }

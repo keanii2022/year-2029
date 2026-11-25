@@ -35,4 +35,16 @@ return {
 		expect(distance).toBe(4)
 		expect((DogGuard.nearest({}))).toBe(nil)
 	end,
+	["its owner's robot companion is never bitten, a pack robot is"] = function()
+		expect(DogGuard.biteable(7, 7, false)).toBeFalsy()
+		expect(DogGuard.biteable(7, 7, true)).toBeFalsy()
+		expect(DogGuard.biteable(nil, 7, true)).toBeFalsy()
+		expect(DogGuard.biteable(nil, 7, false)).toBeTruthy()
+		expect(DogGuard.biteable(9, 7, false)).toBeTruthy()
+	end,
+	["it growls at a befriended robot until it's bonded"] = function()
+		expect(DogGuard.growlsAt(true, false)).toBeTruthy()
+		expect(DogGuard.growlsAt(true, true)).toBeFalsy()
+		expect(DogGuard.growlsAt(false, false)).toBeFalsy()
+	end,
 }

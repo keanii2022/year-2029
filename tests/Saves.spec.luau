@@ -224,7 +224,7 @@ return {
 			audio = { master = 0.5, music = 0.2, effects = 1, voice = 1, gentle = true },
 		}, rules)
 		expect(problem).toBe(nil)
-		expect(data.version).toBe(5)
+		expect(data.version).toBe(Saves.VERSION)
 		expect(data.tokens).toBe(12)
 		expect(data.streak.days).toBe(4)
 		expect(data.files[1]).toBe("f1")
@@ -237,5 +237,27 @@ return {
 		expect(Saves.load({ version = 5, dog = { level = 9.7, day = 20001 } }, rules).dog.level).toBe(3)
 		expect(Saves.load({ version = 5, dog = { level = -2, day = 5 } }, rules).dog.level).toBe(0)
 		expect(Saves.load({ version = 5, dog = "good boy" }, rules).dog.day).toBe(0)
+	end,
+	["a version 4 save migrates to 6 with no robot rapport, keeping everything else"] = function()
+		local data = Saves.load({
+			version = 5,
+			tokens = 30,
+			audio = { master = 0.5, music = 1, effects = 1, voice = 1, gentle = true },
+		}, rules)
+		expect(data.version).toBe(Saves.VERSION)
+		expect(data.tokens).toBe(30)
+		expect(data.audio.master).toBe(0.5)
+		expect(data.rapport.stage).toBe(0)
+		expect(data.rapport.at).toBe(0)
+	end,
+	["robot rapport is cleaned"] = function()
+		local data = Saves.load({ version = 6, rapport = { stage = 9, at = -5 } }, rules)
+		expect(data.rapport.stage).toBe(4)
+		expect(data.rapport.at).toBe(0)
+		expect(Saves.load({ version = 6, rapport = "bonded" }, rules).rapport.stage).toBe(0)
+		expect(Saves.load({ version = 6, rapport = { stage = 3.7, at = 1700000000 } }, rules).rapport.stage).toBe(
+			3
+		)
+		expect(Saves.default().rapport.stage).toBe(0)
 	end,
 }

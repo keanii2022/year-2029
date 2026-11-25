@@ -183,6 +183,11 @@ local function turnHeads(dt: number)
 		head.yaw = RobotMotion.turnHead(head.yaw, target, dt, motion.HeadSpeed, motion.HeadEase)
 		local left = math.abs(target - head.yaw)
 		local tilt = if left < 3 then RobotMotion.tilt(now, head.seed, motion.Tilt) else 0
+		-- a curious companion tilts its head right over at you (Systems/Companion)
+		local curious = model:GetAttribute("HeadTilt")
+		if type(curious) == "number" then
+			tilt += curious
+		end
 		head.tilt += (tilt - head.tilt) * math.min(1, dt * 6)
 		head.writing = true
 		head.motor.C0 = head.base

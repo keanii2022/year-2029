@@ -8,6 +8,8 @@
 -- A hunter that loses you searches where it saw you last and a few spots round it; one that spots
 -- you freezes and stares for a moment first, then calls the others, who rush to cut you off (answerCall).
 -- Any robot hit by an EMP: disabled until it wears off.
+-- A befriended robot (Systems/Companion) is in "companion": it ignores night, calls and errands and
+-- goes where its order says until it's released.
 local RobotChores = if script then require(script.Parent.RobotChores) else require("./RobotChores")
 local RobotSenses = if script then require(script.Parent.RobotSenses) else require("./RobotSenses")
 
@@ -25,6 +27,7 @@ export type State =
 	| "sweep"
 	| "investigate"
 	| "errand"
+	| "companion"
 export type Point = { x: number, z: number }
 export type Errand = { x: number, z: number, face: Point?, chore: string, workSeconds: number }
 export type Brain = {
@@ -41,7 +44,11 @@ export type Brain = {
 	rushing: boolean, -- investigating at a run: answering a call or chasing down where you vanished
 	searchesLeft: number, -- more spots to check near the last sighting before it gives up
 	stareUntil: number, -- a hunter that just spotted you freezes and stares until then, then goes
+	companion: boolean, -- befriended: driven by order, not by what it senses
+	order: Order?,
 }
+-- What a befriended robot is told to do: walk to goal (or stand), in pose, facing face.
+export type Order = { goal: Point?, speed: ("walk" | "chase")?, pose: string, face: Point? }
 export type Seen = { id: any, x: number, z: number, distance: number, range: number }
 export type Loose = { id: any, distance: number }
 export type Input = {
@@ -57,7 +64,7 @@ export type Input = {
 	loose: Loose?,
 	roll: number?, -- 0..1 from the caller, for how long a stare lasts
 }
-export type Goal = "home" | "focus" | "loose" | "wander" | "study" | "errand"
+export type Goal = "home" | "focus" | "loose" | "wander" | "study" | "errand" | "order"
 export type Intent = {
 	goal: Goal?,
 	speed: ("walk" | "chase")?,
@@ -89,6 +96,8 @@ function RobotBrain.new(role: Role, phase: string, now: number): Brain
 		rushing = false,
 		searchesLeft = 0,
 		stareUntil = -math.huge,
+		companion = false,
+		order = nil,
 	}
 end
 
@@ -124,13 +133,39 @@ function RobotBrain.sendOnErrand(brain: Brain, errand: Errand, phase: string, no
 	return true
 end
 
+-- Befriended: from now on it does what its order says.
+function RobotBrain.befriend(brain: Brain, now: number)
+	calm(brain)
+	brain.companion = true
+	brain.errand = nil
+	brain.order = nil
+	if brain.state ~= "disabled" then
+		enter(brain, "companion", now)
+	end
+end
+
+-- Let go again: back to its own mind, hunting if it's night.
+function RobotBrain.release(brain: Brain, phase: string, now: number)
+	brain.companion = false
+	brain.order = nil
+	calm(brain)
+	if brain.state ~= "disabled" then
+		local awake = phase == "Night" or brain.role == "prowler"
+		enter(brain, if awake then "sweep" else "return", now)
+	end
+end
+
+function RobotBrain.steer(brain: Brain, order: Order?)
+	brain.order = order
+end
+
 function RobotBrain.disable(brain: Brain, untilTime: number)
 	brain.disabledUntil = math.max(brain.disabledUntil, untilTime)
 end
 
 -- Lights on: chore bots head home with whatever they carry. Lights out: everyone sweeps.
 function RobotBrain.phaseChanged(brain: Brain, phase: string, now: number)
-	if brain.state == "disabled" then
+	if brain.state == "disabled" or brain.companion then
 		return
 	end
 	if phase == "Night" then
@@ -184,7 +219,12 @@ end
 
 -- Something made it angry (it got shot): it goes straight for seen, no slow notice first.
 function RobotBrain.provoke(brain: Brain, seen: Seen, now: number)
-	if now < brain.disabledUntil or brain.state == "disabled" or brain.state == "stalled" then
+	if
+		now < brain.disabledUntil
+		or brain.state == "disabled"
+		or brain.state == "stalled"
+		or brain.companion
+	then
 		return
 	end
 	startChase(brain, seen, now)
@@ -410,6 +450,22 @@ function RobotBrain.update(brain: Brain, input: Input, settings: any, now: numbe
 	if brain.state == "disabled" then
 		local awake = isNight or brain.role == "prowler"
 		enter(brain, if awake then "sweep" elseif brain.role == "hunter" then "stalled" else "return", now)
+	end
+
+	if brain.companion then
+		if brain.state ~= "companion" then
+			enter(brain, "companion", now)
+		end
+		local order = brain.order
+		if not order then
+			return { pose = "idle" }
+		end
+		return {
+			goal = if order.goal then "order" else nil,
+			speed = if order.goal then order.speed or "walk" else nil,
+			pose = order.pose,
+			face = order.face,
+		}
 	end
 
 	if brain.role == "hunter" and not isNight then
