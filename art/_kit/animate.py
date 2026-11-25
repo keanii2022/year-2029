@@ -42,7 +42,8 @@ H = hi.z - lo.z
 
 CRITTER = NAME in ("pigeon", "rat", "moth")
 KID = "lost_kid" in NAME
-MANNEQUIN = "mannequin" in NAME
+MANNEQUIN = "mannequin" in NAME or NAME == "sorter_decoy"
+SORTER = NAME == "sorter"  # a robot built into a mannequin: hunter moves plus the mannequin freeze poses
 DOG = "Body" in names and not CRITTER
 if CRITTER:
     ROOT = "Body"
@@ -597,11 +598,13 @@ elif DOG:
              ("bark", dog_bark, 36, False), ("bite", dog_bite, 24, False)]
 else:
     CLIPS = [("idle", idle, 60, True), ("walk", walk, 32, True), ("chase", chase, 20 if not CRAWLER else 14, True), ("grab", grab, 30, False)]
-    if not HUNTER:
+    if not HUNTER and not SORTER:
         CLIPS.append(("study", study, 90, True))
     CLIPS.append(("scan", scan, 64, True))
-    if HUNTER:
+    if HUNTER or SORTER:
         CLIPS += [("stall", stall, 90, True), ("wake", wake, 30, False)]
+    if SORTER:  # same names as sorter_decoy's, so a real one and a decoy can hold the same pose
+        CLIPS += [(n, mq_pose(n), 12, False) for n in ("stand", "reach", "turn", "crouch", "face")]
 
 # ---------- key the clips ----------
 data = {"model": NAME, "fps": FPS,

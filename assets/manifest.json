@@ -13228,6 +13228,513 @@
    "screenId": null
   },
   {
+   "name": "sorter",
+   "group": "robots",
+   "fbx": "art/robots/sorter/sorter.fbx",
+   "texture": "art/robots/sorter/sorter_color.png",
+   "screen": null,
+   "clips": [
+    "chase",
+    "crouch",
+    "face",
+    "grab",
+    "idle",
+    "reach",
+    "scan",
+    "stall",
+    "stand",
+    "turn",
+    "wake",
+    "walk"
+   ],
+   "size": [
+    1.662,
+    5.599,
+    0.783
+   ],
+   "parts": [
+    {
+     "name": "Extra",
+     "center": [
+      0.0,
+      5.2,
+      0.265
+     ],
+     "size": [
+      0.395,
+      0.515,
+      0.039
+     ],
+     "pivot": [
+      -0.135,
+      5.24,
+      0.285
+     ]
+    },
+    {
+     "name": "Forearm",
+     "center": [
+      -0.714,
+      3.244,
+      0.013
+     ],
+     "size": [
+      0.234,
+      0.902,
+      0.293
+     ],
+     "pivot": [
+      -0.7,
+      3.6,
+      -0.02
+     ]
+    },
+    {
+     "name": "Hand",
+     "center": [
+      -0.74,
+      2.527,
+      0.091
+     ],
+     "size": [
+      0.17,
+      0.546,
+      0.277
+     ],
+     "pivot": [
+      -0.74,
+      2.8,
+      0.07
+     ]
+    },
+    {
+     "name": "Head",
+     "center": [
+      -0.0,
+      5.17,
+      0.021
+     ],
+     "size": [
+      0.58,
+      0.86,
+      0.683
+     ],
+     "pivot": [
+      0.0,
+      4.76,
+      0.0
+     ]
+    },
+    {
+     "name": "LeftForearm",
+     "center": [
+      0.714,
+      3.244,
+      0.013
+     ],
+     "size": [
+      0.234,
+      0.902,
+      0.293
+     ],
+     "pivot": [
+      0.7,
+      3.6,
+      -0.02
+     ]
+    },
+    {
+     "name": "LeftHand",
+     "center": [
+      0.74,
+      2.527,
+      0.091
+     ],
+     "size": [
+      0.17,
+      0.546,
+      0.277
+     ],
+     "pivot": [
+      0.74,
+      2.8,
+      0.07
+     ]
+    },
+    {
+     "name": "LeftShin",
+     "center": [
+      0.25,
+      0.803,
+      0.092
+     ],
+     "size": [
+      0.302,
+      1.605,
+      0.536
+     ],
+     "pivot": [
+      0.25,
+      1.48,
+      -0.02
+     ]
+    },
+    {
+     "name": "LeftThigh",
+     "center": [
+      0.25,
+      2.107,
+      -0.0
+     ],
+     "size": [
+      0.416,
+      1.445,
+      0.394
+     ],
+     "pivot": [
+      0.25,
+      2.72,
+      0.0
+     ]
+    },
+    {
+     "name": "LeftUpperArm",
+     "center": [
+      0.614,
+      4.08,
+      -0.0
+     ],
+     "size": [
+      0.404,
+      1.1,
+      0.337
+     ],
+     "pivot": [
+      0.6,
+      4.48,
+      0.0
+     ]
+    },
+    {
+     "name": "Shin",
+     "center": [
+      -0.25,
+      0.803,
+      0.092
+     ],
+     "size": [
+      0.302,
+      1.605,
+      0.536
+     ],
+     "pivot": [
+      -0.25,
+      1.48,
+      -0.02
+     ]
+    },
+    {
+     "name": "Thigh",
+     "center": [
+      -0.25,
+      2.107,
+      -0.0
+     ],
+     "size": [
+      0.416,
+      1.445,
+      0.394
+     ],
+     "pivot": [
+      -0.25,
+      2.72,
+      0.0
+     ]
+    },
+    {
+     "name": "Torso",
+     "center": [
+      0.0,
+      3.665,
+      -0.0
+     ],
+     "size": [
+      1.272,
+      2.21,
+      0.783
+     ],
+     "pivot": [
+      0.0,
+      2.72,
+      0.0
+     ]
+    },
+    {
+     "name": "UpperArm",
+     "center": [
+      -0.614,
+      4.08,
+      -0.0
+     ],
+     "size": [
+      0.404,
+      1.1,
+      0.337
+     ],
+     "pivot": [
+      -0.6,
+      4.48,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
+   "name": "sorter_decoy",
+   "group": "robots",
+   "fbx": "art/robots/sorter_decoy/sorter_decoy.fbx",
+   "texture": "art/robots/sorter_decoy/sorter_decoy_color.png",
+   "screen": null,
+   "clips": [
+    "crouch",
+    "face",
+    "reach",
+    "stand",
+    "turn"
+   ],
+   "size": [
+    1.662,
+    5.599,
+    0.783
+   ],
+   "parts": [
+    {
+     "name": "Forearm",
+     "center": [
+      -0.714,
+      3.244,
+      0.013
+     ],
+     "size": [
+      0.234,
+      0.902,
+      0.293
+     ],
+     "pivot": [
+      -0.7,
+      3.6,
+      -0.02
+     ]
+    },
+    {
+     "name": "Hand",
+     "center": [
+      -0.74,
+      2.527,
+      0.091
+     ],
+     "size": [
+      0.17,
+      0.546,
+      0.277
+     ],
+     "pivot": [
+      -0.74,
+      2.8,
+      0.07
+     ]
+    },
+    {
+     "name": "Head",
+     "center": [
+      -0.0,
+      5.17,
+      0.021
+     ],
+     "size": [
+      0.58,
+      0.86,
+      0.683
+     ],
+     "pivot": [
+      0.0,
+      4.76,
+      0.0
+     ]
+    },
+    {
+     "name": "LeftForearm",
+     "center": [
+      0.714,
+      3.244,
+      0.013
+     ],
+     "size": [
+      0.234,
+      0.902,
+      0.293
+     ],
+     "pivot": [
+      0.7,
+      3.6,
+      -0.02
+     ]
+    },
+    {
+     "name": "LeftHand",
+     "center": [
+      0.74,
+      2.527,
+      0.091
+     ],
+     "size": [
+      0.17,
+      0.546,
+      0.277
+     ],
+     "pivot": [
+      0.74,
+      2.8,
+      0.07
+     ]
+    },
+    {
+     "name": "LeftShin",
+     "center": [
+      0.25,
+      0.803,
+      0.092
+     ],
+     "size": [
+      0.302,
+      1.605,
+      0.536
+     ],
+     "pivot": [
+      0.25,
+      1.48,
+      -0.02
+     ]
+    },
+    {
+     "name": "LeftThigh",
+     "center": [
+      0.25,
+      2.107,
+      -0.0
+     ],
+     "size": [
+      0.416,
+      1.445,
+      0.394
+     ],
+     "pivot": [
+      0.25,
+      2.72,
+      0.0
+     ]
+    },
+    {
+     "name": "LeftUpperArm",
+     "center": [
+      0.614,
+      4.08,
+      -0.0
+     ],
+     "size": [
+      0.404,
+      1.1,
+      0.337
+     ],
+     "pivot": [
+      0.6,
+      4.48,
+      0.0
+     ]
+    },
+    {
+     "name": "Shin",
+     "center": [
+      -0.25,
+      0.803,
+      0.092
+     ],
+     "size": [
+      0.302,
+      1.605,
+      0.536
+     ],
+     "pivot": [
+      -0.25,
+      1.48,
+      -0.02
+     ]
+    },
+    {
+     "name": "Thigh",
+     "center": [
+      -0.25,
+      2.107,
+      -0.0
+     ],
+     "size": [
+      0.416,
+      1.445,
+      0.394
+     ],
+     "pivot": [
+      -0.25,
+      2.72,
+      0.0
+     ]
+    },
+    {
+     "name": "Torso",
+     "center": [
+      0.0,
+      3.665,
+      -0.0
+     ],
+     "size": [
+      1.272,
+      2.21,
+      0.783
+     ],
+     "pivot": [
+      0.0,
+      2.72,
+      0.0
+     ]
+    },
+    {
+     "name": "UpperArm",
+     "center": [
+      -0.614,
+      4.08,
+      -0.0
+     ],
+     "size": [
+      0.404,
+      1.1,
+      0.337
+     ],
+     "pivot": [
+      -0.6,
+      4.48,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
    "name": "blueprint",
    "group": "story",
    "fbx": "art/story/blueprint/blueprint.fbx",

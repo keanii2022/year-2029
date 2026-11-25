@@ -17,7 +17,7 @@ return {
 			end
 			expect(math.max(entry.size[1], entry.size[2], entry.size[3]) > 0.1).toBeTruthy()
 		end
-		expect(count).toBe(323)
+		expect(count).toBe(325)
 	end,
 	["index groups models by art folder in name order"] = function()
 		expect(index.models.fridge.group).toBe("furniture")
