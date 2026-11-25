@@ -43,17 +43,26 @@ return {
 	},
 
 	ItemNudge = {
-		Keyboard = "{=1} - {=9} or {=Scroll} picks what you hold   {Backpack} Backpack",
-		Gamepad = "{HotbarPrevious} {HotbarNext} picks what you hold   {Backpack} Backpack",
-		Touch = "Tap the bar to pick what you hold   {Backpack} Backpack",
+		Keyboard = "{=1} - {=6} or {=Scroll} picks what you hold   {Backpack} Bag",
+		Gamepad = "{HotbarPrevious} {HotbarNext} picks what you hold   {Backpack} Bag",
+		Touch = "Tap the bar to pick what you hold   {Backpack} Bag",
 	},
-	BackpackTitle = "BACKPACK",
+	BackpackTitle = "BAG",
 	BackpackEmpty = "Nothing in here yet. Loot the shelves.",
+	BackpackFull = "BAG FULL", -- spray red beside the stack count when every stack is used
+	BackpackQuickTitle = "QUICK SLOTS",
+	BackpackToBag = "TO BAG",
+	BackpackDrop = "DROP",
+	BackpackDropAgain = "AGAIN TO DROP",
+	BackpackDropSeconds = 2, -- the second drop press has this long to land
+	-- %d: the hotbar number of the quick slot the gamepad would put into
 	BackpackFooter = {
-		Keyboard = "{=LMB} Hold it   {Backpack} Close",
-		Gamepad = "{=Cross} Hold it   {Backpack} {=Circle} Close",
-		Touch = "Tap one to hold it",
+		Keyboard = "Hover + {=3} - {=6} or drag: quick slot   {=X} Drop   {=LMB} Pick   {Backpack} {=Esc} Close",
+		Gamepad = "{=Cross} Put in slot %d   {=Square} Next slot   {=R1} Drop   {=Circle} Close",
+		Touch = "Tap an item, then a quick slot   {Backpack} Close",
 	},
+	InBagToast = "%s: in your bag", -- every quick slot was taken
+	InBagSeconds = 2.5,
 	HeldHint = "{Fire} %s", -- flashed when you pick a non-gun item: "{Fire} Eat"
 	HeldHintSeconds = 3,
 
@@ -100,8 +109,8 @@ return {
 			},
 			right = {
 				{ "HANDS" },
-				{ "{=1} - {=9} {=Scroll}", "Pick what you hold" },
-				{ "{Backpack}", "Backpack: everything you carry" },
+				{ "{=1} - {=6} {=Scroll}", "Pick what you hold" },
+				{ "{Backpack}", "Bag. Hover an item + 3 - 6: quick slot" },
 				{ "{Fire}", "Use it: fire, eat, throw, cuff" },
 				{ "{Fire}", "Empty hands: grab furniture. Hold: pry" },
 				{ "{Grab}", "Grab shortcut, empties your hands" },
@@ -131,7 +140,7 @@ return {
 			right = {
 				{ "{Fire}", "Use it. Empty hands: grab" },
 				{ "{HotbarNext}", "Next item" },
-				{ "{Backpack}", "Backpack" },
+				{ "{Backpack}", "Bag: fill your quick slots" },
 				{ "{Callout}", "Call out. Hold: pick" },
 				{ "{Jump}", "Jump. Hidden: hold breath" },
 				{ "{Use}", "Use. Nothing there: reload" },
@@ -159,7 +168,7 @@ return {
 				{ "{Use}", "Open, sit, hide, switch on" },
 				{ "{Flashlight}", "Flashlight" },
 				{ "{=Tap bar}", "Pick what you hold" },
-				{ "{Backpack}", "Everything you carry" },
+				{ "{Backpack}", "Bag. Tap item, tap slot" },
 				{ "{Aim} {Reload}", "Show while you hold a gun" },
 				{ "{=SPIN} {=TIP} {=ROLL}", "Carrying: turn it every way" },
 				{ "{CarryCloser} {CarryFarther}", "Carrying: closer, farther" },

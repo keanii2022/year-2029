@@ -1,5 +1,7 @@
 -- The server's copy of what every player carries, plus loot piles in the world.
 -- Other systems go through this API; clients only get a read-only "InventoryChanged" snapshot.
+-- Also owns each player's quick slots (Logic/QuickSlots): which bag items sit on the hotbar.
+-- They live for the session, so a respawn puts things you pick back up into their old slots.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -8,6 +10,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local InventoryLogic = require(ReplicatedStorage.Shared.Logic.Inventory)
 local Net = require(ReplicatedStorage.Shared.Net)
+local QuickSlots = require(ReplicatedStorage.Shared.Logic.QuickSlots)
 
 type Stack = InventoryLogic.Stack
 
@@ -17,8 +20,11 @@ local Inventory = {}
 Inventory.Items = InventoryItems
 
 local bags: { [Player]: { Stack } } = {}
+local quicks: { [Player]: QuickSlots.Quick } = {}
+local lastDrop: { [Player]: number } = {}
 local piles: { [Model]: { Stack } } = {}
 local changedRemote: RemoteEvent
+local quickRemote: RemoteEvent
 local pilesFolder: Folder
 
 local function bagOf(player: Player): { Stack }
@@ -30,9 +36,47 @@ local function bagOf(player: Player): { Stack }
 	return bag
 end
 
+local function quickOf(player: Player): QuickSlots.Quick
+	local quick = quicks[player]
+	if not quick then
+		quick = QuickSlots.new(Config.Hotbar.QuickSlots)
+		quicks[player] = quick
+	end
+	return quick
+end
+
+local function groupOf(itemId: string): string?
+	return QuickSlots.groupOf(itemId, Config.Hotbar.Slots, Config.Supplies.Uses, settings.Blasters)
+end
+
 local function sync(player: Player)
 	if player.Parent then
 		changedRemote:FireClient(player, InventoryLogic.totals(bagOf(player)))
+	end
+end
+
+-- inBag: an item that just went to the bag because every quick slot was taken (the client toasts it)
+local function syncQuick(player: Player, inBag: string?)
+	if player.Parent then
+		quickRemote:FireClient(player, quickOf(player), inBag)
+	end
+end
+
+-- Puts newly carried items into a free quick slot; anything that can't fit there gets toasted.
+local function placeQuick(player: Player, itemIds: { string })
+	local quick = quickOf(player)
+	local carried =
+		QuickSlots.carried(bagOf(player), Config.Hotbar.Slots, Config.Supplies.Uses, settings.Blasters)
+	local before = table.concat(quick, "|")
+	local inBag: string? = nil
+	for _, itemId in itemIds do
+		local group = groupOf(itemId)
+		if group and not QuickSlots.autoAssign(quick, group, carried) then
+			inBag = itemId
+		end
+	end
+	if inBag or table.concat(quick, "|") ~= before then
+		syncQuick(player, inBag)
 	end
 end
 
@@ -41,6 +85,7 @@ function Inventory.add(player: Player, itemId: string, count: number?): number
 	local added = InventoryLogic.add(bagOf(player), InventoryItems, itemId, count or 1, settings.BaseSlots)
 	if added > 0 then
 		sync(player)
+		placeQuick(player, { itemId })
 	end
 	return added
 end
@@ -87,8 +132,19 @@ local function onPickup(pile: Model, prompt: ProximityPrompt, player: Player)
 	if not contents or not humanoid or humanoid.Health <= 0 then
 		return
 	end
+	local offered = {}
+	for _, entry in contents do
+		table.insert(offered, entry.id)
+	end
 	if InventoryLogic.moveAll(contents, bagOf(player), InventoryItems, settings.BaseSlots) > 0 then
 		sync(player)
+		local taken = {}
+		for _, itemId in offered do
+			if InventoryLogic.count(bagOf(player), itemId) > 0 then
+				table.insert(taken, itemId)
+			end
+		end
+		placeQuick(player, taken)
 	end
 	if #contents == 0 then
 		piles[pile] = nil
@@ -151,16 +207,61 @@ function Inventory.dropAll(player: Player, position: Vector3): Model?
 	return buildPile(groundBelow(position, player.Character), contents)
 end
 
+-- Throws every one of an item out of the bag onto the floor in front of the player.
+function Inventory.drop(player: Player, itemId: string): Model?
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local count = InventoryLogic.count(bagOf(player), itemId)
+	if not root or not humanoid or humanoid.Health <= 0 or count <= 0 then
+		return nil
+	end
+	InventoryLogic.remove(bagOf(player), itemId, count)
+	sync(player)
+	local spot = root.Position + root.CFrame.LookVector * 3
+	return buildPile(groundBelow(spot, character), { { id = itemId, count = count } })
+end
+
+-- The bag panel's requests: "put" an item in quick slot n, "clear" slot n, "drop" an item.
+local function onQuickRequest(player: Player, action: any, itemId: any, index: any)
+	local validIndex = type(index) == "number" and index % 1 == 0
+	local validItem = type(itemId) == "string" and InventoryItems[itemId] ~= nil
+	local quick = quickOf(player)
+	if action == "put" and validItem and validIndex and Inventory.has(player, itemId) then
+		local group = groupOf(itemId)
+		if group and QuickSlots.put(quick, index, group) then
+			syncQuick(player)
+		end
+	elseif action == "clear" and validIndex then
+		if QuickSlots.clear(quick, index) then
+			syncQuick(player)
+		end
+	elseif action == "drop" and validItem then
+		local now = os.clock()
+		if now - (lastDrop[player] or 0) >= settings.DropCooldown then
+			lastDrop[player] = now
+			Inventory.drop(player, itemId)
+		end
+	end
+end
+
 function Inventory.Init()
 	changedRemote = Net.event("InventoryChanged")
+	quickRemote = Net.event("QuickSlotsChanged")
+	Net.event("QuickSlotRequest").OnServerEvent:Connect(onQuickRequest)
 	pilesFolder = Instance.new("Folder")
 	pilesFolder.Name = "LootPiles"
 	pilesFolder.Parent = workspace
 
 	-- Clients ask once at start so a snapshot sent before they were listening is never lost.
-	Net.event("InventorySync").OnServerEvent:Connect(sync)
+	Net.event("InventorySync").OnServerEvent:Connect(function(player)
+		sync(player)
+		syncQuick(player)
+	end)
 	Players.PlayerRemoving:Connect(function(player)
 		bags[player] = nil
+		quicks[player] = nil
+		lastDrop[player] = nil
 	end)
 end
 

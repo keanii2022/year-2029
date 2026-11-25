@@ -343,8 +343,9 @@ return {
 	WhizRadius = 4,
 	WhizMinDistance = 6,
 
-	-- Inventory and loot piles.
-	BaseSlots = 10,
+	-- Inventory and loot piles. BaseSlots: stacks the bag holds (every gun is its own stack).
+	BaseSlots = 18,
+	DropCooldown = 0.4, -- seconds between items thrown out of the bag
 	LootPileTag = "LootPile",
 	LootPickupRange = 8,
 	LootPickupHold = 0.6,

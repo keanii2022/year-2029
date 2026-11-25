@@ -9,6 +9,13 @@ local items = {
 }
 
 return {
+	["stacksUsed counts packed stacks from totals"] = function()
+		local bag = {}
+		Inventory.add(bag, items, "Cells", 25, 10)
+		Inventory.add(bag, items, "Gun", 1, 10)
+		expect(Inventory.stacksUsed(Inventory.totals(bag), items)).toBe(#bag)
+		expect(Inventory.stacksUsed({}, items)).toBe(0)
+	end,
 	["add fills existing stacks before new slots"] = function()
 		local bag = {}
 		expect(Inventory.add(bag, items, "Cells", 7, 5)).toBe(7)

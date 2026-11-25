@@ -80,6 +80,16 @@ function Inventory.totals(stacks: { Stack }): { Stack }
 	return result
 end
 
+-- How many slots a totals list fills. add and remove keep each item's stacks packed, so it's
+-- every item's count over its stack size, rounded up.
+function Inventory.stacksUsed(totals: { Stack }, items: Items): number
+	local used = 0
+	for _, entry in totals do
+		used += math.ceil(entry.count / definition(items, entry.id).stackSize)
+	end
+	return used
+end
+
 -- The single most valuable item carried; ties go to the earlier slot.
 function Inventory.bestItem(stacks: { Stack }, items: Items): string?
 	local bestId, bestValue = nil, -math.huge
