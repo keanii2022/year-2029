@@ -144,6 +144,21 @@ return {
 	RoomLootChance = 0.7,
 	RoomDepthBonus = 0.15,
 
+	-- Every installation also gets InstallationLootCount guaranteed pickups by its furniture, rolled
+	-- from this better list (weights at full depth), plus the guarded stash crate (Config.Containers)
+	InstallationLootCount = { 2, 4 },
+	InstallationLootReach = 3.5, -- studs out from the furniture
+	InstallationLoot = {
+		{ item = "BlasterCells", model = "ammo_cell", count = { 15, 30 }, near = 10, deep = 10 },
+		{ item = "RationPack", model = "ration_pack", count = { 1, 1 }, near = 7, deep = 7 },
+		{ item = "Medkit", model = "medkit", count = { 1, 1 }, near = 5, deep = 5 },
+		{ item = "Bandage", model = "bandage", count = { 2, 3 }, near = 5, deep = 5 },
+		{ item = "EnergyDrink", model = "energy_drink", count = { 1, 2 }, near = 4, deep = 4 },
+		{ item = "FlashlightBattery", model = "battery", count = { 2, 3 }, near = 4, deep = 4 },
+		{ item = "EmpCharge", model = "emp_charge", count = { 1, 1 }, near = 1, deep = 1 },
+		{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 0.5, deep = 0.5 },
+	},
+
 	PickupTag = "SupplyPickup",
 	PickupRange = 8,
 	PickupHold = 0.3,

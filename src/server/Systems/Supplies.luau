@@ -267,6 +267,25 @@ local function buildPickup(roll: Loot.Roll, spot: Loot.Spot, turn: number)
 	model.Parent = pickupFolder
 end
 
+-- The guaranteed pickups in each installation: by different pieces of furniture, out in front
+local function installationSpots(layout: any, rng: Rng.Rng): { Loot.Spot }
+	local spots = {}
+	local reach = Settings.InstallationLootReach
+	for _, room in layout.rooms do
+		if not room.installation then
+			continue
+		end
+		local items = rng:shuffle(room.items)
+		for n = 1, rng:int(Settings.InstallationLootCount[1], Settings.InstallationLootCount[2]) do
+			local thing = items[n]
+			local x = if thing then thing.x + thing.nx * reach else room.cx + rng:range(-1, 1) * 4
+			local z = if thing then thing.z + thing.nz * reach else room.cz + rng:range(-1, 1) * 4
+			table.insert(spots, { x = x, z = z, depth = 1 })
+		end
+	end
+	return spots
+end
+
 -- Clears every pickup and lays out a fresh set. A newer restock stops an older one mid-way.
 local function restock(seed: number)
 	restockToken += 1
@@ -286,8 +305,13 @@ local function restock(seed: number)
 	for _, spot in Loot.roomSpots(layout, rng, Settings.RoomLootChance, Settings.RoomDepthBonus) do
 		table.insert(spots, spot)
 	end
+	local guaranteed = #spots + 1
+	for _, spot in installationSpots(layout, rng) do
+		table.insert(spots, spot)
+	end
 	for index, spot in spots do
-		local roll = Loot.roll(Settings.Loot, spot.depth, rng)
+		local entries = if index >= guaranteed then Settings.InstallationLoot else Settings.Loot
+		local roll = Loot.roll(entries, spot.depth, rng)
 		if roll then
 			buildPickup(roll, spot, rng:range(0, math.pi * 2))
 		end

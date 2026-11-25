@@ -126,6 +126,44 @@ return {
 			expect(seen[kind]).toBeTruthy()
 		end
 	end,
+	["every installation spills its light out of each hall doorway and hides a stash"] = function()
+		local Installations = require("../src/shared/Logic/WarehouseGenInstallations")
+		local stashes = {}
+		for _, item in layout.loose do
+			if item.name == config.InstallationStash then
+				table.insert(stashes, item)
+			end
+		end
+		for index, room in layout.rooms do
+			local pocket = layout.pockets[index]
+			expect(pocket.kind).toBe(room.kind)
+			expect(type(room.tone)).toBe("string")
+			expect(room.stash ~= nil).toBeTruthy()
+			expect(Rooms.contains(pocket, room.stash.x, room.stash.z, 0)).toBeTruthy()
+			local found = false
+			for _, item in stashes do
+				found = found or (item.x == room.stash.x and item.z == room.stash.z)
+			end
+			expect(found).toBeTruthy()
+			for _, door in pocket.doors do
+				local x, z, nx, nz = Installations.doorway(pocket, door)
+				local pool, frame = false, 0
+				for _, spec in layout.pieces do
+					if spec.spill and math.abs(spec.x - x) < 8 and math.abs(spec.z - z) < 8 then
+						if spec.lamp == `spill_{room.tone}` then
+							-- outside the hall, never inside the dark
+							local out = (spec.x - x) * nx + (spec.z - z) * nz
+							pool = pool or out > 0
+						elseif spec.style == `spill_{room.tone}` then
+							frame += 1
+						end
+					end
+				end
+				expect(pool).toBeTruthy()
+				expect(frame).toBe(3)
+			end
+		end
+	end,
 	["pockets stay inside their zone"] = function()
 		for _, pocket in layout.pockets do
 			local zone = WarehouseGen.zoneAt(layout, (pocket.x0 + pocket.x1) / 2, (pocket.z0 + pocket.z1) / 2)
