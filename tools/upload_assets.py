@@ -268,6 +268,9 @@ def build_manifest(old):
     sounds = []
     sound_dir = os.path.join(ART, "sounds")
     for folder, _, files in sorted(os.walk(sound_dir)):
+        # Raw recordings waiting to be cut and named stay out of the game
+        if os.path.relpath(folder, sound_dir).split(os.sep)[0] == "voice_raw":
+            continue
         for file in sorted(files):
             if file.endswith(".mp3"):
                 name = file[:-4]
