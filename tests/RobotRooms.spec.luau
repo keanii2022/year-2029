@@ -63,6 +63,13 @@ return {
 		expect(#RobotRooms.needHunters(players, { { x = 50, z = 0 } }, 100, 8)).toBe(1)
 		expect(#RobotRooms.needHunters(players, { { x = 50, z = 0 } }, 100, 1)).toBe(0)
 	end,
+	["later nights want more than one hunter near each player"] = function()
+		local players = { { id = "a", x = 0, z = 0 } }
+		local one = { { x = 50, z = 0 } }
+		local two = { { x = 50, z = 0 }, { x = 0, z = 50 } }
+		expect(#RobotRooms.needHunters(players, one, 100, 8, 2)).toBe(1)
+		expect(#RobotRooms.needHunters(players, two, 100, 8, 2)).toBe(0)
+	end,
 	["bigger halls get more robots, inside the range"] = function()
 		expect(RobotRooms.botCount(100 * 100, { 2, 3 }, 3600, 0)).toBe(2)
 		expect(RobotRooms.botCount(40 * 40, { 2, 3 }, 3600, 0)).toBe(2)

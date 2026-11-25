@@ -24,6 +24,7 @@ local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 local LightingController = require(script.Parent.Lighting)
+local RobotDread = require(script.Parent.RobotDread)
 
 local settings = Config.Robots
 local voiceLines = settings.Voice
@@ -47,6 +48,10 @@ type Talker = {
 	chaseSince: number?,
 	eyes: BasePart?,
 	eyeColor: Color3?, -- what the server dressed the eyes in, shown while it isn't suspicious or chasing
+	hum: Sound?,
+	humVolume: number,
+	pendingChase: boolean, -- spotted you but still staring: the chase sounds wait until it goes
+	staring: boolean,
 }
 
 local Robots = {}
@@ -292,6 +297,13 @@ local function footsteps(model: Model, talker: Talker)
 	if not stepSound then
 		return
 	end
+	if model:GetAttribute("Silent") then
+		if talker.stepLoop then
+			talker.stepLoop:Destroy()
+			talker.stepLoop = nil
+		end
+		return
+	end
 	local night = isLoud(model)
 	local volume = if night then sounds.NightStepVolume else sounds.StepVolume
 	local walking = moved > 0.05 and moved < 20 -- a jump that big is a teleport, not a stride
@@ -433,6 +445,37 @@ local function feelDread(target: number, dt: number)
 	end
 end
 
+-- Stop and stare: eyes flare, the hum cuts out, and the chase sounds hold until it goes. The silent
+-- hunter keeps its hum off until it lunges.
+local function stare(model: Model, talker: Talker)
+	local staring = model:GetAttribute("Pose") == "stare"
+	if talker.hum then
+		talker.hum.Volume = if staring or model:GetAttribute("Silent") then 0 else talker.humVolume
+	end
+	if talker.pendingChase and not staring then
+		talker.pendingChase = false
+		if model:GetAttribute("State") == "chase" then
+			startChase(model, talker)
+			popMark(model, "!", settings.ChaseEyeColor)
+			playOnce(talker.body, settings.StateSounds.chase, sounds.CueVolume, isLoud(model))
+		end
+	end
+	if staring == talker.staring then
+		return
+	end
+	talker.staring = staring
+	local eyes = talker.eyes
+	local glow = eyes and eyes:FindFirstChild("EyeGlow")
+	if eyes and staring then
+		eyes.Color = settings.ChaseEyeColor
+	end
+	if glow and glow:IsA("PointLight") then
+		local scale = if staring then hunt.StareGlow else 1 / hunt.StareGlow
+		glow.Brightness *= scale
+		glow.Range *= scale
+	end
+end
+
 local function step(folder: Instance)
 	local now = os.clock()
 	local character = player.Character
@@ -461,6 +504,7 @@ local function step(folder: Instance)
 		if talker then
 			footsteps(model, talker)
 			updateChase(talker, now)
+			stare(model, talker)
 		end
 		local frozen = isFrozen(model)
 		local eyes = model:FindFirstChild(settings.EyePart, true)
@@ -487,7 +531,7 @@ local function step(folder: Instance)
 		end
 	end
 	feelDread(fear, 0.1)
-	LightingController.disturb(fearAt)
+	LightingController.disturb(RobotDread.flickerAt() or fearAt)
 	if nearest and now >= nextLineAt then
 		nextLineAt = now + random:NextNumber(table.unpack(settings.StallLineEvery))
 		sayLine(nearest)
@@ -525,14 +569,19 @@ local function voice(model: Model)
 		chaseSince = nil,
 		eyes = eyePart,
 		eyeColor = if eyePart then eyePart.Color else nil,
+		hum = nil,
+		humVolume = if night then sounds.NightHumVolume else sounds.HumVolume,
+		pendingChase = false,
+		staring = false,
 	}
 	talkers[model] = talker
 	local lastState = model:GetAttribute("State")
-	local hum =
-		soundOn(body, sounds.Hum, if night then sounds.NightHumVolume else sounds.HumVolume, true, night)
+	local hum = soundOn(body, sounds.Hum, talker.humVolume, true, night)
 	if hum then
+		hum.Volume = if model:GetAttribute("Silent") then 0 else talker.humVolume
 		hum:Play()
 	end
+	talker.hum = hum
 	if lastState == "chase" then
 		startChase(model, talker)
 	end
@@ -564,9 +613,9 @@ local function voice(model: Model)
 			say(talker, line)
 		end
 		if state == "chase" and not wasChasing then
-			startChase(model, talker)
-			popMark(model, "!", settings.ChaseEyeColor)
+			talker.pendingChase = true -- step starts the chase once any stare is over
 		elseif state ~= "chase" and wasChasing then
+			talker.pendingChase = false
 			stopChase(talker)
 		end
 		if state == "suspicious" then
@@ -574,7 +623,7 @@ local function voice(model: Model)
 		end
 		tintEyes(talker, state)
 		local cue = settings.StateSounds[state]
-		if cue then
+		if cue and state ~= "chase" then
 			local name = if type(cue) == "table" then cue[random:NextInteger(1, #cue)] else cue
 			playOnce(body, name, sounds.CueVolume, night)
 		end
@@ -602,6 +651,10 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 		sparkBurst(at, 60)
 	elseif kind == "reboot" then
 		playOnce(body, shot.Reboot, sounds.CueVolume, true)
+	elseif kind == "land" then
+		for _, name in settings.Racks.Sounds do
+			playOnce(body, name, settings.Racks.Volume, true)
+		end
 	elseif kind == "lunge" then
 		playFar(body, hunt.LungeSound, hunt.LungeVolume, hunt.LungePitch, settings.NightRollOff)
 	elseif kind == "alert" then

@@ -5,6 +5,9 @@
 -- so nothing here touches physics. Limbs are procedural until the real clips are imported in Studio.
 -- Guns hurt them too (Robots.shot): each hit staggers one, enough knock it down for a while, and it
 -- wakes up hunting whoever shot it. Only the EMP, disruptor and Robots.destroy end one for good.
+-- Dread: heads turn smoothly (clients animate LookAt), walking hunters hold still then burst, a hunter
+-- stares before it chases, nights get harder (Logic/RobotNights), some drop off racks, and now and
+-- then one replays a player's callout from the wrong place (the mimic).
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local PathfindingService = game:GetService("PathfindingService")
@@ -20,10 +23,15 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local RobotBrain = require(ReplicatedStorage.Shared.Logic.RobotBrain)
 local RobotChores = require(ReplicatedStorage.Shared.Logic.RobotChores)
 local RobotHunt = require(ReplicatedStorage.Shared.Logic.RobotHunt)
+local RobotMimic = require(ReplicatedStorage.Shared.Logic.RobotMimic)
+local RobotMotion = require(ReplicatedStorage.Shared.Logic.RobotMotion)
+local RobotNights = require(ReplicatedStorage.Shared.Logic.RobotNights)
 local RobotPoses = require(ReplicatedStorage.Shared.Logic.RobotPoses)
+local RobotRacks = require(ReplicatedStorage.Shared.Logic.RobotRacks)
 local RobotRooms = require(ReplicatedStorage.Shared.Logic.RobotRooms)
 local RobotSenses = require(ReplicatedStorage.Shared.Logic.RobotSenses)
 local RobotWeapons = require(ReplicatedStorage.Shared.Logic.RobotWeapons)
+local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
 local DayNight = require(script.Parent.DayNight)
 local Grab = require(script.Parent.Grab)
 local Interact = require(script.Parent.Interact)
@@ -103,6 +111,13 @@ export type Robot = {
 	searchFrom: Vector3?, -- where it lost them; its searches circle this spot
 	lungeUntil: number, -- bursting forward at Hunt.Lunge.Speed until then
 	lungeReadyAt: number,
+	-- dread
+	burst: RobotMotion.Burst?, -- walking hunters: still or bursting until when
+	staring: boolean, -- froze to stare last tick
+	watch: RobotMotion.Watch, -- a studying robot being stared at
+	silent: boolean, -- tonight's silent hunter: no steps or hum until it lunges
+	perch: { dropAt: number, land: Vector3, dropping: boolean }?, -- on top of a rack, about to drop
+	publishedLook: Vector3?,
 }
 type Alive = { player: Player, character: Model, root: BasePart, humanoid: Humanoid, position: Vector3 }
 
@@ -132,6 +147,15 @@ local shot = settings.Shot
 local prowl = settings.Prowl
 local hunt = settings.Hunt
 local catchFeel = settings.Catch
+local motion = settings.Motion
+local racks = settings.Racks
+local mimic = settings.Mimic
+local threat = RobotNights.threat(1, settings.Nights)
+local mimicRemote: RemoteEvent
+local calls: { RobotMimic.Call } = {}
+local mimicReadyAt = 0
+local huntersTonight = 0
+local silentPick = 0
 local fxRemote: RemoteEvent
 
 local function flat(v: Vector3): Vector3
@@ -641,6 +665,7 @@ local function dress(robot: Robot)
 	model:SetAttribute("RobotType", robot.typeName)
 	model:SetAttribute("Role", robot.role)
 	model:SetAttribute("Night", robot.night)
+	model:SetAttribute("Silent", robot.silent or nil)
 	model:SetAttribute("State", robot.brain.state)
 	model:SetAttribute("Pose", robot.pose)
 end
@@ -724,6 +749,12 @@ local function spawnRobot(
 		searchFrom = nil,
 		lungeUntil = 0,
 		lungeReadyAt = 0,
+		burst = nil,
+		staring = false,
+		watch = RobotMotion.newWatch(),
+		silent = false,
+		perch = nil,
+		publishedLook = nil,
 	}
 	model.Name = typeName
 	dress(robot)
@@ -748,6 +779,7 @@ local function swapModel(robot: Robot, night: boolean)
 	robot.pivotHeight = height
 	robot.night = night
 	robot.lastPoses = {}
+	robot.publishedLook = nil
 	model.Name = robot.typeName
 	dress(robot)
 	place(robot)
@@ -1016,14 +1048,6 @@ local function moveStep(robot: Robot, dt: number)
 	place(robot)
 end
 
--- Head turn (in pose units) that points a still robot's face at target, as far as the neck goes
-local function headTurn(robot: Robot, target: Vector3): number
-	local away = robot.model:GetPivot():VectorToObjectSpace(flat(target - robot.position))
-	local degrees =
-		math.clamp(math.deg(math.atan2(away.X, away.Z)), -watcher.MaxHeadTurn, watcher.MaxHeadTurn)
-	return degrees / Config.Models.MoverDegrees
-end
-
 local WORK_POSES = { sweep = true, restock = true, shelve = true }
 
 local function animate(now: number)
@@ -1042,7 +1066,7 @@ local function animate(now: number)
 		end
 		local limbs = RobotPoses.limbs(limbName, robot.stride, now, robot.moving, progress)
 		if robot.lookAt then
-			limbs.Head = headTurn(robot, robot.lookAt)
+			limbs.Head = 0 -- clients turn it toward LookAt, smoothly, from straight ahead
 		end
 		for part, t in limbs do
 			local last = robot.lastPoses[part]
@@ -1094,6 +1118,8 @@ local function senseRobot(
 	local sightRange = if outOnErrand then math.min(info.sightRange, chores.SightRange) else info.sightRange
 	if robot.role == "prowler" and not night then
 		sightRange *= prowl.SightFactor
+	elseif night then
+		sightRange *= threat.sight
 	end
 	-- the doorway robot hears anyone walking about its room by day
 	local guardEars = robot.guard ~= nil and not night and calmGuard(robot)
@@ -1429,8 +1455,9 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 
 	robot.pose = intent.pose
 	robot.face = if intent.face then onFloor(Vector3.new(intent.face.x, 0, intent.face.z)) else nil
+	local hunterAtNight = DayNight.isNight() and robot.role ~= "chore"
 	robot.speed = if intent.speed == "chase"
-		then info.chaseSpeed
+		then RobotNights.chaseSpeed(info, hunterAtNight, threat.speed)
 		elseif intent.speed == "walk" then info.walkSpeed
 		else 0
 	if robot.grudge and now < robot.grudgeUntil then
@@ -1483,6 +1510,13 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 		walkStraight(robot, goal)
 	else
 		setGoal(robot, goal, now)
+	end
+	-- after the goal is set, so standing still between bursts keeps the path
+	local awake = DayNight.isNight() or robot.role == "prowler"
+	if intent.speed == "walk" and awake and robot.role ~= "chore" then
+		local factor
+		robot.burst, factor = RobotMotion.burst(robot.burst, now, random:NextNumber(), motion.Burst)
+		robot.speed *= factor
 	end
 
 	choreGear(robot)
@@ -1575,6 +1609,113 @@ local function keepApart(robot: Robot)
 	end
 end
 
+-- Where the head looks: clients turn it there smoothly. Only sent when it moves a stud or more.
+local function publishLook(robot: Robot)
+	local look, last = robot.lookAt, robot.publishedLook
+	if look == last or (look and last and (look - last).Magnitude < 1) then
+		return
+	end
+	robot.publishedLook = look
+	robot.model:SetAttribute("LookAt", look)
+end
+
+local function nearestInView(robot: Robot, alive: { Alive }, range: number): Alive?
+	local nearest, nearestDistance = nil, range
+	for _, target in alive do
+		local d = flatDistance(target.position, robot.position)
+		if d <= nearestDistance and lineOfSight(robot, target) then
+			nearest, nearestDistance = target, d
+		end
+	end
+	return nearest
+end
+
+-- Someone looking straight at this robot from close by, with nothing in between.
+local function watchedBy(robot: Robot, alive: { Alive }): Alive?
+	local watched = motion.Watched
+	local at = { x = robot.position.X, z = robot.position.Z }
+	for _, target in alive do
+		local look = target.root.CFrame.LookVector
+		local from = { x = target.position.X, z = target.position.Z }
+		if
+			RobotMotion.looksAt(from, { x = look.X, z = look.Z }, at, watched.Range, watched.Angle)
+			and lineOfSight(robot, target)
+		then
+			return target
+		end
+	end
+	return nil
+end
+
+-- After the brain acted: who the head follows, and a studying robot stared at long enough stops work
+-- and looks back until it's left alone.
+local function lookAround(robot: Robot, alive: { Alive }, seen: RobotBrain.Seen?, dt: number)
+	local brain = robot.brain
+	local phase = DayNight.phase()
+	local awake = phase == "Night" or robot.role == "prowler"
+	robot.lookAt = nil
+	if robot.role == "chore" and brain.state == "study" and phase ~= "Night" then
+		local by = watchedBy(robot, alive)
+		local wasFrozen = robot.watch.frozen
+		RobotMotion.watchStep(robot.watch, by ~= nil, dt, motion.Watched)
+		if robot.watch.frozen then
+			robot.speed = 0
+			robot.pose = "idle"
+			robot.model:SetAttribute("Pose", "idle")
+			robot.lookAt = if by then by.position else robot.publishedLook
+		elseif wasFrozen then
+			robot.lastPoses = {} -- back to work: the server poses every limb again
+		end
+		if robot.lookAt then
+			return
+		end
+	elseif robot.watch.looked > 0 then
+		robot.watch = RobotMotion.newWatch()
+	end
+	if robot.pose == "stare" and brain.focus then
+		robot.lookAt = onFloor(Vector3.new(brain.focus.x, 0, brain.focus.z)) + Vector3.yAxis * 3
+	elseif awake and seen and brain.state ~= "chase" then
+		robot.lookAt = Vector3.new(seen.x, robot.position.Y + 3, seen.z)
+	elseif robot.role == "hunter" and brain.state == "stalled" then
+		local near = nearestInView(robot, alive, motion.StalledLookRange)
+		robot.lookAt = near and near.position
+	end
+end
+
+-- On top of a rack: hold still watching the nearest player, then drop into the aisle and land hard.
+local function perchStep(robot: Robot, alive: { Alive }, now: number)
+	local perch = robot.perch :: { dropAt: number, land: Vector3, dropping: boolean }
+	local near = nearestInView(robot, alive, 60)
+	robot.lookAt = near and near.position
+	publishLook(robot)
+	if perch.dropping or now < perch.dropAt then
+		return
+	end
+	perch.dropping = true
+	task.spawn(function()
+		local top = robot.position
+		local started = os.clock()
+		while not robot.dead do
+			local t = math.min(1, (os.clock() - started) / racks.DropSeconds)
+			-- across at an even pace, down like a falling weight
+			local across = top:Lerp(perch.land, t)
+			robot.position = Vector3.new(across.X, top.Y + (perch.land.Y - top.Y) * t * t, across.Z)
+			place(robot)
+			if t >= 1 then
+				break
+			end
+			RunService.Heartbeat:Wait()
+		end
+		if robot.dead then
+			return
+		end
+		robot.perch = nil
+		robot.lastPoses = {}
+		robot.staggerUntil = os.clock() + racks.LandStill
+		fxRemote:FireAllClients(robot.model, "land", robot.position)
+	end)
+end
+
 local function despawn(robot: Robot)
 	dropCarried(robot, robot.position)
 	holdChoreBox(robot, false)
@@ -1620,8 +1761,13 @@ local function tick(dt: number)
 				RobotBrain.provoke(robot.brain, angryAt, now)
 			end
 		end
+		if robot.perch then
+			perchStep(robot, alive, now)
+			continue
+		end
 		keepApart(robot)
 		if robot.watching and keepWatching(robot, alive, seen ~= nil or heard ~= nil, now) then
+			publishLook(robot)
 			continue
 		end
 		local state = robot.brain.state
@@ -1660,26 +1806,44 @@ local function tick(dt: number)
 			loose = if loose
 				then { id = loose.instance, distance = flatDistance(loose.position, robot.position) }
 				else nil,
+			roll = random:NextNumber(),
 		}
 		local night = phase == "Night" and robot.role ~= "chore"
 		if
 			RobotHunt.shouldLunge(state, seen and seen.distance, night, now, robot.lungeReadyAt, hunt.Lunge)
+			and now >= robot.brain.stareUntil
 		then
 			robot.lungeUntil = now + hunt.Lunge.Seconds
 			robot.lungeReadyAt = robot.lungeUntil + hunt.Lunge.Cooldown
+			if robot.silent then
+				robot.silent = false
+				robot.model:SetAttribute("Silent", nil)
+			end
 			fxRemote:FireAllClients(robot.model, "lunge", robot.position)
 		end
 		act(robot, RobotBrain.update(robot.brain, input, settings, now), alive, now, seen ~= nil)
+		lookAround(robot, alive, seen, dt)
+		publishLook(robot)
 
 		local brain = robot.brain
+		-- the pack hears nothing until the stare ends and it goes
+		local stareEnded = robot.staring and robot.pose ~= "stare"
+		robot.staring = robot.pose == "stare"
 		if brain.targetId then
 			robot.lastTarget = brain.targetId
 		end
 		if state == "chase" and brain.state == "investigate" and brain.focus then
 			robot.searchFrom = onFloor(Vector3.new(brain.focus.x, 0, brain.focus.z))
 		end
-		if awake and brain.state == "chase" and seen and (state ~= "chase" or now >= robot.shareAt) then
-			callPack(robot, seen, now, state ~= "chase")
+		local fresh = state ~= "chase" or stareEnded
+		if
+			awake
+			and brain.state == "chase"
+			and seen
+			and not robot.staring
+			and (fresh or now >= robot.shareAt)
+		then
+			callPack(robot, seen, now, fresh)
 		end
 	end
 end
@@ -1751,15 +1915,58 @@ end
 local nightStartedAt = 0
 local dayStartedAt = 0
 
-local function spawnHunter(near: Vector3, role: RobotBrain.Role, types: { string }, distance: { number })
+-- A night hunter perched on top of a rack bay near the player, behind them if it can, about to drop
+-- into the aisle. Nil when no rack is in range or the landing isn't clear.
+local function spawnOnRack(target: Alive, typeName: string): Robot?
+	local look = target.root.CFrame.LookVector
+	local here = target.position - origin
+	local top, land = RobotRacks.dropSpot(
+		Warehouse.layout().shelves,
+		{ x = here.X, z = here.Z },
+		{ x = look.X, z = look.Z },
+		racks,
+		random:NextNumber()
+	)
+	if not top or not land then
+		return nil
+	end
+	local landing = onFloor(Warehouse.toWorld(land.x, land.z))
+	local perch = onFloor(Warehouse.toWorld(top.x, top.z))
+	if inAnyRoom(landing) or not spotIsClear(landing, Vector3.new(4, 7, 4)) then
+		return nil
+	end
+	local robot = spawnRobot(typeName, nearestRoom(landing), perch, landing - perch, "hunter")
+	if robot then
+		robot.position = perch + Vector3.yAxis * Config.Warehouse.RackHeight
+		robot.pose = "stall"
+		robot.perch = { dropAt = os.clock() + randomIn(racks.Perch), land = landing, dropping = false }
+		place(robot)
+	end
+	return robot
+end
+
+local function spawnHunter(target: Alive, role: RobotBrain.Role, types: { string }, distance: { number })
 	local typeName = types[random:NextInteger(1, #types)]
+	local robot: Robot? = nil
+	if role == "hunter" and random:NextNumber() < racks.DropChance then
+		robot = spawnOnRack(target, typeName)
+	end
 	for _ = 1, 8 do
+		if robot then
+			break
+		end
 		local angle = random:NextNumber(0, math.pi * 2)
 		local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
-		local spot = onFloor(near + direction * randomIn(distance))
+		local spot = onFloor(target.position + direction * randomIn(distance))
 		if not inAnyRoom(spot) and spotIsClear(spot, Vector3.new(4, 7, 4)) then
-			spawnRobot(typeName, nearestRoom(spot), spot, -direction, role)
-			return
+			robot = spawnRobot(typeName, nearestRoom(spot), spot, -direction, role)
+		end
+	end
+	if robot and role == "hunter" then
+		huntersTonight += 1
+		if huntersTonight == silentPick then
+			robot.silent = true
+			robot.model:SetAttribute("Silent", true)
 		end
 	end
 end
@@ -1774,7 +1981,7 @@ local function spawnNear(
 	for _, player in need do
 		for _, target in alive do
 			if target.player == player then
-				spawnHunter(target.position, role, types, distance)
+				spawnHunter(target, role, types, distance)
 			end
 		end
 	end
@@ -1871,7 +2078,13 @@ local function activate()
 	local now = os.clock()
 	local phase = DayNight.phase()
 	if phase == "Night" and now - nightStartedAt >= settings.HunterGrace then
-		local need = RobotRooms.needHunters(points, hunters, settings.HunterNearRadius, settings.MaxHunters)
+		local need = RobotRooms.needHunters(
+			points,
+			hunters,
+			settings.HunterNearRadius,
+			settings.MaxHunters,
+			threat.hunters
+		)
 		spawnNear(need, alive, "hunter", settings.HunterTypes, settings.HunterSpawnDistance)
 	elseif phase == "Day" and now - dayStartedAt >= prowl.Grace then
 		local need = RobotRooms.needHunters(points, prowlers, prowl.NearRadius, prowl.Max)
@@ -1881,8 +2094,11 @@ end
 
 local function onPhaseChanged(phase: string)
 	local now = os.clock()
+	threat = RobotNights.threat(DayNight.day(), settings.Nights)
 	if phase == "Night" then
 		nightStartedAt = now
+		huntersTonight = 0
+		silentPick = random:NextInteger(1, settings.Silent.PickFrom)
 	end
 	if phase == "Day" then
 		dayStartedAt = now
@@ -1900,6 +2116,60 @@ local function onPhaseChanged(phase: string)
 			swapModel(robot, true)
 		elseif phase == "Day" then
 			swapModel(robot, false)
+		end
+	end
+end
+
+-- The mimic --------------------------------------------------------------------------------------
+
+-- Remembers recent callouts (Callouts checks and plays them; this only listens).
+local function heardCallout(player: Player, index: unknown)
+	if not VoiceLines.validCallout(index, #Config.Callouts.Sounds) then
+		return
+	end
+	local character = player.Character
+	local head = character and character:FindFirstChild("Head")
+	if not head or not head:IsA("BasePart") then
+		return
+	end
+	table.insert(calls, {
+		speaker = player,
+		index = index :: number,
+		x = head.Position.X,
+		z = head.Position.Z,
+		time = os.clock(),
+	})
+	if #calls > 8 then
+		table.remove(calls, 1)
+	end
+end
+
+-- Now and then at night an awake robot somewhere else plays a recent callout back, pitched wrong.
+local function tryMimic(now: number)
+	if not DayNight.isNight() or now < mimicReadyAt or #calls == 0 or random:NextNumber() > mimic.Chance then
+		return
+	end
+	local candidates = {}
+	for id, robot in robots do
+		local state = robot.brain.state
+		if not robot.knockedUntil and not robot.perch and (state == "sweep" or state == "investigate") then
+			table.insert(candidates, { id = id, x = robot.position.X, z = robot.position.Z })
+		end
+	end
+	local call, id = RobotMimic.pick(calls, candidates, now, mimic)
+	local robot = id and robots[id]
+	if not call or not robot then
+		return
+	end
+	mimicReadyAt = now + randomIn(mimic.Cooldown)
+	table.remove(calls, table.find(calls, call) :: number)
+	for _, player in Players:GetPlayers() do
+		local character = player.Character
+		if
+			character
+			and (character:GetPivot().Position - robot.position).Magnitude <= Config.Callouts.HearRange
+		then
+			mimicRemote:FireClient(player, robot.model, call.index)
 		end
 	end
 end
@@ -2203,6 +2473,8 @@ function Robots.Init()
 	stashFolder.Name = "RobotStash"
 	stashFolder.Parent = workspace
 	fxRemote = Net.event("RobotFx")
+	mimicRemote = Net.event("RobotMimic")
+	Net.event("Callout").OnServerEvent:Connect(heardCallout)
 end
 
 function Robots.Start()
@@ -2212,6 +2484,7 @@ function Robots.Start()
 	origin = Warehouse.toWorld(0, 0)
 	floorY = origin.Y
 	dayStartedAt = os.clock()
+	threat = RobotNights.threat(DayNight.day(), settings.Nights)
 	for _, room in Warehouse.rooms() do
 		roomsById[room.id] = room
 		local center = Warehouse.toWorld(room.cx, room.cz)
@@ -2252,6 +2525,12 @@ function Robots.Start()
 		while true do
 			activate()
 			task.wait(settings.ActivationInterval)
+		end
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(mimic.CheckEvery)
+			tryMimic(os.clock())
 		end
 	end)
 end
