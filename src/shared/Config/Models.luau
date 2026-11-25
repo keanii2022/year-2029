@@ -17,6 +17,8 @@ return {
 	GreyboxColor = Color3.fromRGB(150, 150, 155),
 	GreyboxGlowColor = Color3.fromRGB(255, 190, 90),
 	GreyboxScreenColor = Color3.fromRGB(25, 30, 35),
+	-- Uploaded screens once their picture moves to the swappable image: what shows while it's off
+	ScreenGlassColor = Color3.fromRGB(20, 24, 28),
 
 	-- Parts whose axis differs from the default for their kind, per model (from art/MOVES.md)
 	AxisOverrides = {

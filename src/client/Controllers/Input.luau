@@ -9,6 +9,7 @@
 -- Other controllers call Input.bind / Input.isDown instead of reading keys themselves.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 export type Device = "Keyboard" | "Gamepad" | "Touch"
@@ -98,6 +99,8 @@ local listeners: { [string]: { Listener } } = {}
 local held: { [string]: boolean } = {}
 -- While set, presses of every other action are dropped (the call wheel is open)
 local exclusive: string? = nil
+local MENU_ATTRIBUTE = "Menu"
+local lastMenuSelection: GuiObject? = nil
 
 local function isGamepad(input: InputObject): boolean
 	return string.match(input.UserInputType.Name, "^Gamepad") ~= nil
@@ -156,6 +159,42 @@ local function dispatch(input: InputObject, began: boolean)
 	send(action, true, device)
 end
 
+local function onOpenMenu(object: GuiObject): boolean
+	local screen = object:FindFirstAncestorWhichIsA("ScreenGui")
+	if not screen or not screen.Enabled or screen:GetAttribute(MENU_ATTRIBUTE) ~= true then
+		return false
+	end
+	local node: Instance? = object
+	while node and node ~= screen do
+		if node:IsA("GuiObject") and not node.Visible then
+			return false
+		end
+		node = node.Parent
+	end
+	return true
+end
+
+-- The gamepad selection may only sit on an open menu. The stick can wander off a panel onto the
+-- hotbar or the phone buttons, and a selection left anywhere after its menu shuts keeps Roblox from
+-- walking or looking and makes dispatch drop the pad's buttons, so it goes back or goes away.
+local function keepSelectionOnMenus()
+	local selected = GuiService.SelectedObject
+	if not selected then
+		return
+	end
+	if onOpenMenu(selected) then
+		lastMenuSelection = selected
+		return
+	end
+	local back = lastMenuSelection
+	GuiService.SelectedObject = if back and back.Parent and onOpenMenu(back) then back else nil
+end
+
+-- A ScreenGui whose buttons the gamepad may select while it's open.
+function Input.markMenu(gui: ScreenGui)
+	gui:SetAttribute(MENU_ATTRIBUTE, true)
+end
+
 -- Calls listener(began, device) on press and release. Returns a function that unbinds.
 function Input.bind(action: string, listener: Listener): () -> ()
 	assert(Input.Actions[action], `Unknown input action {action}`)
@@ -198,6 +237,11 @@ function Input.Init()
 	-- Roblox's default turns the touchpad / Select button into "pick a GUI button" mode, which would
 	-- grab the hotbar every time someone opens the controls card.
 	GuiService.AutoSelectGuiEnabled = false
+	GuiService:GetPropertyChangedSignal("SelectedObject"):Connect(function()
+		task.defer(keepSelectionOnMenus)
+	end)
+	-- Catches menus that shut without clearing the selection: hidden objects fail onOpenMenu
+	RunService.Heartbeat:Connect(keepSelectionOnMenus)
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if not gameProcessed then
 			dispatch(input, true)

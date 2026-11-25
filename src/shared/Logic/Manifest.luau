@@ -186,6 +186,19 @@ function Manifest.isScreen(partName: string): boolean
 	return baseName(partName) == "Screen"
 end
 
+-- Which face of a screen part looks out of the model's front. (x, y, z) is the model's front (+z in
+-- model space) seen from the part's own axes. Uploaded meshes keep their import axes and get turned
+-- upright, so a screen's facing side is not always its Back face the way it is on greybox blocks.
+function Manifest.screenFace(x: number, y: number, z: number): string
+	local ax, ay, az = math.abs(x), math.abs(y), math.abs(z)
+	if az >= ax and az >= ay then
+		return if z >= 0 then "Back" else "Front"
+	elseif ay >= ax then
+		return if y >= 0 then "Top" else "Bottom"
+	end
+	return if x >= 0 then "Right" else "Left"
+end
+
 function Manifest.rootPart(partNames: { string }): string?
 	local present = {}
 	for _, name in partNames do

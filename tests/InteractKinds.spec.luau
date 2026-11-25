@@ -74,6 +74,17 @@ return {
 			end
 		end)
 	end,
+	["every channel and screen picture has a Screen part to show on"] = function()
+		eachBehaviour(function(modelName, label, behaviour)
+			if behaviour.channels or behaviour.screenOn then
+				local hasScreen = false
+				for _, name in Manifest.partNames(index.models[modelName]) do
+					hasScreen = hasScreen or Manifest.isScreen(name)
+				end
+				check(hasScreen, label)
+			end
+		end)
+	end,
 	["each kind has the fields it needs"] = function()
 		eachBehaviour(function(_, label, behaviour)
 			if behaviour.kind == "sit" then

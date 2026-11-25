@@ -274,6 +274,7 @@ end
 function Cuffs.Init()
 	gui = Instance.new("ScreenGui")
 	gui.Name = "Cuffs"
+	Input.markMenu(gui)
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 5

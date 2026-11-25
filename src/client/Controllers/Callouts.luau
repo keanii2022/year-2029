@@ -397,6 +397,11 @@ function Callouts.Start()
 	Net.event("CalloutHeard").OnClientEvent:Connect(onHeard)
 	Input.bind("Callout", onCalloutButton)
 	Players.PlayerRemoving:Connect(stopCall)
+	-- An open wheel holds Input and the stick; dying with it up must not carry that into the next life
+	player.CharacterRemoving:Connect(function()
+		pressing = false
+		closeWheel()
+	end)
 	RunService.RenderStepped:Connect(updateMarkers)
 end
 

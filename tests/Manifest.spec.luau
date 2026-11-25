@@ -76,6 +76,15 @@ return {
 		expect(Manifest.isScreen("ScreenFrame")).toBeFalsy()
 		expect(Manifest.isGlow("Glow")).toBeTruthy()
 	end,
+	["a screen shows on whichever face looks out the front"] = function()
+		expect(Manifest.screenFace(0, 0, 1)).toBe("Back")
+		expect(Manifest.screenFace(0, 0, -1)).toBe("Front")
+		-- an imported mesh turned upright: the model's front is the part's own up or down
+		expect(Manifest.screenFace(0.1, 0.98, 0.05)).toBe("Top")
+		expect(Manifest.screenFace(0, -1, 0)).toBe("Bottom")
+		expect(Manifest.screenFace(-0.9, 0.2, 0.3)).toBe("Left")
+		expect(Manifest.screenFace(0.8, 0, 0.5)).toBe("Right")
+	end,
 	["doors swing toward the front, lids lift, bottom flaps drop forward"] = function()
 		-- door to the right of its hinge: a negative turn about y carries +x toward +z
 		expect(Manifest.turnSign("Y", { 1, 0, 0 }, { 0, 0, 0 })).toBe(-1)
