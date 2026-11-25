@@ -155,15 +155,6 @@ local function buildHealth()
 		TextColor3 = SPRAY_RED,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	}, panel)
-	tokensLabel = label({
-		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, 0, 0, -4),
-		Size = UDim2.fromOffset(120, 14),
-		Text = "",
-		TextSize = 12,
-		TextTransparency = 0.3,
-		TextXAlignment = Enum.TextXAlignment.Right,
-	}, panel)
 end
 
 local function refreshTokens()
@@ -228,6 +219,16 @@ local function buildClock()
 		TextSize = 16,
 		TextTransparency = 0.2,
 		TextStrokeTransparency = 0.6,
+	}, gui)
+	-- Tokens sit quietly under the clock, away from the health block
+	tokensLabel = label({
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 38),
+		Size = UDim2.fromOffset(200, 14),
+		Text = "",
+		TextSize = 12,
+		TextTransparency = 0.4,
+		TextStrokeTransparency = 0.7,
 	}, gui)
 end
 

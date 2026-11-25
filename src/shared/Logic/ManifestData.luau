@@ -8200,6 +8200,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 86081480211828,
+			textureId = 83761226576909,
 		},
 		{
 			name = "rack_bay_full",
