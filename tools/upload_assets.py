@@ -13,6 +13,7 @@ Python 3 stdlib only.
 """
 
 import argparse
+import http.client
 import json
 import math
 import os
@@ -398,7 +399,12 @@ def request(method, url, api_key, body=None, content_type=None):
                 time.sleep(wait)
                 continue
             raise RuntimeError(f"{e.code} {e.read().decode(errors='replace')[:300]}") from None
-    raise RuntimeError("gave up after repeated rate limits")
+        except (urllib.error.URLError, http.client.HTTPException, ConnectionError, TimeoutError) as e:
+            # Roblox sometimes drops the connection mid-upload; a fresh try usually goes through
+            wait = 2**attempt * 3
+            print(f"  connection dropped ({e}), waiting {wait}s")
+            time.sleep(wait)
+    raise RuntimeError("gave up after repeated rate limits or dropped connections")
 
 
 def upload_file(path, display_name, api_key, creator_id):
