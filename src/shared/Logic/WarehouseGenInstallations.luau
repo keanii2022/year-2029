@@ -3,6 +3,7 @@
 -- live in each one, guarding a stash. Every set has its own look, its own wrongness and, often, something far too big.
 -- Each set is registered as a robot room (id, kind, rect, doors, walls, items) so Robots and the
 -- other systems find it like any room.
+local Fill = if script then require(script.Parent.WarehouseGenFill) else require("./WarehouseGenFill")
 local Pieces = if script then require(script.Parent.WarehouseGenPieces) else require("./WarehouseGenPieces")
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
@@ -1278,6 +1279,28 @@ function Sets.window_court(ctx: Ctx)
 		lamp = "warm",
 	})
 	item(ctx, "survivor_tent", ctx.x0 + 10, ctx.z1 - 10, 0, -1)
+	-- Courtyard lamps on the path corners between the lawns, each with a bench under it
+	for _, fx in { 0.45, 0.55 } do
+		for _, fz in { 0.44, 0.56 } do
+			local x, z = ctx.x0 + ctx.w * fx, ctx.z0 + ctx.d * fz
+			piece(L, { x = x, y = 3, z = z, sx = 0.4, sy = 6, sz = 0.4, style = "cable", solid = true })
+			lamp(ctx, x, 6.4, z, "street")
+		end
+	end
+	for _, fx in { 0.27, 0.73 } do
+		for _, fz in { 0.1, 0.9 } do
+			piece(L, {
+				x = ctx.x0 + ctx.w * fx,
+				y = 0.8,
+				z = ctx.z0 + ctx.d * fz,
+				sx = 5,
+				sy = 0.4,
+				sz = 1.4,
+				style = "bench_stone",
+				solid = true,
+			})
+		end
+	end
 end
 
 -- Catwalk Void: no floor at all, just black far below. A narrow catwalk with railings runs out
@@ -2455,6 +2478,12 @@ function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Piece
 	end
 	room.tone = mainTone(layout, firstPiece, config.InstallationSpill.fallback)
 	room.giant = hw > config.BlockSize
+	local doorways = {}
+	for _, door in room.doors do
+		local x, z = doorway(room, door)
+		table.insert(doorways, { x, z })
+	end
+	Fill.room(layout, config, room, firstPiece, ctx.h, doorways)
 	placeStash(layout, config, room, hall)
 	for _, door in hall.doors do
 		doorSpill(layout, config, hall, door, room.tone)

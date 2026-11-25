@@ -278,17 +278,16 @@ local function textLabel(props: { [string]: any }, parent: Instance): TextLabel
 	return label
 end
 
-local function buildBoard(spawnFloor: CFrame, folder: Folder)
+local function buildBoard(home: CFrame, folder: Folder)
 	local size = BoardSettings.PartSize
-	local spot = spawnFloor * CFrame.new(BoardSettings.Offset)
-	local centre = spot.Position + Vector3.new(0, size.Y / 2 + 1, 0)
 	local part = Instance.new("Part")
 	part.Name = "Leaderboard"
 	part.Anchored = true
 	part.Size = size
 	part.Color = PANEL
 	part.Material = Enum.Material.Metal
-	part.CFrame = CFrame.lookAt(centre, Vector3.new(spawnFloor.X, centre.Y, spawnFloor.Z))
+	-- Upright and flush to the wall; the front face (-z) looks out the same way as the frame
+	part.CFrame = home * CFrame.new(BoardSettings.Offset.X, size.Y / 2 + 1, -(size.Z / 2 + 0.1))
 
 	local gui = Instance.new("SurfaceGui")
 	gui.Face = Enum.NormalId.Front
@@ -353,7 +352,7 @@ local function boardLoop()
 	local folder = Instance.new("Folder")
 	folder.Name = "Leaderboards"
 	folder.Parent = workspace
-	for _, spot in Saves.spawnSpots() do
+	for _, spot in Saves.homeSpots() do
 		buildBoard(spot, folder)
 	end
 	local lastWrite = os.clock()

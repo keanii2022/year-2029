@@ -99,6 +99,69 @@ local settings = {
 	LightEvery = 2, -- every Nth working strip actually casts light, the rest only glow
 	EmergencyEvery = 12, -- every Nth working strip stays on at night as a small red pool of light
 	ExitSignChance = 0.35,
+	ExitSignLight = { brightness = 0.7, range = 10 }, -- the pillar EXIT signs glow green on the floor
+
+	-- Lights that stay on at night (see Logic/WarehouseGenNightLights). Every one is a small
+	-- no-shadow light, and they only go on the main aisles, so phones keep up.
+	NightLights = {
+		Gap = 96, -- studs between path posts down a main aisle, swapping sides each post
+		Jitter = 10,
+		EdgeInset = 1.5, -- posts stand this far in from the rack ends
+		StripLength = 6, -- the LED strip on the floor by each post
+		PathTone = "path",
+		WorkLightChance = 0.3, -- per main-aisle crossing
+		WorkLightHeight = 5,
+		WorkTone = "work",
+		WorkFlickerChance = 0.4,
+		CarryLightCount = 70, -- battery lamps lying in the aisles for players to carry off
+		CarryLights = { "emergency_light", "emergency_light", "candles" },
+	},
+
+	-- Models that always carry their own small light wherever they're placed, by lamp tone.
+	-- The carry ones are grabbable like any prop, so the light goes wherever a player takes them.
+	ModelLights = {
+		emergency_light = "carry",
+		candles = "candle",
+		vending_machine = "vending",
+	},
+
+	-- The open floor of every installation set gets furniture groups, robot hoards and study
+	-- benches, each under a bare bulb (see Logic/WarehouseGenFill)
+	InstallationFill = {
+		AreaPerGroup = 1800, -- square studs of set floor per group
+		Groups = { 3, 22 },
+		GroupRadius = 8,
+		GroupGap = 4, -- walking room between two groups
+		DoorClearance = 8,
+		TriesPerGroup = 25,
+		BulbHeight = 10,
+		BulbTone = "pool",
+		HeapSize = { 6, 10 },
+		CarryLightChance = 0.3,
+		Skip = { catwalk_void = true }, -- no floor to put anything on
+		HumanStuff = {
+			"rubber_duck",
+			"rotary_phone",
+			"music_box",
+			"boombox",
+			"toaster",
+			"record_player",
+			"crank_radio",
+			"stuffed_robot",
+			"kid_ball",
+			"bike_helmet",
+			"school_backpack",
+			"lunchbox",
+			"cassette_tape",
+			"journal",
+			"wall_clock",
+			"table_fan",
+			"lava_lamp",
+			"pizza_box",
+			"box_loose",
+			"desk_lamp",
+		},
+	},
 
 	-- Store departments: a floor under a hanging sign on long cables, furniture staged in little sets
 	DeptSignY = 26,
@@ -375,6 +438,13 @@ local settings = {
 		seam = { color = Color3.fromRGB(150, 200, 255), brightness = 2, range = 40 },
 		street = { color = Color3.fromRGB(255, 200, 130), brightness = 2, range = 36 },
 		fake_sun = { color = Color3.fromRGB(230, 240, 255), brightness = 4, range = 60 },
+		-- Night lights: small pools, never shadows
+		path = { color = Color3.fromRGB(190, 255, 220), brightness = 0.9, range = 14 },
+		work = { color = Color3.fromRGB(255, 214, 150), brightness = 1.6, range = 26 },
+		pool = { color = Color3.fromRGB(255, 210, 160), brightness = 1.2, range = 16 },
+		carry = { color = Color3.fromRGB(235, 245, 255), brightness = 1.2, range = 14 },
+		candle = { color = Color3.fromRGB(255, 170, 90), brightness = 1, range = 10 },
+		vending = { color = Color3.fromRGB(170, 210, 255), brightness = 1, range = 12 },
 	},
 
 	LightTones = {
@@ -495,6 +565,9 @@ local settings = {
 		frame = { color = Color3.fromRGB(40, 34, 30), material = Enum.Material.Wood },
 		art_grey = { color = Color3.fromRGB(150, 150, 146), material = Enum.Material.SmoothPlastic },
 		exit_green = { color = Color3.fromRGB(30, 170, 80), material = Enum.Material.Neon },
+		bollard = { color = Color3.fromRGB(44, 46, 50), material = Enum.Material.Metal },
+		path_glow = { color = Color3.fromRGB(120, 200, 160), material = Enum.Material.Neon },
+		work_glow = { color = Color3.fromRGB(255, 226, 170), material = Enum.Material.Neon },
 		wall_pink = { color = Color3.fromRGB(226, 80, 120), material = Enum.Material.Plaster },
 		wall_blue = { color = Color3.fromRGB(40, 70, 130), material = Enum.Material.Plaster },
 		wall_yellow = { color = Color3.fromRGB(236, 196, 50), material = Enum.Material.Plaster },

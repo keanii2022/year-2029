@@ -103,6 +103,22 @@ local function tagIfMovable(model: Model, name: string)
 	end
 end
 
+-- A small no-shadow light on the models that always glow (battery lamps, candles, vending machines)
+local function addModelLight(model: Model, name: string)
+	local toneName = settings.ModelLights[name]
+	local tone = toneName and settings.LampTones[toneName]
+	local body = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
+	if not tone or not body then
+		return
+	end
+	local glow = Instance.new("PointLight")
+	glow.Color = tone.color
+	glow.Brightness = tone.brightness
+	glow.Range = tone.range
+	glow.Shadows = false
+	glow.Parent = body
+end
+
 local function spawnModel(
 	name: string,
 	parent: Instance,
@@ -117,6 +133,7 @@ local function spawnModel(
 	end
 	placeModel(model, x, z, facing, backToWall)
 	tagIfMovable(model, name)
+	addModelLight(model, name)
 	model.Parent = parent
 	noteBuilt()
 	return model
@@ -153,6 +170,7 @@ local function placeKit(
 	if movable then
 		tagIfMovable(model, name)
 	end
+	addModelLight(model, name)
 	model.Parent = chunkFor(x, z)
 	noteBuilt()
 	return model
@@ -481,6 +499,13 @@ local function buildPillars()
 			)
 			detail(sign)
 			textGui(sign, Enum.NormalId.Front, "EXIT", Color3.fromRGB(235, 255, 240), Enum.Font.GothamBlack)
+			local glow = Instance.new("SurfaceLight")
+			glow.Face = Enum.NormalId.Front
+			glow.Color = sign.Color
+			glow.Brightness = settings.ExitSignLight.brightness
+			glow.Range = settings.ExitSignLight.range
+			glow.Shadows = false
+			glow.Parent = sign
 		end
 	end
 end
@@ -810,6 +835,11 @@ local function buildPiece(spec: WarehouseGen.Piece)
 			glow.Range = tone.range
 			glow.Shadows = false
 			glow.Parent = part
+		end
+		-- Not a strip light, so it never goes dark at night; it just blinks when you're near
+		if spec.flicker then
+			part:SetAttribute("AlwaysOn", true)
+			CollectionService:AddTag(part, FLICKER_TAG)
 		end
 	end
 	if settings.MovableStyles[spec.style] and longestSide(part.Size) <= settings.MaxGrabSize then

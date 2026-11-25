@@ -164,6 +164,72 @@ return {
 			end
 		end
 	end,
+	["main aisles get battery path lights in the clear, never inside a hall"] = function()
+		local posts = 0
+		for _, spec in layout.pieces do
+			if spec.lamp == config.NightLights.PathTone then
+				posts += 1
+				expect(WarehouseGen.pocketAt(layout, spec.x, spec.z)).toBe(nil)
+				local line = (spec.x + layout.half) / layout.blockSize
+				local cross = (spec.z + layout.half) / layout.blockSize
+				local nearLine = math.abs(line - math.round(line)) * layout.blockSize <= config.BlockMargin
+				local nearCross = math.abs(cross - math.round(cross)) * layout.blockSize <= config.BlockMargin
+				expect(nearLine or nearCross).toBeTruthy()
+			end
+		end
+		expect(posts > 100).toBeTruthy()
+	end,
+	["every hall doorway has a lit exit sign over it, and battery lamps lie about"] = function()
+		local Installations = require("../src/shared/Logic/WarehouseGenInstallations")
+		for _, pocket in layout.pockets do
+			for _, door in pocket.doors do
+				local x, z = Installations.doorway(pocket, door)
+				local found = false
+				for _, spec in layout.pieces do
+					found = found
+						or (
+							spec.label == "EXIT"
+							and spec.lamp == "exit"
+							and math.abs(spec.x - x) < 1
+							and math.abs(spec.z - z) < 1
+						)
+				end
+				expect(found).toBeTruthy()
+			end
+		end
+		local lamps = 0
+		for _, item in layout.loose do
+			if table.find(config.NightLights.CarryLights, item.name) then
+				lamps += 1
+			end
+		end
+		expect(lamps >= config.NightLights.CarryLightCount).toBeTruthy()
+	end,
+	["installation sets get furniture groups under bulbs, clear of their own doorways"] = function()
+		local Installations = require("../src/shared/Logic/WarehouseGenInstallations")
+		local filled = 0
+		for _, room in layout.rooms do
+			local bulbs = 0
+			for _, spec in layout.pieces do
+				if
+					spec.lamp == config.InstallationFill.BulbTone and Rooms.contains(room, spec.x, spec.z, 0)
+				then
+					bulbs += 1
+					for _, door in room.doors do
+						local x, z = Installations.doorway(room, door)
+						local gap = math.sqrt((spec.x - x) ^ 2 + (spec.z - z) ^ 2)
+						expect(gap >= config.InstallationFill.DoorClearance).toBeTruthy()
+					end
+				end
+			end
+			expect(bulbs <= config.InstallationFill.Groups[2]).toBeTruthy()
+			if bulbs >= config.InstallationFill.Groups[1] then
+				filled += 1
+			end
+		end
+		-- Most sets have open floor; a few (water, void, hedges) leave nowhere to put a group
+		expect(filled >= #layout.rooms / 2).toBeTruthy()
+	end,
 	["pockets stay inside their zone"] = function()
 		for _, pocket in layout.pockets do
 			local zone = WarehouseGen.zoneAt(layout, (pocket.x0 + pocket.x1) / 2, (pocket.z0 + pocket.z1) / 2)

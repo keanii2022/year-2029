@@ -1,7 +1,7 @@
 -- Flips the store lighting with the clock: dim fluorescent day, red pulsing siren,
 -- a flicker into near black at lights out, and lights snapping back on in the morning.
 -- Also drives the warehouse strip lights: on by day, dark at night except the red emergency ones,
--- and the broken ones near you flicker.
+-- and the broken ones near you flicker (so do the always-on work lamps tagged to flicker).
 local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -69,12 +69,12 @@ local function flickerNearby()
 	for _, strip in CollectionService:GetTagged(FLICKER_TAG) do
 		if
 			strip:IsA("BasePart")
-			and (stripsOn or strip:GetAttribute("Emergency") == true)
+			and (stripsOn or strip:GetAttribute("Emergency") == true or strip:GetAttribute("AlwaysOn") == true)
 			and (strip.Position - origin).Magnitude < Settings.FlickerRange
 		then
 			local lit = math.random() > 0.35
 			strip.Material = if lit then Enum.Material.Neon else Enum.Material.SmoothPlastic
-			local glow = strip:FindFirstChildOfClass("SurfaceLight")
+			local glow = strip:FindFirstChildWhichIsA("Light")
 			if glow then
 				glow.Enabled = lit
 			end
