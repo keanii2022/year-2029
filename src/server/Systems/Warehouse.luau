@@ -4,6 +4,7 @@
 -- Parts go into square chunk folders so streaming (on in the place file) can load them near players.
 local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -1094,6 +1095,14 @@ function Warehouse.Start()
 	-- Floor and spawns first so anyone joining mid-build lands on something
 	buildFloor()
 	buildSpawns(spawns)
+	-- A size server reads its settings before building, so early arrivals spawned in the test room
+	if game.PrivateServerId ~= "" then
+		for _, player in Players:GetPlayers() do
+			if player.Character then
+				task.spawn(player.LoadCharacter, player)
+			end
+		end
+	end
 	buildShell(shell)
 	buildPillars()
 	for _, room in layout.rooms do
