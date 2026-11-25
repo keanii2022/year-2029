@@ -41,6 +41,8 @@ end
 
 export type ShotFeel = {
 	sound: string,
+	oncePerPull: number?,
+	takes: { string }?,
 	kick: number,
 	twitch: number,
 	fovPunch: number,

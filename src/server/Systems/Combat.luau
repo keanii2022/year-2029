@@ -213,7 +213,26 @@ local function dropFlare(position: Vector3, normal: Vector3?)
 	light.Shadows = true
 	light.Parent = flare
 	flare.Parent = workspace
+	-- Keani's recorded flare: it burns on a loop, then sputters out as it fades
+	local function flareSound(name: string, looped: boolean): Sound?
+		local id = ModelLibrary.soundId(name)
+		if not id then
+			return nil
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = id
+		sound.Looped = looped
+		sound.RollOffMaxDistance = 60
+		sound.Parent = flare
+		sound:Play()
+		return sound
+	end
+	local burn = flareSound(settings.FlareBurnSound, true)
 	task.delay(settings.FlareTime - settings.FlareFadeTime, function()
+		if burn then
+			burn:Stop()
+		end
+		flareSound(settings.FlareBurnoutSound, false)
 		local fade = TweenInfo.new(settings.FlareFadeTime)
 		TweenService:Create(light, fade, { Brightness = 0 }):Play()
 		TweenService:Create(flare, fade, { Transparency = 1 }):Play()

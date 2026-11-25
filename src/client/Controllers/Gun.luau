@@ -444,9 +444,29 @@ local function feelOf(gunId: string?): CombatFeel.ShotFeel
 end
 
 -- The shot's bang, plus its follow-up (the shotgun's pump) a moment later.
-local function playShotSound(feel: CombatFeel.ShotFeel, position: Vector3?)
+-- Per shooter: when the burst take last started, and where each gun is in its cycle of takes
+local burstSoundAt: { [any]: number } = {}
+local takeIndex: { [any]: number } = {}
+
+local function playShotSound(feel: CombatFeel.ShotFeel, position: Vector3?, key: any?)
 	local sounds = settings.Sounds
-	playSound(feel.sound, position, sounds.FireVolume, sounds.FirePitch)
+	local slot = key or "self"
+	local name = feel.sound
+	-- The rifle's recording is the whole 3-round burst: play it once per trigger pull
+	if feel.oncePerPull then
+		local last = burstSoundAt[slot]
+		if last and os.clock() - last < feel.oncePerPull then
+			return
+		end
+		burstSoundAt[slot] = os.clock()
+	end
+	-- The dart blaster cycles its recorded pops in order, one per shot
+	if feel.takes then
+		local index = (takeIndex[slot] or 0) % #feel.takes + 1
+		takeIndex[slot] = index
+		name = feel.takes[index]
+	end
+	playSound(name, position, sounds.FireVolume, sounds.FirePitch)
 	local followUp = feel.followUp
 	if followUp then
 		task.delay(feel.followUpDelay or 0, playSound, followUp, position, sounds.FireVolume)
@@ -778,7 +798,7 @@ function Gun.Start()
 				local first = pellet == nil or pellet == 1
 				drawShot(muzzle, hitPosition, normal, hitPlayer, first)
 				if first then
-					playShotSound(feelOf(gunId), origin)
+					playShotSound(feelOf(gunId), origin, shooter)
 				end
 			end
 		end

@@ -247,7 +247,15 @@ return {
 	ShotFeel = {
 		pistol = { sound = "shot_pistol", kick = 2.4, twitch = 0.5, fovPunch = 1.2, shake = 0, weight = 1 },
 		smg = { sound = "shot_smg", kick = 2, twitch = 0.7, fovPunch = 1, shake = 0, weight = 0.8 },
-		rifle = { sound = "shot_rifle", kick = 2.8, twitch = 0.5, fovPunch = 1.4, shake = 0.3, weight = 1.3 },
+		rifle = {
+			sound = "shot_rifle",
+			oncePerPull = 0.45,
+			kick = 2.8,
+			twitch = 0.5,
+			fovPunch = 1.4,
+			shake = 0.3,
+			weight = 1.3,
+		},
 		marksman = {
 			sound = "shot_marksman",
 			kick = 3.2,
@@ -277,7 +285,24 @@ return {
 		},
 		nail = { sound = "nail_gun", kick = 1.6, twitch = 0.4, fovPunch = 0.8, shake = 0, weight = 0.7 },
 		flare = { sound = "flare_pop", kick = 2.2, twitch = 0.5, fovPunch = 1.2, shake = 0, weight = 1 },
-		dart = { sound = "dart_pop", kick = 1.4, twitch = 0.3, fovPunch = 0.8, shake = 0, weight = 0.6 },
+		dart = {
+			sound = "dart_pop_1",
+			takes = {
+				"dart_pop_1",
+				"dart_pop_2",
+				"dart_pop_3",
+				"dart_pop_4",
+				"dart_pop_5",
+				"dart_pop_6",
+				"dart_pop_7",
+				"dart_pop_8",
+			},
+			kick = 1.4,
+			twitch = 0.3,
+			fovPunch = 0.8,
+			shake = 0,
+			weight = 0.6,
+		},
 		disruptor = {
 			sound = "disruptor_crack",
 			kick = 3,
@@ -287,6 +312,8 @@ return {
 			weight = 1.2,
 		},
 	},
+	FlareBurnSound = "flare_burn_loop",
+	FlareBurnoutSound = "flare_burnout",
 	DefaultShotFeel = "pistol", -- for a gun missing from GunFeel
 	CameraKickRise = 0.02, -- seconds the view snaps up over
 	CameraKickSettle = 0.16, -- seconds it springs back over

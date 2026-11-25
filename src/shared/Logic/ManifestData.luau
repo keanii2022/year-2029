@@ -2837,6 +2837,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 122191920095643,
+			textureId = 80223703153040,
 		},
 		{
 			name = "disruptor",
@@ -2899,6 +2901,8 @@ return {
 					does = "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots.",
 				},
 			},
+			assetId = 140219653963283,
+			textureId = 76935238719167,
 		},
 		{
 			name = "emp_charge",
@@ -2979,6 +2983,8 @@ return {
 					does = "The flare round. A fired flare lights an area for a while and pulls robots to it.",
 				},
 			},
+			assetId = 99566042749331,
+			textureId = 109976114213671,
 		},
 		{
 			name = "flashlight",
@@ -3133,6 +3139,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 116077911489145,
+			textureId = 80453636665559,
 		},
 		{
 			name = "hiking_pack",
@@ -3253,6 +3261,8 @@ return {
 					does = "Scope lens glints. Players far away can spot it.",
 				},
 			},
+			assetId = 138376957148519,
+			textureId = 98660172159340,
 		},
 		{
 			name = "medkit",
@@ -3324,6 +3334,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 82262862907193,
+			textureId = 86112373986176,
 		},
 		{
 			name = "noise_maker",
@@ -3420,6 +3432,8 @@ return {
 					does = "Cocks back before each shot (pivot at its base), snaps forward on fire.",
 				},
 			},
+			assetId = 126203870142564,
+			textureId = 91266296248668,
 		},
 		{
 			name = "rifle",
@@ -3474,6 +3488,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 91286285412841,
+			textureId = 107069070653422,
 		},
 		{
 			name = "riot_helmet",
@@ -3594,6 +3610,8 @@ return {
 					does = "Racks back toward the grip and forward after each shot.",
 				},
 			},
+			assetId = 75857228033982,
+			textureId = 77171072365317,
 		},
 		{
 			name = "smg",
@@ -3648,6 +3666,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 133213241536817,
+			textureId = 129230362597527,
 		},
 		{
 			name = "smoke_can",
@@ -3718,6 +3738,8 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
+			assetId = 99546984168124,
+			textureId = 110943577860214,
 		},
 		{
 			name = "supply_locker",
@@ -6230,6 +6252,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 89124516666592,
+			textureId = 81216102281476,
 		},
 		{
 			name = "aisle_sign_hanging",
@@ -9371,6 +9395,7 @@ return {
 		{
 			name = "bullet_whiz",
 			group = "gear",
+			assetId = 78359321255591,
 		},
 		{
 			name = "cell_eject",
@@ -9393,9 +9418,36 @@ return {
 			assetId = 102275371977321,
 		},
 		{
-			name = "dart_pop",
+			name = "dart_pop_1",
 			group = "gear",
-			assetId = 113579670455801,
+		},
+		{
+			name = "dart_pop_2",
+			group = "gear",
+		},
+		{
+			name = "dart_pop_3",
+			group = "gear",
+		},
+		{
+			name = "dart_pop_4",
+			group = "gear",
+		},
+		{
+			name = "dart_pop_5",
+			group = "gear",
+		},
+		{
+			name = "dart_pop_6",
+			group = "gear",
+		},
+		{
+			name = "dart_pop_7",
+			group = "gear",
+		},
+		{
+			name = "dart_pop_8",
+			group = "gear",
 		},
 		{
 			name = "disruptor_charge",
@@ -9425,12 +9477,14 @@ return {
 		{
 			name = "flare_burn_loop",
 			group = "gear",
-			assetId = 87871535597138,
+		},
+		{
+			name = "flare_burnout",
+			group = "gear",
 		},
 		{
 			name = "flare_pop",
 			group = "gear",
-			assetId = 78612957490661,
 		},
 		{
 			name = "flashlight_click",
@@ -9440,14 +9494,17 @@ return {
 		{
 			name = "hit_marker",
 			group = "gear",
+			assetId = 117162795531037,
 		},
 		{
 			name = "impact_concrete",
 			group = "gear",
+			assetId = 136670849159058,
 		},
 		{
 			name = "impact_metal",
 			group = "gear",
+			assetId = 120577402329050,
 		},
 		{
 			name = "locker_clang",
@@ -9462,7 +9519,6 @@ return {
 		{
 			name = "nail_gun",
 			group = "gear",
-			assetId = 75343123704751,
 		},
 		{
 			name = "noise_maker_bell",
@@ -9491,6 +9547,7 @@ return {
 		{
 			name = "shot_marksman",
 			group = "gear",
+			assetId = 77934346648120,
 		},
 		{
 			name = "shot_pistol",
@@ -9499,6 +9556,7 @@ return {
 		{
 			name = "shot_revolver",
 			group = "gear",
+			assetId = 121289902501207,
 		},
 		{
 			name = "shot_rifle",
@@ -9515,6 +9573,7 @@ return {
 		{
 			name = "shotgun_pump",
 			group = "gear",
+			assetId = 81630168977498,
 		},
 		{
 			name = "smoke_hiss",
@@ -9884,14 +9943,17 @@ return {
 		{
 			name = "brute_thud",
 			group = "robots",
+			assetId = 103264687073454,
 		},
 		{
 			name = "chase_servo_scream",
 			group = "robots",
+			assetId = 107962493179108,
 		},
 		{
 			name = "chase_steps",
 			group = "robots",
+			assetId = 84213212027166,
 		},
 		{
 			name = "crawler_skitter_loop",
@@ -9901,18 +9963,22 @@ return {
 		{
 			name = "curious_beep_1",
 			group = "robots",
+			assetId = 127121402867108,
 		},
 		{
 			name = "curious_beep_2",
 			group = "robots",
+			assetId = 108060802225897,
 		},
 		{
 			name = "curious_beep_3",
 			group = "robots",
+			assetId = 133417270148018,
 		},
 		{
 			name = "drag",
 			group = "robots",
+			assetId = 133250616663948,
 		},
 		{
 			name = "emp_shutdown",
@@ -9922,26 +9988,32 @@ return {
 		{
 			name = "error_stall",
 			group = "robots",
+			assetId = 103636141797105,
 		},
 		{
 			name = "fumble",
 			group = "robots",
+			assetId = 127025180176602,
 		},
 		{
 			name = "grab_clank",
 			group = "robots",
+			assetId = 86559826633529,
 		},
 		{
 			name = "heavy_step",
 			group = "robots",
+			assetId = 91588097918585,
 		},
 		{
 			name = "hum_loop",
 			group = "robots",
+			assetId = 120604825653371,
 		},
 		{
 			name = "hydraulic_hiss",
 			group = "robots",
+			assetId = 133074424352186,
 		},
 		{
 			name = "jingle_distorted",
@@ -9951,10 +10023,12 @@ return {
 		{
 			name = "oil_drip",
 			group = "robots",
+			assetId = 76731051387580,
 		},
 		{
 			name = "scanner_ping",
 			group = "robots",
+			assetId = 111722901422626,
 		},
 		{
 			name = "scout_eye_whine",
@@ -9969,82 +10043,102 @@ return {
 		{
 			name = "scrape",
 			group = "robots",
+			assetId = 86273468828981,
 		},
 		{
 			name = "servo_whirr_1",
 			group = "robots",
+			assetId = 118984836745583,
 		},
 		{
 			name = "servo_whirr_2",
 			group = "robots",
+			assetId = 98067518835454,
 		},
 		{
 			name = "spot_alert",
 			group = "robots",
+			assetId = 92395665266996,
 		},
 		{
 			name = "callout_0",
 			group = "voice",
+			assetId = 109091450158742,
 		},
 		{
 			name = "callout_1",
 			group = "voice",
+			assetId = 95350814187075,
 		},
 		{
 			name = "callout_2",
 			group = "voice",
+			assetId = 121536614885105,
 		},
 		{
 			name = "callout_3",
 			group = "voice",
+			assetId = 92928971352250,
 		},
 		{
 			name = "callout_4",
 			group = "voice",
+			assetId = 107849856758042,
 		},
 		{
 			name = "callout_5",
 			group = "voice",
+			assetId = 115877998839000,
 		},
 		{
 			name = "callout_6",
 			group = "voice",
+			assetId = 92441773453435,
 		},
 		{
 			name = "ghost_kid_close",
 			group = "voice",
+			assetId = 87204267202159,
 		},
 		{
 			name = "ghost_kid_cry",
 			group = "voice",
+			assetId = 116480066647804,
 		},
 		{
 			name = "ghost_kid_near_1",
 			group = "voice",
+			assetId = 73398083685902,
 		},
 		{
 			name = "ghost_kid_near_2",
 			group = "voice",
+			assetId = 83111417982617,
 		},
 		{
 			name = "robot_chatter",
 			group = "voice",
+			assetId = 71290644651510,
 		},
 		{
 			name = "robot_error",
 			group = "voice",
+			assetId = 102609962424834,
 		},
 		{
 			name = "robot_notice",
 			group = "voice",
+			assetId = 89502601556081,
 		},
 		{
 			name = "robot_resume",
 			group = "voice",
+			assetId = 112101001652469,
 		},
 		{
 			name = "robot_task",
 			group = "voice",
+			assetId = 70835749640045,
 		},
 		{
 			name = "distant_hum_loop",
@@ -10386,10 +10480,12 @@ return {
 		{
 			name = "bullet_tracer",
 			kind = "effect",
+			assetId = 86104979749014,
 		},
 		{
 			name = "muzzle_flash_card",
 			kind = "effect",
+			assetId = 108625774648569,
 		},
 	},
 }
