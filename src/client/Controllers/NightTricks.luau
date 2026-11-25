@@ -17,6 +17,8 @@ local Glyphs = require(script.Parent.Glyphs)
 local Input = require(script.Parent.Input)
 local Movement = require(script.Parent.Movement)
 local Music = require(script.Parent.Music)
+local Soundtrack = require(script.Parent.Soundtrack)
+local Subtitles = require(script.Parent.Subtitles)
 
 local Settings = Config.NightTricks
 local Sounds = Settings.Sounds
@@ -30,7 +32,6 @@ local gui: ScreenGui
 local peek: Frame
 local breathBar: Frame
 local batteryBar: Frame
-local subtitle: TextLabel
 local note: TextLabel
 local lorePanel: Frame
 local rain: Sound?
@@ -40,7 +41,6 @@ local effort = 0
 local flashing = false
 local nightToken = 0
 local noteToken = 0
-local subtitleToken = 0
 local lastFlickerSound = 0
 
 local function makeSound(name: string, volume: number, looped: boolean): Sound?
@@ -190,15 +190,6 @@ local function buildGui()
 	batteryBar = bar("Battery", 72, gui)
 	-- The "hold breath" key shows in Hints' hidden line, under the crosshair with "get out"
 	breathBar = bar("Breath", 92, gui)
-	subtitle = label({
-		Name = "Subtitle",
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -150),
-		Size = UDim2.new(0.6, 0, 0, 24),
-		TextSize = 18,
-		TextWrapped = true,
-		Visible = false,
-	}, gui)
 	note = label({
 		Name = "Note",
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -297,7 +288,12 @@ end
 
 local function updateSound(dt: number)
 	local hidden = player:GetAttribute("Hidden") == true
-	local reverb = World.reverb(hidden, player:GetAttribute("Area") == "Room", Settings.Reverb)
+	local reverb = World.reverb(
+		hidden,
+		player:GetAttribute("Area") == "Room",
+		Soundtrack.nearInstallation(0),
+		Settings.Reverb
+	)
 	SoundService.AmbientReverb = (Enum.ReverbType :: any)[reverb]
 
 	local sprinting = Movement.getStance() == "Sprint"
@@ -462,10 +458,7 @@ local function onAnnouncement(text: unknown, voice: unknown, glitch: unknown)
 		if type(voice) == "string" then
 			Music.playVoiceLine(voice)
 		end
-		subtitleToken += 1
-		showFor(subtitle, text, rules.SubtitleTime, subtitleToken, function()
-			return subtitleToken
-		end)
+		Subtitles.show(text, rules.SubtitleTime)
 		if glitch == true then
 			task.delay(rules.SubtitleTime * 0.6, playOnce, Sounds.Glitch, rules.Volume)
 		end

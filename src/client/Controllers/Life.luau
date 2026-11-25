@@ -21,8 +21,8 @@ local LifeSpots = require(ReplicatedStorage.Shared.Logic.LifeSpots)
 local Manifest = require(ReplicatedStorage.Shared.Logic.Manifest)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
-local Hints = require(script.Parent.Hints)
 local Music = require(script.Parent.Music)
+local Subtitles = require(script.Parent.Subtitles)
 
 local Settings = Config.Life
 local Sounds = Settings.Sounds
@@ -1174,7 +1174,7 @@ local function paLoop()
 			playFlat(Sounds.Chime, Volume.Chime)
 			task.wait(CHIME_LEAD)
 			Music.playVoiceLine(line.voice)
-			Hints.flash("life_pa", Settings.PaPrefix .. line.text, Settings.PaSubtitleSeconds)
+			Subtitles.show(Settings.PaPrefix .. line.text, Settings.PaSubtitleSeconds)
 			if roll() < Settings.PaGlitchChance then
 				task.wait(Settings.PaSubtitleSeconds * 0.6)
 				playFlat(Sounds.Glitch, Volume.Chime)

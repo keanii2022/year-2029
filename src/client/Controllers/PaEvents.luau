@@ -9,8 +9,8 @@ local SoundService = game:GetService("SoundService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
-local Hints = require(script.Parent.Hints)
 local Music = require(script.Parent.Music)
+local Subtitles = require(script.Parent.Subtitles)
 
 local Settings = Config.Prizes.Pa
 local MarkerSettings = Settings.Marker
@@ -97,7 +97,7 @@ local function onEvent(event: any)
 	-- A rumor is just a crackle and a line: no chime, no [PA], no arrow
 	if event.rumor then
 		playFlat(Settings.Rumor.Sound)
-		Hints.flash("pa_event", event.text, Settings.SubtitleSeconds)
+		Subtitles.show(event.text, Settings.SubtitleSeconds)
 		return
 	end
 	playFlat(Settings.Sounds.Chime)
@@ -105,7 +105,7 @@ local function onEvent(event: any)
 	if type(event.voice) == "string" then
 		Music.playVoiceLine(event.voice)
 	end
-	Hints.flash("pa_event", Settings.Prefix .. event.text, Settings.SubtitleSeconds)
+	Subtitles.show(Settings.Prefix .. event.text, Settings.SubtitleSeconds)
 	if typeof(event.position) == "Vector3" then
 		addMarker(event.position)
 	end

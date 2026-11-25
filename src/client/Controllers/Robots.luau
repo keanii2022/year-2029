@@ -45,6 +45,8 @@ type Talker = {
 	chase: { Sound },
 	whine: Sound?, -- the chase loop whose pitch climbs
 	chaseSince: number?,
+	eyes: BasePart?,
+	eyeColor: Color3?, -- what the server dressed the eyes in, shown while it isn't suspicious or chasing
 }
 
 local Robots = {}
@@ -141,6 +143,58 @@ local function sayLine(model: Model)
 		TextStrokeTransparency = 1,
 	}):Play()
 	Debris:AddItem(gui, 2.6)
+end
+
+-- A small "?" (suspicious) or "!" (chasing) pops over its head and fades, so a muted or deaf player
+-- still sees it notice them. Only up close, and walls hide it.
+local function popMark(model: Model, text: string, color: Color3)
+	local head = model:FindFirstChild("Head", true)
+	if not head or not head:IsA("BasePart") then
+		return
+	end
+	local mark = settings.Mark
+	local gui = Instance.new("BillboardGui")
+	gui.Size = UDim2.fromScale(mark.Size, mark.Size)
+	gui.StudsOffsetWorldSpace = Vector3.new(0, mark.Height, 0)
+	gui.LightInfluence = 0
+	gui.MaxDistance = mark.Range
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamBlack
+	label.TextScaled = true
+	label.TextColor3 = color
+	label.TextStrokeTransparency = 0.3
+	label.Text = text
+	label.Parent = gui
+	gui.Parent = head
+	TweenService:Create(label, TweenInfo.new(mark.Seconds, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+		TextTransparency = 1,
+		TextStrokeTransparency = 1,
+	}):Play()
+	Debris:AddItem(gui, mark.Seconds + 0.1)
+end
+
+local function eyeColorFor(talker: Talker, state: unknown): Color3?
+	if state == "chase" then
+		return settings.ChaseEyeColor
+	elseif state == "suspicious" then
+		return settings.SuspiciousEyeColor
+	end
+	return talker.eyeColor
+end
+
+local function tintEyes(talker: Talker, state: unknown)
+	local eyes = talker.eyes
+	local color = eyeColorFor(talker, state)
+	if not eyes or not color then
+		return
+	end
+	eyes.Color = color
+	local glow = eyes:FindFirstChild("EyeGlow")
+	if glow and glow:IsA("PointLight") then
+		glow.Color = color
+	end
 end
 
 -- One line at a time per robot: a new one cuts off whatever it was saying.
@@ -456,6 +510,8 @@ local function voice(model: Model)
 		return
 	end
 	local night = isLoud(model)
+	local eyes = model:FindFirstChild(settings.EyePart, true)
+	local eyePart = if eyes and eyes:IsA("BasePart") then eyes else nil
 	local talker: Talker = {
 		body = body,
 		speaking = nil,
@@ -467,6 +523,8 @@ local function voice(model: Model)
 		chase = {},
 		whine = nil,
 		chaseSince = nil,
+		eyes = eyePart,
+		eyeColor = if eyePart then eyePart.Color else nil,
 	}
 	talkers[model] = talker
 	local lastState = model:GetAttribute("State")
@@ -478,6 +536,7 @@ local function voice(model: Model)
 	if lastState == "chase" then
 		startChase(model, talker)
 	end
+	tintEyes(talker, lastState)
 	-- Now and then an idle robot leaks oil or lets off pressure; at night it pings and whirrs, more often
 	task.spawn(function()
 		local prowler = model:GetAttribute("Role") == "prowler"
@@ -506,9 +565,14 @@ local function voice(model: Model)
 		end
 		if state == "chase" and not wasChasing then
 			startChase(model, talker)
+			popMark(model, "!", settings.ChaseEyeColor)
 		elseif state ~= "chase" and wasChasing then
 			stopChase(talker)
 		end
+		if state == "suspicious" then
+			popMark(model, "?", settings.SuspiciousEyeColor)
+		end
+		tintEyes(talker, state)
 		local cue = settings.StateSounds[state]
 		if cue then
 			local name = if type(cue) == "table" then cue[random:NextInteger(1, #cue)] else cue
@@ -538,6 +602,8 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 		sparkBurst(at, 60)
 	elseif kind == "reboot" then
 		playOnce(body, shot.Reboot, sounds.CueVolume, true)
+	elseif kind == "lunge" then
+		playFar(body, hunt.LungeSound, hunt.LungeVolume, hunt.LungePitch, settings.NightRollOff)
 	elseif kind == "alert" then
 		playFar(body, hunt.AlertSound, hunt.AlertVolume, hunt.AlertPitch, hunt.RollOff)
 	elseif kind == "answer" then

@@ -339,6 +339,8 @@ return {
 	AimEase = 14,
 	HitMarkerTime = 0.15,
 	HitMarkerPop = 1.7, -- the X starts this much bigger and shrinks back over HitMarkerTime
+	DownSound = "down_zap", -- the moment you go down
+	DownSoundVolume = 0.8,
 
 	-- A shot passing this close to another player's head plays a whiz for them. Not within
 	-- WhizMinDistance studs of the shooter, so standing beside a teammate stays quiet.

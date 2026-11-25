@@ -66,6 +66,11 @@ local function update(dt: number)
 	camera.CFrame *= CFrame.new(side, up, 0) * CFrame.Angles(0, 0, math.rad(roll + sway))
 end
 
+-- The head bob's phase, 0..2pi per two steps; Footsteps lands a foot on each dip.
+function Camera.bobPhase(): number
+	return phase
+end
+
 function Camera.Init()
 	player.CameraMode = Enum.CameraMode.LockFirstPerson
 	player.CameraMaxZoomDistance = 0.5

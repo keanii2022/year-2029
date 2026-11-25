@@ -118,7 +118,7 @@ return {
 	},
 
 	-- SoundService.AmbientReverb per place.
-	Reverb = { Aisle = "Hangar", Room = "LivingRoom", Hidden = "PaddedCell" },
+	Reverb = { Aisle = "Hangar", Room = "LivingRoom", Installation = "StoneRoom", Hidden = "PaddedCell" },
 
 	Peek = {
 		Slats = 7,

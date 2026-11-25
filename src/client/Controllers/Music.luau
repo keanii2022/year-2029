@@ -1,7 +1,7 @@
--- Store sound with the clock: day music and PA announcements, the siren with a spoken countdown,
--- the lights-out clunk, then the night hum. Every sound comes from the manifest or Config and
--- simply stays silent until it has an uploaded id.
--- Music.playVoiceLine(name) is the hook for any line in art/sounds/VOICE_LINES.md.
+-- Store sound with the clock: day music and the morning PA line, the siren with a ticking clock and
+-- a spoken countdown, the lights-out clunk and alarm beep, then the night hum. Every sound comes from
+-- the manifest or Config and simply stays silent until it has an uploaded id; PA lines always show
+-- as [PA] subtitles. Music.playVoiceLine(name) is the hook for any line in art/sounds/VOICE_LINES.md.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 
@@ -10,14 +10,17 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Hints = require(script.Parent.Hints)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Subtitles = require(script.Parent.Subtitles)
 
 local Settings = Config.DayNight
 local Sounds = Settings.Sounds
 local Volume = Settings.Volume
 
+type PaLine = { voice: string, text: string }
+
 -- Gaps so the jingle or chime finishes before the announcer talks over it.
 local AFTER_JINGLE = 3
-local AFTER_CHIME = 1.5
+local COUNTDOWN_WORD_SECONDS = 1.2
 
 local Music = {}
 
@@ -27,6 +30,8 @@ local dayMusic: Sound?
 local sirenLoop: Sound?
 local nightHum: Sound?
 local nightAmbience: Sound?
+local clockTick: Sound?
+local clockTickFast: Sound?
 
 local function makeSound(id: string?, volume: number, looped: boolean): Sound?
 	if not id then
@@ -63,7 +68,7 @@ local function setPlaying(sound: Sound?, playing: boolean)
 	end
 end
 
-local function pick(list: { string }): string
+local function pick<T>(list: { T }): T
 	return list[random:NextInteger(1, #list)]
 end
 
@@ -82,14 +87,23 @@ function Music.playVoiceLine(name: string): boolean
 	return playOnce(Settings.VoiceLineIds[name] or ModelLibrary.soundId(name), Volume.Announcer)
 end
 
-local function scheduleAnnouncement()
-	later(random:NextNumber(Settings.AnnouncementGap.Min, Settings.AnnouncementGap.Max), function()
-		playOnce(ModelLibrary.soundId(Sounds.Chime), Volume.Stinger)
-		later(AFTER_CHIME, function()
-			Music.playVoiceLine(pick(Settings.DayLines))
+-- The recorded clip plays once it has an id; the subtitle shows either way, for anyone muted or deaf.
+local function announce(line: PaLine)
+	Music.playVoiceLine(line.voice)
+	Subtitles.show(Settings.PaPrefix .. line.text, Settings.PaSubtitleSeconds)
+end
+
+-- The last seconds before lights out: the clock ticks faster under the spoken count, word by word.
+local function countdown()
+	local line = Settings.CountdownLine
+	setPlaying(clockTick, false)
+	setPlaying(clockTickFast, true)
+	Music.playVoiceLine(line.voice)
+	for index, word in line.words do
+		later(index - 1, function()
+			Subtitles.show(Settings.PaPrefix .. word, COUNTDOWN_WORD_SECONDS)
 		end)
-		scheduleAnnouncement()
-	end)
+	end
 end
 
 -- The siren comes in blasts with quiet between, not one endless wail
@@ -114,6 +128,8 @@ local function show(phase: string, endsAt: number, animate: boolean)
 	setPlaying(sirenLoop, false)
 	setPlaying(nightHum, phase == "Night")
 	setPlaying(nightAmbience, phase == "Night")
+	setPlaying(clockTick, phase == "Siren")
+	setPlaying(clockTickFast, false)
 
 	if phase == "Day" then
 		if animate then
@@ -121,24 +137,25 @@ local function show(phase: string, endsAt: number, animate: boolean)
 			later(Config.Dawn.JingleDelay, function()
 				playOnce(ModelLibrary.soundId(Sounds.Jingle), Volume.Stinger)
 				later(AFTER_JINGLE, function()
-					Music.playVoiceLine(pick(Settings.MorningLines))
+					announce(pick(Settings.MorningLines))
 				end)
 			end)
 		end
-		scheduleAnnouncement()
 	elseif phase == "Siren" then
 		Hints.flash("siren", Settings.SirenHint, 8)
 		sirenBursts(phaseToken)
 		local timeLeft = endsAt - workspace:GetServerTimeNow()
 		local countdownIn = ClockEffects.countdownDelay(timeLeft, Settings.CountdownLead)
 		if countdownIn then
-			later(countdownIn, function()
-				Music.playVoiceLine(Settings.CountdownLine)
-			end)
+			later(countdownIn, countdown)
+		elseif timeLeft > 0 then
+			setPlaying(clockTick, false)
+			setPlaying(clockTickFast, true)
 		end
 	elseif phase == "Night" and animate then
 		playOnce(ModelLibrary.soundId(Sounds.LightsOut), Volume.Stinger)
-		Music.playVoiceLine(pick(Settings.LightsOutLines))
+		playOnce(ModelLibrary.soundId(Sounds.AlarmBeep), Volume.AlarmBeep)
+		announce(pick(Settings.LightsOutLines))
 	end
 end
 
@@ -147,6 +164,8 @@ function Music.Start()
 	sirenLoop = makeSound(ModelLibrary.soundId(Sounds.Siren), Volume.Siren, true)
 	nightHum = makeSound(ModelLibrary.soundId(Sounds.NightHum), Volume.NightHum, true)
 	nightAmbience = makeSound(ModelLibrary.soundId(Sounds.NightAmbience), Volume.NightAmbience, true)
+	clockTick = makeSound(ModelLibrary.soundId(Sounds.ClockTick), Volume.ClockTick, true)
+	clockTickFast = makeSound(ModelLibrary.soundId(Sounds.ClockTickFast), Volume.ClockTick, true)
 
 	Net.event("PhaseChanged").OnClientEvent:Connect(function(phase: string, endsAt: number)
 		show(phase, endsAt, true)

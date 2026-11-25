@@ -18,7 +18,8 @@ local loops: { [string]: Sound } = {}
 local lightsTrack = "Day"
 local swapAt = 0
 
-local function nearInstallation(): boolean
+-- True within `padding` studs of an installation's dark hall (0: inside it).
+function Soundtrack.nearInstallation(padding: number): boolean
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local folder = ReplicatedStorage:FindFirstChild("Installations")
@@ -27,7 +28,7 @@ local function nearInstallation(): boolean
 	end
 	for _, marker in folder:GetChildren() do
 		if marker:IsA("Vector3Value") then
-			local reach = (marker:GetAttribute("Radius") or 0) + settings.InstallationPadding
+			local reach = (marker:GetAttribute("Radius") or 0) + padding
 			local offset = root.Position - marker.Value
 			if math.abs(offset.X) < reach and math.abs(offset.Z) < reach then
 				return true
@@ -38,7 +39,7 @@ local function nearInstallation(): boolean
 end
 
 local function wanted(): string
-	if nearInstallation() then
+	if Soundtrack.nearInstallation(settings.InstallationPadding) then
 		return "Installation"
 	end
 	local phase = ReplicatedStorage:GetAttribute("Phase") or "Day"
