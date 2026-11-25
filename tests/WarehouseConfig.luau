@@ -148,6 +148,16 @@ return {
 		CarryLightCount = 70,
 		CarryLights = { "emergency_light", "emergency_light", "candles" },
 	},
+	PrizeSpots = {
+		Count = { 1, 3 },
+		AreaPerExtra = 7500,
+		Radius = 3,
+		WallPad = 5,
+		GridStep = 4,
+		MinGap = 18,
+		DoorClearance = 10,
+		KitClearance = 3,
+	},
 	InstallationFill = {
 		AreaPerGroup = 1800,
 		Groups = { 3, 22 },
