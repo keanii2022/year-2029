@@ -95,7 +95,7 @@ return {
 			falloffStart = 10,
 			falloffEnd = 40,
 			range = 120,
-			fireInterval = 0.95,
+			fireInterval = 1.0,
 			magSize = 6,
 			reloadTime = 2.6,
 		},
