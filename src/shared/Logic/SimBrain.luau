@@ -152,6 +152,19 @@ function SimBrain.decide(
 end
 
 -- A made-up gamer tag from word lists, e.g. "NeonPickle42", "sleepy_toaster" or "xXWaffleXx".
+-- Drops a fresh bot straight into an action, as if it had been at it a while (a filled lobby)
+function SimBrain.start(
+	brain: Brain,
+	action: Action,
+	phase: string,
+	settings: Settings,
+	now: number,
+	random: () -> number
+): Action
+	brain.phase = phase
+	return choose(brain, action, nil, settings, now, random)
+end
+
 function SimBrain.gamerName(
 	words: { Adjectives: { string }, Nouns: { string } },
 	random: () -> number

@@ -309,7 +309,7 @@ local function restock(seed: number)
 		layout,
 		Config.Warehouse,
 		rng,
-		Settings.FloorSpots,
+		Warehouse.scaled(Settings.FloorSpots),
 		Settings.SpotTries,
 		Settings.SpotClearance
 	)

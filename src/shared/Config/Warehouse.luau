@@ -10,7 +10,16 @@ local settings = {
 	Origin = Vector3.new(0, 0, -6000),
 
 	-- Studs. 3200 at walk speed 14 is a bit under 4 minutes wall to wall: big, but packed.
+	-- Size is what the counts below are tuned for; the live warehouse picks one of Sizes at boot.
 	Size = 3200,
+	Sizes = { Small = 1600, Medium = 2400, Large = 3200 },
+	DefaultSize = "Large",
+	StudioSize = nil :: string?, -- Studio only: a Sizes name to playtest without a size server
+	TunedSize = 3200,
+	CountScalePower = 0.85, -- below 1 keeps smaller warehouses a bit denser than straight area
+	-- Size servers: the admin panel reserves a fresh server and leaves its size here (MemoryStore,
+	-- keyed by the private server id); the new server waits up to ReadTimeout seconds for it.
+	SizeServer = { MapName = "WarehouseSizes", Expiry = 3600, ReadTimeout = 5 },
 	CeilingHeight = 70,
 	WallThickness = 8,
 

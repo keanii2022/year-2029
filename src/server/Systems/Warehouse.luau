@@ -10,6 +10,8 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local GrabRules = require(ReplicatedStorage.Shared.Logic.GrabRules)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local WarehouseGen = require(ReplicatedStorage.Shared.Logic.WarehouseGen)
+local WarehouseSizes = require(ReplicatedStorage.Shared.Logic.WarehouseSizes)
+local SizeServers = require(script.Parent.SizeServers)
 
 local Warehouse = {}
 
@@ -20,6 +22,9 @@ local FLICKER_TAG = "FlickerLight"
 local LIGHT_TAG = "WarehouseLight" -- client Lighting switches these off at night, emergency ones go red
 
 local layout: WarehouseGen.Layout
+-- The layout waits on the size choice (a MemoryStore read on size servers), so it is made in Start;
+-- other systems asking for it before then wait here.
+local layoutReady = Instance.new("BindableEvent")
 local root: Folder
 local chunks: { [string]: Folder } = {}
 local built = 0
@@ -518,7 +523,10 @@ local RACK_WRECKS = { "rack_collapsed", "rack_toppled_beam" }
 -- Loose props across one rack slot. base: the slot's centre at its load bottom, x along the rack.
 -- deck lays a wire deck across the beams first, for slots that only have beams under them.
 local function stockSlot(base: CFrame, slot: Vector3, deck: boolean, parent: Instance)
-	if shelfStocked >= settings.ShelfStockMax or cosmetic:NextNumber() >= settings.ShelfStockChance then
+	if
+		shelfStocked >= WarehouseSizes.scaled(layout.size, settings.ShelfStockMax, settings)
+		or cosmetic:NextNumber() >= settings.ShelfStockChance
+	then
 		return
 	end
 	if deck then
@@ -1015,27 +1023,44 @@ local function buildDecal(decal: WarehouseGen.Decal)
 	noteBuilt()
 end
 
+local function waitForLayout()
+	if not layout then
+		layoutReady.Event:Wait()
+	end
+end
+
 function Warehouse.layout(): WarehouseGen.Layout
+	waitForLayout()
 	return layout
 end
 
 function Warehouse.rooms(): { any }
+	waitForLayout()
 	return layout.rooms
+end
+
+-- A count tuned for Config.Warehouse.TunedSize, scaled to this server's warehouse
+function Warehouse.scaled(count: number): number
+	waitForLayout()
+	return WarehouseSizes.scaled(layout.size, count, settings)
 end
 
 -- 0 at the entrance, 1 at the far corners
 function Warehouse.depth(position: Vector3): number
+	waitForLayout()
 	local relative = position - settings.Origin
 	return WarehouseGen.depth(layout, relative.X, relative.Z)
 end
 
 function Warehouse.roomAt(position: Vector3): any?
+	waitForLayout()
 	local relative = position - settings.Origin
 	return WarehouseGen.roomAt(layout, relative.X, relative.Z)
 end
 
 -- The dreamcore pocket a spot is inside, if any (kind: poolroom, flooded, office, ...)
 function Warehouse.pocketAt(position: Vector3): WarehouseGen.Pocket?
+	waitForLayout()
 	local relative = position - settings.Origin
 	return WarehouseGen.pocketAt(layout, relative.X, relative.Z)
 end
@@ -1045,13 +1070,15 @@ function Warehouse.toWorld(x: number, z: number): Vector3
 end
 
 function Warehouse.Init()
-	local seed = if settings.Seed == 0 then Random.new():NextInteger(1, 2 ^ 31 - 1) else settings.Seed
-	layout = WarehouseGen.generate(settings, seed)
-	cosmetic = Random.new(seed)
 	buildHaze()
 end
 
 function Warehouse.Start()
+	local seed = if settings.Seed == 0 then Random.new():NextInteger(1, 2 ^ 31 - 1) else settings.Seed
+	layout = WarehouseGen.generate(WarehouseSizes.configFor(SizeServers.choice().size, settings), seed)
+	cosmetic = Random.new(seed)
+	layoutReady:Fire()
+
 	root = Instance.new("Folder")
 	root.Name = "Warehouse"
 	root:SetAttribute("Seed", layout.seed)

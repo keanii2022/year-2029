@@ -235,8 +235,15 @@ local function placeStorySpots(
 	table.sort(kinds)
 	for _, kind in kinds do
 		local group = Settings.StorySpots[kind]
-		local spots =
-			HauntPlacement.spots(group.count, half, Settings.SpotGap, Settings.SpotTries, clear, taken, roll)
+		local spots = HauntPlacement.spots(
+			Warehouse.scaled(group.count),
+			half,
+			Settings.SpotGap,
+			Settings.SpotTries,
+			clear,
+			taken,
+			roll
+		)
 		for _, spot in spots do
 			for _, item in HauntPlacement.arrange(group.items, spot) do
 				local model = place(item.name, item.x, item.z, item.turn)
@@ -260,7 +267,7 @@ local function placeGroups(
 	half: number
 )
 	local rules = Settings[if kind == "pigeons" then "Pigeons" else "Rats"]
-	local count = if kind == "pigeons" then rules.Flocks else rules.Nests
+	local count = Warehouse.scaled(if kind == "pigeons" then rules.Flocks else rules.Nests)
 	local size = if kind == "pigeons" then rules.PerFlock else rules.PerNest
 	local model = if kind == "pigeons" then "pigeon" else "rat"
 	for _, spot in HauntPlacement.spots(count, half, Settings.SpotGap, Settings.SpotTries, clear, taken, roll) do
@@ -416,7 +423,7 @@ end
 
 local function placeCams(layout: WarehouseGen.Layout)
 	local out = Config.Warehouse.PillarSize / 2 + 0.3
-	for _, pillar in HauntPlacement.everyNth(layout.pillars, Settings.Cams.Count) do
+	for _, pillar in HauntPlacement.everyNth(layout.pillars, Warehouse.scaled(Settings.Cams.Count)) do
 		local turn = random:NextInteger(0, 3) * 90
 		local radians = math.rad(turn)
 		local x, z = pillar.x + math.sin(radians) * out, pillar.z + math.cos(radians) * out

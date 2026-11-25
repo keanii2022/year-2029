@@ -1,6 +1,10 @@
 -- Mirrors the layout numbers in Config/Warehouse (that file holds Roblox types Lune can't load)
 return {
 	Size = 3200,
+	Sizes = { Small = 1600, Medium = 2400, Large = 3200 },
+	DefaultSize = "Large",
+	TunedSize = 3200,
+	CountScalePower = 0.85,
 	CeilingHeight = 70,
 	WallThickness = 8,
 	BlockSize = 160,

@@ -6,16 +6,19 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
 
 local AdminAccess = require(ReplicatedStorage.Shared.Logic.AdminAccess)
 local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
+local WarehouseSizes = require(ReplicatedStorage.Shared.Logic.WarehouseSizes)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Combat = require(script.Parent.Combat)
 local DayNight = require(script.Parent.DayNight)
 local DevTeleport = require(script.Parent.DevTeleport)
 local Inventory = require(script.Parent.Inventory)
 local Robots = require(script.Parent.Robots)
+local SizeServers = require(script.Parent.SizeServers)
 
 local settings = Config.Admin
 local blasters = Config.Guns.Blasters
@@ -42,7 +45,12 @@ local function isAdmin(player: Player): boolean
 end
 
 local function refresh(player: Player)
-	player:SetAttribute("Admin", if isAdmin(player) then true else nil)
+	local admin = isAdmin(player)
+	player:SetAttribute("Admin", if admin then true else nil)
+	-- The size buttons' "Public lobby" toggle, on unless this admin turned it off
+	if admin and player:GetAttribute("AdminPublicLobby") == nil then
+		player:SetAttribute("AdminPublicLobby", true)
+	end
 end
 
 local function resolveNames()
@@ -316,6 +324,50 @@ local function simClear(): string
 	end)
 end
 
+local function simFill(): string
+	return withSim(function(sim)
+		return `Lobby filled: {sim.fillLobby()} players`
+	end)
+end
+
+-- Warehouse size servers --------------------------------------------------------------------------
+
+local function openSizeServer(player: Player, sizeName: unknown): string
+	if not WarehouseSizes.isSize(sizeName, Config.Warehouse) then
+		return "Unknown size"
+	end
+	local admins = {}
+	for _, other in Players:GetPlayers() do
+		if isAdmin(other) then
+			table.insert(admins, other)
+		end
+	end
+	return SizeServers.open(sizeName :: string, player:GetAttribute("AdminPublicLobby") == true, admins)
+end
+
+local function togglePublicLobby(player: Player): string
+	local on = player:GetAttribute("AdminPublicLobby") ~= true
+	player:SetAttribute("AdminPublicLobby", on)
+	return `Public lobby on size servers: {if on then "ON" else "OFF"}`
+end
+
+-- A size server asked for a public lobby: fill it once the warehouse is standing
+local function fillIfAsked()
+	if not SizeServers.choice().publicLobby then
+		return
+	end
+	local root = workspace:WaitForChild("Warehouse")
+	while root:GetAttribute("Built") ~= true do
+		root:GetAttributeChangedSignal("Built"):Wait()
+	end
+	local result = simFill()
+	for _, player in Players:GetPlayers() do
+		if isAdmin(player) then
+			statusRemote:FireClient(player, result)
+		end
+	end
+end
+
 local function sendSimCount(player: Player)
 	local sim = simPlayers()
 	local ok, count = false, nil
@@ -362,6 +414,9 @@ local commands: { [string]: (player: Player, arg: unknown) -> string? } = {
 		return simMood(mood)
 	end,
 	sim_clear = simClear,
+	sim_fill = simFill,
+	size_server = openSizeServer,
+	size_lobby = togglePublicLobby,
 	sim_count = function(player)
 		sendSimCount(player)
 		return nil
@@ -410,6 +465,12 @@ function Admin.Start()
 	if not RunService:IsStudio() then
 		task.spawn(resolveNames)
 	end
+	TeleportService.TeleportInitFailed:Connect(function(player, _result, message)
+		if isAdmin(player) then
+			statusRemote:FireClient(player, `Teleport failed: {message}`)
+		end
+	end)
+	task.spawn(fillIfAsked)
 end
 
 return Admin

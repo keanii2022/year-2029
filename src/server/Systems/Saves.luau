@@ -797,7 +797,7 @@ local function restockPaper(day: number)
 		Warehouse.layout(),
 		Config.Warehouse,
 		rng,
-		BlueprintSettings.PaperPerDay,
+		Warehouse.scaled(BlueprintSettings.PaperPerDay),
 		BlueprintSettings.PaperSpotTries,
 		BlueprintSettings.PaperSpotClearance
 	)

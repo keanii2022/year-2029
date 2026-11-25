@@ -1,6 +1,6 @@
 -- Simulated players for filling a fake lobby. Only exist when the admin panel spawns them.
 return {
-	Max = 24,
+	Max = 30,
 	Tag = "SimPlayer", -- CollectionService tag on every bot model; Robots and Combat look for it
 	FolderName = "SimPlayers",
 	RespawnDelay = 10, -- seconds a downed bot lies there before it comes back at a spawn
@@ -92,6 +92,17 @@ return {
 		},
 	},
 	DefaultMood = "normal",
+
+	-- Fill lobby: a public server already running when you drop in. Bots is the Large-warehouse
+	-- range, scaled down by area on smaller ones. Groups are 1 to 3; Openings is what each group is
+	-- busy with when it appears (drag is fort building). The rest of a group starts on "group".
+	Lobby = {
+		Bots = { 20, 26 },
+		Mood = "normal",
+		SoloShare = 0.45,
+		TrioShare = 0.2,
+		Openings = { loot = 3, drag = 2, sneak = 1.5 },
+	},
 
 	-- Roblox's stock R15 animations; used when the rig doesn't carry its own Animate ids
 	Animations = {

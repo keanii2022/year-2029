@@ -99,6 +99,11 @@ return {
 		expect(SimBrain.decide(brain, input({}), SETTINGS, 1, rolls(0.9))).toBe("wander")
 		expect(SimBrain.decide(brain, input({}), SETTINGS, 100, rolls(0.9))).toBe("group")
 	end,
+	["a lobby bot starts mid-action and keeps at it"] = function()
+		local brain = SimBrain.new()
+		expect(SimBrain.start(brain, "drag", "Day", SETTINGS, 0, rolls(0.5))).toBe("drag")
+		expect(SimBrain.decide(brain, input({}), SETTINGS, 1, rolls(0.1))).toBe("drag")
+	end,
 	["day actions follow the mood weights"] = function()
 		local weights = { wander = 0, loot = 3, sneak = 0, drag = 1, group = 0 }
 		expect(SimBrain.pickWeighted(weights, 0)).toBe("loot")
