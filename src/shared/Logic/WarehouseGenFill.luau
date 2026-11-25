@@ -9,7 +9,7 @@ local Rng = if script then require(script.Parent.WarehouseGenRng) else require("
 local Fill = {}
 
 -- A keep-out: a box (half sizes hx, hz) grown by r, or a plain circle when hx = hz = 0
-type Block = { x: number, z: number, r: number, hx: number, hz: number }
+export type Block = { x: number, z: number, r: number, hx: number, hz: number }
 type Frame = { x: number, z: number, quarter: number }
 
 local piece = Pieces.piece
@@ -146,7 +146,7 @@ local function bulb(layout: any, settings: any, x: number, z: number, ceiling: n
 end
 
 -- Low, solid things the set already put down: anything a group would end up inside
-local function blockers(layout: any, room: any, from: number): { Block }
+function Fill.blockers(layout: any, room: any, from: number): { Block }
 	local list = {}
 	for index = from, #layout.pieces do
 		local spec = layout.pieces[index]
@@ -183,7 +183,7 @@ local function overlaps(block: Block, x: number, z: number, radius: number): boo
 	return dx * dx + dz * dz < (radius + block.r) ^ 2
 end
 
-local function free(list: { Block }, x: number, z: number, radius: number): boolean
+function Fill.free(list: { Block }, x: number, z: number, radius: number): boolean
 	for _, block in list do
 		if overlaps(block, x, z, radius) then
 			return false
@@ -206,7 +206,7 @@ function Fill.room(
 		return
 	end
 	local rng = Rng.new(layout.seed + room.id * 7919)
-	local list = blockers(layout, room, from)
+	local list = Fill.blockers(layout, room, from)
 	for _, door in doorways do
 		table.insert(list, { x = door[1], z = door[2], r = settings.DoorClearance, hx = 0, hz = 0 })
 	end
@@ -222,7 +222,7 @@ function Fill.room(
 		tries += 1
 		local x = rng:range(room.x0 + pad, room.x1 - pad)
 		local z = rng:range(room.z0 + pad, room.z1 - pad)
-		if free(list, x, z, radius) then
+		if Fill.free(list, x, z, radius) then
 			placed += 1
 			local frame: Frame = { x = x, z = z, quarter = rng:int(0, 3) }
 			local kind = GROUP_NAMES[(placed + room.id) % #GROUP_NAMES + 1]

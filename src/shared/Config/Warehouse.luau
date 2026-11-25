@@ -125,6 +125,19 @@ local settings = {
 		vending_machine = "vending",
 	},
 
+	-- Prize chest spots in every set (Logic/WarehouseGenPrizes; the chests are Config.Prizes): the
+	-- free floor furthest from the hall doors, MinGap apart, Radius clear of furniture and walls
+	PrizeSpots = {
+		Count = { 1, 3 }, -- giant halls get the most
+		AreaPerExtra = 7500, -- square studs of set floor per extra chest
+		Radius = 3,
+		WallPad = 5,
+		GridStep = 4,
+		MinGap = 18,
+		DoorClearance = 10,
+		KitClearance = 3,
+	},
+
 	-- The open floor of every installation set gets furniture groups, robot hoards and study
 	-- benches, each under a bare bulb (see Logic/WarehouseGenFill)
 	InstallationFill = {

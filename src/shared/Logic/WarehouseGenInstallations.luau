@@ -5,6 +5,7 @@
 -- other systems find it like any room.
 local Fill = if script then require(script.Parent.WarehouseGenFill) else require("./WarehouseGenFill")
 local Pieces = if script then require(script.Parent.WarehouseGenPieces) else require("./WarehouseGenPieces")
+local Prizes = if script then require(script.Parent.WarehouseGenPrizes) else require("./WarehouseGenPrizes")
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
 
@@ -1385,6 +1386,17 @@ function Sets.catwalk_void(ctx: Ctx)
 		skipIfKit = "vending_machine",
 	})
 	Pieces.kitProp(L, "vending_machine", endX, endZ, 0, y + 0.2)
+	-- The prize sits on the walkway just short of the vending machine: the floor below is the void
+	local outX = if alongX then (if door.side == "west" then 1 else -1) else 0
+	local outZ = if alongX then 0 else (if door.side == "north" then 1 else -1)
+	ctx.room.prizeHints = {
+		{
+			x = endX - outX * 4.5,
+			z = endZ - outZ * 4.5,
+			y = y + 0.2,
+			turn = math.deg(math.atan2(-outX, -outZ)),
+		},
+	}
 	piece(L, {
 		x = endX,
 		y = y + 3,
@@ -2485,6 +2497,12 @@ function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Piece
 	end
 	Fill.room(layout, config, room, firstPiece, ctx.h, doorways)
 	placeStash(layout, config, room, hall)
+	local entrances = {}
+	for _, door in hall.doors do
+		local x, z = doorway(hall, door)
+		table.insert(entrances, { x, z })
+	end
+	Prizes.place(layout, config, room, firstPiece, doorways, entrances)
 	for _, door in hall.doors do
 		doorSpill(layout, config, hall, door, room.tone)
 	end
