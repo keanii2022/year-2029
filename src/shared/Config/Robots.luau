@@ -43,12 +43,12 @@ return {
 
 	-- Per type. Speeds in studs per second (players walk 14, sprint 22, crouch 7).
 	Types = {
-		cleaner = { role = "chore", walkSpeed = 8, chaseSpeed = 18, sightRange = 34, agentHeight = 7 },
-		carrier = { role = "chore", walkSpeed = 8, chaseSpeed = 17, sightRange = 34, agentHeight = 7 },
-		cook = { role = "chore", walkSpeed = 8, chaseSpeed = 18, sightRange = 34, agentHeight = 7 },
-		scout = { role = "hunter", walkSpeed = 10, chaseSpeed = 20, sightRange = 70, agentHeight = 7 },
-		brute = { role = "hunter", walkSpeed = 8, chaseSpeed = 17, sightRange = 45, agentHeight = 8 },
-		crawler = { role = "hunter", walkSpeed = 11, chaseSpeed = 21, sightRange = 40, agentHeight = 3.5 },
+		cleaner = { role = "chore", walkSpeed = 7, chaseSpeed = 13, sightRange = 34, agentHeight = 7 },
+		carrier = { role = "chore", walkSpeed = 7, chaseSpeed = 13, sightRange = 34, agentHeight = 7 },
+		cook = { role = "chore", walkSpeed = 7, chaseSpeed = 13, sightRange = 34, agentHeight = 7 },
+		scout = { role = "hunter", walkSpeed = 9, chaseSpeed = 16, sightRange = 70, agentHeight = 7 },
+		brute = { role = "hunter", walkSpeed = 8, chaseSpeed = 15, sightRange = 45, agentHeight = 8 },
+		crawler = { role = "hunter", walkSpeed = 9, chaseSpeed = 17, sightRange = 40, agentHeight = 3.5 },
 	},
 
 	-- Senses

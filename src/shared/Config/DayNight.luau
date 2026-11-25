@@ -23,16 +23,16 @@ return {
 			Haze = { Density = 0.48, Color = Color3.fromRGB(124, 130, 134), Haze = 2.8 },
 		},
 		Night = {
-			Ambient = Color3.fromRGB(4, 4, 7),
-			OutdoorAmbient = Color3.fromRGB(4, 4, 7),
+			Ambient = Color3.fromRGB(16, 17, 24),
+			OutdoorAmbient = Color3.fromRGB(16, 17, 24),
 			Brightness = 0,
 			ClockTime = 0,
 			ColorShift_Top = Color3.fromRGB(30, 40, 60),
 			ColorShift_Bottom = Color3.fromRGB(0, 0, 0),
-			FogColor = Color3.fromRGB(3, 3, 5),
+			FogColor = Color3.fromRGB(8, 9, 13),
 			FogStart = 0,
 			FogEnd = 200,
-			Haze = { Density = 0.6, Color = Color3.fromRGB(5, 5, 8), Haze = 2 },
+			Haze = { Density = 0.55, Color = Color3.fromRGB(12, 13, 18), Haze = 2 },
 		},
 	},
 	-- Strip lights at night: most go dark, emergency ones glow a dim red
@@ -40,7 +40,7 @@ return {
 		Glow = Color3.fromRGB(150, 24, 20),
 		Light = Color3.fromRGB(255, 50, 40),
 		Brightness = 1.6,
-		Range = 13, -- small pools: you see shapes against them, not the floor in front of you
+		Range = 18, -- small pools: you see shapes against them, not the floor in front of you
 	},
 	DeadStripColor = Color3.fromRGB(60, 62, 64),
 	FlickerRange = 160, -- only strips this close to the camera flicker
