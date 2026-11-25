@@ -14,6 +14,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Hands = require(script.Parent.Hands)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
+local NightTricks = require(script.Parent.NightTricks)
 
 local Settings = Config.DayNight.Flashlight
 local player = Players.LocalPlayer
@@ -129,9 +130,24 @@ local function cullFarBeams()
 	end
 end
 
+-- Asking for the light and still dark this long after means the server said no (dead battery)
+local REFUSED_AFTER = 0.5
+local asks = 0
+
 local function onToggle(began: boolean)
-	if began then
-		toggleRemote:FireServer(player:GetAttribute("FlashlightOn") ~= true)
+	if not began then
+		return
+	end
+	local wantOn = player:GetAttribute("FlashlightOn") ~= true
+	toggleRemote:FireServer(wantOn)
+	asks += 1
+	local ask = asks
+	if wantOn then
+		task.delay(REFUSED_AFTER, function()
+			if ask == asks and player:GetAttribute("FlashlightOn") ~= true then
+				NightTricks.lightRefused()
+			end
+		end)
 	end
 end
 

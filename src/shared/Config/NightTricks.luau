@@ -128,6 +128,7 @@ return {
 
 	Sounds = {
 		Flicker = "flashlight_flicker",
+		DeadClick = "flashlight_click", -- the light was refused (dead battery, no spare)
 		HoldBreath = "hold_breath",
 		Release = "breath_release",
 		Gasp = "breath_release",

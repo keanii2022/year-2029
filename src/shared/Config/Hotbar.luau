@@ -99,4 +99,9 @@ return {
 	SlotSize = 52,
 	SlotGap = 6,
 	Bottom = 8,
+	LabelSize = 10, -- largest slot label; long ones shrink to fit
+	TouchLabelSize = 13,
+	-- Small phones: the bar's right edge sits this far from the screen's right, clear of
+	-- TouchButtons' AIM and FIRE (laid out round Roblox's small jump button)
+	TouchClearRight = 290,
 }

@@ -326,7 +326,7 @@ local function placeStash(roomKey: number, itemId: string, count: number, positi
 	prompt.ActionText = "Take"
 	prompt.HoldDuration = settings.StashPickupHold
 	prompt.MaxActivationDistance = settings.StashPickupRange
-	prompt.RequiresLineOfSight = false
+	prompt.RequiresLineOfSight = true -- no taking it through a wall
 	stashLabel(prompt, itemId, count)
 	prompt.Parent = crate
 	prompt.Triggered:Connect(function(player)
@@ -1193,6 +1193,10 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 	local isPlayer = typeof(player) == "Instance" -- false for a simulated player's stand-in
 	local caughtRemote = Net.event("RobotCaught")
 	fxRemote:FireAllClients(robot.model, "catch", target.position)
+	-- For the down screen (Combat): what got you
+	local body = target.humanoid.Parent :: Instance
+	body:SetAttribute("HurtBy", `Caught by a {robot.typeName} robot`)
+	body:SetAttribute("HurtAt", workspace:GetServerTimeNow())
 	if DayNight.isNight() then
 		-- caught at night counts as going down: Combat drops their bag when the Humanoid dies
 		if isPlayer then

@@ -2,7 +2,8 @@
 -- presses an Input action, so a tap does exactly what the key or gamepad button does.
 -- The cluster wraps round Roblox's jump button (movement stacked above it, actions to its left)
 -- and only shows what matters right now: AIM and RELOAD with a gun in hand, SPIN / TIP and
--- NEAR / FAR while carrying. The big button says what it'll do: FIRE, EAT, THROW, GRAB, PRY, DROP.
+-- NEAR / FAR while carrying. The big button says what it'll do: FIRE, EAT, THROW, GRAB / PRY (only
+-- with something in reach, else a dim HANDS), DROP. CROUCH stays lit while crouched.
 -- Roblox's own thumbstick and jump button stay; the jump button also presses Jump (breath, mash).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -16,6 +17,7 @@ local Gun = require(script.Parent.Gun)
 local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
+local Movement = require(script.Parent.Movement)
 
 local player = Players.LocalPlayer
 
@@ -23,6 +25,7 @@ local PANEL = Color3.fromRGB(12, 12, 14)
 local TEXT = Color3.fromRGB(225, 222, 215)
 local IDLE = 0.35
 local PRESSED = 0.05
+local DIM_TEXT = 0.55 -- the big button's text with nothing in reach
 local REFRESH_EVERY = 0.2
 
 -- Roblox's jump button on a small screen (min side <= 500): 70 across, centre 60 / 55 in from the
@@ -30,13 +33,14 @@ local REFRESH_EVERY = 0.2
 local SMALL_JUMP = { centre = Vector2.new(-60, -55), radius = 35 }
 local LARGE_JUMP = { centre = Vector2.new(-110, -150), radius = 60 }
 
--- mode: hold mirrors the finger, toggle stays pressed until tapped again, tap is a quick press.
+-- mode: hold mirrors the finger, toggle stays pressed until tapped again, tap is a quick press,
+-- state is a tap whose lit look follows the game (crouched or not).
 -- at: centre, from the bottom-right corner, laid out round the small-screen jump button.
 -- when: shown only then ("gun", "carry", "free" = not carrying). corner: top-left instead.
 type Spec = {
 	name: string,
 	action: string?,
-	mode: "hold" | "toggle" | "tap",
+	mode: "hold" | "toggle" | "tap" | "state",
 	size: number,
 	at: Vector2,
 	when: ("gun" | "carry" | "free")?,
@@ -45,7 +49,7 @@ type Spec = {
 
 local BUTTONS: { Spec } = {
 	{ name = "Fire", action = "Fire", mode = "hold", size = 80, at = Vector2.new(-160, -60) },
-	{ name = "Crouch", action = "Crouch", mode = "tap", size = 56, at = Vector2.new(-60, -138) },
+	{ name = "Crouch", action = "Crouch", mode = "state", size = 56, at = Vector2.new(-60, -138) },
 	{ name = "Use", action = "Use", mode = "hold", size = 56, at = Vector2.new(-136, -150) },
 	{
 		name = "Backpack",
@@ -109,6 +113,7 @@ local TouchButtons = {}
 
 local gui: ScreenGui
 local buttons: { [string]: TextButton } = {}
+local specs: { [string]: Spec } = {}
 local toggled: { [string]: boolean } = {}
 
 local function paint(button: TextButton, pressed: boolean)
@@ -125,7 +130,7 @@ end
 
 local function fitText(button: TextButton, size: number)
 	local text = button.Text
-	button.TextSize = if size >= 80 then 17 elseif #text > 5 then 11 else 13
+	button.TextSize = if size >= 80 then 17 elseif #text > 5 then 12 else 14
 end
 
 local function build(spec: Spec)
@@ -162,6 +167,11 @@ local function build(spec: Spec)
 			press(spec, on)
 			return
 		end
+		if spec.mode == "state" then
+			press(spec, true)
+			press(spec, false)
+			return
+		end
 		paint(button, true)
 		press(spec, true)
 		if spec.mode == "tap" then
@@ -181,6 +191,7 @@ local function build(spec: Spec)
 	end)
 	button.Parent = gui
 	buttons[spec.name] = button
+	specs[spec.name] = spec
 end
 
 local function release(spec: Spec)
@@ -197,21 +208,24 @@ local function releaseToggles()
 	end
 end
 
--- Places the cluster round whichever jump button this screen gets
-local function layout()
+-- Where a point laid out round the small jump button (from the bottom-right corner) lands round
+-- whichever jump button this screen gets. Hud places the ammo readout with it too.
+function TouchButtons.place(at: Vector2): UDim2
 	local camera = workspace.CurrentCamera
 	local viewport = if camera then camera.ViewportSize else Vector2.new(844, 390)
 	local jump = if math.min(viewport.X, viewport.Y) <= 500 then SMALL_JUMP else LARGE_JUMP
 	local grow = jump.radius - SMALL_JUMP.radius
+	local offset = at - SMALL_JUMP.centre
+	local placed = jump.centre + offset + Vector2.new(math.sign(offset.X), math.sign(offset.Y)) * grow
+	return UDim2.new(1, placed.X, 1, placed.Y)
+end
+
+local function layout()
 	for _, spec in BUTTONS do
 		local button = buttons[spec.name]
-		if spec.corner then
-			button.Position = UDim2.fromOffset(spec.at.X, spec.at.Y)
-		else
-			local offset = spec.at - SMALL_JUMP.centre
-			local at = jump.centre + offset + Vector2.new(math.sign(offset.X), math.sign(offset.Y)) * grow
-			button.Position = UDim2.new(1, at.X, 1, at.Y)
-		end
+		button.Position = if spec.corner
+			then UDim2.fromOffset(spec.at.X, spec.at.Y)
+			else TouchButtons.place(spec.at)
 	end
 end
 
@@ -221,16 +235,26 @@ local function refreshContext()
 	local carrying = Grab.carrying()
 	local gun = Gun.getAmmo() ~= nil
 	local word = if not slot then "FIRE" else Config.Hotbar.Verbs[slot.use] or "USE"
+	local idle = false
 	if carrying then
 		word = "DROP"
-	elseif slot and slot.use == "Grab" and Grab.target() == "pry" then
-		word = "PRY"
+	elseif slot and slot.use == "Grab" then
+		local target = Grab.target()
+		word = if target == "pry" then "PRY" elseif target then word else "HANDS"
+		idle = target == nil
 	end
 	Glyphs.setTouchLabel("Fire", word)
 	local fire = buttons.Fire
 	if fire.Text ~= word then
 		fire.Text = word
 		fitText(fire, 80)
+	end
+	fire.TextTransparency = if idle then DIM_TEXT else 0
+	-- Crouch is a toggle in Movement, so the button just shows it; crouching drops a toggled sprint
+	local crouched = Movement.getStance() == "Crouch"
+	paint(buttons.Crouch, crouched)
+	if crouched then
+		release(specs.Sprint)
 	end
 	for _, spec in BUTTONS do
 		local show = spec.when == nil

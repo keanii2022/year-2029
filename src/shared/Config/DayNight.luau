@@ -49,7 +49,8 @@ return {
 	SirenStrength = 0.6,
 	SirenFlashRate = 1.2, -- flashes per second
 	SirenBurst = { On = 4, Off = 6 }, -- seconds of wail, then seconds of quiet, until lights out
-	SirenHint = "NIGHT IS COMING. Get somewhere safe before the lights go out.",
+	-- A Glyphs template: {Use} draws the right key
+	SirenHint = "NIGHT IS COMING.\n{Use} Hide in a wardrobe, or get behind your fort",
 	-- Lights out flicker: alternating off/on seconds, starting off. Ends dark.
 	FlickerPattern = { 0.08, 0.1, 0.06, 0.25, 0.1, 0.06, 0.35 },
 

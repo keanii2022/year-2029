@@ -27,6 +27,8 @@ local PANEL_SIZE = Vector2.new(640, 340)
 local SLIDE = 24 -- pixels the panel rises as it opens
 local OPEN_TIME = 0.18
 local PAD_ACTION = "ContainerPad"
+local AUTO_CLOSE_SLACK = 4 -- studs past Interact's reach before an open container shuts itself
+local REACH_CHECK_EVERY = 0.25 -- seconds
 
 type Stack = { id: string, count: number }
 type Side = "bag" | "box"
@@ -288,6 +290,19 @@ function Containers.close()
 	end
 end
 
+-- Further from the box than Interact's reach (measured to its bounding box) plus some slack
+local function outOfReach(model: Model, at: Vector3): boolean
+	local box, size = model:GetBoundingBox()
+	local offset = box:PointToObjectSpace(at)
+	local half = size / 2
+	local nearest = Vector3.new(
+		math.clamp(offset.X, -half.X, half.X),
+		math.clamp(offset.Y, -half.Y, half.Y),
+		math.clamp(offset.Z, -half.Z, half.Z)
+	)
+	return (offset - nearest).Magnitude > Config.Interact.Reach + AUTO_CLOSE_SLACK
+end
+
 local function build()
 	panel = Instance.new("Frame")
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -384,6 +399,35 @@ function Containers.Start()
 	end)
 	Net.event("InventorySync"):FireServer()
 	player.CharacterRemoving:Connect(hide)
+	-- Shuts when you go down or get hurt: a looting player isn't stuck in a menu while robbed
+	local function watchBody(character: Model)
+		local humanoid = character:WaitForChild("Humanoid", 10) :: Humanoid?
+		if not humanoid then
+			return
+		end
+		local last = humanoid.Health
+		humanoid.HealthChanged:Connect(function(health)
+			if health < last then
+				Containers.close()
+			end
+			last = health
+		end)
+		humanoid.Died:Connect(Containers.close)
+	end
+	player.CharacterAdded:Connect(watchBody)
+	if player.Character then
+		task.spawn(watchBody, player.Character)
+	end
+	task.spawn(function()
+		while true do
+			task.wait(REACH_CHECK_EVERY)
+			local model = current
+			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if model and root and outOfReach(model, root.Position) then
+				Containers.close()
+			end
+		end
+	end)
 	Glyphs.onChanged(function()
 		if current then
 			fillFooter()

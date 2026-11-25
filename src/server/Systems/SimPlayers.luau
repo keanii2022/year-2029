@@ -662,6 +662,10 @@ local function shoot(bot: Bot, model: Model, root: BasePart, target: Person, now
 			victimBot.attacker = model
 			victimBot.hitAt = now
 		end
+		-- For the down screen (Combat): what got you
+		local body = victim.Parent :: Instance
+		body:SetAttribute("HurtBy", `Shot by {model.Name}`)
+		body:SetAttribute("HurtAt", workspace:GetServerTimeNow())
 		victim:TakeDamage(damage)
 	end
 	local Robots = require(script.Parent.Robots) :: any

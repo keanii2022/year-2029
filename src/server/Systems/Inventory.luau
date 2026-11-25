@@ -185,7 +185,7 @@ local function buildPile(position: Vector3, contents: { Stack }): Model
 	prompt.ObjectText = pileSummary(contents)
 	prompt.HoldDuration = settings.LootPickupHold
 	prompt.MaxActivationDistance = settings.LootPickupRange
-	prompt.RequiresLineOfSight = false
+	prompt.RequiresLineOfSight = true -- no looting through a wall
 	prompt.Parent = bag
 	prompt.Triggered:Connect(function(player)
 		onPickup(pile, prompt, player)

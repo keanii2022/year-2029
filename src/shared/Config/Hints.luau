@@ -3,8 +3,19 @@
 -- Keyboard / Gamepad / Touch picks wording per device. Keys themselves live in Controllers/Input.
 return {
 	MaxLines = 4, -- hint lines under the crosshair at once; lower order wins
+	TouchMaxLines = 2, -- a phone has less room under the crosshair
 	NudgeSeconds = 5, -- first-time nudges, once per session each
+	-- A "\n" in any hint splits it into stacked lines
 
+	-- First join: the loop in three lines, one every IntroGap seconds, then the locker and controls
+	IntroDelay = 2,
+	IntroGap = 6,
+	IntroLines = {
+		"Loot the shelves by day: food, cells, gear.",
+		"Siren means night. Hide, or fort up with furniture.",
+		"Robots take anything left loose. Anyone can rob you.",
+	},
+	StashNudge = "Your red STASH locker keeps loot between servers. Bank it before dark.",
 	StartHint = "{Controls} All controls",
 	StartHintSeconds = 12,
 
@@ -37,7 +48,7 @@ return {
 		Touch = "Pick HANDS to pry",
 	},
 	CarryHint = {
-		Keyboard = "{Fire} Place   Hold {Fire} Let go   {=R} Spin   {=T} Tip   Hold {=Shift} Fine, no snap   {=Scroll} Closer / farther",
+		Keyboard = "{Fire} Place   Hold {Fire} Let go   {=R} Spin   {=T} Tip\nHold {=Shift} Fine, no snap   {=Scroll} Closer / farther",
 		Gamepad = "{Fire} Place   Hold {Fire} Let go   {=DPadLeft} {=DPadRight} Spin   {=DPadUp} {=DPadDown} Tip   Hold {=L2} Fine, no snap   {=L1} {=R1} Closer / farther",
 		Touch = "{Fire} Place   Hold {Fire} Let go   {CarrySpin} Spin, hold: fine   {CarryTip} Tip   {CarryCloser} {CarryFarther} Distance",
 	},
@@ -59,7 +70,7 @@ return {
 	BackpackDropSeconds = 2, -- the second drop press has this long to land
 	-- %d: the hotbar number of the quick slot the gamepad would put into
 	BackpackFooter = {
-		Keyboard = "Hover + {=3} - {=6} or drag: quick slot   {=X} Drop   {=LMB} Pick   {Backpack} {=Esc} Close",
+		Keyboard = "Hover + {=3} - {=6} or drag: quick slot   {=X} Drop   {=LMB} Pick   {Backpack} Close",
 		Gamepad = "{=Cross} Put in slot %d   {=Square} Next slot   {=R1} Drop   {=Circle} Close",
 		Touch = "Tap an item, then a quick slot   {Backpack} Close",
 	},
@@ -79,6 +90,18 @@ return {
 		Keyboard = "{=1} - {=7} or mouse Pick   Let go of {Callout} Choose",
 		Gamepad = "{=LS} {=DPad} Pick   Let go of {Callout} or {=Cross} Choose",
 		Touch = "Tap a call",
+	},
+
+	-- Along the bottom of the locker / record panel: the stash view, then the record view
+	LockerFooter = {
+		Keyboard = "{=LMB} Click a stack to move it",
+		Gamepad = "{=Cross} Move a stack   {=Circle} Close",
+		Touch = "Tap a stack to move it   Tap X to close",
+	},
+	RecordFooter = {
+		Keyboard = "{Record} Close",
+		Gamepad = "{=Circle} Close",
+		Touch = "Tap X to close",
 	},
 
 	CuffHint = "{Fire} Cuff %s",
@@ -145,7 +168,7 @@ return {
 				{ "{Backpack}", "Bag: fill your quick slots" },
 				{ "{Callout}", "Call out. Hold: pick" },
 				{ "{Jump}", "Jump. Hidden: hold breath" },
-				{ "{Use}", "Use. Nothing there: reload" },
+				{ "{Use}", "Use. Gun out: tap reload, hold use" },
 				{ "{=RS}", "Look. Click: crouch" },
 			},
 			footer = "{=Touchpad} Tap: this card. Hold: your record   {=Options} Menu",

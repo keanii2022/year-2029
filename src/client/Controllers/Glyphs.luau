@@ -105,7 +105,7 @@ local touchLabels: { [string]: string } = {
 	Sprint = "RUN",
 	Callout = "CALL",
 	Jump = "JUMP",
-	Record = "REC",
+	Record = "RECORD",
 	Controls = "?",
 	Backpack = "BAG",
 	CarrySpin = "SPIN",
@@ -113,7 +113,7 @@ local touchLabels: { [string]: string } = {
 	CarryCloser = "NEAR",
 	CarryFarther = "FAR",
 }
--- Reload has no gamepad button of its own: Square reloads when there's nothing to use
+-- Reload has no gamepad button of its own: a tap on Square reloads a gun that isn't full (Gun)
 local GAMEPAD_EXTRA = { Reload = "Square" }
 
 local device: Device = Input.lastDevice()
