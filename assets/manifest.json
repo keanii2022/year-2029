@@ -10543,8 +10543,8 @@
       0.506
      ],
      "size": [
-      0.748,
-      0.187,
+      0.88,
+      0.038,
       0.044
      ],
      "pivot": [
@@ -10628,14 +10628,14 @@
     {
      "name": "LeftHand",
      "center": [
-      1.177,
-      2.337,
-      0.462
+      1.232,
+      2.365,
+      0.476
      ],
      "size": [
-      0.484,
-      1.089,
-      0.682
+      0.374,
+      1.034,
+      0.457
      ],
      "pivot": [
       1.232,
@@ -10771,8 +10771,8 @@
     }
    ],
    "moves": [],
-   "assetId": 74033957110044,
-   "textureId": 80630883818984,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -10888,14 +10888,14 @@
     {
      "name": "LeftHand",
      "center": [
-      1.177,
-      2.227,
-      0.462
+      1.232,
+      2.365,
+      0.476
      ],
      "size": [
-      0.484,
-      1.309,
-      0.682
+      0.374,
+      1.034,
+      0.457
      ],
      "pivot": [
       1.232,
@@ -11031,8 +11031,8 @@
     }
    ],
    "moves": [],
-   "assetId": 102337433800821,
-   "textureId": 133970543198248,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -11059,12 +11059,12 @@
      "name": "Extra",
      "center": [
       0.0,
-      4.944,
+      4.939,
       0.583
      ],
      "size": [
       0.594,
-      0.394,
+      0.404,
       0.043
      ],
      "pivot": [
@@ -11114,12 +11114,12 @@
      "center": [
       0.0,
       4.99,
-      0.016
+      0.024
      ],
      "size": [
       1.642,
       0.972,
-      1.112
+      1.129
      ],
      "pivot": [
       0.0,
@@ -11258,12 +11258,12 @@
      "center": [
       0.0,
       3.397,
-      -0.265
+      -0.238
      ],
      "size": [
       1.75,
       2.279,
-      1.782
+      1.836
      ],
      "pivot": [
       0.0,
@@ -11291,8 +11291,8 @@
     }
    ],
    "moves": [],
-   "assetId": 127299973966857,
-   "textureId": 91894467413722,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -11374,12 +11374,12 @@
      "center": [
       0.157,
       4.965,
-      0.016
+      0.024
      ],
      "size": [
       1.635,
       1.138,
-      1.112
+      1.129
      ],
      "pivot": [
       0.0,
@@ -11551,8 +11551,8 @@
     }
    ],
    "moves": [],
-   "assetId": 94019097787771,
-   "textureId": 103553643326463,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -11571,7 +11571,7 @@
    ],
    "size": [
     2.239,
-    5.6,
+    5.671,
     1.173
    ],
    "parts": [
@@ -11579,12 +11579,12 @@
      "name": "Extra",
      "center": [
       0.0,
-      4.458,
+      4.523,
       0.499
      ],
      "size": [
-      0.495,
-      0.262,
+      0.485,
+      0.191,
       0.039
      ],
      "pivot": [
@@ -11632,13 +11632,13 @@
     {
      "name": "Head",
      "center": [
-      0.0,
-      4.827,
+      -0.065,
+      4.862,
       -0.0
      ],
      "size": [
-      1.077,
-      1.547,
+      1.206,
+      1.619,
       1.112
      ],
      "pivot": [
@@ -11668,14 +11668,14 @@
     {
      "name": "LeftHand",
      "center": [
-      0.845,
-      1.883,
-      0.198
+      0.892,
+      1.934,
+      0.173
      ],
      "size": [
-      0.361,
-      0.737,
-      0.506
+      0.341,
+      0.636,
+      0.415
      ],
      "pivot": [
       0.901,
@@ -11811,8 +11811,8 @@
     }
    ],
    "moves": [],
-   "assetId": 100354870322242,
-   "textureId": 113617239610120,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -11831,7 +11831,7 @@
    ],
    "size": [
     2.239,
-    5.6,
+    5.671,
     1.224
    ],
    "parts": [
@@ -11839,12 +11839,12 @@
      "name": "Extra",
      "center": [
       0.0,
-      4.473,
+      4.523,
       0.499
      ],
      "size": [
-      0.479,
-      0.292,
+      0.485,
+      0.191,
       0.039
      ],
      "pivot": [
@@ -11892,13 +11892,13 @@
     {
      "name": "Head",
      "center": [
-      0.0,
-      4.827,
+      -0.065,
+      4.862,
       -0.0
      ],
      "size": [
-      1.077,
-      1.547,
+      1.206,
+      1.619,
       1.112
      ],
      "pivot": [
@@ -11928,14 +11928,14 @@
     {
      "name": "LeftHand",
      "center": [
-      0.845,
-      1.883,
-      0.198
+      0.892,
+      1.934,
+      0.173
      ],
      "size": [
-      0.361,
-      0.737,
-      0.506
+      0.341,
+      0.636,
+      0.415
      ],
      "pivot": [
       0.901,
@@ -12071,8 +12071,8 @@
     }
    ],
    "moves": [],
-   "assetId": 116605579345924,
-   "textureId": 109804464914016,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -22489,6 +22489,18 @@
    "assetId": 92441773453435
   },
   {
+   "name": "dad_last_tape",
+   "group": "voice",
+   "file": "art/sounds/voice/dad_last_tape.mp3",
+   "assetId": null
+  },
+  {
+   "name": "dad_phone_bud",
+   "group": "voice",
+   "file": "art/sounds/voice/dad_phone_bud.mp3",
+   "assetId": null
+  },
+  {
    "name": "ghost_kid_close",
    "group": "voice",
    "file": "art/sounds/voice/ghost_kid_close.mp3",
@@ -22522,6 +22534,36 @@
    "name": "kid_found_you",
    "group": "voice",
    "file": "art/sounds/voice/kid_found_you.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_aisle40_counting",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_aisle40_counting.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_aisle40_frowning",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_aisle40_frowning.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_aisle40_happy",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_aisle40_happy.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_aisle40_manager",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_aisle40_manager.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_aisle40_wider",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_aisle40_wider.mp3",
    "assetId": null
   },
   {

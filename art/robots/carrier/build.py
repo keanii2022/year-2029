@@ -8,8 +8,8 @@ white = shell()
 line = panel()
 dark = rubber()
 joint = steel()
-yellow = accent("#f2c94c") if NIGHT else plain("#f2c94c", grime=0.2, vary=0.15)
-sky = accent("#6fb7e8") if NIGHT else plain("#6fb7e8", grime=0.15, vary=0.15)
+yellow = accent("#f2c94c")
+sky = accent("#6fb7e8")
 eyes = scanner() if NIGHT else lit("#7ff0ff")
 
 # Torso: pelvis, waist, square chest, neck, back rack with a taped box on it.
@@ -54,9 +54,8 @@ for x in (-1, 1):
     R.add("Head", box((0.08, 0.4, 0.34), joint, (x * 0.63, 0, 4.78), r=0.03, n=1))
 if NIGHT:  # both eyes merge into one thin scanning bar
     R.add("Extra", box((0.86, 0.04, 0.07), eyes, (0, -0.46, 4.77), r=0.02, n=1))
-else:
-    for x in (-0.24, 0.24):
-        R.add("Extra", box((0.2, 0.04, 0.17), eyes, (x, -0.46, 4.77), r=0.05, n=1))
+else:  # a delivery scanner where a face should be: one thin amber line
+    R.add("Extra", box((0.8, 0.04, 0.035), lit("#ffb347"), (0, -0.46, 4.77), r=0.01, n=1))
 R.joint("neck", (0, 0, 4.42))
 R.joint("extra", (0, -0.46, 4.77))
 
@@ -77,10 +76,24 @@ def paddle(side, at):
     return move(obs, loc=at)
 
 
-# Arms: box forearms held forward, ready to carry.
+def mannequin_hand(side, at):
+    """A store mannequin's hand bolted on in place of a paddle: smooth palm, fingers together, held gently."""
+    skin = paint("#d9c6ad", chip=0.3, under="#9c8a74", under2="#5b4a3a", grime=0.5, streaks=0.35)
+    obs = [cyl(0.17, 0.14, joint, (0, 0, -0.07), seg=6, bevel=0.01), box((0.3, 0.3, 0.12), joint, (0, 0, -0.18), r=0.03, n=1)]
+    for b in ((0.08, 0.06), (-0.08, 0.06), (0.08, -0.08), (-0.08, -0.08)):
+        obs.append(cyl(0.03, 0.04, steel("#9a9fa5"), (b[0], b[1], -0.25), seg=6, bevel=0.005))
+    obs.append(box((0.1, 0.34, 0.4), skin, (0, -0.02, -0.46), r=0.05, n=1))
+    for i, y in enumerate((-0.13, -0.045, 0.04, 0.125)):
+        obs.append(box((0.08, 0.075, 0.3 - abs(i - 1.5) * 0.04), skin, (-side * 0.02, y, -0.8), (side * 8, 0, 0), r=0.03, n=1))
+    obs.append(box((0.08, 0.08, 0.2), skin, (-side * 0.08, -0.2, -0.56), (0, 0, side * 20), r=0.03, n=1))
+    return move(obs, loc=at)
+
+
+# Arms: box forearms held forward, ready to carry. The left paddle was swapped for a mannequin hand.
 for side in (-1, 1):
     s, e, w = (side * 1.05, 0, 3.95), (side * 1.15, 0.05, 3.18), (side * 1.12, -0.4, 2.62)
-    arm(R, side, s, e, w, 0.36, 0.42, white, joint, paddle(side, w), stripe=sky, fore=1.2, grip=(0, -0.6))
+    hand = mannequin_hand(side, w) if side > 0 else paddle(side, w)
+    arm(R, side, s, e, w, 0.36, 0.42, white, joint, hand, stripe=sky, fore=1.2, grip=(0, -0.6))
 
 for x in (-0.45, 0.45):
     leg(R, x, (0, 2.3), (-0.05, 1.45), (0.02, 0.6), 0.38, 0.44, white, joint, stripe=sky, foot_size=(0.6, 1.0, 0.36))

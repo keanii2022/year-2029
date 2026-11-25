@@ -4718,7 +4718,7 @@ return {
 				{
 					name = "Extra",
 					center = { 0.0, 5.247, 0.506 },
-					size = { 0.748, 0.187, 0.044 },
+					size = { 0.88, 0.038, 0.044 },
 					pivot = { 0.0, 5.247, 0.506 },
 				},
 				{
@@ -4747,8 +4747,8 @@ return {
 				},
 				{
 					name = "LeftHand",
-					center = { 1.177, 2.337, 0.462 },
-					size = { 0.484, 1.089, 0.682 },
+					center = { 1.232, 2.365, 0.476 },
+					size = { 0.374, 1.034, 0.457 },
 					pivot = { 1.232, 2.882, 0.44 },
 				},
 				{
@@ -4803,8 +4803,6 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 74033957110044,
-			textureId = 80630883818984,
 		},
 		{
 			name = "carrier_night",
@@ -4843,8 +4841,8 @@ return {
 				},
 				{
 					name = "LeftHand",
-					center = { 1.177, 2.227, 0.462 },
-					size = { 0.484, 1.309, 0.682 },
+					center = { 1.232, 2.365, 0.476 },
+					size = { 0.374, 1.034, 0.457 },
 					pivot = { 1.232, 2.882, 0.44 },
 				},
 				{
@@ -4899,8 +4897,6 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 102337433800821,
-			textureId = 133970543198248,
 		},
 		{
 			name = "cleaner",
@@ -4909,8 +4905,8 @@ return {
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 4.944, 0.583 },
-					size = { 0.594, 0.394, 0.043 },
+					center = { 0.0, 4.939, 0.583 },
+					size = { 0.594, 0.404, 0.043 },
 					pivot = { 0.0, 4.968, 0.583 },
 				},
 				{
@@ -4927,8 +4923,8 @@ return {
 				},
 				{
 					name = "Head",
-					center = { 0.0, 4.99, 0.016 },
-					size = { 1.642, 0.972, 1.112 },
+					center = { 0.0, 4.99, 0.024 },
+					size = { 1.642, 0.972, 1.129 },
 					pivot = { 0.0, 4.482, 0.0 },
 				},
 				{
@@ -4975,8 +4971,8 @@ return {
 				},
 				{
 					name = "Torso",
-					center = { 0.0, 3.397, -0.265 },
-					size = { 1.75, 2.279, 1.782 },
+					center = { 0.0, 3.397, -0.238 },
+					size = { 1.75, 2.279, 1.836 },
 					pivot = { 0.0, 2.376, 0.0 },
 				},
 				{
@@ -4995,8 +4991,6 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 127299973966857,
-			textureId = 91894467413722,
 		},
 		{
 			name = "cleaner_night",
@@ -5023,8 +5017,8 @@ return {
 				},
 				{
 					name = "Head",
-					center = { 0.157, 4.965, 0.016 },
-					size = { 1.635, 1.138, 1.112 },
+					center = { 0.157, 4.965, 0.024 },
+					size = { 1.635, 1.138, 1.129 },
 					pivot = { 0.0, 4.482, 0.0 },
 				},
 				{
@@ -5091,18 +5085,16 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 94019097787771,
-			textureId = 103553643326463,
 		},
 		{
 			name = "cook",
 			group = "robots",
-			size = { 2.239, 5.6, 1.173 },
+			size = { 2.239, 5.671, 1.173 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 4.458, 0.499 },
-					size = { 0.495, 0.262, 0.039 },
+					center = { 0.0, 4.523, 0.499 },
+					size = { 0.485, 0.191, 0.039 },
 					pivot = { 0.0, 4.484, 0.499 },
 				},
 				{
@@ -5119,8 +5111,8 @@ return {
 				},
 				{
 					name = "Head",
-					center = { 0.0, 4.827, -0.0 },
-					size = { 1.077, 1.547, 1.112 },
+					center = { -0.065, 4.862, -0.0 },
+					size = { 1.206, 1.619, 1.112 },
 					pivot = { 0.0, 4.043, 0.0 },
 				},
 				{
@@ -5131,8 +5123,8 @@ return {
 				},
 				{
 					name = "LeftHand",
-					center = { 0.845, 1.883, 0.198 },
-					size = { 0.361, 0.737, 0.506 },
+					center = { 0.892, 1.934, 0.173 },
+					size = { 0.341, 0.636, 0.415 },
 					pivot = { 0.901, 2.252, 0.137 },
 				},
 				{
@@ -5187,18 +5179,16 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 100354870322242,
-			textureId = 113617239610120,
 		},
 		{
 			name = "cook_night",
 			group = "robots",
-			size = { 2.239, 5.6, 1.224 },
+			size = { 2.239, 5.671, 1.224 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 4.473, 0.499 },
-					size = { 0.479, 0.292, 0.039 },
+					center = { 0.0, 4.523, 0.499 },
+					size = { 0.485, 0.191, 0.039 },
 					pivot = { 0.0, 4.484, 0.499 },
 				},
 				{
@@ -5215,8 +5205,8 @@ return {
 				},
 				{
 					name = "Head",
-					center = { 0.0, 4.827, -0.0 },
-					size = { 1.077, 1.547, 1.112 },
+					center = { -0.065, 4.862, -0.0 },
+					size = { 1.206, 1.619, 1.112 },
 					pivot = { 0.0, 4.043, 0.0 },
 				},
 				{
@@ -5227,8 +5217,8 @@ return {
 				},
 				{
 					name = "LeftHand",
-					center = { 0.845, 1.883, 0.198 },
-					size = { 0.361, 0.737, 0.506 },
+					center = { 0.892, 1.934, 0.173 },
+					size = { 0.341, 0.636, 0.415 },
 					pivot = { 0.901, 2.252, 0.137 },
 				},
 				{
@@ -5283,8 +5273,6 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 116605579345924,
-			textureId = 109804464914016,
 		},
 		{
 			name = "crawler",
@@ -10345,6 +10333,14 @@ return {
 			assetId = 92441773453435,
 		},
 		{
+			name = "dad_last_tape",
+			group = "voice",
+		},
+		{
+			name = "dad_phone_bud",
+			group = "voice",
+		},
+		{
 			name = "ghost_kid_close",
 			group = "voice",
 			assetId = 87204267202159,
@@ -10370,6 +10366,26 @@ return {
 		},
 		{
 			name = "kid_found_you",
+			group = "voice",
+		},
+		{
+			name = "pa_aisle40_counting",
+			group = "voice",
+		},
+		{
+			name = "pa_aisle40_frowning",
+			group = "voice",
+		},
+		{
+			name = "pa_aisle40_happy",
+			group = "voice",
+		},
+		{
+			name = "pa_aisle40_manager",
+			group = "voice",
+		},
+		{
+			name = "pa_aisle40_wider",
 			group = "voice",
 		},
 		{

@@ -1,4 +1,4 @@
--- cook, 5.60 studs tall, feet at 0. Roblox space, for MESH_JOINTS.
+-- cook, 5.67 studs tall, feet at 0. Roblox space, for MESH_JOINTS.
 hip = Vector3.new(0.00, 2.15, -0.00),
 neck = Vector3.new(0.00, 4.04, -0.00),
 extra = Vector3.new(0.00, 4.48, 0.50),
