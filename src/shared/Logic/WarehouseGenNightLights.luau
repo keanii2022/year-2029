@@ -14,37 +14,28 @@ local NightLights = {}
 
 local piece = Pieces.piece
 
--- A knee-high battery post with a glowing head, and a short LED strip on the floor beside it
+-- A low battery emergency box on the floor and a thin, dim LED strip running from it, like the
+-- leftover safety lighting in a real store after hours
 local function pathLight(layout: any, settings: any, x: number, z: number, alongX: boolean)
 	piece(layout, {
 		x = x,
-		y = 0.55,
+		y = 0.2,
 		z = z,
-		sx = 0.5,
-		sy = 1.1,
-		sz = 0.5,
+		sx = if alongX then 0.9 else 0.5,
+		sy = 0.4,
+		sz = if alongX then 0.5 else 0.9,
 		style = "bollard",
-		collide = false,
-	})
-	piece(layout, {
-		x = x,
-		y = 1.35,
-		z = z,
-		sx = 0.6,
-		sy = 0.5,
-		sz = 0.6,
-		style = "path_glow",
 		collide = false,
 		lamp = settings.PathTone,
 	})
 	local strip = settings.StripLength
 	piece(layout, {
 		x = x,
-		y = 0.06,
+		y = 0.03,
 		z = z,
-		sx = if alongX then strip else 0.25,
-		sy = 0.06,
-		sz = if alongX then 0.25 else strip,
+		sx = if alongX then strip else 0.12,
+		sy = 0.03,
+		sz = if alongX then 0.12 else strip,
 		style = "path_glow",
 		collide = false,
 	})

@@ -491,7 +491,7 @@ local settings = {
 		street = { color = Color3.fromRGB(255, 200, 130), brightness = 2, range = 36 },
 		fake_sun = { color = Color3.fromRGB(230, 240, 255), brightness = 4, range = 60 },
 		-- Night lights: small pools, never shadows
-		path = { color = Color3.fromRGB(190, 255, 220), brightness = 0.9, range = 14 },
+		path = { color = Color3.fromRGB(255, 226, 180), brightness = 0.7, range = 14 },
 		work = { color = Color3.fromRGB(255, 214, 150), brightness = 1.6, range = 26 },
 		pool = { color = Color3.fromRGB(255, 210, 160), brightness = 1.2, range = 16 },
 		carry = { color = Color3.fromRGB(235, 245, 255), brightness = 1.2, range = 14 },
@@ -618,7 +618,7 @@ local settings = {
 		art_grey = { color = Color3.fromRGB(150, 150, 146), material = Enum.Material.SmoothPlastic },
 		exit_green = { color = Color3.fromRGB(30, 170, 80), material = Enum.Material.Neon },
 		bollard = { color = Color3.fromRGB(44, 46, 50), material = Enum.Material.Metal },
-		path_glow = { color = Color3.fromRGB(120, 200, 160), material = Enum.Material.Neon },
+		path_glow = { color = Color3.fromRGB(150, 140, 110), material = Enum.Material.Neon },
 		work_glow = { color = Color3.fromRGB(255, 226, 170), material = Enum.Material.Neon },
 		wall_pink = { color = Color3.fromRGB(226, 80, 120), material = Enum.Material.Plaster },
 		wall_blue = { color = Color3.fromRGB(40, 70, 130), material = Enum.Material.Plaster },
