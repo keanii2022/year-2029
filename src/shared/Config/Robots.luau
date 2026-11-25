@@ -60,6 +60,12 @@ return {
 		AnswerSounds = { "scout_eye_whine", "servo_whirr_1", "brute_groan" },
 		AnswerPitch = 0.8,
 		AnswerDelay = { 0.3, 1.2 },
+		-- Up close at night a chasing hunter bursts past sprint speed (22) for a moment, screeching
+		-- first, then cools down. Speed in studs per second, times in seconds.
+		Lunge = { Range = 15, Speed = 24, Seconds = 1.5, Cooldown = 4 },
+		LungeSound = "chase_servo_scream",
+		LungePitch = 1.35,
+		LungeVolume = 1.3,
 		RollOff = { 20, 220 },
 	},
 
@@ -316,6 +322,10 @@ return {
 	EyePart = "Extra",
 	DayEyeColor = Color3.fromRGB(150, 220, 235),
 	NightEyeColor = Color3.fromRGB(255, 40, 30),
+	-- Eyes say what it's thinking, with a small "?" or "!" popping over its head (seen only up close)
+	SuspiciousEyeColor = Color3.fromRGB(255, 170, 30),
+	ChaseEyeColor = Color3.fromRGB(255, 25, 20),
+	Mark = { Range = 60, Seconds = 1.6, Size = 2.2, Height = 2 },
 	ScannerColor = Color3.fromRGB(255, 70, 60),
 	ScannerRange = 40,
 	ScannerAngle = 40,
@@ -390,7 +400,7 @@ return {
 	CaughtDayLine = "A ROBOT GRABBED YOU. It took your %s back to its room. Sneak in and steal it back.",
 	CaughtNightLine = "A ROBOT GOT YOU IN THE DARK.",
 	CaughtDayHurtLine = "A ROBOT THREW YOU DOWN. Stay out of reach.",
-	IdleSounds = { "oil_drip", "hydraulic_hiss" },
+	IdleSounds = { "oil_drip", "hydraulic_hiss", "fumble" },
 	NightIdleSounds = { "scanner_ping", "servo_whirr_2", "hydraulic_hiss", "curious_beep_3" },
 	IdleSoundGap = { 8, 20 },
 	NightIdleSoundGap = { 4, 10 },

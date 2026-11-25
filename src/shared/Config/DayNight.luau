@@ -57,11 +57,13 @@ return {
 	Sounds = {
 		Siren = "siren",
 		Jingle = "store_jingle",
-		Chime = "pa_chime",
 		LightsOut = "lights_out_clunk",
 		NightHum = "distant_hum_loop",
 		NightAmbience = "night_ambience_loop",
 		FlashlightClick = "flashlight_click",
+		ClockTick = "clock_tick_loop", -- through the siren, then ClockTickFast once the countdown starts
+		ClockTickFast = "clock_tick_fast_loop",
+		AlarmBeep = "alarm_clock_beep", -- with the lights-out clunk
 	},
 	-- Keani picks the day music (creepily joyful elevator music). Paste its rbxassetid:// here.
 	DayMusicId = nil :: string?,
@@ -73,17 +75,52 @@ return {
 		Siren = 0.65,
 		Stinger = 0.8,
 		Announcer = 0.9,
+		ClockTick = 0.35,
+		AlarmBeep = 0.6,
 	},
 
 	-- Voice lines from art/sounds/VOICE_LINES.md, keyed by file name. Not recorded yet:
 	-- add "rbxassetid://..." here once uploaded (or add them to the manifest).
 	VoiceLineIds = {} :: { [string]: string },
-	MorningLines = { "announcer_welcome", "announcer_welcome_2" },
-	DayLines = { "announcer_welcome", "announcer_welcome_2" },
-	CountdownLine = "announcer_countdown",
+	-- The clock's PA lines (art/sounds/PA_SCRIPT.md). Each shows as a [PA] subtitle and plays its
+	-- recorded clip once it has an id. Day and night announcements in between come from Life and
+	-- NightTricks.
+	PaPrefix = "[PA] ",
+	PaSubtitleSeconds = 6,
+	MorningLines = {
+		{
+			voice = "announcer_welcome",
+			text = "Good morning, shoppers! The store is open. Have a wonderful day!",
+		},
+		{
+			voice = "announcer_welcome_2",
+			text = "Rise and shine! Lights are on. Our helpers are happy to see you!",
+		},
+	},
+	-- One word a second, ending as the lights go out
+	CountdownLine = {
+		voice = "announcer_countdown",
+		words = {
+			"Lights out in ten.",
+			"Nine.",
+			"Eight.",
+			"Seven.",
+			"Six.",
+			"Five.",
+			"Four.",
+			"Three.",
+			"Two.",
+			"One.",
+		},
+	},
 	CountdownLead = 11, -- seconds the countdown line runs before lights out
-	LightsOutLines = { "announcer_lights_out", "announcer_lights_out_2" },
-	AnnouncementGap = { Min = 75, Max = 150 }, -- seconds between daytime PA announcements
+	LightsOutLines = {
+		{
+			voice = "announcer_lights_out",
+			text = "The store is now closed. Please stay where our helpers can find you.",
+		},
+		{ voice = "announcer_lights_out_2", text = "Good night, shoppers! Sleep tight." },
+	},
 
 	Flashlight = {
 		Brightness = 3,

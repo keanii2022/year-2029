@@ -3,10 +3,12 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 local StarterGui = game:GetService("StarterGui")
 
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local Config = require(ReplicatedStorage.Shared.Config)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Gun = require(script.Parent.Gun)
 
 local settings = Config.Guns
@@ -230,6 +232,25 @@ local function update()
 	end
 end
 
+local function isDown(): boolean
+	return type(player:GetAttribute("DownUntil")) == "number"
+end
+
+local function playDownZap()
+	local id = ModelLibrary.soundId(settings.DownSound)
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = settings.DownSoundVolume
+	sound.Parent = SoundService
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+	sound:Play()
+end
+
 function Hud.Init()
 	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
 
@@ -249,6 +270,14 @@ function Hud.Start()
 	Gun.onHit(showHitMarker)
 	refreshAmmo()
 	RunService.RenderStepped:Connect(update)
+	local wasDown = isDown()
+	player:GetAttributeChangedSignal("DownUntil"):Connect(function()
+		local down = isDown()
+		if down and not wasDown then
+			playDownZap()
+		end
+		wasDown = down
+	end)
 end
 
 return Hud

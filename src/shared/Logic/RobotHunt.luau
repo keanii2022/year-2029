@@ -79,4 +79,21 @@ function RobotHunt.dread(
 	return 0
 end
 
+-- A night chase that closes inside lunge.Range bursts forward, so an open aisle is never safe;
+-- after a burst it can't lunge again until readyAt.
+function RobotHunt.shouldLunge(
+	state: string,
+	targetDistance: number?,
+	night: boolean,
+	now: number,
+	readyAt: number,
+	lunge: any
+): boolean
+	return night
+		and state == "chase"
+		and targetDistance ~= nil
+		and targetDistance <= lunge.Range
+		and now >= readyAt
+end
+
 return RobotHunt

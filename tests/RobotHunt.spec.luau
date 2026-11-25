@@ -42,4 +42,13 @@ return {
 		expect(RobotHunt.dread(0, "sweep", false, DREAD)).toBe(0)
 		expect(RobotHunt.dread(5, "study", true, DREAD)).toBe(0)
 	end,
+	["a night chase lunges up close, then cools down"] = function()
+		local lunge = { Range = 15 }
+		expect(RobotHunt.shouldLunge("chase", 10, true, 5, 0, lunge)).toBe(true)
+		expect(RobotHunt.shouldLunge("chase", 20, true, 5, 0, lunge)).toBe(false)
+		expect(RobotHunt.shouldLunge("chase", 10, false, 5, 0, lunge)).toBe(false)
+		expect(RobotHunt.shouldLunge("suspicious", 10, true, 5, 0, lunge)).toBe(false)
+		expect(RobotHunt.shouldLunge("chase", nil, true, 5, 0, lunge)).toBe(false)
+		expect(RobotHunt.shouldLunge("chase", 10, true, 5, 6, lunge)).toBe(false)
+	end,
 }

@@ -41,11 +41,14 @@ return {
 		expect(World.announcement(nil, rolls({ 0.5 }), pa).voice).toBe("pa_thank_you")
 		expect(World.announcement(nil, rolls({ 0.99 }), pa).voice).toBe("pa_aisle")
 	end,
-	["reverb follows hiding, rooms and aisles"] = function()
-		local reverb = { Aisle = "Hangar", Room = "LivingRoom", Hidden = "PaddedCell" }
-		expect(World.reverb(true, true, reverb)).toBe("PaddedCell")
-		expect(World.reverb(false, true, reverb)).toBe("LivingRoom")
-		expect(World.reverb(false, false, reverb)).toBe("Hangar")
+	["reverb follows hiding, rooms, installations and aisles"] = function()
+		local reverb =
+			{ Aisle = "Hangar", Room = "LivingRoom", Installation = "StoneRoom", Hidden = "PaddedCell" }
+		expect(World.reverb(true, true, false, reverb)).toBe("PaddedCell")
+		expect(World.reverb(true, false, true, reverb)).toBe("PaddedCell")
+		expect(World.reverb(false, true, false, reverb)).toBe("LivingRoom")
+		expect(World.reverb(false, false, true, reverb)).toBe("StoneRoom")
+		expect(World.reverb(false, false, false, reverb)).toBe("Hangar")
 	end,
 	["between scales a roll into a range"] = function()
 		expect(World.between({ 10, 20 }, 0.5)).toBe(15)

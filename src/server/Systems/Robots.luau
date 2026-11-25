@@ -98,6 +98,8 @@ export type Robot = {
 	shareAt: number, -- next time it tells the others where its target is
 	lastTarget: any?, -- who it last chased, for searching hiding spots after losing them
 	searchFrom: Vector3?, -- where it lost them; its searches circle this spot
+	lungeUntil: number, -- bursting forward at Hunt.Lunge.Speed until then
+	lungeReadyAt: number,
 }
 type Alive = { player: Player, character: Model, root: BasePart, humanoid: Humanoid, position: Vector3 }
 
@@ -698,6 +700,8 @@ local function spawnRobot(
 		shareAt = 0,
 		lastTarget = nil,
 		searchFrom = nil,
+		lungeUntil = 0,
+		lungeReadyAt = 0,
 	}
 	model.Name = typeName
 	dress(robot)
@@ -1349,6 +1353,9 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 	if robot.grudge and now < robot.grudgeUntil then
 		robot.speed *= shot.AngrySpeed
 	end
+	if brain.state == "chase" and now < robot.lungeUntil then
+		robot.speed = math.max(robot.speed, hunt.Lunge.Speed)
+	end
 
 	local goal: Vector3? = nil
 	if intent.goal == "home" then
@@ -1571,6 +1578,14 @@ local function tick(dt: number)
 				then { id = loose.instance, distance = flatDistance(loose.position, robot.position) }
 				else nil,
 		}
+		local night = phase == "Night" and robot.role ~= "chore"
+		if
+			RobotHunt.shouldLunge(state, seen and seen.distance, night, now, robot.lungeReadyAt, hunt.Lunge)
+		then
+			robot.lungeUntil = now + hunt.Lunge.Seconds
+			robot.lungeReadyAt = robot.lungeUntil + hunt.Lunge.Cooldown
+			fxRemote:FireAllClients(robot.model, "lunge", robot.position)
+		end
 		act(robot, RobotBrain.update(robot.brain, input, settings, now), alive, now, seen ~= nil)
 
 		local brain = robot.brain

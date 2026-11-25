@@ -38,12 +38,20 @@ function NightTricksWorld.announcement(realAisle: number?, next: () -> number, s
 	return { text = line.text, voice = line.voice }
 end
 
--- Reverb preset name: muffled while hidden, tight in a room, a big echo in the aisles.
-function NightTricksWorld.reverb(hidden: boolean, inRoom: boolean, settings: any): string
+-- Reverb preset name: muffled while hidden, tight in a room, stony inside an installation's hall,
+-- a big echo in the aisles.
+function NightTricksWorld.reverb(
+	hidden: boolean,
+	inRoom: boolean,
+	inInstallation: boolean,
+	settings: any
+): string
 	if hidden then
 		return settings.Hidden
+	elseif inRoom then
+		return settings.Room
 	end
-	return if inRoom then settings.Room else settings.Aisle
+	return if inInstallation then settings.Installation else settings.Aisle
 end
 
 function NightTricksWorld.between(range: { number }, roll: number): number
