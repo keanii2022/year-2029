@@ -189,6 +189,42 @@ return {
 		Volume = 0.8, -- a touch quieter than a real callout, and further off
 		Tail = "walkie_static",
 		TailVolume = 0.15,
+		-- The lure: it sneaks to cover out of the callers' sight, goes dark and still, calls, and waits.
+		-- Cover spots are probed on rings round it; each probe ray (CoverProbe studs) that hits counts.
+		CoverRings = { 6, 10, 14, 18 },
+		CoverSteps = 12, -- spots per ring
+		CoverRange = { 4, 20 },
+		CoverMin = 2, -- probe hits needed: beside a rack end or a pillar, more in a corner
+		CoverProbe = 5,
+		CoverDistanceCost = 0.1,
+		FortClearance = 8, -- never hides this close to a piece a player placed
+		SneakSeconds = 15, -- not in cover by then: gives up without calling
+		WaitSeconds = 30,
+		Repeats = { 0, 2 }, -- extra calls while it waits
+		RepeatGap = { 8, 12 },
+		PounceRange = 10,
+		ViewRange = 18,
+		ViewAngle = 35, -- degrees either side of where it faces
+		-- its head follows one player while it waits (Logic/RobotMimic.track)
+		TrackRange = 30,
+		HoldSeconds = 3,
+		SwitchMargin = 0.25, -- someone this much nearer takes the lock
+		HeadSpeedFactor = 0.35, -- a slow deliberate turn, never a snap
+		CrankRange = 12, -- the only sound its head makes, and only this close
+		CrankVolume = 0.12,
+		-- fair tells: a faint glint and the wet breath, heard within TellRange
+		LurkEyeColor = Color3.fromRGB(45, 10, 10),
+		LurkGlow = { Range = 2, Brightness = 0.25 },
+		TellRange = 12,
+		RevealGlow = 3, -- the eyes snap this much brighter than normal as it pounces, then settle
+		-- the player its head is locked on, once they can see it: a faint red at the screen edges and
+		-- the heartbeat up a little (halved with Gentler scares)
+		SingledDread = 0.3,
+		SingledRise = 0.35, -- per second
+		SingledFall = 0.5,
+		VignetteColor = Color3.fromRGB(110, 0, 0),
+		VignetteAlpha = 0.3,
+		VignetteSize = 0.18, -- of the screen, from each edge
 	},
 
 	-- At night a red glow round the eyes, so you see them hunting from far off in the dark

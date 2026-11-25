@@ -35,6 +35,7 @@ local hunt = settings.Hunt
 local dread = settings.Dread
 local ambience = settings.Ambience
 local catchFeel = settings.Catch
+local mimic = settings.Mimic
 local player = Players.LocalPlayer
 local STEP_EVERY = 0.1 -- seconds between robot sound and dread updates
 
@@ -58,6 +59,7 @@ type Talker = {
 	breath: Sound?,
 	moveLoop: Sound?,
 	nextPerchTickAt: number,
+	lurking: boolean,
 }
 
 local Robots = {}
@@ -70,6 +72,8 @@ local talkers: { [Model]: Talker } = {}
 local dreadLevel = 0
 local heartbeat: Sound?
 local grade: ColorCorrectionEffect?
+local singledLevel = 0
+local vignette: { Frame } = {}
 
 local function useGear(action: string)
 	return function(began: boolean)
@@ -543,12 +547,35 @@ local function stare(model: Model, talker: Talker)
 	end
 end
 
--- A still robot watching at night (staring, stalled, or a Watcher in its corner) breathes, wet and slow.
+-- Lying in wait (the mimic's lure): eyes all but dark, a faint glint for anyone looking closely.
+local function lurk(model: Model, talker: Talker)
+	local lurking = model:GetAttribute("Lurking") == true and model:GetAttribute("State") ~= "chase"
+	if lurking == talker.lurking then
+		return
+	end
+	talker.lurking = lurking
+	local eyes = talker.eyes
+	if eyes and lurking then
+		eyes.Color = mimic.LurkEyeColor
+	elseif not lurking then
+		tintEyes(talker, model:GetAttribute("State"))
+	end
+	local glow = eyes and eyes:FindFirstChild("EyeGlow")
+	if glow and glow:IsA("PointLight") then
+		local look = if lurking then mimic.LurkGlow else settings.EyeGlow
+		glow.Range = look.Range
+		glow.Brightness = look.Brightness
+	end
+end
+
+-- A still robot watching at night (staring, stalled, a Watcher in its corner, or a mimic lying in
+-- wait) breathes, wet and slow. The lurker's breath only carries TellRange: a tell for the close.
 local function breathe(model: Model, talker: Talker)
 	local phase = ReplicatedStorage:GetAttribute("Phase")
 	local still = model:GetAttribute("Pose") == "stare"
 		or model:GetAttribute("State") == "stalled"
 		or model:GetAttribute("Watching") == true
+		or talker.lurking
 	local wanted = still and (phase == "Night" or phase == "Siren")
 	if wanted and not talker.breath then
 		local breath = soundOn(talker.body, sounds.Breath, 0, true, true, "Scare")
@@ -561,6 +588,76 @@ local function breathe(model: Model, talker: Talker)
 		talker.breath:Destroy()
 		talker.breath = nil
 	end
+	if talker.breath then
+		talker.breath.RollOffMaxDistance = if talker.lurking
+			then mimic.TellRange
+			else settings.NightRollOff[2]
+	end
+end
+
+-- Faint red creeping in at the screen edges: four edge strips fading inward.
+local function showVignette(level: number)
+	if #vignette == 0 then
+		local playerGui = player:FindFirstChildOfClass("PlayerGui")
+		if level <= 0.01 or not playerGui then
+			return
+		end
+		local gui = Instance.new("ScreenGui")
+		gui.Name = "LockedOn"
+		gui.IgnoreGuiInset = true
+		gui.ResetOnSpawn = false
+		local w = mimic.VignetteSize
+		local edges = {
+			{ UDim2.fromScale(w, 1), UDim2.fromScale(0, 0), 0 },
+			{ UDim2.fromScale(w, 1), UDim2.fromScale(1 - w, 0), 180 },
+			{ UDim2.fromScale(1, w), UDim2.fromScale(0, 0), 90 },
+			{ UDim2.fromScale(1, w), UDim2.fromScale(0, 1 - w), 270 },
+		}
+		for _, edge in edges do
+			local frame = Instance.new("Frame")
+			frame.Size = edge[1]
+			frame.Position = edge[2]
+			frame.BorderSizePixel = 0
+			frame.BackgroundColor3 = mimic.VignetteColor
+			frame.BackgroundTransparency = 1
+			local gradient = Instance.new("UIGradient")
+			gradient.Rotation = edge[3]
+			gradient.Transparency = NumberSequence.new(0, 1)
+			gradient.Parent = frame
+			frame.Parent = gui
+			table.insert(vignette, frame)
+		end
+		gui.Parent = playerGui
+	end
+	for _, frame in vignette do
+		frame.BackgroundTransparency = 1 - level
+	end
+end
+
+local singledParams = RaycastParams.new()
+singledParams.FilterType = Enum.RaycastFilterType.Exclude
+
+-- A lurker's head locked on this player, and this player can see it from where their camera is.
+local function singledOutBy(model: Model, folder: Instance, character: Model?): boolean
+	local camera = workspace.CurrentCamera
+	if model:GetAttribute("LockedOn") ~= player.UserId or not camera or not character then
+		return false
+	end
+	singledParams.FilterDescendantsInstances = { folder, character }
+	local from = camera.CFrame.Position
+	local at = model:GetPivot().Position + Vector3.yAxis * 2
+	return workspace:Raycast(from, at - from, singledParams) == nil
+end
+
+-- Eases the singled-out feel toward target and shows it; returns how much dread it adds.
+local function feelSingled(target: number, dt: number): number
+	local rate = if target > singledLevel then mimic.SingledRise else mimic.SingledFall
+	singledLevel = if target > singledLevel
+		then math.min(target, singledLevel + rate * dt)
+		else math.max(target, singledLevel - rate * dt)
+	local strength = singledLevel * (if Mix.audio().gentle then 0.5 else 1)
+	showVignette(strength * mimic.VignetteAlpha)
+	return strength * mimic.SingledDread
 end
 
 -- On top of a rack waiting to drop: ticks now and then, by type.
@@ -582,6 +679,7 @@ local function step(folder: Instance)
 	local fear, fearAt = 0, nil
 	local alive = character and character:FindFirstChildOfClass("Humanoid")
 	local hasBody = root and root:IsA("BasePart") and alive and alive.Health > 0
+	local singled = 0
 	for _, model in folder:GetChildren() do
 		-- the folder also holds the boxes and brooms chore bots carry
 		if not model:IsA("Model") or model:GetAttribute("RobotId") == nil then
@@ -598,8 +696,12 @@ local function step(folder: Instance)
 				fear, fearAt = weight, model:GetPivot().Position
 			end
 		end
+		if hasBody and singled == 0 and singledOutBy(model, folder, character) then
+			singled = 1
+		end
 		local talker = talkers[model]
 		if talker then
+			lurk(model, talker)
 			footsteps(model, talker)
 			updateChase(talker, now)
 			stare(model, talker)
@@ -630,7 +732,7 @@ local function step(folder: Instance)
 			end
 		end
 	end
-	feelDread(fear, STEP_EVERY)
+	feelDread(math.max(fear, feelSingled(singled, STEP_EVERY)), STEP_EVERY)
 	LightingController.disturb(RobotDread.flickerAt() or fearAt)
 	if nearest and now >= nextLineAt then
 		nextLineAt = now + random:NextNumber(table.unpack(settings.StallLineEvery))
@@ -676,6 +778,7 @@ local function voice(model: Model)
 		breath = nil,
 		moveLoop = nil,
 		nextPerchTickAt = 0,
+		lurking = false,
 	}
 	talkers[model] = talker
 	local lastState = model:GetAttribute("State")
@@ -782,6 +885,24 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 		for _, name in settings.Racks.Sounds do
 			playOnce(body, name, settings.Racks.Volume, true, "Scare")
 		end
+	elseif kind == "reveal" then
+		-- the lurker springs: eyes snap bright and lock on, then settle as the chase starts
+		talker.lurking = false
+		local eyes = talker.eyes
+		local glow = eyes and eyes:FindFirstChild("EyeGlow")
+		if eyes then
+			eyes.Color = settings.ChaseEyeColor
+		end
+		if glow and glow:IsA("PointLight") then
+			local normal = settings.EyeGlow
+			glow.Color = settings.ChaseEyeColor
+			glow.Brightness = normal.Brightness * mimic.RevealGlow
+			glow.Range = normal.Range * mimic.RevealGlow
+			TweenService
+				:Create(glow, TweenInfo.new(1.2), { Brightness = normal.Brightness, Range = normal.Range })
+				:Play()
+		end
+		playOnce(body, hunt.StareSound, hunt.StareVolume, true, "Scare", "sharp")
 	elseif kind == "lunge" then
 		playFar(
 			body,

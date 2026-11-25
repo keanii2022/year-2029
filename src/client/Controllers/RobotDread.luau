@@ -3,7 +3,8 @@
 --   with a sideways tilt now and then while they hold on you
 -- - a hunting robot close by that you can't see makes the lights round you flicker and the PA hum
 -- - a hard night keeps the PA glitching, and the siren says how many nights they've been learning
--- - the mimic: a robot playing back someone's callout from where it stands, in its own copied voice
+-- - the mimic: a robot playing back someone's callout from cover, in its own copied voice; while it
+--   lies in wait its head turns slowly and silently, with only a faint crank when you're right by it
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -187,7 +188,9 @@ local function turnHeads(dt: number)
 		end
 		local away = pivot:VectorToObjectSpace(Vector3.new(look.X - pivot.X, 0, look.Z - pivot.Z))
 		local target = RobotMotion.headYaw(away.X, away.Z, motion.MaxHeadTurn)
-		head.yaw = RobotMotion.turnHead(head.yaw, target, dt, motion.HeadSpeed, motion.HeadEase)
+		local lurking = model:GetAttribute("Lurking") == true
+		local speed = if lurking then motion.HeadSpeed * mimic.HeadSpeedFactor else motion.HeadSpeed
+		head.yaw = RobotMotion.turnHead(head.yaw, target, dt, speed, motion.HeadEase)
 		local left = math.abs(target - head.yaw)
 		local tilt = if left < 3 then RobotMotion.tilt(now, head.seed, motion.Tilt) else 0
 		-- a curious companion tilts its head right over at you (Systems/Companion)
@@ -203,6 +206,22 @@ local function turnHeads(dt: number)
 		head.writing = false
 		local part = head.motor.Part1
 		local turning = left > motion.RatchetMinTurn
+		if lurking then
+			local character = player.Character
+			local close = character ~= nil
+				and (pivot.Position - character:GetPivot().Position).Magnitude <= mimic.CrankRange
+			if turning and not head.turning and part and close then
+				playOn(
+					part,
+					motion.NeckCrank,
+					mimic.CrankVolume,
+					random:NextNumber(0.95, 1.05),
+					settings.SoundRollOff
+				)
+			end
+			head.turning = turning
+			continue
+		end
 		if turning and not head.turning and part and cranksNeck(model) then
 			playOn(
 				part,

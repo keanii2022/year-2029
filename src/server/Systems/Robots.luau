@@ -7,7 +7,7 @@
 -- wakes up hunting whoever shot it. Only the EMP, disruptor and Robots.destroy end one for good.
 -- Dread: heads turn smoothly (clients animate LookAt), walking hunters hold still then burst, a hunter
 -- stares before it chases, nights get harder (Logic/RobotNights), some drop off racks, and now and
--- then one replays a player's callout from the wrong place (the mimic).
+-- then one sneaks into cover, goes dark and plays back a player's callout to lure them in (the mimic).
 -- Companions: Systems/Companion befriends a few chore bots (Robots.befriend) and drives them with
 -- orders. A befriended robot keeps its room spot in the count but is never despawned, never answers
 -- the pack, never runs errands, never holds a grudge, and won't walk through walls.
@@ -131,8 +131,22 @@ export type Robot = {
 	blockedAt: number, -- last time a wall stopped its step
 	carryFn: ((Robot) -> ())?, -- holds a piece it's hauling for a fort, called whenever it's placed
 	headPart: BasePart?,
+	lure: Lure?,
 }
 type Alive = { player: Player, character: Model, root: BasePart, humanoid: Humanoid, position: Vector3 }
+-- the mimic sneaking to cover (waiting false) or lying in wait there with its copied call
+type Lure = {
+	spot: Vector3,
+	face: Vector3,
+	index: number,
+	waiting: boolean,
+	untilAt: number,
+	repeats: number,
+	nextCallAt: number,
+	lock: RobotMimic.Lock?,
+	distances: { [Player]: number },
+	answered: { [Player]: boolean },
+}
 
 local Robots = {}
 
@@ -168,6 +182,7 @@ local threat = RobotNights.threat(1, settings.Nights)
 local mimicRemote: RemoteEvent
 local calls: { RobotMimic.Call } = {}
 local mimicReadyAt = 0
+local lurer: Robot? = nil -- only one robot lures at a time
 local huntersTonight = 0
 local silentPick = 0
 local fxRemote: RemoteEvent
@@ -813,6 +828,7 @@ local function spawnRobot(
 		blockedAt = -math.huge,
 		carryFn = nil,
 		headPart = nil,
+		lure = nil,
 	}
 	model.Name = typeName
 	dress(robot)
@@ -1860,6 +1876,268 @@ local function despawn(robot: Robot)
 	robot.model:Destroy()
 end
 
+-- The lure ---------------------------------------------------------------------------------------
+
+local coverParams = RaycastParams.new()
+coverParams.FilterType = Enum.RaycastFilterType.Exclude
+coverParams.RespectCanCollide = true
+local PROBE_DIRECTIONS = {}
+for i = 0, 7 do
+	local angle = i * math.pi / 4
+	table.insert(PROBE_DIRECTIONS, Vector3.new(math.cos(angle), 0, math.sin(angle)))
+end
+
+-- The players its call is for: alive and within earshot of where it stands.
+local function inEarshot(position: Vector3, alive: { Alive }): { Alive }
+	local near = {}
+	for _, target in alive do
+		if flatDistance(target.position, position) <= Config.Callouts.HearRange then
+			table.insert(near, target)
+		end
+	end
+	return near
+end
+
+local function playCopy(robot: Robot, index: number)
+	for _, target in inEarshot(robot.position, alivePlayers()) do
+		mimicRemote:FireClient(target.player, robot.model, index)
+	end
+end
+
+local function fortNear(position: Vector3): boolean
+	local params = OverlapParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { folder, stashFolder }
+	for _, part in workspace:GetPartBoundsInRadius(onFloor(position), mimic.FortClearance, params) do
+		local prop = grabbableOf(part)
+		if prop and prop:GetAttribute("PlacedBy") ~= nil then
+			return true
+		end
+	end
+	return false
+end
+
+-- One place it could hide: open floor, out of every caller's sight, and how much is round it.
+local function probeSpot(position: Vector3, callers: { Alive }): RobotMimic.Spot
+	local spot = { x = position.X, z = position.Z, clear = false, hidden = false, cover = 0 }
+	local floor = onFloor(position)
+	spot.clear = math.abs(onGround(position, floorY).Y - floorY) < 1
+		and spotIsClear(position, Vector3.new(3, 6, 3))
+		and not fortNear(position)
+	if not spot.clear then
+		return spot
+	end
+	spot.hidden = true
+	for _, caller in callers do
+		local eye = caller.position + Vector3.yAxis * 1.5
+		for _, height in { 2, 5 } do
+			local at = floor + Vector3.yAxis * height
+			if workspace:Raycast(eye, at - eye, coverParams) == nil then
+				spot.hidden = false
+				return spot
+			end
+		end
+	end
+	for _, direction in PROBE_DIRECTIONS do
+		if workspace:Raycast(floor + Vector3.yAxis * 3, direction * mimic.CoverProbe, coverParams) then
+			spot.cover += 1
+		end
+	end
+	return spot
+end
+
+local function findCover(robot: Robot, callers: { Alive }, alive: { Alive }): Vector3?
+	local ignore: { Instance } = { folder, stashFolder }
+	for _, target in alive do
+		table.insert(ignore, target.character)
+	end
+	coverParams.FilterDescendantsInstances = ignore
+	local spots = {}
+	for _, radius in mimic.CoverRings do
+		for step = 1, mimic.CoverSteps do
+			local angle = step / mimic.CoverSteps * math.pi * 2
+			local position = robot.position + Vector3.new(math.cos(angle), 0, math.sin(angle)) * radius
+			table.insert(spots, probeSpot(position, callers))
+		end
+	end
+	local best = RobotMimic.coverSpot(spots, { x = robot.position.X, z = robot.position.Z }, mimic)
+	return best and onFloor(Vector3.new(best.x, 0, best.z))
+end
+
+local function startLure(robot: Robot, call: RobotMimic.Call, now: number): boolean
+	local alive = alivePlayers()
+	local callers = inEarshot(robot.position, alive)
+	if #callers == 0 then
+		return false
+	end
+	local spot = findCover(robot, callers, alive)
+	if not spot then
+		return false
+	end
+	local middle = Vector3.zero
+	for _, caller in callers do
+		middle += caller.position
+	end
+	lurer = robot
+	robot.lure = {
+		spot = spot,
+		face = onFloor(middle / #callers),
+		index = call.index,
+		waiting = false,
+		untilAt = now + mimic.SneakSeconds,
+		repeats = random:NextInteger(mimic.Repeats[1], mimic.Repeats[2]),
+		nextCallAt = math.huge,
+		lock = nil,
+		distances = {},
+		answered = {},
+	}
+	robot.model:SetAttribute("Silent", true)
+	robot.model:SetAttribute("Lurking", true)
+	return true
+end
+
+local function endLure(robot: Robot)
+	robot.lure = nil
+	if lurer == robot then
+		lurer = nil
+	end
+	robot.lookAt = nil
+	robot.model:SetAttribute("Lurking", nil)
+	robot.model:SetAttribute("LockedOn", nil)
+	robot.model:SetAttribute("Silent", robot.silent or nil)
+end
+
+-- Straight into the chase with a lunge, no stop and stare; the eyes snap bright as it goes.
+local function pounceOn(robot: Robot, target: Alive, now: number)
+	endLure(robot)
+	robot.silent = false
+	robot.model:SetAttribute("Silent", nil)
+	RobotBrain.provoke(robot.brain, {
+		id = target.player,
+		x = target.position.X,
+		z = target.position.Z,
+		distance = flatDistance(target.position, robot.position),
+		range = settings.Types[robot.typeName].sightRange,
+	}, now)
+	robot.lungeUntil = now + hunt.Lunge.Seconds
+	robot.lungeReadyAt = robot.lungeUntil + hunt.Lunge.Cooldown
+	fxRemote:FireAllClients(robot.model, "reveal", robot.position)
+	fxRemote:FireAllClients(robot.model, "lunge", robot.position)
+end
+
+-- A different callout someone made near it lately, else the same one again.
+local function nextCallIndex(robot: Robot, current: number): number
+	for i = #calls, 1, -1 do
+		local call = calls[i]
+		local near = flatDistance(Vector3.new(call.x, 0, call.z), robot.position) <= Config.Callouts.HearRange
+		if near and call.index ~= current then
+			table.remove(calls, i)
+			return call.index
+		end
+	end
+	return current
+end
+
+-- Its head follows one player while it waits; that player's client feels singled out (LockedOn).
+local function trackWatchers(robot: Robot, lure: Lure, alive: { Alive }, now: number)
+	local watchers = {}
+	local byPlayer: { [Player]: Alive } = {}
+	for _, target in alive do
+		local d = flatDistance(target.position, robot.position)
+		local last = lure.distances[target.player]
+		lure.distances[target.player] = d
+		byPlayer[target.player] = target
+		table.insert(watchers, {
+			id = target.player,
+			distance = d,
+			approaching = last ~= nil and d < last - 0.05,
+			answered = lure.answered[target.player] == true,
+		})
+	end
+	lure.lock = RobotMimic.track(lure.lock, watchers, now, mimic)
+	local locked = lure.lock and byPlayer[lure.lock.id]
+	robot.lookAt = locked and locked.position
+	local userId = locked and locked.player.UserId
+	if robot.model:GetAttribute("LockedOn") ~= userId then
+		robot.model:SetAttribute("LockedOn", userId)
+	end
+end
+
+local function setPose(robot: Robot, pose: string)
+	robot.pose = pose
+	if robot.model:GetAttribute("Pose") ~= pose then
+		robot.model:SetAttribute("Pose", pose)
+	end
+end
+
+-- True while the lure has the robot this tick; false hands it back to its brain.
+local function lureStep(robot: Robot, alive: { Alive }, now: number): boolean
+	local lure = robot.lure :: Lure
+	local state = robot.brain.state
+	if
+		not DayNight.isNight()
+		or robot.knockedUntil
+		or robot.brain.companion
+		or (state ~= "sweep" and state ~= "investigate")
+	then
+		endLure(robot)
+		return false
+	end
+	if not lure.waiting then
+		if now >= lure.untilAt then
+			endLure(robot)
+			return false
+		end
+		if flatDistance(lure.spot, robot.position) > settings.ArriveRange then
+			robot.speed = settings.Types[robot.typeName].walkSpeed
+			robot.face = nil
+			setPose(robot, "walk")
+			setGoal(robot, lure.spot, now)
+			robot.lookAt = nil
+			publishLook(robot)
+			return true
+		end
+		lure.waiting = true
+		lure.untilAt = now + mimic.WaitSeconds
+		lure.nextCallAt = now + randomIn(mimic.RepeatGap)
+		robot.speed = 0
+		robot.face = lure.face
+		setGoal(robot, nil, now)
+		setPose(robot, "idle")
+		playCopy(robot, lure.index)
+	end
+	local near = {}
+	for _, target in alive do
+		if flatDistance(target.position, robot.position) <= mimic.ViewRange then
+			table.insert(near, {
+				id = target,
+				x = target.position.X,
+				z = target.position.Z,
+				visible = lineOfSight(robot, target),
+			})
+		end
+	end
+	local eye = { x = robot.position.X, z = robot.position.Z, fx = robot.facing.X, fz = robot.facing.Z }
+	local prey = RobotMimic.pounce(eye, near, mimic)
+	if prey then
+		pounceOn(robot, prey, now)
+		return false
+	end
+	if now >= lure.untilAt then
+		endLure(robot) -- nobody came: slips back to sweeping, still quiet
+		return false
+	end
+	if lure.repeats > 0 and now >= lure.nextCallAt then
+		lure.repeats -= 1
+		lure.nextCallAt = now + randomIn(mimic.RepeatGap)
+		lure.index = nextCallIndex(robot, lure.index)
+		playCopy(robot, lure.index)
+	end
+	trackWatchers(robot, lure, alive, now)
+	publishLook(robot)
+	return true
+end
+
 local function tick(dt: number)
 	local now = os.clock()
 	local phase = DayNight.phase()
@@ -1897,6 +2175,9 @@ local function tick(dt: number)
 			continue
 		end
 		keepApart(robot)
+		if robot.lure and lureStep(robot, alive, now) then
+			continue
+		end
 		if robot.watching and keepWatching(robot, alive, seen ~= nil or heard ~= nil, now) then
 			publishLook(robot)
 			continue
@@ -2272,6 +2553,14 @@ local function heardCallout(player: Player, index: unknown)
 	if not head or not head:IsA("BasePart") then
 		return
 	end
+	local lure = lurer and lurer.lure
+	if
+		lure
+		and lure.waiting
+		and (head.Position - (lurer :: Robot).position).Magnitude <= Config.Callouts.HearRange
+	then
+		lure.answered[player] = true -- someone calling back to it: its head turns their way
+	end
 	table.insert(calls, {
 		speaker = player,
 		index = index :: number,
@@ -2284,34 +2573,41 @@ local function heardCallout(player: Player, index: unknown)
 	end
 end
 
--- Now and then at night an awake robot somewhere else plays a recent callout back, pitched wrong.
+-- Now and then at night an awake robot somewhere else sneaks into cover and plays a recent callout
+-- back, pitched wrong, to lure them in (lureStep). Companions never do.
 local function tryMimic(now: number)
-	if not DayNight.isNight() or now < mimicReadyAt or #calls == 0 or random:NextNumber() > mimic.Chance then
+	if lurer and lurer.dead then
+		lurer = nil
+	end
+	if
+		lurer
+		or not DayNight.isNight()
+		or now < mimicReadyAt
+		or #calls == 0
+		or random:NextNumber() > mimic.Chance
+	then
 		return
 	end
 	local candidates = {}
 	for id, robot in robots do
 		local state = robot.brain.state
-		if not robot.knockedUntil and not robot.perch and (state == "sweep" or state == "investigate") then
+		if
+			not robot.knockedUntil
+			and not robot.perch
+			and not robot.brain.companion
+			and robot.role ~= "chore"
+			and (state == "sweep" or state == "investigate")
+		then
 			table.insert(candidates, { id = id, x = robot.position.X, z = robot.position.Z })
 		end
 	end
 	local call, id = RobotMimic.pick(calls, candidates, now, mimic)
 	local robot = id and robots[id]
-	if not call or not robot then
+	if not call or not robot or not startLure(robot, call, now) then
 		return
 	end
 	mimicReadyAt = now + randomIn(mimic.Cooldown)
 	table.remove(calls, table.find(calls, call) :: number)
-	for _, player in Players:GetPlayers() do
-		local character = player.Character
-		if
-			character
-			and (character:GetPivot().Position - robot.position).Magnitude <= Config.Callouts.HearRange
-		then
-			mimicRemote:FireClient(player, robot.model, call.index)
-		end
-	end
 end
 
 -- Public ------------------------------------------------------------------------------------------
