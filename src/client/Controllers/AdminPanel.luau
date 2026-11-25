@@ -31,7 +31,8 @@ local HEIGHT = 400
 local CELL = Vector2.new(136, 52)
 local GAP = 8
 local PAD_ACTION = "AdminPanelPad"
-local TABS = { "Guns", "Items", "Moves", "Time", "Robots", "Sim" }
+local SIZE_ORDER = { "Small", "Medium", "Large" }
+local TABS = { "Guns", "Items", "Moves", "Time", "Robots", "Sim", "Size" }
 
 type ButtonSpec = {
 	text: string | () -> string,
@@ -245,7 +246,33 @@ local function simSpecs(): { ButtonSpec }
 	for _, mood in settings.SimMoods do
 		table.insert(specs, { text = string.upper(mood), command = "sim_mood", arg = mood })
 	end
+	table.insert(specs, { text = "FILL LOBBY", command = "sim_fill" })
 	table.insert(specs, { text = "CLEAR", command = "sim_clear" })
+	return specs
+end
+
+-- Each size button moves every admin here to a fresh server with that warehouse
+local function sizeSpecs(): { ButtonSpec }
+	local specs: { ButtonSpec } = {}
+	for _, name in SIZE_ORDER do
+		table.insert(specs, {
+			text = `{string.upper(name)} {Config.Warehouse.Sizes[name]}`,
+			command = "size_server",
+			arg = name,
+			on = function()
+				return ReplicatedStorage:GetAttribute("WarehouseSize") == name
+			end,
+		})
+	end
+	table.insert(specs, {
+		text = function()
+			return onOff("PUBLIC LOBBY", isOn("AdminPublicLobby"))
+		end,
+		command = "size_lobby",
+		on = function()
+			return isOn("AdminPublicLobby")
+		end,
+	})
 	return specs
 end
 
@@ -256,6 +283,7 @@ local SPECS: { [string]: () -> { ButtonSpec } } = {
 	Time = timeSpecs,
 	Robots = robotSpecs,
 	Sim = simSpecs,
+	Size = sizeSpecs,
 }
 
 local function refreshLabels()
@@ -687,10 +715,10 @@ local function enable()
 		simCount = count
 		refreshLabels()
 	end)
-	for _, name in { "God", "Fly", "AdminSpeed", "InfiniteAmmo" } do
+	for _, name in { "God", "Fly", "AdminSpeed", "InfiniteAmmo", "AdminPublicLobby" } do
 		player:GetAttributeChangedSignal(name):Connect(refreshLabels)
 	end
-	for _, name in { "ClockFrozen", "RobotsFrozen" } do
+	for _, name in { "ClockFrozen", "RobotsFrozen", "WarehouseSize" } do
 		ReplicatedStorage:GetAttributeChangedSignal(name):Connect(refreshLabels)
 	end
 	local function playersChanged()

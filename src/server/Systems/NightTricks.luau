@@ -389,7 +389,7 @@ end
 
 local function placeGenerators(taken: { HauntPlacement.Spot })
 	local rules = Settings.Generators
-	for _, spot in findSpots(rules.Count, rules, taken) do
+	for _, spot in findSpots(Warehouse.scaled(rules.Count), rules, taken) do
 		local model = place("generator", spot, folder)
 		if model then
 			model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
@@ -452,7 +452,7 @@ local function placeFuelCans()
 		local pivot = generator.model:GetPivot().Position - Config.Warehouse.Origin
 		table.insert(taken, { x = pivot.X, z = pivot.Z, turn = 0 })
 	end
-	for _, spot in findSpots(rules.Count, rules, taken) do
+	for _, spot in findSpots(Warehouse.scaled(rules.Count), rules, taken) do
 		local model = place("fuel_can", spot, fuelFolder)
 		if model then
 			local prompt = addPrompt(model, "Pick up", "Fuel can")

@@ -15,6 +15,7 @@ local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local CombatModes = require(ReplicatedStorage.Shared.Logic.CombatModes)
 local Config = require(ReplicatedStorage.Shared.Config)
 local InteractKinds = require(ReplicatedStorage.Shared.Logic.InteractKinds)
+local Lobby = require(ReplicatedStorage.Shared.Logic.Lobby)
 local Net = require(ReplicatedStorage.Shared.Net)
 local SimBrain = require(ReplicatedStorage.Shared.Logic.SimBrain)
 local DayNight = require(script.Parent.DayNight)
@@ -23,6 +24,7 @@ local Loudness = require(script.Parent.Loudness)
 local Warehouse = require(script.Parent.Warehouse)
 
 local settings = Config.SimPlayers
+local lobby = settings.Lobby
 local guns = Config.Guns
 local movement = Config.Movement
 
@@ -37,6 +39,7 @@ type Bot = {
 	id: number,
 	name: string,
 	home: Vector3?,
+	opening: string?, -- action a lobby-fill bot is already busy with when it first appears
 	handle: Handle,
 	brain: SimBrain.Brain,
 	generation: number,
@@ -1050,6 +1053,14 @@ local function spawnBody(bot: Bot)
 	byModel[model] = bot
 	bot.alive = true
 	bot.brain = SimBrain.new()
+	if bot.opening then
+		local phase = DayNight.phase()
+		local action = if phase == "Day" then bot.opening else "hide"
+		SimBrain.start(bot.brain, action :: any, phase, settings, os.clock(), function()
+			return random:NextNumber()
+		end)
+		bot.opening = nil
+	end
 	bot.action = nil
 	bot.goal, bot.waypoints, bot.waypointIndex = nil, {}, 1
 	bot.pathFor, bot.pathBusy = nil, false
@@ -1188,39 +1199,64 @@ end
 
 -- Public ------------------------------------------------------------------------------------------
 
+local function addBot(home: Vector3?, opening: string?)
+	nextId += 1
+	local name = uniqueName()
+	local bot: Bot = {
+		id = nextId,
+		name = name,
+		handle = newHandle(name),
+		brain = SimBrain.new(),
+		generation = 0,
+		alive = false,
+		thinkAt = os.clock() + random:NextNumber(0, 1 / settings.ThinkRate),
+		waypoints = {},
+		waypointIndex = 1,
+		pathAt = 0,
+		pathBusy = false,
+		lastMovedAt = 0,
+		lastPosition = Vector3.zero,
+		looted = {},
+		strafeAt = 0,
+		nextShotAt = 0,
+		burstLeft = 0,
+		mag = 0,
+		hitAt = -math.huge,
+		lastHealth = 0,
+		tracks = {},
+		home = home,
+		opening = opening,
+	}
+	bots[bot.id] = bot
+	task.spawn(spawnBody, bot)
+end
+
 -- Adds up to count bots, never past Config.SimPlayers.Max. Bodies build on their own threads.
 function SimPlayers.spawn(count: number, near: Vector3?)
 	local room = settings.Max - botCount()
 	for _ = 1, math.clamp(math.floor(tonumber(count) or 0), 0, room) do
-		nextId += 1
-		local name = uniqueName()
-		local bot: Bot = {
-			id = nextId,
-			name = name,
-			handle = newHandle(name),
-			brain = SimBrain.new(),
-			generation = 0,
-			alive = false,
-			thinkAt = os.clock() + random:NextNumber(0, 1 / settings.ThinkRate),
-			waypoints = {},
-			waypointIndex = 1,
-			pathAt = 0,
-			pathBusy = false,
-			lastMovedAt = 0,
-			lastPosition = Vector3.zero,
-			looted = {},
-			strafeAt = 0,
-			nextShotAt = 0,
-			burstLeft = 0,
-			mag = 0,
-			hitAt = -math.huge,
-			lastHealth = 0,
-			tracks = {},
-			home = near,
-		}
-		bots[bot.id] = bot
-		task.spawn(spawnBody, bot)
+		addBot(near)
 	end
+end
+
+-- A public server that was already running: replaces any bots with count of them (default scaled
+-- to the warehouse size) spread over the warehouse spawns in solos and small groups, busy from the
+-- first second. Returns how many it made.
+function SimPlayers.fillLobby(count: number?): number
+	SimPlayers.clear()
+	SimPlayers.setMood(lobby.Mood)
+	local layout = Warehouse.layout()
+	local function roll(): number
+		return random:NextNumber()
+	end
+	local total = math.min(count or Lobby.botCount(layout.size, Config.Warehouse, lobby, roll), settings.Max)
+	for _, squad in Lobby.plan(total, layout.spawns, lobby, roll) do
+		local home = Warehouse.toWorld(squad.spot.x, squad.spot.z)
+		for member = 1, squad.size do
+			addBot(home, if member == 1 then squad.opening else "group")
+		end
+	end
+	return botCount()
 end
 
 function SimPlayers.setMood(newMood: string)

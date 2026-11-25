@@ -8,6 +8,7 @@ local Installations = if script
 	else require("./WarehouseGenInstallations")
 local Pieces = if script then require(script.Parent.WarehouseGenPieces) else require("./WarehouseGenPieces")
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
+local Sizes = if script then require(script.Parent.WarehouseSizes) else require("./WarehouseSizes")
 
 local NightLights = {}
 
@@ -167,8 +168,9 @@ end
 local function addCarryLights(layout: any, config: any, rng: Rng.Rng, isClear: any)
 	local settings = config.NightLights
 	local edge = config.BlockMargin - settings.EdgeInset - 2
+	local wanted = Sizes.scaled(config.Size, settings.CarryLightCount, config)
 	local placed, tries = 0, 0
-	while placed < settings.CarryLightCount and tries < settings.CarryLightCount * 20 do
+	while placed < wanted and tries < wanted * 20 do
 		tries += 1
 		local line = rng:int(1, layout.blocks - 1)
 		local across = -layout.half + line * layout.blockSize + rng:range(-edge, edge)

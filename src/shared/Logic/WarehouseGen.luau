@@ -8,6 +8,7 @@ local NightLights = if script
 	else require("./WarehouseGenNightLights")
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
+local Sizes = if script then require(script.Parent.WarehouseSizes) else require("./WarehouseSizes")
 local Zones = if script then require(script.Parent.WarehouseGenZones) else require("./WarehouseGenZones")
 local Clutter = if script
 	then require(script.Parent.WarehouseGenClutter)
@@ -295,7 +296,7 @@ local function decalSurface(layout: Layout, config: any, rng: Rng.Rng)
 end
 
 local function addDecals(layout: Layout, config: any, rng: Rng.Rng)
-	for _ = 1, config.DecalCount do
+	for _ = 1, Sizes.scaled(config.Size, config.DecalCount, config) do
 		local x, z, nx, nz, faceWidth = decalSurface(layout, config, rng)
 		if x then
 			local kind = rng:weighted(config.DecalKinds)
@@ -342,8 +343,9 @@ local function addSpawns(layout: Layout, config: any, rng: Rng.Rng)
 		return best
 	end
 
+	local wanted = Sizes.scaled(config.Size, config.SpawnCount, config)
 	local rounds = 0
-	while #layout.spawns < config.SpawnCount and rounds < config.SpawnCount * 20 do
+	while #layout.spawns < wanted and rounds < wanted * 20 do
 		rounds += 1
 		-- Best of several candidates: the one furthest from everyone already placed
 		local bestX, bestZ, bestGap = nil, nil, -1
