@@ -172,7 +172,7 @@ return {
 				weight = 1.5,
 				rumor = true,
 				text = {
-					"*crackle* ...someone saw a dog near aisle {spot}...",
+					"*crackle* ...heard someone crying for help near aisle {spot}. nobody was there. found a crate though...",
 					"*crackle* ...left a stash behind in aisle {spot}, couldn't carry it all...",
 					"*crackle* ...anyone near aisle {spot}? something fell off a robot cart...",
 				},

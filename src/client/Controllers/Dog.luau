@@ -104,7 +104,7 @@ local function playCall(key: any, position: any)
 	echo.Parent = sound
 	sound.Parent = spot
 	-- part of the warehouse's background, so it dips under the PA and gunfights like the rest of it
-	Mix.route(sound, "Ambience")
+	Mix.route(sound, "SFX")
 	sound:Play()
 	sound.Ended:Once(function()
 		spot:Destroy()
