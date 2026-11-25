@@ -691,6 +691,21 @@ def shot_stairsnowhere():
     render("stairsnowhere")
 
 
+def shot_held(gun):
+    """First-person check for a gun ("gear/smg"): low right in view, seen from behind and above like in play."""
+    wipe()
+    world((0.05, 0.055, 0.06), 0.0)
+    root = place(gun)
+    for o in root.children_recursive:
+        if o.name.split(".")[0] in ("Muzzle", "Rear", "Grip", "Foregrip", "Lens"):
+            o.hide_render = True
+    lamp("AREA", (1.5, 1.5, 3.0), 120, (1.0, 0.96, 0.9), size=2.0, aim=(0, 0, 0.6))
+    lamp("AREA", (1.5, -1.0, 1.5), 40, (0.6, 0.75, 1.0), size=1.5, aim=(0, 0, 0.6))
+    lamp("AREA", (0, 2.5, 0.5), 25, (1, 1, 1), size=2.0, aim=(0, 0, 0.6))
+    camera((0.45, 1.95, 1.15), (0.45, -3.0, 0.62), lens=26)
+    render("held_" + os.path.basename(gun))
+
+
 SHOTS = {"aisle": shot_aisle, "installation": shot_installation, "pillar": shot_pillar, "culdesac": shot_culdesac,
          "pool": shot_pool, "courtyard": shot_courtyard, "catwalk": shot_catwalk, "blacksun": shot_blacksun, "mall": shot_mall,
          "party": shot_party, "office": shot_office, "basement": shot_basement, "library": shot_library,
@@ -700,3 +715,5 @@ SHOTS = {"aisle": shot_aisle, "installation": shot_installation, "pillar": shot_
 for name in WANT:
     if name in SHOTS:
         SHOTS[name]()
+    elif name.startswith("held:"):
+        shot_held(name[5:])

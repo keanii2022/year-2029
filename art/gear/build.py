@@ -2,6 +2,7 @@ import os, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "_kit"))
 from ykit import *  # noqa
+from gundetail import *  # noqa
 
 # Ammo color code, shared by each ammo box and the guns that use it.
 LIGHT = "#2bb3a8"  # starter_pistol, smg
@@ -90,25 +91,7 @@ def hexbarrel(r, length, y, z, x=0.0):
 
 @item("starter_pistol", "gear")
 def starter_pistol(P):
-    worn = paint(WHITE, chip=0.25, under="#8d8f92", under2="#5d6064", grime=0.6, streaks=0.3)
-    g = plain(GREY, grime=0.5)
-    P.add("Handle", box((0.22, 0.86, 0.22), worn, loc=(0, -0.04, 0.62), r=0.05, n=1))
-    P.add("Handle", box((0.2, 0.72, 0.12), g, loc=(0, -0.02, 0.46), r=0.03, n=1))
-    P.add("Handle", box((0.25, 0.1, 0.2), g, loc=(0, -0.5, 0.6), r=0.025, n=1))
-    P.add("Handle", hexbarrel(0.055, 0.07, -0.58, 0.61))
-    P.add("Handle", grip(0.22, 0.22, 0.46))
-    P.add("Mag", box((0.12, 0.17, 0.44), plain(LIGHT, grime=0.3), loc=(0, 0.225, 0.24), rot=(14, 0, 0), r=0.02, n=1))
-    P.add("Mag", box((0.2, 0.27, 0.05), plain(ORANGE, grime=0.4), loc=(0, 0.28, 0.0), rot=(14, 0, 0), r=0.015, n=1))
-    P.add("Handle", band((0.185, 0.245, 0.07), loc=(0, 0.21, 0.27), rot=(14, 0, 0)))
-    P.add("Handle", trigger(-0.06, 0.4))
-    P.add("Handle", box((0.17, 0.06, 0.06), plain(DARK), loc=(0, 0.33, 0.75), r=0.015, n=1))
-    P.add("Handle", box((0.05, 0.05, 0.05), plain(ORANGE), loc=(0, -0.42, 0.75), r=0.012, n=1))
-    for sx in (1, -1):
-        P.add("Glow", glowstrip(0.34, (sx * 0.111, -0.18, 0.66), LIGHT))
-    P.add("Handle", hazard(0.2, 0.08, (0.112, 0.2, 0.6), (1, 0, 0), n=3))
-    P.add("Handle", screws([(0.111, 0.08, 0.56), (0.111, -0.36, 0.56), (-0.111, 0.08, 0.56)]))
-    P.add("Handle", box((0.006, 0.12, 0.05), flat("#6c6e70"), loc=(0.112, -0.32, 0.67), rot=(18, 0, 0), r=0.0, n=1))
-    P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.615, 0.61), r=0.0, n=1))
+    pistol(P, "Handle", LIGHT)
 
 
 @item("smg", "gear")
@@ -130,11 +113,17 @@ def smg(P):
     P.add("Handle", box((0.06, 0.44, 0.06), g, loc=(0, 0.62, 0.5), rot=(-6, 0, 0), r=0.02, n=1))
     P.add("Handle", box((0.2, 0.08, 0.36), d, loc=(0, 0.86, 0.6), r=0.03, n=1))
     P.add("Handle", box((0.22, 0.04, 0.38), plain(ORANGE, grime=0.3), loc=(0, 0.91, 0.6), r=0.015, n=1))
-    for sx in (1, -1):
-        P.add("Glow", glowstrip(0.4, (sx * 0.131, -0.05, 0.7), LIGHT))
     P.add("Handle", hazard(0.26, 0.09, (0.132, 0.2, 0.56), (1, 0, 0), n=4))
     P.add("Handle", tie(0.22, 0.22, -0.48, 0.64))
     P.add("Handle", screws([(0.131, -0.32, 0.54), (0.131, 0.36, 0.7), (-0.131, -0.32, 0.54), (-0.131, 0.36, 0.7)]))
+    P.add("Handle", panel(0.131, -0.42, 0.42, 0.5, 0.745))
+    body, lit_parts = cell_window(0.132, -0.36, 0.0, 0.66, 0.06, LIGHT)
+    P.add("Handle", body)
+    P.add("Glow", lit_parts)
+    P.add("Handle", grip_texture(0.22, 0.3, 0.42))
+    P.add("Handle", rail(-0.3, 0.3, 0.83))
+    P.add("Handle", reflex(0.15, 0.865))
+    P.add("Rear", marker((0, 0.45, 0.64)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.98, 0.64), r=0.0, n=1))
     P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.64, 0.64), r=0.0, n=1))
 
@@ -165,6 +154,12 @@ def shotgun(P):
     P.add("Handle", hazard(0.42, 0.08, (-0.192, -0.72, 0.68), (-1, 0, 0), n=5))
     P.add("Handle", band((0.39, 0.09, 0.23), loc=(0, -0.38, 0.72)))
     P.add("Handle", screws([(0.151, 0.4, 0.76), (-0.151, 0.4, 0.76), (0.151, -0.2, 0.76), (-0.151, -0.2, 0.76)]))
+    P.add("Handle", panel(0.151, 0.28, 0.48, 0.5, 0.78))
+    P.add("Handle", top_vents(-1.05, -0.45, 0.833, 0.2, 6))
+    P.add("Handle", grip_texture(0.48, 0.3, 0.44, w=0.19, d=0.25))
+    P.add("Handle", rail(-0.2, 0.4, 0.82))
+    P.add("Handle", reflex(0.25, 0.855))
+    P.add("Rear", marker((0, 0.5, 0.72)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.3, 0.72), r=0.0, n=1))
     P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.72, 0.53), r=0.0, n=1))
 
@@ -197,6 +192,13 @@ def rifle(P):
     P.add("Handle", tie(0.18, 0.18, -0.45, 0.66))
     P.add("Handle", band((0.19, 0.1, 0.19), loc=(0, -1.25, 0.66)))
     P.add("Handle", screws([(0.111, -0.25, 0.7), (0.111, 0.45, 0.7), (-0.111, -0.25, 0.7), (-0.111, 0.45, 0.7)]))
+    P.add("Handle", panel(0.111, -0.38, 0.58, 0.49, 0.75))
+    body, lit_parts = cell_window(0.112, -0.32, -0.02, 0.67, 0.06, HEAVY)
+    P.add("Handle", body)
+    P.add("Glow", lit_parts)
+    P.add("Handle", vents(0.112, 0.04, 0.2, 0.67, 0.06, n=3))
+    P.add("Handle", grip_texture(0.3, 0.3, 0.42))
+    P.add("Rear", marker((0, 0.6, 0.66)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.7, 0.66), r=0.0, n=1))
     P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.85, 0.66), r=0.0, n=1))
 
@@ -232,6 +234,10 @@ def heavy_blaster(P):
     P.add("Handle", box((0.46, 0.06, 0.06), plain(TEAL, grime=0.3), loc=(0, -0.6, 1.04), r=0.015, n=1))
     P.add("Handle", band((0.47, 0.1, 0.12), loc=(0, 0.45, 0.6)))
     P.add("Handle", screws([(0.231, -0.4, 0.62), (0.231, 0.5, 0.62), (-0.231, -0.4, 0.62), (-0.231, 0.5, 0.62)], r=0.024))
+    P.add("Handle", panel(0.231, -0.55, 0.55, 0.56, 1.0))
+    P.add("Handle", vents(0.232, -0.55, -0.25, 0.86, 0.1, n=4))
+    P.add("Handle", grip_texture(0.38, 0.3, 0.46, w=0.2, d=0.26))
+    P.add("Rear", marker((0, 0.6, 0.8)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.495, 0.8), r=0.0, n=1))
     P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.78, 0.45), r=0.0, n=1))
 
@@ -457,6 +463,12 @@ def disruptor(P):
         P.add("Glow", glowstrip(0.5, (sx * 0.151, 0.15, 0.62), "#7ff6ff"))
     P.add("Handle", hazard(0.34, 0.08, (0.152, 0.45, 0.76), (1, 0, 0), n=4))
     P.add("Handle", screws([(0.151, -0.2, 0.76), (-0.151, -0.2, 0.76), (0.151, 0.65, 0.6), (-0.151, 0.65, 0.6)]))
+    P.add("Handle", panel(0.151, -0.25, 0.75, 0.56, 0.84))
+    P.add("Handle", vents(0.152, -0.27, -0.12, 0.68, 0.07, n=3))
+    P.add("Handle", grip_texture(0.55, 0.32, 0.44, w=0.18, d=0.24))
+    P.add("Handle", rail(0.64, 0.8, 0.87))
+    P.add("Handle", reflex(0.73, 0.905, w=0.13, h=0.09))
+    P.add("Rear", marker((0, 0.8, 0.72)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.83, 0.72), r=0.0, n=1))
     P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.56, 0.5), r=0.0, n=1))
 
@@ -481,6 +493,10 @@ def revolver(P):
     P.add("Handle", hazard(0.16, 0.07, (0.101, 0.18, 0.6), (1, 0, 0), n=3))
     P.add("Handle", screws([(0.101, 0.0, 0.54), (-0.101, 0.0, 0.54), (0.101, 0.24, 0.68)]))
     P.add("Handle", band((0.17, 0.08, 0.17), loc=(0, -0.3, 0.68)))
+    P.add("Handle", grip_texture(0.3, 0.36, 0.42, w=0.16, d=0.22, lean=22))
+    P.add("Handle", panel(0.101, 0.1, 0.3, 0.52, 0.72, screws_at=False))
+    P.add("Handle", top_vents(-0.66, -0.24, 0.802, 0.04, 6))
+    P.add("Rear", marker((0, 0.31, 0.68)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.805, 0.68), r=0.0, n=1))
 
 
@@ -518,6 +534,12 @@ def marksman_rifle(P):
     P.add("Handle", box((0.14, 0.08, 0.08), g, loc=(0, -1.66, 0.57), r=0.015, n=1))
     P.add("Handle", hazard(0.3, 0.08, (0.101, 0.35, 0.56), (1, 0, 0), n=4))
     P.add("Handle", screws([(0.101, 0.45, 0.68), (-0.101, 0.45, 0.68)]))
+    P.add("Handle", panel(0.101, -0.38, 0.2, 0.52, 0.73))
+    body, lit_parts = cell_window(0.102, -0.32, -0.04, 0.64, 0.06, HEAVY)
+    P.add("Handle", body)
+    P.add("Glow", lit_parts)
+    P.add("Handle", grip_texture(0.33, 0.3, 0.42))
+    P.add("Rear", marker((0, 0.6, 0.66)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -2.04, 0.66), r=0.0, n=1))
     P.add("Foregrip", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.0, 0.64), r=0.0, n=1))
 
@@ -549,6 +571,9 @@ def nail_gun(P):
     P.add("Glow", box((0.08, 0.012, 0.04), lit(NAIL), loc=(0, 0.351, 0.78), r=0.006, n=1))
     P.add("Handle", hazard(0.2, 0.07, (0.121, -0.3, 0.62), (1, 0, 0), n=3))
     P.add("Handle", words("NL", 0.07, flat("#1e1e22"), loc=(-0.123, 0.0, 0.72), rot=(0, 0, 90)))
+    P.add("Handle", grip_texture(0.38, 0.34, 0.44, w=0.18, d=0.22, lean=10))
+    P.add("Handle", vents(0.121, 0.17, 0.33, 0.78, 0.07, n=3))
+    P.add("Rear", marker((0, 0.35, 0.62)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.775, 0.62), r=0.0, n=1))
 
 
@@ -572,6 +597,8 @@ def flare_gun(P):
     for sx in (1, -1):
         P.add("Handle", hazard(0.3, 0.08, (sx * 0.121, 0.06, 0.58), (sx, 0, 0), n=4))
     P.add("Handle", screws([(0.121, 0.22, 0.74), (-0.121, 0.22, 0.74)]))
+    P.add("Handle", grip_texture(0.26, 0.3, 0.46, w=0.21, d=0.27, lean=16))
+    P.add("Rear", marker((0, 0.29, 0.68)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -0.665, 0.68), r=0.0, n=1))
 
 
@@ -597,6 +624,9 @@ def dart_blaster(P):
         P.add("Glow", glowstrip(0.45, (sx * 0.081, -0.15, 0.62), DART))
     P.add("Handle", words("SHH", 0.05, flat("#2b6b5a"), loc=(0, -0.85, 0.66), rot=(0, 0, 90)))
     P.add("Handle", screws([(0.081, 0.3, 0.66), (-0.081, 0.3, 0.66)], r=0.014))
+    P.add("Handle", grip_texture(0.24, 0.38, 0.38, w=0.14, d=0.2, lean=18))
+    P.add("Handle", panel(0.081, 0.1, 0.42, 0.59, 0.73, screws_at=False))
+    P.add("Rear", marker((0, 0.45, 0.66)))
     P.add("Muzzle", box((0.08, 0.08, 0.08), plain("#34322f"), loc=(0, -1.11, 0.66), r=0.0, n=1))
 
 

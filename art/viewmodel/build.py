@@ -2,6 +2,7 @@ import os, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "_kit"))
 from ykit import *  # noqa
+from gundetail import pistol
 
 # First-person pieces, shown close to the camera. Forward is -y, like the guns.
 LIGHT = "#2bb3a8"  # starter_pistol ammo color, matches gear/build.py
@@ -168,46 +169,10 @@ def viewmodel_arm_left_open(P):
 
 @item("viewmodel_blaster", "viewmodel")
 def viewmodel_blaster(P):
-    """First-person starter_pistol: same size and colors, crisper edges, more on the top and back.
-    Muzzle is the hidden cube at the barrel tip, Grip the one at the handle centre (where viewmodel_arm_right's Grip goes)."""
-    worn = paint(WHITE, chip=0.25, under="#8d8f92", under2="#5d6064", grime=0.6, streaks=0.3)
-    g = plain(GREY, grime=0.5)
-    dark = plain(DARK)
-    steel = plain("#3a3c40", grime=0.2)
-    P.add("Body", box((0.22, 0.86, 0.22), worn, loc=(0, -0.04, 0.62), r=0.025, n=1))
-    P.add("Body", box((0.2, 0.72, 0.12), g, loc=(0, -0.02, 0.46), r=0.018, n=1))
-    P.add("Body", box((0.25, 0.1, 0.2), g, loc=(0, -0.5, 0.6), r=0.015, n=1))
-    P.add("Body", cyl(0.055, 0.07, steel, loc=(0, -0.58, 0.61), rot=(90, 0, 0), seg=6, bevel=0.006))
-    P.add("Body", cyl(0.03, 0.01, flat("#0c0c0e"), loc=(0, -0.617, 0.61), rot=(90, 0, 0), seg=6, bevel=0.0))
-    P.add("Body", box((0.17, 0.23, 0.46), plain(DARK, grime=0.25, vary=0.15), loc=(0, 0.22, 0.22), rot=(14, 0, 0), r=0.03, n=1))
-    P.add("Body", box((0.12, 0.17, 0.44), plain(LIGHT, grime=0.3), loc=(0, 0.225, 0.24), rot=(14, 0, 0), r=0.015, n=1))
-    P.add("Body", box((0.2, 0.27, 0.05), plain(ORANGE, grime=0.4), loc=(0, 0.28, 0.0), rot=(14, 0, 0), r=0.012, n=1))
-    P.add("Body", box((0.185, 0.245, 0.07), plain("#cdb98a", grime=0.55), loc=(0, 0.21, 0.27), rot=(14, 0, 0), r=0.008, n=1))
-    P.add("Body", [box((0.05, 0.26, 0.035), g, loc=(0, -0.09, 0.3), r=0.01, n=1),
-                   box((0.05, 0.035, 0.13), g, loc=(0, -0.21, 0.36), r=0.01, n=1),
-                   box((0.035, 0.035, 0.09), plain(ORANGE, grime=0.2), loc=(0, -0.06, 0.37), rot=(-15, 0, 0), r=0.008, n=1)])
-    # rear sight: two posts with a notch that lines up with the orange front dot
-    P.add("Body", box((0.17, 0.06, 0.03), dark, loc=(0, 0.33, 0.745), r=0.008, n=1))
-    for sx in (1, -1):
-        P.add("Body", box((0.05, 0.06, 0.06), dark, loc=(sx * 0.06, 0.33, 0.775), r=0.008, n=1))
-    P.add("Body", box((0.05, 0.05, 0.05), plain(ORANGE), loc=(0, -0.42, 0.75), r=0.01, n=1))
-    P.add("Body", box((0.04, 0.3, 0.006), flat("#3a3c40"), loc=(0, -0.13, 0.731), r=0.0, n=1))
-    for i in range(5):
-        P.add("Body", box((0.15, 0.012, 0.01), g, loc=(0, 0.12 + 0.03 * i, 0.733), r=0.002, n=1))
-    P.add("Body", box((0.005, 0.11, 0.004), flat("#6c6e70"), loc=(0.05, -0.3, 0.731), rot=(0, 0, 14), r=0.0, n=1))
-    # back plate the player looks at down the sights
-    P.add("Body", box((0.16, 0.012, 0.15), g, loc=(0, 0.394, 0.62), r=0.004, n=1))
-    P.add("Body", [bolt(0.014, loc=(sx * 0.06, 0.401, z), normal=(0, 1, 0)) for sx in (1, -1) for z in (0.565, 0.675)])
-    P.add("Body", cyl(0.03, 0.02, dark, loc=(0, 0.405, 0.62), rot=(90, 0, 0), seg=6, bevel=0.004))
-    for sx in (1, -1):
-        P.add("Glow", box((0.012, 0.34, 0.025), lit(LIGHT), loc=(sx * 0.111, -0.18, 0.66), r=0.004, n=1))
-    hz = slab([(-0.1, -0.04), (0.1, -0.04), (0.1, 0.04), (-0.1, 0.04)], 0.01, flat("#f2c230"))
-    stripes = [slab([(x0, -0.04), (min(x0 + 0.033, 0.1), -0.04), (min(x0 + 0.033 + 0.056, 0.1), 0.04), (min(x0 + 0.056, 0.1), 0.04)], 0.016, flat("#1e1e22"))
-               for x0 in (-0.1, -0.033, 0.033)]
-    P.add("Body", aim([hz] + stripes, (0.112, 0.2, 0.6), (1, 0, 0)))
-    P.add("Body", [bolt(0.018, loc=p, normal=(1 if p[0] > 0 else -1, 0, 0)) for p in ((0.111, 0.08, 0.56), (0.111, -0.36, 0.56), (-0.111, 0.08, 0.56))])
-    P.add("Body", box((0.006, 0.12, 0.05), flat("#6c6e70"), loc=(0.112, -0.32, 0.67), rot=(18, 0, 0), r=0.0, n=1))
-    P.add("Muzzle", marker((0, -0.615, 0.61)))
+    """First-person starter_pistol, the same build as the floor pickup (see _kit/gundetail.py).
+    Muzzle sits at the barrel tip, Rear on the barrel line at the back plate, Grip at the handle centre
+    (where viewmodel_arm_right's Grip goes)."""
+    pistol(P, "Body", LIGHT)
     P.add("Grip", marker((0, 0.22, 0.22)))
 
 
