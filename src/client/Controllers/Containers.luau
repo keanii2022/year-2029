@@ -258,7 +258,7 @@ local function show(model: Model, incoming: State)
 	panel.Visible = true
 	-- A visible modal button frees the mouse while the panel is up, even in first person
 	closeButton.Modal = true
-	-- Square is Use and Circle is Psst; while the panel is up they work the panel instead
+	-- Square is Use and Circle is Call out; while the panel is up they work the panel instead
 	ContextActionService:BindActionAtPriority(
 		PAD_ACTION,
 		onPad,
