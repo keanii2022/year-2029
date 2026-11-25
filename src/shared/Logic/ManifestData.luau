@@ -2819,6 +2819,12 @@ return {
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.476, -0.76 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
 			},
 			clips = {},
 			moves = {
@@ -2831,8 +2837,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 98236222357278,
-			textureId = 133723989312234,
 		},
 		{
 			name = "disruptor",
@@ -2853,8 +2857,8 @@ return {
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.468, -0.019 },
-					size = { 0.453, 0.937, 3.182 },
+					center = { 0.0, 0.475, -0.019 },
+					size = { 0.453, 0.95, 3.182 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
@@ -2866,6 +2870,12 @@ return {
 				{
 					name = "Muzzle",
 					center = { 0.0, 0.633, 1.57 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.633, -1.06 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -2889,8 +2899,6 @@ return {
 					does = "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots.",
 				},
 			},
-			assetId = 76776026129505,
-			textureId = 128581704842237,
 		},
 		{
 			name = "emp_charge",
@@ -2949,6 +2957,12 @@ return {
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.683, -0.411 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
 			},
 			clips = {},
 			moves = {
@@ -2965,8 +2979,6 @@ return {
 					does = "The flare round. A fired flare lights an area for a while and pulls robots to it.",
 				},
 			},
-			assetId = 100631328731014,
-			textureId = 87426853648377,
 		},
 		{
 			name = "flashlight",
@@ -3103,6 +3115,12 @@ return {
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.745, -0.75 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
 			},
 			clips = {},
 			moves = {
@@ -3115,8 +3133,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 100260432207388,
-			textureId = 85741295872563,
 		},
 		{
 			name = "hiking_pack",
@@ -3183,35 +3199,41 @@ return {
 		{
 			name = "marksman_rifle",
 			group = "gear",
-			size = { 0.222, 0.967, 3.675 },
+			size = { 0.24, 0.967, 3.675 },
 			parts = {
 				{
 					name = "Foregrip",
-					center = { -0.004, 0.562, 0.757 },
+					center = { 0.0, 0.562, 0.757 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { -0.004, 0.753, 0.77 },
-					size = { 0.154, 0.367, 1.075 },
+					center = { 0.0, 0.734, 0.552 },
+					size = { 0.226, 0.405, 1.51 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
 					center = { 0.0, 0.483, -0.017 },
-					size = { 0.222, 0.967, 3.642 },
+					size = { 0.24, 0.967, 3.642 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { -0.004, 0.293, -0.022 },
+					center = { 0.0, 0.293, -0.022 },
 					size = { 0.14, 0.277, 0.2 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { -0.004, 0.582, 1.797 },
+					center = { 0.0, 0.582, 1.797 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.582, -0.843 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -3231,8 +3253,6 @@ return {
 					does = "Scope lens glints. Players far away can spot it.",
 				},
 			},
-			assetId = 119121322354778,
-			textureId = 75265716975454,
 		},
 		{
 			name = "medkit",
@@ -3286,6 +3306,12 @@ return {
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
+				{
+					name = "Rear",
+					center = { -0.02, 0.635, -0.448 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
 			},
 			clips = {},
 			moves = {
@@ -3298,8 +3324,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 110536695399772,
-			textureId = 93698328874013,
 		},
 		{
 			name = "noise_maker",
@@ -3364,6 +3388,12 @@ return {
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.583, -0.485 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
 			},
 			clips = {},
 			moves = {
@@ -3380,41 +3410,45 @@ return {
 					does = "The hex drum. Swings out to reload.",
 				},
 			},
-			assetId = 102573011027598,
-			textureId = 109565473599742,
 		},
 		{
 			name = "rifle",
 			group = "gear",
-			size = { 0.24, 0.972, 3.16 },
+			size = { 0.26, 0.972, 3.16 },
 			parts = {
 				{
 					name = "Foregrip",
-					center = { -0.003, 0.622, 0.69 },
+					center = { 0.0, 0.622, 0.69 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { -0.003, 0.78, 0.542 },
-					size = { 0.194, 0.342, 0.995 },
+					center = { 0.0, 0.777, 0.45 },
+					size = { 0.246, 0.35, 1.18 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
 					center = { 0.0, 0.506, -0.017 },
-					size = { 0.24, 0.932, 3.127 },
+					size = { 0.26, 0.932, 3.127 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { -0.003, 0.242, 0.08 },
+					center = { 0.0, 0.242, 0.08 },
 					size = { 0.13, 0.483, 0.298 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { -0.003, 0.622, 1.54 },
+					center = { 0.0, 0.622, 1.54 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.622, -0.76 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -3430,8 +3464,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 90213081785246,
-			textureId = 116308336300439,
 		},
 		{
 			name = "riot_helmet",
@@ -3492,7 +3524,7 @@ return {
 		{
 			name = "shotgun",
 			group = "gear",
-			size = { 0.42, 0.789, 2.59 },
+			size = { 0.42, 0.952, 2.59 },
 			parts = {
 				{
 					name = "Foregrip",
@@ -3508,8 +3540,8 @@ return {
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.395, -0.017 },
-					size = { 0.42, 0.789, 2.557 },
+					center = { 0.0, 0.476, -0.017 },
+					size = { 0.42, 0.952, 2.557 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
@@ -3524,6 +3556,12 @@ return {
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.654, -0.545 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
 			},
 			clips = {},
 			moves = {
@@ -3536,41 +3574,45 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 125387910119984,
-			textureId = 134192798188934,
 		},
 		{
 			name = "smg",
 			group = "gear",
-			size = { 0.28, 0.833, 1.951 },
+			size = { 0.3, 1.031, 1.951 },
 			parts = {
 				{
 					name = "Foregrip",
-					center = { -0.003, 0.643, 0.595 },
+					center = { 0.0, 0.643, 0.595 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { -0.003, 0.703, 0.005 },
-					size = { 0.274, 0.025, 0.4 },
+					center = { 0.0, 0.663, 0.135 },
+					size = { 0.286, 0.06, 0.36 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.457, -0.017 },
-					size = { 0.28, 0.752, 1.917 },
+					center = { 0.0, 0.556, -0.017 },
+					size = { 0.3, 0.949, 1.917 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { -0.003, 0.265, 0.23 },
+					center = { 0.0, 0.265, 0.23 },
 					size = { 0.16, 0.531, 0.27 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { -0.003, 0.643, 0.935 },
+					center = { 0.0, 0.643, 0.935 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.643, -0.495 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -3586,8 +3628,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 120674634717715,
-			textureId = 96512146664212,
 		},
 		{
 			name = "smoke_can",
@@ -3614,29 +3654,35 @@ return {
 		{
 			name = "starter_pistol",
 			group = "gear",
-			size = { 0.25, 0.834, 1.069 },
+			size = { 0.28, 1.01, 1.228 },
 			parts = {
 				{
 					name = "Glow",
-					center = { 0.0, 0.713, 0.059 },
-					size = { 0.234, 0.025, 0.34 },
+					center = { 0.0, 0.695, -0.26 },
+					size = { 0.266, 0.101, 0.708 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.433, -0.005 },
-					size = { 0.25, 0.801, 1.012 },
+					center = { 0.0, 0.53, -0.013 },
+					size = { 0.28, 0.96, 1.186 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { 0.0, 0.261, -0.375 },
-					size = { 0.2, 0.522, 0.319 },
+					center = { 0.0, 0.267, -0.413 },
+					size = { 0.21, 0.533, 0.348 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { 0.0, 0.663, 0.494 },
+					center = { 0.0, 0.683, 0.574 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.683, -0.566 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -3652,8 +3698,6 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 			},
-			assetId = 82255035726900,
-			textureId = 96834737584255,
 		},
 		{
 			name = "supply_locker",
@@ -6125,37 +6169,47 @@ return {
 		{
 			name = "viewmodel_blaster",
 			group = "viewmodel",
-			size = { 0.25, 0.859, 1.071 },
+			size = { 0.28, 1.01, 1.228 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.43, -0.017 },
-					size = { 0.25, 0.859, 1.037 },
+					center = { 0.0, 0.53, -0.013 },
+					size = { 0.28, 0.96, 1.186 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { 0.0, 0.714, 0.06 },
-					size = { 0.234, 0.025, 0.34 },
+					center = { 0.0, 0.695, -0.26 },
+					size = { 0.266, 0.101, 0.708 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Grip",
-					center = { 0.0, 0.274, -0.34 },
+					center = { 0.0, 0.283, -0.366 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
+					name = "Mag",
+					center = { 0.0, 0.267, -0.413 },
+					size = { 0.21, 0.533, 0.348 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
 					name = "Muzzle",
-					center = { 0.0, 0.664, 0.495 },
+					center = { 0.0, 0.683, 0.574 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Rear",
+					center = { 0.0, 0.683, -0.566 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 102694943719323,
-			textureId = 74926724098437,
 		},
 		{
 			name = "aisle_sign_hanging",

@@ -19,7 +19,7 @@ local player = Players.LocalPlayer
 
 local Viewmodel = {}
 
-local MARKERS = { "Muzzle", "Grip", "Foregrip", "Lens" }
+local MARKERS = { "Muzzle", "Grip", "Foregrip", "Lens", "Rear" }
 
 local model: Model? = nil
 local modelName: string? = nil -- uploaded template in use, nil for the stand-in
@@ -142,9 +142,13 @@ local function useUploaded(template: Instance)
 	local pivot = copy:GetPivot()
 	local body = findPart(copy, "Body")
 	local tip = findPart(copy, "Muzzle")
-	local newAlignment = CFrame.identity
+	local newAlignment = CFrame.identity -- The barrel line runs Rear -> Muzzle; the body's centre sits low in the grip and tips the nose down
+	local rear = findPart(copy, "Rear")
 	if tip then
-		local middle = if body then body.Position else (copy:GetBoundingBox()).Position
+		local middle = if rear
+			then rear.Position
+			elseif body then body.Position
+			else (copy:GetBoundingBox()).Position
 		local centre = pivot:PointToObjectSpace(middle)
 		local forward = pivot:PointToObjectSpace(tip.Position) - centre
 		if forward.Magnitude > 0.01 then
