@@ -6083,6 +6083,24 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.476,
+      -0.76
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
    "moves": [
@@ -6095,8 +6113,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 98236222357278,
-   "textureId": 133723989312234,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6152,12 +6170,12 @@
      "name": "Handle",
      "center": [
       0.0,
-      0.468,
+      0.475,
       -0.019
      ],
      "size": [
       0.453,
-      0.937,
+      0.95,
       3.182
      ],
      "pivot": [
@@ -6201,6 +6219,24 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.633,
+      -1.06
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
    "moves": [
@@ -6221,8 +6257,8 @@
      "does": "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots."
     }
    ],
-   "assetId": 76776026129505,
-   "textureId": 128581704842237,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6369,6 +6405,24 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.683,
+      -0.411
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
    "moves": [
@@ -6385,8 +6439,8 @@
      "does": "The flare round. A fired flare lights an area for a while and pulls robots to it."
     }
    ],
-   "assetId": 100631328731014,
-   "textureId": 87426853648377,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6711,6 +6765,24 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.745,
+      -0.75
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
    "moves": [
@@ -6723,8 +6795,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 100260432207388,
-   "textureId": 85741295872563,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -6873,7 +6945,7 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.222,
+    0.24,
     0.967,
     3.675
    ],
@@ -6881,7 +6953,7 @@
     {
      "name": "Foregrip",
      "center": [
-      -0.004,
+      0.0,
       0.562,
       0.757
      ],
@@ -6899,14 +6971,14 @@
     {
      "name": "Glow",
      "center": [
-      -0.004,
-      0.753,
-      0.77
+      0.0,
+      0.734,
+      0.552
      ],
      "size": [
-      0.154,
-      0.367,
-      1.075
+      0.226,
+      0.405,
+      1.51
      ],
      "pivot": [
       0,
@@ -6922,7 +6994,7 @@
       -0.017
      ],
      "size": [
-      0.222,
+      0.24,
       0.967,
       3.642
      ],
@@ -6935,7 +7007,7 @@
     {
      "name": "Mag",
      "center": [
-      -0.004,
+      0.0,
       0.293,
       -0.022
      ],
@@ -6953,9 +7025,27 @@
     {
      "name": "Muzzle",
      "center": [
-      -0.004,
+      0.0,
       0.582,
       1.797
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.582,
+      -0.843
      ],
      "size": [
       0.08,
@@ -6983,8 +7073,8 @@
      "does": "Scope lens glints. Players far away can spot it."
     }
    ],
-   "assetId": 119121322354778,
-   "textureId": 75265716975454,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7126,6 +7216,24 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      -0.02,
+      0.635,
+      -0.448
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
    "moves": [
@@ -7138,8 +7246,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 110536695399772,
-   "textureId": 93698328874013,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7304,6 +7412,24 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.583,
+      -0.485
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
    "moves": [
@@ -7320,8 +7446,8 @@
      "does": "The hex drum. Swings out to reload."
     }
    ],
-   "assetId": 102573011027598,
-   "textureId": 109565473599742,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7332,7 +7458,7 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.24,
+    0.26,
     0.972,
     3.16
    ],
@@ -7340,7 +7466,7 @@
     {
      "name": "Foregrip",
      "center": [
-      -0.003,
+      0.0,
       0.622,
       0.69
      ],
@@ -7358,14 +7484,14 @@
     {
      "name": "Glow",
      "center": [
-      -0.003,
-      0.78,
-      0.542
+      0.0,
+      0.777,
+      0.45
      ],
      "size": [
-      0.194,
-      0.342,
-      0.995
+      0.246,
+      0.35,
+      1.18
      ],
      "pivot": [
       0,
@@ -7381,7 +7507,7 @@
       -0.017
      ],
      "size": [
-      0.24,
+      0.26,
       0.932,
       3.127
      ],
@@ -7394,7 +7520,7 @@
     {
      "name": "Mag",
      "center": [
-      -0.003,
+      0.0,
       0.242,
       0.08
      ],
@@ -7412,9 +7538,27 @@
     {
      "name": "Muzzle",
      "center": [
-      -0.003,
+      0.0,
       0.622,
       1.54
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.622,
+      -0.76
      ],
      "size": [
       0.08,
@@ -7438,8 +7582,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 90213081785246,
-   "textureId": 116308336300439,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7571,7 +7715,7 @@
    "clips": [],
    "size": [
     0.42,
-    0.789,
+    0.952,
     2.59
    ],
    "parts": [
@@ -7615,12 +7759,12 @@
      "name": "Handle",
      "center": [
       0.0,
-      0.395,
+      0.476,
       -0.017
      ],
      "size": [
       0.42,
-      0.789,
+      0.952,
       2.557
      ],
      "pivot": [
@@ -7664,6 +7808,24 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.654,
+      -0.545
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
    "moves": [
@@ -7676,8 +7838,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 125387910119984,
-   "textureId": 134192798188934,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7688,15 +7850,15 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.28,
-    0.833,
+    0.3,
+    1.031,
     1.951
    ],
    "parts": [
     {
      "name": "Foregrip",
      "center": [
-      -0.003,
+      0.0,
       0.643,
       0.595
      ],
@@ -7714,14 +7876,14 @@
     {
      "name": "Glow",
      "center": [
-      -0.003,
-      0.703,
-      0.005
+      0.0,
+      0.663,
+      0.135
      ],
      "size": [
-      0.274,
-      0.025,
-      0.4
+      0.286,
+      0.06,
+      0.36
      ],
      "pivot": [
       0,
@@ -7733,12 +7895,12 @@
      "name": "Handle",
      "center": [
       0.0,
-      0.457,
+      0.556,
       -0.017
      ],
      "size": [
-      0.28,
-      0.752,
+      0.3,
+      0.949,
       1.917
      ],
      "pivot": [
@@ -7750,7 +7912,7 @@
     {
      "name": "Mag",
      "center": [
-      -0.003,
+      0.0,
       0.265,
       0.23
      ],
@@ -7768,9 +7930,27 @@
     {
      "name": "Muzzle",
      "center": [
-      -0.003,
+      0.0,
       0.643,
       0.935
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.643,
+      -0.495
      ],
      "size": [
       0.08,
@@ -7794,8 +7974,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 120674634717715,
-   "textureId": 96512146664212,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7848,22 +8028,22 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.25,
-    0.834,
-    1.069
+    0.28,
+    1.01,
+    1.228
    ],
    "parts": [
     {
      "name": "Glow",
      "center": [
       0.0,
-      0.713,
-      0.059
+      0.695,
+      -0.26
      ],
      "size": [
-      0.234,
-      0.025,
-      0.34
+      0.266,
+      0.101,
+      0.708
      ],
      "pivot": [
       0,
@@ -7875,13 +8055,13 @@
      "name": "Handle",
      "center": [
       0.0,
-      0.433,
-      -0.005
+      0.53,
+      -0.013
      ],
      "size": [
-      0.25,
-      0.801,
-      1.012
+      0.28,
+      0.96,
+      1.186
      ],
      "pivot": [
       0,
@@ -7893,13 +8073,13 @@
      "name": "Mag",
      "center": [
       0.0,
-      0.261,
-      -0.375
+      0.267,
+      -0.413
      ],
      "size": [
-      0.2,
-      0.522,
-      0.319
+      0.21,
+      0.533,
+      0.348
      ],
      "pivot": [
       0,
@@ -7911,8 +8091,26 @@
      "name": "Muzzle",
      "center": [
       0.0,
-      0.663,
-      0.494
+      0.683,
+      0.574
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.683,
+      -0.566
      ],
      "size": [
       0.08,
@@ -7936,8 +8134,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": 82255035726900,
-   "textureId": 96834737584255,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -13968,22 +14166,22 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.25,
-    0.859,
-    1.071
+    0.28,
+    1.01,
+    1.228
    ],
    "parts": [
     {
      "name": "Body",
      "center": [
       0.0,
-      0.43,
-      -0.017
+      0.53,
+      -0.013
      ],
      "size": [
-      0.25,
-      0.859,
-      1.037
+      0.28,
+      0.96,
+      1.186
      ],
      "pivot": [
       0,
@@ -13995,13 +14193,13 @@
      "name": "Glow",
      "center": [
       0.0,
-      0.714,
-      0.06
+      0.695,
+      -0.26
      ],
      "size": [
-      0.234,
-      0.025,
-      0.34
+      0.266,
+      0.101,
+      0.708
      ],
      "pivot": [
       0,
@@ -14013,8 +14211,8 @@
      "name": "Grip",
      "center": [
       0.0,
-      0.274,
-      -0.34
+      0.283,
+      -0.366
      ],
      "size": [
       0.08,
@@ -14028,11 +14226,47 @@
      ]
     },
     {
+     "name": "Mag",
+     "center": [
+      0.0,
+      0.267,
+      -0.413
+     ],
+     "size": [
+      0.21,
+      0.533,
+      0.348
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "Muzzle",
      "center": [
       0.0,
-      0.664,
-      0.495
+      0.683,
+      0.574
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Rear",
+     "center": [
+      0.0,
+      0.683,
+      -0.566
      ],
      "size": [
       0.08,
@@ -14047,8 +14281,8 @@
     }
    ],
    "moves": [],
-   "assetId": 102694943719323,
-   "textureId": 74926724098437,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -20865,6 +21099,12 @@
    "assetId": 120417259136225
   },
   {
+   "name": "bullet_whiz",
+   "group": "gear",
+   "file": "art/sounds/gear/bullet_whiz.mp3",
+   "assetId": null
+  },
+  {
    "name": "cell_eject",
    "group": "gear",
    "file": "art/sounds/gear/cell_eject.mp3",
@@ -20943,6 +21183,24 @@
    "assetId": 102480904694272
   },
   {
+   "name": "hit_marker",
+   "group": "gear",
+   "file": "art/sounds/gear/hit_marker.mp3",
+   "assetId": null
+  },
+  {
+   "name": "impact_concrete",
+   "group": "gear",
+   "file": "art/sounds/gear/impact_concrete.mp3",
+   "assetId": null
+  },
+  {
+   "name": "impact_metal",
+   "group": "gear",
+   "file": "art/sounds/gear/impact_metal.mp3",
+   "assetId": null
+  },
+  {
    "name": "locker_clang",
    "group": "gear",
    "file": "art/sounds/gear/locker_clang.mp3",
@@ -20983,6 +21241,54 @@
    "group": "gear",
    "file": "art/sounds/gear/shell_clink.mp3",
    "assetId": 76846330256831
+  },
+  {
+   "name": "shot_heavy",
+   "group": "gear",
+   "file": "art/sounds/gear/shot_heavy.mp3",
+   "assetId": null
+  },
+  {
+   "name": "shot_marksman",
+   "group": "gear",
+   "file": "art/sounds/gear/shot_marksman.mp3",
+   "assetId": null
+  },
+  {
+   "name": "shot_pistol",
+   "group": "gear",
+   "file": "art/sounds/gear/shot_pistol.mp3",
+   "assetId": null
+  },
+  {
+   "name": "shot_revolver",
+   "group": "gear",
+   "file": "art/sounds/gear/shot_revolver.mp3",
+   "assetId": null
+  },
+  {
+   "name": "shot_rifle",
+   "group": "gear",
+   "file": "art/sounds/gear/shot_rifle.mp3",
+   "assetId": null
+  },
+  {
+   "name": "shot_shotgun",
+   "group": "gear",
+   "file": "art/sounds/gear/shot_shotgun.mp3",
+   "assetId": null
+  },
+  {
+   "name": "shot_smg",
+   "group": "gear",
+   "file": "art/sounds/gear/shot_smg.mp3",
+   "assetId": null
+  },
+  {
+   "name": "shotgun_pump",
+   "group": "gear",
+   "file": "art/sounds/gear/shotgun_pump.mp3",
+   "assetId": null
   },
   {
    "name": "smoke_hiss",
@@ -21426,19 +21732,19 @@
    "name": "brute_thud",
    "group": "robots",
    "file": "art/sounds/robots/brute_thud.mp3",
-   "assetId": 119263010523639
+   "assetId": null
   },
   {
    "name": "chase_servo_scream",
    "group": "robots",
    "file": "art/sounds/robots/chase_servo_scream.mp3",
-   "assetId": 110349771813157
+   "assetId": null
   },
   {
    "name": "chase_steps",
    "group": "robots",
    "file": "art/sounds/robots/chase_steps.mp3",
-   "assetId": 132579789546999
+   "assetId": null
   },
   {
    "name": "crawler_skitter_loop",
@@ -21450,25 +21756,25 @@
    "name": "curious_beep_1",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_1.mp3",
-   "assetId": 80640581588348
+   "assetId": null
   },
   {
    "name": "curious_beep_2",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_2.mp3",
-   "assetId": 113981036217790
+   "assetId": null
   },
   {
    "name": "curious_beep_3",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_3.mp3",
-   "assetId": 80152316730961
+   "assetId": null
   },
   {
    "name": "drag",
    "group": "robots",
    "file": "art/sounds/robots/drag.mp3",
-   "assetId": 109214577972447
+   "assetId": null
   },
   {
    "name": "emp_shutdown",
@@ -21480,31 +21786,37 @@
    "name": "error_stall",
    "group": "robots",
    "file": "art/sounds/robots/error_stall.mp3",
-   "assetId": 140013043287739
+   "assetId": null
   },
   {
    "name": "fumble",
    "group": "robots",
    "file": "art/sounds/robots/fumble.mp3",
-   "assetId": 127226965760038
+   "assetId": null
   },
   {
    "name": "grab_clank",
    "group": "robots",
    "file": "art/sounds/robots/grab_clank.mp3",
-   "assetId": 126545407886948
+   "assetId": null
   },
   {
    "name": "heavy_step",
    "group": "robots",
    "file": "art/sounds/robots/heavy_step.mp3",
-   "assetId": 140278800213667
+   "assetId": null
   },
   {
    "name": "hum_loop",
    "group": "robots",
    "file": "art/sounds/robots/hum_loop.mp3",
-   "assetId": 134796717209411
+   "assetId": null
+  },
+  {
+   "name": "hydraulic_hiss",
+   "group": "robots",
+   "file": "art/sounds/robots/hydraulic_hiss.mp3",
+   "assetId": null
   },
   {
    "name": "jingle_distorted",
@@ -21513,10 +21825,16 @@
    "assetId": 97656652677433
   },
   {
+   "name": "oil_drip",
+   "group": "robots",
+   "file": "art/sounds/robots/oil_drip.mp3",
+   "assetId": null
+  },
+  {
    "name": "scanner_ping",
    "group": "robots",
    "file": "art/sounds/robots/scanner_ping.mp3",
-   "assetId": 89116867981817
+   "assetId": null
   },
   {
    "name": "scout_eye_whine",
@@ -21534,25 +21852,121 @@
    "name": "scrape",
    "group": "robots",
    "file": "art/sounds/robots/scrape.mp3",
-   "assetId": 140381889758100
+   "assetId": null
   },
   {
    "name": "servo_whirr_1",
    "group": "robots",
    "file": "art/sounds/robots/servo_whirr_1.mp3",
-   "assetId": 96495886367795
+   "assetId": null
   },
   {
    "name": "servo_whirr_2",
    "group": "robots",
    "file": "art/sounds/robots/servo_whirr_2.mp3",
-   "assetId": 118321188591677
+   "assetId": null
   },
   {
    "name": "spot_alert",
    "group": "robots",
    "file": "art/sounds/robots/spot_alert.mp3",
-   "assetId": 95338565831027
+   "assetId": null
+  },
+  {
+   "name": "callout_0",
+   "group": "voice",
+   "file": "art/sounds/voice/callout_0.mp3",
+   "assetId": null
+  },
+  {
+   "name": "callout_1",
+   "group": "voice",
+   "file": "art/sounds/voice/callout_1.mp3",
+   "assetId": null
+  },
+  {
+   "name": "callout_2",
+   "group": "voice",
+   "file": "art/sounds/voice/callout_2.mp3",
+   "assetId": null
+  },
+  {
+   "name": "callout_3",
+   "group": "voice",
+   "file": "art/sounds/voice/callout_3.mp3",
+   "assetId": null
+  },
+  {
+   "name": "callout_4",
+   "group": "voice",
+   "file": "art/sounds/voice/callout_4.mp3",
+   "assetId": null
+  },
+  {
+   "name": "callout_5",
+   "group": "voice",
+   "file": "art/sounds/voice/callout_5.mp3",
+   "assetId": null
+  },
+  {
+   "name": "callout_6",
+   "group": "voice",
+   "file": "art/sounds/voice/callout_6.mp3",
+   "assetId": null
+  },
+  {
+   "name": "ghost_kid_close",
+   "group": "voice",
+   "file": "art/sounds/voice/ghost_kid_close.mp3",
+   "assetId": null
+  },
+  {
+   "name": "ghost_kid_cry",
+   "group": "voice",
+   "file": "art/sounds/voice/ghost_kid_cry.mp3",
+   "assetId": null
+  },
+  {
+   "name": "ghost_kid_near_1",
+   "group": "voice",
+   "file": "art/sounds/voice/ghost_kid_near_1.mp3",
+   "assetId": null
+  },
+  {
+   "name": "ghost_kid_near_2",
+   "group": "voice",
+   "file": "art/sounds/voice/ghost_kid_near_2.mp3",
+   "assetId": null
+  },
+  {
+   "name": "robot_chatter",
+   "group": "voice",
+   "file": "art/sounds/voice/robot_chatter.mp3",
+   "assetId": null
+  },
+  {
+   "name": "robot_error",
+   "group": "voice",
+   "file": "art/sounds/voice/robot_error.mp3",
+   "assetId": null
+  },
+  {
+   "name": "robot_notice",
+   "group": "voice",
+   "file": "art/sounds/voice/robot_notice.mp3",
+   "assetId": null
+  },
+  {
+   "name": "robot_resume",
+   "group": "voice",
+   "file": "art/sounds/voice/robot_resume.mp3",
+   "assetId": null
+  },
+  {
+   "name": "robot_task",
+   "group": "voice",
+   "file": "art/sounds/voice/robot_task.mp3",
+   "assetId": null
   },
   {
    "name": "distant_hum_loop",
@@ -21962,13 +22376,13 @@
    "name": "bullet_tracer",
    "kind": "effect",
    "file": "art/effects/bullet_tracer.png",
-   "assetId": 88396894923652
+   "assetId": null
   },
   {
    "name": "muzzle_flash_card",
    "kind": "effect",
    "file": "art/effects/muzzle_flash_card.png",
-   "assetId": 108665251268090
+   "assetId": null
   }
  ]
 }

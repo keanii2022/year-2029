@@ -1117,6 +1117,97 @@ def blaster_thump():
     return drive(layer(punch, (amp(lp(noise(0.08), 1200), decay(0.08, 0.02)), 0, 0.6), (tail, 0.01, 0.4)), 1.6)
 
 
+def gunshot(punch=70, crack=1.0, blast=1.0, zap=None, zap_len=0.16, mech=1.0, room=1.0, boom=1.0):
+    """A shot that hits: a split-second crack, a chest punch, the blaster's own energy snap, the action cycling,
+    and the warehouse throwing it back. Each gun turns these knobs."""
+    snap_ = amp(hp(noise(0.014), 1800), decay(0.014, 0.0035, 0.0001))
+    burst = amp(lp(noise(0.3), 2600), decay(0.3, 0.035 * blast, 0.0004))
+    thump = amp(osc(expo(punch * 2.4, punch * 0.55, 0.4), 0.4), decay(0.4, 0.06 * boom, 0.0008))
+    sub = amp(osc(expo(punch * 0.9, punch * 0.45, 0.5), 0.5), decay(0.5, 0.1 * boom, 0.002))
+    parts = [(snap_, 0, 1.2 * crack), (burst, 0, 0.9 * blast), (thump, 0, 1.1), (sub, 0, 0.8 * boom)]
+    if zap:
+        z = layer(osc(expo(zap, zap * 0.12, zap_len), zap_len, "saw"), (osc(expo(zap * 1.51, zap * 0.2, zap_len), zap_len, "square"), 0, 0.3))
+        parts.append((lp(amp(z, decay(zap_len, zap_len / 4, 0.0005)), 6000), 0.002, 0.45))
+    if mech:
+        action = layer(click(2600, 0.02, 2), (knock(520, 0.07, 3200), 0.025, 0.8), (click(1900, 0.015, 2), 0.06, 0.6))
+        parts.append((action, 0.035, 0.35 * mech))
+    dry = drive(layer(*parts), 2.8)
+    return reverb(dry, 2.3, min(0.65, 0.38 * room), 1.0 + 0.9 * room, 0.5, 0.84 + 0.04 * min(room, 1.5))
+
+
+@sound("gear", "shot_pistol", "loud", "starter pistol shot: crack, punch, teal snap, warehouse echo")
+def shot_pistol():
+    return gunshot(75, zap=1900, mech=1.0, room=1.0)
+
+
+@sound("gear", "shot_smg", "loud", "smg shot: short and tight so bursts stay punchy")
+def shot_smg():
+    return gunshot(92, crack=1.2, blast=0.7, zap=2300, zap_len=0.1, mech=0.7, room=0.55, boom=0.7)
+
+
+@sound("gear", "shot_shotgun", "loud", "shotgun blast: huge low boom with a long roar")
+def shot_shotgun():
+    return gunshot(48, crack=1.1, blast=2.2, zap=850, zap_len=0.22, mech=0.0, room=1.4, boom=1.8)
+
+
+@sound("gear", "shotgun_pump", "normal", "shotgun pumped after a shot: rack back, rack forward")
+def shotgun_pump():
+    back = layer(knock(380, 0.08, 2800), (whoosh(0.09, 1200, 2500, 2, 0.01, 0.05), 0, 0.4), (click(2200, 0.02), 0.06, 0.8))
+    fwd = layer(knock(460, 0.1, 3400), (clang(1100, 0.2, 0.4), 0.005, 0.3))
+    return layer(back, (fwd, 0.17))
+
+
+@sound("gear", "shot_rifle", "loud", "rifle shot: sharp crack with a long rolling echo")
+def shot_rifle():
+    return gunshot(64, crack=1.5, blast=1.2, zap=2700, mech=0.8, room=1.25, boom=1.2)
+
+
+@sound("gear", "shot_heavy", "loud", "heavy blaster: deep violet discharge that shakes the room")
+def shot_heavy():
+    sec = 0.6
+    hum = amp(drive(osc(expo(110, 35, sec), sec, "saw"), 3), decay(sec, 0.15, 0.002))
+    return layer(gunshot(38, crack=0.9, blast=1.6, zap=620, zap_len=0.35, mech=0.0, room=1.6, boom=2.2), (lp(hum, 900), 0, 0.5))
+
+
+@sound("gear", "shot_revolver", "loud", "revolver: one big slow bang")
+def shot_revolver():
+    return gunshot(58, crack=1.6, blast=1.5, zap=1500, zap_len=0.12, mech=0.0, room=1.35, boom=1.5)
+
+
+@sound("gear", "shot_marksman", "loud", "marksman rifle: whip crack that echoes across the warehouse")
+def shot_marksman():
+    return gunshot(54, crack=2.0, blast=1.3, zap=3200, zap_len=0.12, mech=0.5, room=2.0, boom=1.4)
+
+
+@sound("gear", "impact_concrete", "normal", "shot hits concrete: crack and grit")
+def impact_concrete():
+    crack = amp(bp(noise(0.03), 2200, 0.8), decay(0.03, 0.006, 0.0002))
+    grit = amp(scatter(0.25, lambda: click(random.uniform(1500, 5000), 0.006, 1.2), 18), decay(0.25, 0.06))
+    return layer(crack, (thud(160, 0.12, 0.5, 0.5), 0, 0.6), (grit, 0.01, 0.5), (hiss(0.3, 1500, 0.01, 0.25), 0.02, 0.12))
+
+
+@sound("gear", "impact_metal", "normal", "shot hits metal: ping and a ricochet whine")
+def impact_metal():
+    ping = clang(random.uniform(1700, 2100), 0.45, 0.9)
+    f = [v * (1 + 0.02 * math.sin(TAU * 30 * i / SR)) for i, v in enumerate(expo(3400, 1500, 0.45))]
+    whine = amp(osc(f, 0.45), ramp([(0, 0), (0.03, 1), (0.45, 0)], 0.45))
+    return layer((strike(0.006, 7000), 0, 0.8), (ping, 0, 0.7), (whine, 0.03, 0.25))
+
+
+@sound("gear", "hit_marker", "normal", "you hit a player: a dry tick with a low thunk under it")
+def hit_marker():
+    return layer(click(3200, 0.012, 2.5), (thud(120, 0.09, 0.6, 0.0), 0, 0.9), (click(5200, 0.006, 3), 0.004, 0.5))
+
+
+@sound("gear", "bullet_whiz", "normal", "a shot flies past your head")
+def bullet_whiz():
+    sec = 0.28
+    f = ramp([(0, 2400), (0.12, 4200), (0.28, 1500)], sec)
+    swish = amp(bp(noise(sec), f, 4), ramp([(0, 0), (0.12, 1), (0.28, 0)], sec))
+    zip_ = amp(osc(ramp([(0, 3000), (0.12, 3600), (0.28, 2100)], sec), sec), ramp([(0, 0), (0.12, 0.35), (0.28, 0)], sec))
+    return layer(swish, (zip_, 0, 0.3))
+
+
 @sound("gear", "shell_clink", "loud", "spent shell clinks on the floor")
 def shell_clink():
     s = lambda: clink(random.uniform(3000, 3400), 0.2)
@@ -1405,7 +1496,7 @@ def scanner_ping():
     while t < 0.9:
         lens.append((click(random.uniform(1800, 2400), 0.012, 3), t, 0.5))
         t += gap
-        gap *= 0.82
+        gap = max(0.025, gap * 0.82)
     whine = amp(motor(0.9, expo(90, 180, 0.9), 0.4, 1100), adsr(0.9, 0.1, 0.3, 0.35))
     return reverb(layer(pulse, (whine, 0.08), *lens), 1.8, 0.45, 1.8)
 

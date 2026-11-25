@@ -9349,6 +9349,10 @@ return {
 			assetId = 120417259136225,
 		},
 		{
+			name = "bullet_whiz",
+			group = "gear",
+		},
+		{
 			name = "cell_eject",
 			group = "gear",
 			assetId = 126220538349952,
@@ -9414,6 +9418,18 @@ return {
 			assetId = 102480904694272,
 		},
 		{
+			name = "hit_marker",
+			group = "gear",
+		},
+		{
+			name = "impact_concrete",
+			group = "gear",
+		},
+		{
+			name = "impact_metal",
+			group = "gear",
+		},
+		{
 			name = "locker_clang",
 			group = "gear",
 			assetId = 121925049267035,
@@ -9447,6 +9463,38 @@ return {
 			name = "shell_clink",
 			group = "gear",
 			assetId = 76846330256831,
+		},
+		{
+			name = "shot_heavy",
+			group = "gear",
+		},
+		{
+			name = "shot_marksman",
+			group = "gear",
+		},
+		{
+			name = "shot_pistol",
+			group = "gear",
+		},
+		{
+			name = "shot_revolver",
+			group = "gear",
+		},
+		{
+			name = "shot_rifle",
+			group = "gear",
+		},
+		{
+			name = "shot_shotgun",
+			group = "gear",
+		},
+		{
+			name = "shot_smg",
+			group = "gear",
+		},
+		{
+			name = "shotgun_pump",
+			group = "gear",
 		},
 		{
 			name = "smoke_hiss",
@@ -9915,6 +9963,70 @@ return {
 			group = "robots",
 		},
 		{
+			name = "callout_0",
+			group = "voice",
+		},
+		{
+			name = "callout_1",
+			group = "voice",
+		},
+		{
+			name = "callout_2",
+			group = "voice",
+		},
+		{
+			name = "callout_3",
+			group = "voice",
+		},
+		{
+			name = "callout_4",
+			group = "voice",
+		},
+		{
+			name = "callout_5",
+			group = "voice",
+		},
+		{
+			name = "callout_6",
+			group = "voice",
+		},
+		{
+			name = "ghost_kid_close",
+			group = "voice",
+		},
+		{
+			name = "ghost_kid_cry",
+			group = "voice",
+		},
+		{
+			name = "ghost_kid_near_1",
+			group = "voice",
+		},
+		{
+			name = "ghost_kid_near_2",
+			group = "voice",
+		},
+		{
+			name = "robot_chatter",
+			group = "voice",
+		},
+		{
+			name = "robot_error",
+			group = "voice",
+		},
+		{
+			name = "robot_notice",
+			group = "voice",
+		},
+		{
+			name = "robot_resume",
+			group = "voice",
+		},
+		{
+			name = "robot_task",
+			group = "voice",
+		},
+		{
 			name = "distant_hum_loop",
 			group = "warehouse",
 			assetId = 91293495891472,
@@ -10254,12 +10366,10 @@ return {
 		{
 			name = "bullet_tracer",
 			kind = "effect",
-			assetId = 88396894923652,
 		},
 		{
 			name = "muzzle_flash_card",
 			kind = "effect",
-			assetId = 108665251268090,
 		},
 	},
 }
