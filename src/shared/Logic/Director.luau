@@ -4,7 +4,8 @@
 local Director = {}
 
 export type Point = { x: number, z: number }
-export type Group = { x: number, z: number, count: number }
+-- members: indexes into the clustered points, so a caller can tell which ones made the group
+export type Group = { x: number, z: number, count: number, members: { number }? }
 export type Installation = { x: number, z: number, room: any }
 export type Candidate = { x: number, z: number, kind: string, weight: number, room: any? }
 
@@ -38,13 +39,14 @@ function Director.cluster(points: { Point }, radius: number): { Group }
 		local key = root(index)
 		local group = byRoot[key]
 		if not group then
-			group = { x = 0, z = 0, count = 0 }
+			group = { x = 0, z = 0, count = 0, members = {} }
 			byRoot[key] = group
 			table.insert(groups, group)
 		end
 		group.x += point.x
 		group.z += point.z
 		group.count += 1
+		table.insert(group.members :: { number }, index)
 	end
 	for _, group in groups do
 		group.x /= group.count

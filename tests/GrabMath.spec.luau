@@ -13,18 +13,6 @@ return {
 		expect(GrabMath.wrapAngle(-15)).toBeNear(345)
 		expect(GrabMath.wrapAngle(360)).toBe(0)
 	end,
-	["rotateSpeed waits for a hold, then ramps up"] = function()
-		expect(GrabMath.rotateSpeed(0.1, 0.2, 180, 600, 1)).toBe(0)
-		expect(GrabMath.rotateSpeed(0.2, 0.2, 180, 600, 1)).toBeNear(180)
-		expect(GrabMath.rotateSpeed(0.7, 0.2, 180, 600, 1)).toBeNear(390)
-		expect(GrabMath.rotateSpeed(5, 0.2, 180, 600, 1)).toBeNear(600)
-	end,
-	["snapTurn rounds a hold to the nearest step"] = function()
-		expect(GrabMath.snapTurn(15, 15)).toBeNear(0)
-		expect(GrabMath.snapTurn(20, 15)).toBeNear(-5)
-		expect(GrabMath.snapTurn(25, 15)).toBeNear(5)
-		expect(GrabMath.snapTurn(-20, 15)).toBeNear(5)
-	end,
 	["quarterYaw snaps the camera to the nearest wall direction"] = function()
 		expect(GrabMath.quarterYaw(0, -1)).toBe(0)
 		expect(GrabMath.quarterYaw(-1, 0)).toBeNear(90)

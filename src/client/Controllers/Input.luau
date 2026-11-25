@@ -4,7 +4,7 @@
 -- follows what shooter players already know: R2 fire / use what you hold (empty hands: grab),
 -- L2 aim, Square use/reload, Cross jump, L1 / R1 step the hotbar (empty hands is a slot),
 -- Triangle opens the bag. Circle calls out (hold: pick a call), R3 crouches.
--- While carrying, Grab takes over L1 / R1 / L2 and the D-pad to move the prop.
+-- While carrying, Grab takes over L1 / R1 / L2 and the D-pad to move the prop (R and T on keys).
 -- Glyphs draws these keys on screen.
 -- Other controllers call Input.bind / Input.isDown instead of reading keys themselves.
 local GuiService = game:GetService("GuiService")
@@ -66,12 +66,8 @@ local actions: { [string]: Binding } = {
 	Controls = { keyboard = Enum.KeyCode.H, gamepad = Enum.KeyCode.ButtonSelect },
 	Record = { keyboard = Enum.KeyCode.M },
 	-- Phone-only carry buttons; keyboard and gamepad move props through Grab's own keys
-	CarrySpinLeft = {},
-	CarrySpinRight = {},
-	CarryTipForward = {},
-	CarryTipBack = {},
-	CarryRollLeft = {},
-	CarryRollRight = {},
+	CarrySpin = {},
+	CarryTip = {},
 	CarryCloser = {},
 	CarryFarther = {},
 }

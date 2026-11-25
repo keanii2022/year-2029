@@ -12,23 +12,29 @@ return {
 	WheelStep = 1,
 
 	GridSize = 1,
-	RotateStep = 15, -- a tap turns this much; a hold also snaps to it when let go
-	RepeatDelay = 0.2, -- a tap steps RotateStep or WheelStep; holding past this keeps going
-	-- Holding a spin / tip / roll input: degrees per second, from start to max over RotateRampSeconds
-	RotateStartSpeed = 180,
-	RotateMaxSpeed = 540,
-	RotateRampSeconds = 0.8,
+	RotateStep = 90, -- a spin or tip tap turns this much
+	FineRotateStep = 15, -- with the fine modifier held (Shift, L2), or each step of a held SPIN on a phone
+	TouchSpinRepeat = 0.25, -- a held SPIN steps FineRotateStep this often
+	RepeatDelay = 0.2, -- a tap steps WheelStep; holding closer / farther past this keeps going
 	HoldDistanceSpeed = 6, -- studs per second while closer / farther is held
 	MaxPlaceAboveFeet = 20, -- tallest a stack can get: prop bottom above the placer's feet
 	MaxDropFall = 60,
 	PlaceTolerance = 0.3, -- studs a placed prop may sink into its neighbours or a bumpy floor
-	PlaceNudges = { 0.75, 1.5, 2.5 }, -- rings of nearby spots tried when the aimed one doesn't fit
+	PlaceSlack = 0.1, -- extra sink the server allows on top, so a green ghost always places
+	PushMax = 1.5, -- a blocked spot is nudged out along the blocking face up to this far
+	PushStep = 0.25,
+	CameraSlack = 6, -- studs the reported camera may sit from the head before the head is used instead
 	HoldToLetGo = 0.6, -- seconds holding the grab button to let go in place, whatever's in the way
 	SettleSeconds = 6, -- a let-go prop falls with physics, then freezes once still or after this
 
-	AimRate = 20, -- client aim updates per second
-	GhostRate = 10, -- server ghost previews per second
-	CarrySmoothing = 18,
+	-- Snapping to placed pieces: within SnapReach and facing within SnapAngle degrees the same way,
+	-- a face closer than SnapRange goes flush and ends closer than SnapRange line up.
+	SnapReach = 2,
+	SnapRange = 0.75,
+	SnapAngle = 5,
+
+	GhostTransparency = 0.5,
+	AimRate = 10, -- hold reports per second; the server moves the real prop for everyone else from these
 
 	-- Heavy props slow the carrier down: full speed at LightMass, MinSpeedMultiplier at HeavyMass.
 	LightMass = 15,
@@ -37,6 +43,12 @@ return {
 
 	-- Pulling a piece out of someone else's fort.
 	PrySeconds = 3,
+	FortPrySeconds = 4.5, -- a fortified piece (touching another placed piece or a wall) holds longer
+	BrutePrySeconds = 5, -- brutes are the only robots that pull fortified pieces, and it takes this
+	FortGap = 0.3, -- closer than this to a placed piece or a wall counts as touching
+	FortWallOverlap = 0.5, -- a fixed neighbour must share this much height to count as a wall, not a floor
+	FortOutlineRange = 40, -- your own fort pieces this close get a faint outline, on your screen only
+	FortOutlineEvery = 1, -- seconds between outline rescans
 	PryGrace = 0.25, -- seconds of network slack when the client says the pry finished
 	PryNoiseInterval = 1, -- loud noise and a creak at the piece this often while prying
 	PrySounds = { "cabinet_creak", "scrape", "wardrobe_creak" },
@@ -52,6 +64,7 @@ return {
 		["too high"] = "Too high to stack",
 		blocked = "No room here",
 		player = "Someone's standing there",
+		["through wall"] = "Can't place through that",
 	},
 
 	SpawnTestProps = true,
