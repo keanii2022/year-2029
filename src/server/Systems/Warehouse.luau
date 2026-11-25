@@ -816,6 +816,11 @@ local function buildSign(sign: WarehouseGen.Sign)
 		Enum.Material.Metal
 	)
 	detail(wire)
+	if sign.smile then
+		-- Rearrange leaves it alone; client SmileAisle makes it read 41 when nobody's looking
+		model:SetAttribute("SmileAisle", true)
+		CollectionService:AddTag(model, "SmileAisleSign")
+	end
 	model.Parent = chunkFor(sign.x, sign.z)
 	noteBuilt()
 end

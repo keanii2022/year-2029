@@ -144,7 +144,8 @@ local function scanOnce(root: Instance)
 					local name = child:GetAttribute("ModelName")
 					if name == cartName then
 						table.insert(carts, child)
-					elseif name and AISLE_SIGNS[name] then
+					-- Aisle 40's sign stays put: it's how you find the Smile Aisle
+					elseif name and AISLE_SIGNS[name] and not child:GetAttribute("SmileAisle") then
 						local sign = signFor(child)
 						if sign then
 							table.insert(aisleSigns, sign)

@@ -9,6 +9,9 @@ local NightLights = if script
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
 local Sizes = if script then require(script.Parent.WarehouseSizes) else require("./WarehouseSizes")
+local SmileAisle = if script
+	then require(script.Parent.WarehouseGenSmileAisle)
+	else require("./WarehouseGenSmileAisle")
 local Zones = if script then require(script.Parent.WarehouseGenZones) else require("./WarehouseGenZones")
 local Clutter = if script
 	then require(script.Parent.WarehouseGenClutter)
@@ -17,7 +20,7 @@ local Clutter = if script
 local WarehouseGen = {}
 
 export type Shelf = { x0: number, x1: number, z: number, depth: number }
-export type Sign = { x: number, z: number, number: number }
+export type Sign = { x: number, z: number, number: number, smile: boolean? }
 export type Box = { sx: number, sy: number, sz: number, x: number, y: number, z: number, turn: number }
 export type Junk = { x: number, z: number, boxes: { Box } }
 export type Loose = { name: string, x: number, z: number, turn: number }
@@ -99,6 +102,8 @@ export type Layout = {
 	pockets: { Pocket },
 	deptSigns: { DeptSign },
 	solidsByBlock: { [number]: { Solid } },
+	smileAisle: SmileAisle.Plan?,
+	lostFound: SmileAisle.LostFound?,
 }
 
 local function blockIndex(layout: any, x: number, z: number): number
@@ -222,6 +227,24 @@ local function planZones(layout: any, config: any, rng: Rng.Rng): { [number]: an
 					entry.set = pickSet(i, j)
 				end
 				plan[key] = entry
+			end
+		end
+	end
+	-- Aisle 40 needs a racking zone; the odd floor that rolled none turns its first plain zone into one
+	local hasRacking = false
+	for _, entry in plan do
+		if entry.kind == "racking" then
+			hasRacking = true
+			break
+		end
+	end
+	if not hasRacking then
+		for key = 1, blocks * blocks do
+			local entry = plan[key]
+			local single = entry.owner and entry.i0 == entry.i1 and entry.j0 == entry.j1
+			if single and entry.kind ~= "showroom" and entry.kind ~= "installation" then
+				entry.kind, entry.set = "racking", nil
+				break
 			end
 		end
 	end
@@ -432,8 +455,14 @@ function WarehouseGen.generate(config: any, seed: number): Layout
 			{ i = i, j = j, kind = entry.kind, x0 = rect.x0, z0 = rect.z0, x1 = rect.x1, z1 = rect.z1 }
 		)
 	end
+	layout.smileAisle = SmileAisle.plan(layout, config, function(x, z)
+		return WarehouseGen.depth(layout, x, z)
+	end)
 	Clutter.fill(layout, config, rng, WarehouseGen.zoneAt, WarehouseGen.isClear)
 	NightLights.fill(layout, config, WarehouseGen.isClear)
+	layout.lostFound = SmileAisle.lostFound(layout, config, function(x, z, pad)
+		return WarehouseGen.isClear(layout, config, x, z, pad)
+	end)
 	addDecals(layout, config, rng)
 	addSpawns(layout, config, rng)
 	layout.addSolid = nil
