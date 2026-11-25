@@ -103,7 +103,7 @@ For the Roblox build. Part names follow BRIEF.md "Moving parts". Press = E or Sq
 - Redraw them all with `python3 _kit/posters.py` (uses headless Chrome, not Blender).
 
 ## Gear
-Guns are one `Handle` part plus `Mag` and `Glow`. They point along -y.
+Guns are one `Handle` part plus `Mag` and `Glow`. They point along -y. Hidden markers: `Muzzle`, `Rear`, and `Eject` (where casings fly out, just off the right side) on the starter pistol, viewmodel blaster, smg, rifle, marksman rifle and nail gun.
 
 | Item | Part | Does |
 |---|---|---|
@@ -112,6 +112,9 @@ Guns are one `Handle` part plus `Mag` and `Glow`. They point along -y.
 | revolver | Mag | The hex drum. Turns one sixth each shot, swings out to reload. |
 | revolver | Hammer | Cocks back before each shot (pivot at its base), snaps forward on fire. |
 | shotgun | Pump | Racks back toward the grip and forward after each shot. |
+| starter_pistol, viewmodel_blaster | Slide | The whole upper slide kicks back along +y on each shot and springs forward. The cell glow stays put, so keep the kick small. |
+| smg | Slide | Steel block and orange knob in the right-side port: kicks back along +y each shot. |
+| rifle, marksman_rifle, nail_gun | Bolt | Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward. |
 | disruptor | Mag, Glow | Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots. |
 | flare_gun | Mag | The flare round. A fired flare lights an area for a while and pulls robots to it. |
 | marksman_rifle | Glow | Scope lens glints. Players far away can spot it. |

@@ -42,6 +42,13 @@ LIBRARY_SOUNDS = {
     "disruptor_crack": ("gear", 9116225257),  # Laser Blast 101
     "impact_concrete": ("gear", 7842386350),  # Bullet Ricochet 2
     "hit_marker": ("gear", 15675059323),  # Roblox_UI_Bright_Click
+    # The licensed library has almost no dog voices, so the bark, growl, whine and yelp are coyote and wolf stand-ins
+    "dog_bark": ("dog", 9113956187),  # Coyotes Gruff Barking 13
+    "dog_growl": ("dog", 9120788137),  # Wolf Growl 3
+    "dog_whine": ("dog", 9113951583),  # Coyote Cub Whimpering Yelping Crying 3
+    "dog_yelp": ("dog", 9113951595),  # Coyote Cub Whimpering Yelping Crying 4
+    "dog_bite": ("dog", 9120790847),  # Wolf Snarl 2
+    "dog_eat": ("dog", 9114122070),  # Dog Licks Suck 3
 }
 IMAGE_KINDS = {"posters": "poster", "posters/screens": "screen", "posters/scrawls": "scrawl", "effects": "effect"}
 

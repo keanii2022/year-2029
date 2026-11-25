@@ -3207,41 +3207,53 @@ return {
 		{
 			name = "marksman_rifle",
 			group = "gear",
-			size = { 0.24, 0.967, 3.675 },
+			size = { 0.36, 0.967, 3.675 },
 			parts = {
 				{
+					name = "Bolt",
+					center = { -0.069, 0.522, -0.343 },
+					size = { 0.061, 0.07, 0.119 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Eject",
+					center = { -0.14, 0.542, -0.343 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
 					name = "Foregrip",
-					center = { 0.0, 0.562, 0.757 },
+					center = { 0.06, 0.562, 0.757 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { 0.0, 0.734, 0.552 },
+					center = { 0.06, 0.734, 0.552 },
 					size = { 0.226, 0.405, 1.51 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.483, -0.017 },
+					center = { 0.06, 0.483, -0.017 },
 					size = { 0.24, 0.967, 3.642 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { 0.0, 0.293, -0.022 },
+					center = { 0.06, 0.293, -0.022 },
 					size = { 0.14, 0.277, 0.2 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { 0.0, 0.582, 1.797 },
+					center = { 0.06, 0.582, 1.797 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Rear",
-					center = { 0.0, 0.582, -0.843 },
+					center = { 0.06, 0.582, -0.843 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -3257,12 +3269,14 @@ return {
 					does = "Lights up while loaded, dims when empty.",
 				},
 				{
+					part = "Bolt",
+					does = "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward.",
+				},
+				{
 					part = "Glow",
 					does = "Scope lens glints. Players far away can spot it.",
 				},
 			},
-			assetId = 138376957148519,
-			textureId = 98660172159340,
 		},
 		{
 			name = "medkit",
@@ -3290,35 +3304,47 @@ return {
 		{
 			name = "nail_gun",
 			group = "gear",
-			size = { 0.33, 0.903, 1.435 },
+			size = { 0.445, 0.903, 1.435 },
 			parts = {
 				{
+					name = "Bolt",
+					center = { -0.112, 0.645, -0.319 },
+					size = { 0.061, 0.06, 0.105 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Eject",
+					center = { -0.183, 0.665, -0.318 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
 					name = "Glow",
-					center = { -0.02, 0.795, -0.449 },
+					center = { 0.037, 0.795, -0.449 },
 					size = { 0.08, 0.04, 0.012 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.451, -0.017 },
+					center = { 0.057, 0.451, -0.017 },
 					size = { 0.33, 0.903, 1.402 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { -0.02, 0.444, 0.122 },
+					center = { 0.037, 0.444, 0.122 },
 					size = { 0.075, 0.348, 0.627 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { -0.02, 0.635, 0.677 },
+					center = { 0.037, 0.635, 0.677 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Rear",
-					center = { -0.02, 0.635, -0.448 },
+					center = { 0.037, 0.635, -0.448 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -3333,9 +3359,11 @@ return {
 					part = "Glow",
 					does = "Lights up while loaded, dims when empty.",
 				},
+				{
+					part = "Bolt",
+					does = "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward.",
+				},
 			},
-			assetId = 82262862907193,
-			textureId = 86112373986176,
 		},
 		{
 			name = "noise_maker",
@@ -3438,41 +3466,53 @@ return {
 		{
 			name = "rifle",
 			group = "gear",
-			size = { 0.26, 0.972, 3.16 },
+			size = { 0.38, 0.972, 3.16 },
 			parts = {
 				{
+					name = "Bolt",
+					center = { -0.079, 0.562, -0.48 },
+					size = { 0.061, 0.07, 0.119 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Eject",
+					center = { -0.15, 0.582, -0.48 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
 					name = "Foregrip",
-					center = { 0.0, 0.622, 0.69 },
+					center = { 0.06, 0.622, 0.69 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { 0.0, 0.777, 0.45 },
+					center = { 0.06, 0.777, 0.45 },
 					size = { 0.246, 0.35, 1.18 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.506, -0.017 },
+					center = { 0.06, 0.506, -0.017 },
 					size = { 0.26, 0.932, 3.127 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { 0.0, 0.242, 0.08 },
+					center = { 0.06, 0.242, 0.08 },
 					size = { 0.13, 0.483, 0.298 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { 0.0, 0.622, 1.54 },
+					center = { 0.06, 0.622, 1.54 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Rear",
-					center = { 0.0, 0.622, -0.76 },
+					center = { 0.06, 0.622, -0.76 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
@@ -3487,9 +3527,11 @@ return {
 					part = "Glow",
 					does = "Lights up while loaded, dims when empty.",
 				},
+				{
+					part = "Bolt",
+					does = "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward.",
+				},
 			},
-			assetId = 91286285412841,
-			textureId = 107069070653422,
 		},
 		{
 			name = "riot_helmet",
@@ -3616,42 +3658,54 @@ return {
 		{
 			name = "smg",
 			group = "gear",
-			size = { 0.3, 1.031, 1.951 },
+			size = { 0.42, 1.031, 1.951 },
 			parts = {
 				{
+					name = "Eject",
+					center = { -0.17, 0.643, -0.175 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
 					name = "Foregrip",
-					center = { 0.0, 0.643, 0.595 },
+					center = { 0.06, 0.643, 0.595 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { 0.0, 0.663, 0.135 },
+					center = { 0.06, 0.663, 0.135 },
 					size = { 0.286, 0.06, 0.36 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.556, -0.017 },
+					center = { 0.06, 0.556, -0.017 },
 					size = { 0.3, 0.949, 1.917 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { 0.0, 0.265, 0.23 },
+					center = { 0.06, 0.265, 0.23 },
 					size = { 0.16, 0.531, 0.27 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { 0.0, 0.643, 0.935 },
+					center = { 0.06, 0.643, 0.935 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Rear",
-					center = { 0.0, 0.643, -0.495 },
+					center = { 0.06, 0.643, -0.495 },
 					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Slide",
+					center = { -0.099, 0.623, -0.175 },
+					size = { 0.061, 0.07, 0.136 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -3665,9 +3719,11 @@ return {
 					part = "Glow",
 					does = "Lights up while loaded, dims when empty.",
 				},
+				{
+					part = "Slide",
+					does = "Steel block and orange knob in the right-side port: kicks back along +y each shot.",
+				},
 			},
-			assetId = 133213241536817,
-			textureId = 129230362597527,
 		},
 		{
 			name = "smoke_can",
@@ -3694,36 +3750,48 @@ return {
 		{
 			name = "starter_pistol",
 			group = "gear",
-			size = { 0.28, 1.01, 1.228 },
+			size = { 0.4, 1.01, 1.228 },
 			parts = {
 				{
+					name = "Eject",
+					center = { -0.16, 0.803, -0.146 },
+					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
 					name = "Glow",
-					center = { 0.0, 0.695, -0.26 },
+					center = { 0.06, 0.695, -0.26 },
 					size = { 0.266, 0.101, 0.708 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Handle",
-					center = { 0.0, 0.53, -0.013 },
-					size = { 0.28, 0.96, 1.186 },
+					center = { 0.06, 0.53, 0.027 },
+					size = { 0.255, 0.96, 1.106 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { 0.0, 0.267, -0.413 },
+					center = { 0.06, 0.267, -0.413 },
 					size = { 0.21, 0.533, 0.348 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { 0.0, 0.683, 0.574 },
+					center = { 0.06, 0.683, 0.574 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Rear",
-					center = { 0.0, 0.683, -0.566 },
+					center = { 0.06, 0.683, -0.566 },
 					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Slide",
+					center = { 0.06, 0.718, -0.12 },
+					size = { 0.28, 0.34, 0.972 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -3737,9 +3805,11 @@ return {
 					part = "Glow",
 					does = "Lights up while loaded, dims when empty.",
 				},
+				{
+					part = "Slide",
+					does = "The whole upper slide kicks back along +y on each shot and springs forward. The cell glow stays put, so keep the kick small.",
+				},
 			},
-			assetId = 99546984168124,
-			textureId = 110943577860214,
 		},
 		{
 			name = "supply_locker",
@@ -6211,49 +6281,64 @@ return {
 		{
 			name = "viewmodel_blaster",
 			group = "viewmodel",
-			size = { 0.28, 1.01, 1.228 },
+			size = { 0.4, 1.01, 1.228 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.53, -0.013 },
-					size = { 0.28, 0.96, 1.186 },
+					center = { 0.06, 0.53, 0.027 },
+					size = { 0.255, 0.96, 1.106 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Eject",
+					center = { -0.16, 0.803, -0.146 },
+					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { 0.0, 0.695, -0.26 },
+					center = { 0.06, 0.695, -0.26 },
 					size = { 0.266, 0.101, 0.708 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Grip",
-					center = { 0.0, 0.283, -0.366 },
+					center = { 0.06, 0.283, -0.366 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Mag",
-					center = { 0.0, 0.267, -0.413 },
+					center = { 0.06, 0.267, -0.413 },
 					size = { 0.21, 0.533, 0.348 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Muzzle",
-					center = { 0.0, 0.683, 0.574 },
+					center = { 0.06, 0.683, 0.574 },
 					size = { 0.08, 0.08, 0.08 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Rear",
-					center = { 0.0, 0.683, -0.566 },
+					center = { 0.06, 0.683, -0.566 },
 					size = { 0.08, 0.08, 0.08 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+				{
+					name = "Slide",
+					center = { 0.06, 0.718, -0.12 },
+					size = { 0.28, 0.34, 0.972 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
-			moves = {},
-			assetId = 89124516666592,
-			textureId = 81216102281476,
+			moves = {
+				{
+					part = "Slide",
+					does = "The whole upper slide kicks back along +y on each shot and springs forward. The cell glow stays put, so keep the kick small.",
+				},
+			},
 		},
 		{
 			name = "aisle_sign_hanging",
@@ -9155,6 +9240,36 @@ return {
 	},
 	sounds = {
 		{
+			name = "dog_bark",
+			group = "dog",
+			assetId = 9113956187,
+		},
+		{
+			name = "dog_bite",
+			group = "dog",
+			assetId = 9120790847,
+		},
+		{
+			name = "dog_eat",
+			group = "dog",
+			assetId = 9114122070,
+		},
+		{
+			name = "dog_growl",
+			group = "dog",
+			assetId = 9120788137,
+		},
+		{
+			name = "dog_whine",
+			group = "dog",
+			assetId = 9113951583,
+		},
+		{
+			name = "dog_yelp",
+			group = "dog",
+			assetId = 9113951595,
+		},
+		{
 			name = "bite",
 			group = "food",
 			assetId = 74035063593872,
@@ -10095,6 +10210,34 @@ return {
 			assetId = 92395665266996,
 		},
 		{
+			name = "announcer_lights_out",
+			group = "voice",
+		},
+		{
+			name = "announcer_lights_out_2",
+			group = "voice",
+		},
+		{
+			name = "announcer_welcome",
+			group = "voice",
+		},
+		{
+			name = "announcer_welcome_2",
+			group = "voice",
+		},
+		{
+			name = "button_good_job",
+			group = "voice",
+		},
+		{
+			name = "button_task_complete",
+			group = "voice",
+		},
+		{
+			name = "button_you_did_it",
+			group = "voice",
+		},
+		{
 			name = "callout_0",
 			group = "voice",
 			assetId = 109091450158742,
@@ -10150,6 +10293,74 @@ return {
 			assetId = 83111417982617,
 		},
 		{
+			name = "kid_come_find_me",
+			group = "voice",
+		},
+		{
+			name = "kid_found_you",
+			group = "voice",
+		},
+		{
+			name = "pa_aisle_12",
+			group = "voice",
+		},
+		{
+			name = "pa_always_happy",
+			group = "voice",
+		},
+		{
+			name = "pa_closed",
+			group = "voice",
+		},
+		{
+			name = "pa_exit_elsewhere",
+			group = "voice",
+		},
+		{
+			name = "pa_fresh_bread",
+			group = "voice",
+		},
+		{
+			name = "pa_helpers_looking",
+			group = "voice",
+		},
+		{
+			name = "pa_keep_moving",
+			group = "voice",
+		},
+		{
+			name = "pa_lost_children",
+			group = "voice",
+		},
+		{
+			name = "pa_never_close",
+			group = "voice",
+		},
+		{
+			name = "pa_parents",
+			group = "voice",
+		},
+		{
+			name = "pa_smiling_mandatory",
+			group = "voice",
+		},
+		{
+			name = "pa_special_everything",
+			group = "voice",
+		},
+		{
+			name = "pa_thank_you",
+			group = "voice",
+		},
+		{
+			name = "pa_your_name",
+			group = "voice",
+		},
+		{
+			name = "phone_message",
+			group = "voice",
+		},
+		{
 			name = "robot_chatter",
 			group = "voice",
 			assetId = 71290644651510,
@@ -10173,6 +10384,26 @@ return {
 			name = "robot_task",
 			group = "voice",
 			assetId = 70835749640045,
+		},
+		{
+			name = "voice_error_data",
+			group = "voice",
+		},
+		{
+			name = "voice_error_retry",
+			group = "voice",
+		},
+		{
+			name = "voice_error_task",
+			group = "voice",
+		},
+		{
+			name = "voice_error_training",
+			group = "voice",
+		},
+		{
+			name = "walkie_intro",
+			group = "voice",
 		},
 		{
 			name = "distant_hum_loop",

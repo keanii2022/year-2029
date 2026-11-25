@@ -6945,15 +6945,51 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.24,
+    0.36,
     0.967,
     3.675
    ],
    "parts": [
     {
+     "name": "Bolt",
+     "center": [
+      -0.069,
+      0.522,
+      -0.343
+     ],
+     "size": [
+      0.061,
+      0.07,
+      0.119
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Eject",
+     "center": [
+      -0.14,
+      0.542,
+      -0.343
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "Foregrip",
      "center": [
-      0.0,
+      0.06,
       0.562,
       0.757
      ],
@@ -6971,7 +7007,7 @@
     {
      "name": "Glow",
      "center": [
-      0.0,
+      0.06,
       0.734,
       0.552
      ],
@@ -6989,7 +7025,7 @@
     {
      "name": "Handle",
      "center": [
-      0.0,
+      0.06,
       0.483,
       -0.017
      ],
@@ -7007,7 +7043,7 @@
     {
      "name": "Mag",
      "center": [
-      0.0,
+      0.06,
       0.293,
       -0.022
      ],
@@ -7025,7 +7061,7 @@
     {
      "name": "Muzzle",
      "center": [
-      0.0,
+      0.06,
       0.582,
       1.797
      ],
@@ -7043,7 +7079,7 @@
     {
      "name": "Rear",
      "center": [
-      0.0,
+      0.06,
       0.582,
       -0.843
      ],
@@ -7069,12 +7105,16 @@
      "does": "Lights up while loaded, dims when empty."
     },
     {
+     "part": "Bolt",
+     "does": "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward."
+    },
+    {
      "part": "Glow",
      "does": "Scope lens glints. Players far away can spot it."
     }
    ],
-   "assetId": 138376957148519,
-   "textureId": 98660172159340,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7140,15 +7180,51 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.33,
+    0.445,
     0.903,
     1.435
    ],
    "parts": [
     {
+     "name": "Bolt",
+     "center": [
+      -0.112,
+      0.645,
+      -0.319
+     ],
+     "size": [
+      0.061,
+      0.06,
+      0.105
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Eject",
+     "center": [
+      -0.183,
+      0.665,
+      -0.318
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "Glow",
      "center": [
-      -0.02,
+      0.037,
       0.795,
       -0.449
      ],
@@ -7166,7 +7242,7 @@
     {
      "name": "Handle",
      "center": [
-      0.0,
+      0.057,
       0.451,
       -0.017
      ],
@@ -7184,7 +7260,7 @@
     {
      "name": "Mag",
      "center": [
-      -0.02,
+      0.037,
       0.444,
       0.122
      ],
@@ -7202,7 +7278,7 @@
     {
      "name": "Muzzle",
      "center": [
-      -0.02,
+      0.037,
       0.635,
       0.677
      ],
@@ -7220,7 +7296,7 @@
     {
      "name": "Rear",
      "center": [
-      -0.02,
+      0.037,
       0.635,
       -0.448
      ],
@@ -7244,10 +7320,14 @@
     {
      "part": "Glow",
      "does": "Lights up while loaded, dims when empty."
+    },
+    {
+     "part": "Bolt",
+     "does": "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward."
     }
    ],
-   "assetId": 82262862907193,
-   "textureId": 86112373986176,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7480,15 +7560,51 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.26,
+    0.38,
     0.972,
     3.16
    ],
    "parts": [
     {
+     "name": "Bolt",
+     "center": [
+      -0.079,
+      0.562,
+      -0.48
+     ],
+     "size": [
+      0.061,
+      0.07,
+      0.119
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Eject",
+     "center": [
+      -0.15,
+      0.582,
+      -0.48
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "Foregrip",
      "center": [
-      0.0,
+      0.06,
       0.622,
       0.69
      ],
@@ -7506,7 +7622,7 @@
     {
      "name": "Glow",
      "center": [
-      0.0,
+      0.06,
       0.777,
       0.45
      ],
@@ -7524,7 +7640,7 @@
     {
      "name": "Handle",
      "center": [
-      0.0,
+      0.06,
       0.506,
       -0.017
      ],
@@ -7542,7 +7658,7 @@
     {
      "name": "Mag",
      "center": [
-      0.0,
+      0.06,
       0.242,
       0.08
      ],
@@ -7560,7 +7676,7 @@
     {
      "name": "Muzzle",
      "center": [
-      0.0,
+      0.06,
       0.622,
       1.54
      ],
@@ -7578,7 +7694,7 @@
     {
      "name": "Rear",
      "center": [
-      0.0,
+      0.06,
       0.622,
       -0.76
      ],
@@ -7602,10 +7718,14 @@
     {
      "part": "Glow",
      "does": "Lights up while loaded, dims when empty."
+    },
+    {
+     "part": "Bolt",
+     "does": "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward."
     }
    ],
-   "assetId": 91286285412841,
-   "textureId": 107069070653422,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -7894,15 +8014,33 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.3,
+    0.42,
     1.031,
     1.951
    ],
    "parts": [
     {
+     "name": "Eject",
+     "center": [
+      -0.17,
+      0.643,
+      -0.175
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "Foregrip",
      "center": [
-      0.0,
+      0.06,
       0.643,
       0.595
      ],
@@ -7920,7 +8058,7 @@
     {
      "name": "Glow",
      "center": [
-      0.0,
+      0.06,
       0.663,
       0.135
      ],
@@ -7938,7 +8076,7 @@
     {
      "name": "Handle",
      "center": [
-      0.0,
+      0.06,
       0.556,
       -0.017
      ],
@@ -7956,7 +8094,7 @@
     {
      "name": "Mag",
      "center": [
-      0.0,
+      0.06,
       0.265,
       0.23
      ],
@@ -7974,7 +8112,7 @@
     {
      "name": "Muzzle",
      "center": [
-      0.0,
+      0.06,
       0.643,
       0.935
      ],
@@ -7992,7 +8130,7 @@
     {
      "name": "Rear",
      "center": [
-      0.0,
+      0.06,
       0.643,
       -0.495
      ],
@@ -8000,6 +8138,24 @@
       0.08,
       0.08,
       0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Slide",
+     "center": [
+      -0.099,
+      0.623,
+      -0.175
+     ],
+     "size": [
+      0.061,
+      0.07,
+      0.136
      ],
      "pivot": [
       0,
@@ -8016,10 +8172,14 @@
     {
      "part": "Glow",
      "does": "Lights up while loaded, dims when empty."
+    },
+    {
+     "part": "Slide",
+     "does": "Steel block and orange knob in the right-side port: kicks back along +y each shot."
     }
    ],
-   "assetId": 133213241536817,
-   "textureId": 129230362597527,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -8072,15 +8232,33 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.28,
+    0.4,
     1.01,
     1.228
    ],
    "parts": [
     {
+     "name": "Eject",
+     "center": [
+      -0.16,
+      0.803,
+      -0.146
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
      "name": "Glow",
      "center": [
-      0.0,
+      0.06,
       0.695,
       -0.26
      ],
@@ -8098,14 +8276,14 @@
     {
      "name": "Handle",
      "center": [
-      0.0,
+      0.06,
       0.53,
-      -0.013
+      0.027
      ],
      "size": [
-      0.28,
+      0.255,
       0.96,
-      1.186
+      1.106
      ],
      "pivot": [
       0,
@@ -8116,7 +8294,7 @@
     {
      "name": "Mag",
      "center": [
-      0.0,
+      0.06,
       0.267,
       -0.413
      ],
@@ -8134,7 +8312,7 @@
     {
      "name": "Muzzle",
      "center": [
-      0.0,
+      0.06,
       0.683,
       0.574
      ],
@@ -8152,7 +8330,7 @@
     {
      "name": "Rear",
      "center": [
-      0.0,
+      0.06,
       0.683,
       -0.566
      ],
@@ -8160,6 +8338,24 @@
       0.08,
       0.08,
       0.08
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Slide",
+     "center": [
+      0.06,
+      0.718,
+      -0.12
+     ],
+     "size": [
+      0.28,
+      0.34,
+      0.972
      ],
      "pivot": [
       0,
@@ -8176,10 +8372,14 @@
     {
      "part": "Glow",
      "does": "Lights up while loaded, dims when empty."
+    },
+    {
+     "part": "Slide",
+     "does": "The whole upper slide kicks back along +y on each shot and springs forward. The cell glow stays put, so keep the kick small."
     }
    ],
-   "assetId": 99546984168124,
-   "textureId": 110943577860214,
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -14210,7 +14410,7 @@
    "screen": null,
    "clips": [],
    "size": [
-    0.28,
+    0.4,
     1.01,
     1.228
    ],
@@ -14218,14 +14418,32 @@
     {
      "name": "Body",
      "center": [
-      0.0,
+      0.06,
       0.53,
-      -0.013
+      0.027
      ],
      "size": [
-      0.28,
+      0.255,
       0.96,
-      1.186
+      1.106
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "name": "Eject",
+     "center": [
+      -0.16,
+      0.803,
+      -0.146
+     ],
+     "size": [
+      0.08,
+      0.08,
+      0.08
      ],
      "pivot": [
       0,
@@ -14236,7 +14454,7 @@
     {
      "name": "Glow",
      "center": [
-      0.0,
+      0.06,
       0.695,
       -0.26
      ],
@@ -14254,7 +14472,7 @@
     {
      "name": "Grip",
      "center": [
-      0.0,
+      0.06,
       0.283,
       -0.366
      ],
@@ -14272,7 +14490,7 @@
     {
      "name": "Mag",
      "center": [
-      0.0,
+      0.06,
       0.267,
       -0.413
      ],
@@ -14290,7 +14508,7 @@
     {
      "name": "Muzzle",
      "center": [
-      0.0,
+      0.06,
       0.683,
       0.574
      ],
@@ -14308,7 +14526,7 @@
     {
      "name": "Rear",
      "center": [
-      0.0,
+      0.06,
       0.683,
       -0.566
      ],
@@ -14322,11 +14540,34 @@
       0.0,
       0.0
      ]
+    },
+    {
+     "name": "Slide",
+     "center": [
+      0.06,
+      0.718,
+      -0.12
+     ],
+     "size": [
+      0.28,
+      0.34,
+      0.972
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
     }
    ],
-   "moves": [],
-   "assetId": 89124516666592,
-   "textureId": 81216102281476,
+   "moves": [
+    {
+     "part": "Slide",
+     "does": "The whole upper slide kicks back along +y on each shot and springs forward. The cell glow stays put, so keep the kick small."
+    }
+   ],
+   "assetId": null,
+   "textureId": null,
    "screenId": null
   },
   {
@@ -20874,6 +21115,42 @@
  ],
  "sounds": [
   {
+   "name": "dog_bark",
+   "group": "dog",
+   "file": null,
+   "assetId": 9113956187
+  },
+  {
+   "name": "dog_bite",
+   "group": "dog",
+   "file": null,
+   "assetId": 9120790847
+  },
+  {
+   "name": "dog_eat",
+   "group": "dog",
+   "file": null,
+   "assetId": 9114122070
+  },
+  {
+   "name": "dog_growl",
+   "group": "dog",
+   "file": null,
+   "assetId": 9120788137
+  },
+  {
+   "name": "dog_whine",
+   "group": "dog",
+   "file": null,
+   "assetId": 9113951583
+  },
+  {
+   "name": "dog_yelp",
+   "group": "dog",
+   "file": null,
+   "assetId": 9113951595
+  },
+  {
    "name": "bite",
    "group": "food",
    "file": "art/sounds/food/bite.mp3",
@@ -22002,6 +22279,48 @@
    "assetId": 92395665266996
   },
   {
+   "name": "announcer_lights_out",
+   "group": "voice",
+   "file": "art/sounds/voice/announcer_lights_out.mp3",
+   "assetId": null
+  },
+  {
+   "name": "announcer_lights_out_2",
+   "group": "voice",
+   "file": "art/sounds/voice/announcer_lights_out_2.mp3",
+   "assetId": null
+  },
+  {
+   "name": "announcer_welcome",
+   "group": "voice",
+   "file": "art/sounds/voice/announcer_welcome.mp3",
+   "assetId": null
+  },
+  {
+   "name": "announcer_welcome_2",
+   "group": "voice",
+   "file": "art/sounds/voice/announcer_welcome_2.mp3",
+   "assetId": null
+  },
+  {
+   "name": "button_good_job",
+   "group": "voice",
+   "file": "art/sounds/voice/button_good_job.mp3",
+   "assetId": null
+  },
+  {
+   "name": "button_task_complete",
+   "group": "voice",
+   "file": "art/sounds/voice/button_task_complete.mp3",
+   "assetId": null
+  },
+  {
+   "name": "button_you_did_it",
+   "group": "voice",
+   "file": "art/sounds/voice/button_you_did_it.mp3",
+   "assetId": null
+  },
+  {
    "name": "callout_0",
    "group": "voice",
    "file": "art/sounds/voice/callout_0.mp3",
@@ -22068,6 +22387,108 @@
    "assetId": 83111417982617
   },
   {
+   "name": "kid_come_find_me",
+   "group": "voice",
+   "file": "art/sounds/voice/kid_come_find_me.mp3",
+   "assetId": null
+  },
+  {
+   "name": "kid_found_you",
+   "group": "voice",
+   "file": "art/sounds/voice/kid_found_you.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_aisle_12",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_aisle_12.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_always_happy",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_always_happy.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_closed",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_closed.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_exit_elsewhere",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_exit_elsewhere.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_fresh_bread",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_fresh_bread.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_helpers_looking",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_helpers_looking.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_keep_moving",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_keep_moving.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_lost_children",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_lost_children.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_never_close",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_never_close.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_parents",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_parents.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_smiling_mandatory",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_smiling_mandatory.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_special_everything",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_special_everything.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_thank_you",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_thank_you.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_your_name",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_your_name.mp3",
+   "assetId": null
+  },
+  {
+   "name": "phone_message",
+   "group": "voice",
+   "file": "art/sounds/voice/phone_message.mp3",
+   "assetId": null
+  },
+  {
    "name": "robot_chatter",
    "group": "voice",
    "file": "art/sounds/voice/robot_chatter.mp3",
@@ -22096,6 +22517,36 @@
    "group": "voice",
    "file": "art/sounds/voice/robot_task.mp3",
    "assetId": 70835749640045
+  },
+  {
+   "name": "voice_error_data",
+   "group": "voice",
+   "file": "art/sounds/voice/voice_error_data.mp3",
+   "assetId": null
+  },
+  {
+   "name": "voice_error_retry",
+   "group": "voice",
+   "file": "art/sounds/voice/voice_error_retry.mp3",
+   "assetId": null
+  },
+  {
+   "name": "voice_error_task",
+   "group": "voice",
+   "file": "art/sounds/voice/voice_error_task.mp3",
+   "assetId": null
+  },
+  {
+   "name": "voice_error_training",
+   "group": "voice",
+   "file": "art/sounds/voice/voice_error_training.mp3",
+   "assetId": null
+  },
+  {
+   "name": "walkie_intro",
+   "group": "voice",
+   "file": "art/sounds/voice/walkie_intro.mp3",
+   "assetId": null
   },
   {
    "name": "distant_hum_loop",

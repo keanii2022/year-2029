@@ -144,17 +144,29 @@ def stripes(w, h, loc, normal, n=4):
     return aim(out, loc, normal)
 
 
+def charging_port(P, main, part, x, y, z, length=0.16, h=0.07, travel=0.08):
+    """Ejection port on the -x side (the player's right, since guns point along -y): a dark slot on `main` that runs
+    `travel` further back, and a steel bolt face with an orange knob on `part`, so the code can slide `part` back
+    along +y without showing a hole. Eject marker just outside the port, where casings fly out."""
+    P.add(main, box((0.012, length + travel, h + 0.02), flat("#0c0c0e"), loc=(-x - 0.004, y + travel / 2, z), r=0.0, n=1))
+    P.add(part, box((0.02, length * 0.85, h), plain(STEEL, grime=0.3), loc=(-x - 0.009, y, z), r=0.004, n=1))
+    P.add(part, box((0.05, 0.035, 0.035), plain(ORANGE, grime=0.3), loc=(-x - 0.035, y + length * 0.3, z), r=0.01, n=1))
+    P.add("Eject", marker((-x - 0.1, y, z + 0.02)))
+
+
 def pistol(P, main, light=TEAL):
     """The starter blaster, built once for the floor pickup (main="Handle") and the first-person view (main="Body").
     Long chunky slide over a lower frame, hex shroud up front, ribbed grip leaning back, a glowing cell in each side,
-    a rail and small sight on top, and a busy back plate since that's what the player stares at."""
+    a rail and small sight on top, and a busy back plate since that's what the player stares at.
+    The slide, its side panels, cell window bars and back plate are the `Slide` part so the code can kick it back;
+    the cell's glow strips stay on `Glow`."""
     worn = paint(WHITE, chip=0.25, under="#8d8f92", under2="#5d6064", grime=0.6, streaks=0.3)
     g = plain(GREY, grime=0.5)
     dark = plain(DARK)
     axis = 0.62
     # slide: y from -0.5 to 0.42, z 0.5 to 0.75, with a narrower cap on top so the top edge reads chamfered
-    P.add(main, box((0.24, 0.92, 0.25), worn, loc=(0, -0.04, axis), r=0.03, n=1))
-    P.add(main, box((0.19, 0.86, 0.04), worn, loc=(0, -0.05, 0.755), r=0.015, n=1))
+    P.add("Slide", box((0.24, 0.92, 0.25), worn, loc=(0, -0.04, axis), r=0.03, n=1))
+    P.add("Slide", box((0.19, 0.86, 0.04), worn, loc=(0, -0.05, 0.755), r=0.015, n=1))
     # lower frame under the slide, running forward to a dark accessory nose
     P.add(main, box((0.21, 0.78, 0.13), g, loc=(0, -0.05, 0.445), r=0.02, n=1))
     P.add(main, box((0.19, 0.16, 0.1), dark, loc=(0, -0.38, 0.4), r=0.02, n=1))
@@ -164,7 +176,7 @@ def pistol(P, main, light=TEAL):
     P.add(main, shroud(-0.66, axis, 0.105, 0.17, ports=3))
     P.add(main, cyl(0.05, 0.06, plain(STEEL, grime=0.2), loc=(0, -0.69, axis), rot=(90, 0, 0), seg=6, bevel=0.006))
     P.add(main, cyl(0.03, 0.01, flat("#0c0c0e"), loc=(0, -0.721, axis), rot=(90, 0, 0), seg=6, bevel=0.0))
-    P.add(main, box((0.27, 0.035, 0.27), plain(ORANGE, grime=0.35), loc=(0, -0.495, axis), r=0.01, n=1))
+    P.add("Slide", box((0.27, 0.035, 0.27), plain(ORANGE, grime=0.35), loc=(0, -0.495, axis), r=0.01, n=1))
     # grip and mag
     P.add(main, box((0.17, 0.23, 0.44), plain(DARK, grime=0.25, vary=0.15), loc=(0, 0.22, 0.22), rot=(14, 0, 0), r=0.035, n=1))
     P.add(main, grip_texture(0.22, 0.22, 0.44))
@@ -177,24 +189,25 @@ def pistol(P, main, light=TEAL):
                  box((0.05, 0.035, 0.14), g, loc=(0, -0.21, 0.36), r=0.01, n=1),
                  box((0.035, 0.04, 0.09), plain(ORANGE, grime=0.2), loc=(0, -0.05, 0.36), rot=(-15, 0, 0), r=0.008, n=1)])
     # sides: panel lines, vents, glowing cell, hazard stripes, screws
-    P.add(main, panel(0.121, -0.46, 0.38, 0.515, 0.725))
-    P.add(main, vents(0.122, -0.45, -0.3, 0.64, 0.07, n=3))
+    P.add("Slide", panel(0.121, -0.46, 0.38, 0.515, 0.725))
+    P.add("Slide", vents(0.122, -0.45, -0.3, 0.64, 0.07, n=3))
     body, lit_parts = cell_window(0.122, -0.24, 0.1, 0.65, 0.065, light, bars=3)
-    P.add(main, body)
+    P.add("Slide", body)
     P.add("Glow", lit_parts)
     for sx in (1, -1):
-        P.add(main, stripes(0.2, 0.06, (sx * 0.123, 0.24, 0.56), (sx, 0, 0), n=3))
+        P.add("Slide", stripes(0.2, 0.06, (sx * 0.123, 0.24, 0.56), (sx, 0, 0), n=3))
     P.add(main, [bolt(0.016, loc=(sx * 0.122, y, 0.475), normal=(sx, 0, 0)) for sx in (1, -1) for y in (-0.36, 0.0, 0.3)])
     # top: vents up front, rail, small sight near the back, front dot
-    P.add(main, top_vents(-0.44, -0.24, 0.776, 0.12, n=4))
+    P.add("Slide", top_vents(-0.44, -0.24, 0.776, 0.12, n=4))
     P.add(main, rail(-0.2, 0.36, 0.775, w=0.09))
     P.add(main, reflex(0.24, 0.81, w=0.14, h=0.095))
-    P.add(main, box((0.04, 0.04, 0.05), plain(ORANGE), loc=(0, -0.46, 0.8), r=0.01, n=1))
+    P.add("Slide", box((0.04, 0.04, 0.05), plain(ORANGE), loc=(0, -0.46, 0.8), r=0.01, n=1))
     # back plate: what the player looks at down the top of the gun
-    P.add(main, box((0.2, 0.014, 0.2), g, loc=(0, 0.427, axis), r=0.005, n=1))
-    P.add(main, stripes(0.18, 0.04, (0, 0.436, 0.7), (0, 1, 0), n=3))
-    P.add(main, [bolt(0.014, loc=(sx * 0.075, 0.435, z), normal=(0, 1, 0)) for sx in (1, -1) for z in (0.55, 0.66)])
-    P.add(main, cyl(0.04, 0.03, dark, loc=(0, 0.445, 0.6), rot=(90, 0, 0), seg=8, bevel=0.006))
+    P.add("Slide", box((0.2, 0.014, 0.2), g, loc=(0, 0.427, axis), r=0.005, n=1))
+    P.add("Slide", stripes(0.18, 0.04, (0, 0.436, 0.7), (0, 1, 0), n=3))
+    P.add("Slide", [bolt(0.014, loc=(sx * 0.075, 0.435, z), normal=(0, 1, 0)) for sx in (1, -1) for z in (0.55, 0.66)])
+    P.add("Slide", cyl(0.04, 0.03, dark, loc=(0, 0.445, 0.6), rot=(90, 0, 0), seg=8, bevel=0.006))
     P.add("Glow", cyl(0.018, 0.012, glow(light, amount=0.0), loc=(0, 0.462, 0.6), rot=(90, 0, 0), seg=8, bevel=0.002))
     P.add("Muzzle", marker((0, -0.72, axis)))
     P.add("Rear", marker((0, 0.42, axis)))
+    P.add("Eject", marker((-0.22, 0.0, 0.74)))  # off the slide's right side, above the cell window
