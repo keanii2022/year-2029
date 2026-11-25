@@ -117,9 +117,12 @@ local function show(phase: string, endsAt: number, animate: boolean)
 
 	if phase == "Day" then
 		if animate then
-			playOnce(ModelLibrary.soundId(Sounds.Jingle), Volume.Stinger)
-			later(AFTER_JINGLE, function()
-				Music.playVoiceLine(pick(Settings.MorningLines))
+			-- After the lights finish clunking on (Lighting)
+			later(Config.Dawn.JingleDelay, function()
+				playOnce(ModelLibrary.soundId(Sounds.Jingle), Volume.Stinger)
+				later(AFTER_JINGLE, function()
+					Music.playVoiceLine(pick(Settings.MorningLines))
+				end)
 			end)
 		end
 		scheduleAnnouncement()

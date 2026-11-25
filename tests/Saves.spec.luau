@@ -104,4 +104,34 @@ return {
 		expect(Saves.lockerAdd(locker, items, "Cells", 25, 2)).toBe(20)
 		expect(Saves.lockerAdd(locker, items, "Gun", 1, 2)).toBe(0)
 	end,
+	["a version 1 save migrates to 2 keeping locker and stats, with zero tokens"] = function()
+		local data, problem = Saves.load({
+			version = 1,
+			locker = { { id = "Gun", count = 1 }, { id = "Cells", count = 7 } },
+			stats = { NightsSurvived = 6, Downs = 2 },
+			extras = { DogTrust = 3 },
+		}, rules)
+		expect(problem).toBe(nil)
+		expect(data.version).toBe(2)
+		expect(#data.locker).toBe(2)
+		expect(data.locker[2].count).toBe(7)
+		expect(data.stats.NightsSurvived).toBe(6)
+		expect(data.extras.DogTrust).toBe(3)
+		expect(data.tokens).toBe(0)
+	end,
+	["tokens become a whole non-negative number"] = function()
+		expect(Saves.load({ version = 2, tokens = 41.8 }, rules).tokens).toBe(41)
+		expect(Saves.load({ version = 2, tokens = -5 }, rules).tokens).toBe(0)
+		expect(Saves.load({ version = 2, tokens = "lots" }, rules).tokens).toBe(0)
+	end,
+	["spending tokens needs enough and a positive whole amount"] = function()
+		local data = Saves.default()
+		Saves.addTokens(data, 10)
+		expect(Saves.spendTokens(data, 4)).toBe(true)
+		expect(data.tokens).toBe(6)
+		expect(Saves.spendTokens(data, 7)).toBe(false)
+		expect(Saves.spendTokens(data, -1)).toBe(false)
+		expect(Saves.spendTokens(data, 1.5)).toBe(false)
+		expect(data.tokens).toBe(6)
+	end,
 }

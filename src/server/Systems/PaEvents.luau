@@ -40,7 +40,7 @@ local function clearAt(pad: number): (number, number) -> boolean
 	end
 end
 
-local function beam(position: Vector3, look: any): BasePart
+local function beam(position: Vector3, look: any, parent: Instance): BasePart
 	local part = Instance.new("Part")
 	part.Name = "PaBeam"
 	part.Shape = Enum.PartType.Cylinder
@@ -64,7 +64,7 @@ local function beam(position: Vector3, look: any): BasePart
 	light.Brightness = look.LightBrightness
 	light.Shadows = false
 	light.Parent = glow
-	part.Parent = folder
+	part.Parent = parent
 	return part
 end
 
@@ -288,7 +288,7 @@ local function run(name: string, site: Site, room: any)
 	end
 	local position = Warehouse.toWorld(site.x, site.z)
 	local look = event.beam or Settings.Beam
-	local marker = if event.rumor then nil else beam(position, look)
+	local marker = if event.rumor then nil else beam(position, look, folder)
 	task.spawn(expire, marker, chest, look.Seconds)
 	local text = if site.place and event.place then lineFrom(event.place) else lineFrom(event.text)
 	eventRemote:FireAllClients({
@@ -299,6 +299,12 @@ local function run(name: string, site: Site, room: any)
 		voice = event.voice,
 	})
 	SimPlayers.lure(position, Steering.BotPull[name] or 0, Steering.BotLureRange)
+end
+
+-- A light pillar standing on position, the same kind that marks events. look has Width, Height,
+-- Color, Transparency, LightRange and LightBrightness.
+function PaEvents.beam(position: Vector3, look: any, parent: Instance): BasePart
+	return beam(position, look, parent)
 end
 
 -- Picks and runs one event. Returns the event name, or nil when none could happen.

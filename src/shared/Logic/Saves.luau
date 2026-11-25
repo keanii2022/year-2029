@@ -5,7 +5,7 @@ local SavesBlueprint = if script then require(script.Parent.SavesBlueprint) else
 
 local Saves = {}
 
-Saves.VERSION = 1
+Saves.VERSION = 2
 
 type Stack = Inventory.Stack
 
@@ -18,6 +18,7 @@ export type Data = {
 	stats: { [string]: number },
 	cosmetics: { [string]: string },
 	extras: { [string]: number },
+	tokens: number,
 }
 export type Rules = {
 	items: Inventory.Items,
@@ -36,6 +37,12 @@ local MAX_KEY_LENGTH = 40
 local MIGRATIONS: { [number]: (any) -> any } = {
 	[1] = function(raw)
 		raw.version = 1
+		return raw
+	end,
+	-- Version 2 adds Tokens; everyone starts at zero and keeps their locker and stats
+	[2] = function(raw)
+		raw.tokens = 0
+		raw.version = 2
 		return raw
 	end,
 }
@@ -60,6 +67,7 @@ function Saves.default(): Data
 		stats = {},
 		cosmetics = {},
 		extras = {},
+		tokens = 0,
 	}
 end
 
@@ -149,6 +157,7 @@ function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 		stats = cleanStats(raw.stats, rules.stats),
 		cosmetics = cleanCosmetics(raw.cosmetics, rules.cosmetics),
 		extras = cleanExtras(raw.extras),
+		tokens = wholeCount(raw.tokens),
 	}
 end
 
@@ -208,6 +217,21 @@ function Saves.lockerAdd(
 	slots: number
 ): number
 	return Inventory.add(locker, items, id, wholeCount(count), slots)
+end
+
+function Saves.addTokens(data: Data, amount: number): number
+	local added = wholeCount(amount)
+	data.tokens += added
+	return added
+end
+
+-- False (and nothing taken) when the amount isn't a positive whole number or there aren't enough
+function Saves.spendTokens(data: Data, amount: number): boolean
+	if not isFinite(amount) or amount <= 0 or amount ~= math.floor(amount) or data.tokens < amount then
+		return false
+	end
+	data.tokens -= amount
+	return true
 end
 
 return Saves

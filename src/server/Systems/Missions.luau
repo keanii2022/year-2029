@@ -10,6 +10,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local DayNight = require(script.Parent.DayNight)
 local Inventory = require(script.Parent.Inventory)
 local Scores = require(script.Parent.Scores)
+local Tokens = require(script.Parent.Tokens)
 local Warehouse = require(script.Parent.Warehouse)
 
 type Mission = MissionsLogic.Mission
@@ -63,8 +64,8 @@ end
 local function reward(player: Player, finished: { Mission })
 	for _, mission in finished do
 		Inventory.add(player, mission.reward.item, mission.reward.count)
-		-- Rejected until "MissionsDone" is added to Config.Saves.Stats
 		Scores.add(player, "MissionsDone", 1)
+		Tokens.add(player, Config.Dawn.Tokens.Mission)
 	end
 end
 

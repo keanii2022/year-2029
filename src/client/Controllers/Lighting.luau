@@ -1,5 +1,5 @@
 -- Flips the store lighting with the clock: dim fluorescent day, red pulsing siren,
--- a flicker into near black at lights out, and lights snapping back on in the morning.
+-- a flicker into near black at lights out, and lights clunking back on bank by bank in the morning.
 -- Also drives the warehouse strip lights: on by day, dark at night except the red emergency ones,
 -- and the broken ones near you flicker (so do the always-on work lamps tagged to flicker).
 -- Strips near a hunting robot stutter and buzz while it's there (Robots calls disturb).
@@ -7,6 +7,7 @@ local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 
 local ClockEffects = require(ReplicatedStorage.Shared.Logic.ClockEffects)
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -15,6 +16,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 
 local Settings = Config.DayNight
 local dread = Config.Robots.Dread
+local dawnLights = Config.Dawn.LightsOn
 
 local LightingController = {}
 
@@ -198,11 +200,74 @@ local function lightsOut()
 	end)
 end
 
+local function clunk()
+	local id = ModelLibrary.soundId(dawnLights.Clunk)
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = dawnLights.ClunkVolume
+	-- Pitched up a touch so the same clunk reads as switching on
+	sound.PlaybackSpeed = 1.05 + math.random() * 0.15
+	sound.Parent = SoundService
+	sound:Play()
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+end
+
+-- Morning: the strips come back bank by bank, nearest first, a clunk each, and the room's light
+-- steps up with them until the full day look lands on the last bank.
+local function lightsOn()
+	local camera = workspace.CurrentCamera
+	local origin = if camera then camera.CFrame.Position else Vector3.zero
+	local strips: { BasePart } = {}
+	local distance: { [BasePart]: number } = {}
+	for _, strip in CollectionService:GetTagged(LIGHT_TAG) do
+		if strip:IsA("BasePart") then
+			table.insert(strips, strip)
+			distance[strip] = (strip.Position - origin).Magnitude
+		end
+	end
+	table.sort(strips, function(a, b)
+		return distance[a] < distance[b]
+	end)
+	local night, day = Settings.Lighting.Night, Settings.Lighting.Day
+	local banks = dawnLights.Banks
+	local switched, nextBank = 0, 1
+	runEffect(function(elapsed)
+		local reached = math.min(banks, math.floor(elapsed / dawnLights.Gap) + 1)
+		while nextBank <= reached do
+			local upTo = math.ceil(#strips * nextBank / banks)
+			for index = switched + 1, upTo do
+				if strips[index].Parent then
+					setStrip(strips[index], true)
+				end
+			end
+			switched = upTo
+			local share = nextBank / banks
+			Lighting.Ambient = night.Ambient:Lerp(day.Ambient, share)
+			Lighting.OutdoorAmbient = night.OutdoorAmbient:Lerp(day.OutdoorAmbient, share)
+			Lighting.Brightness = night.Brightness + (day.Brightness - night.Brightness) * share
+			clunk()
+			nextBank += 1
+		end
+		if reached >= banks then
+			apply(day)
+			return true
+		end
+		return false
+	end)
+end
+
 local function show(phase: string, animate: boolean)
 	if phase == "Siren" then
 		siren()
 	elseif phase == "Night" and animate then
 		lightsOut()
+	elseif phase == "Day" and animate and not stripsOn then
+		lightsOn()
 	else
 		stopEffect()
 		apply(if phase == "Night" then Settings.Lighting.Night else Settings.Lighting.Day)
