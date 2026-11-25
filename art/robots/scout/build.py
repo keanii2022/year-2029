@@ -40,14 +40,22 @@ warp(head, lambda v: V((v.x * (1.0 - 0.3 * max(0.0, v.y - hy) / 0.39), v.y, v.z)
 R.add("Head", head)
 R.add("Head", cyl(0.29, 0.16, dark, (0, hy - 0.4, hz), (90, 0, 0), seg=16, bevel=0.03))
 R.add("Head", cyl(0.31, 0.04, orange, (0, hy - 0.36, hz), (90, 0, 0), seg=16, bevel=0.01))
-for x in (-1, 1):
+for x in (1,):  # its right fin is snapped off: only a stub is left, so the head reads lopsided
     fin = slab([(0, 0), (0.5, 0.06), (0.62, 0.22), (0.1, 0.2)], 0.04, white, bevel=0.01)
     move(fin, rot=(0, 0, 90), loc=(x * 0.24, hy + 0.05, hz + 0.02))
     move(fin, rot=(0, -x * 25, 0), pivot=(x * 0.24, hy, hz))
     R.add("Head", fin)
 R.add("Head", box((0.06, 0.6, 0.1), joint, (0, hy + 0.05, hz + 0.29), r=0.02, n=1))
+R.add("Head", slab([(0, 0), (0.16, 0.03), (0.12, 0.1), (0.05, 0.08)], 0.04, white, loc=(-0.24, hy + 0.05, hz + 0.02), rot=(0, 25, 90)))
+# A cracked mannequin face clipped to the back of its head: walking away, it looks like a person looking back.
+face = mannequin_plate(0.34, 0.44)
+move(face, rot=(0, 8, 180), loc=(0, hy + 0.41, hz + 0.02))
+R.add("Head", face)
 R.add("Extra", cyl(0.2, 0.04, scan, (0, hy - 0.49, hz), (90, 0, 0), seg=16, bevel=0.01))
 R.add("Extra", cyl(0.07, 0.03, flat("#1a0d0b"), (0, hy - 0.515, hz), (90, 0, 0), seg=10, bevel=0.0))
+for k in range(6):  # iris blades round the lens, so the eye reads as a camera that focuses on you
+    blade = slab([(0.2, -0.025), (0.27, -0.04), (0.27, 0.04), (0.2, 0.025)], 0.02, flat("#15110f"))
+    R.add("Extra", move(blade, rot=(0, k * 60 + 15, 0), loc=(0, hy - 0.525, hz)))
 move(R.parts["Head"] + R.parts["Extra"], scl=1.4, pivot=(0, -0.3, 5.95))
 R.joint("neck", (0, -0.3, 5.95))
 R.joint("extra", V((0, -0.3, 5.95)) + (V((0, hy - 0.49, hz)) - V((0, -0.3, 5.95))) * 1.4)
@@ -56,7 +64,10 @@ R.joint("extra", V((0, -0.3, 5.95)) + (V((0, hy - 0.49, hz)) - V((0, -0.3, 5.95)
 for side in (-1, 1):
     s, e, w = (side * 0.55, -0.12, 5.35), (side * 0.7, 0.02, 3.95), (side * 0.72, -0.18, 2.62)
     arm(R, side, s, e, w, 0.18, 0.22, white, joint, claw(side, w, white, dark, size=1.05, long=2.6 if NIGHT else 1.9, curl=0.9 if NIGHT else 0.6),
-        stripe=orange, pad=(2.0, 1.6, 1.2), grip=(0, -0.7))
+        stripe=orange if side > 0 else None, pad=(2.0, 1.6, 1.2), grip=(0, -0.7))
+    if side < 0:  # the stripe-less arm is held together with tape
+        mid = (V(s) + V(e)) / 2
+        R.add("UpperArm", tape(0.26, 0.2, mid + V((0, -0.13, 0)), (0, -1, 0), roll=12, color="#9fb8c8"))
 
 for x in (-0.3, 0.3):
     leg(R, x, (0, 3.7), (-0.16, 2.1), (0.02, 0.48), 0.22, 0.26, white, joint, stripe=orange, foot_size=(0.34, 0.95, 0.24), shin=0.9)

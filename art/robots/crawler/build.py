@@ -22,6 +22,9 @@ for x in (-0.76, 0.76):
 R.add("Torso", box((0.5, 0.04, 0.14), teal, (0, -1.41, 1.05), r=0.02, n=1))
 R.add("Torso", label("CW-4", 0.09, (0.45, 1.6, 1.2), teal, "#1f3a30"))
 move(R.parts["Torso"][-2:], rot=(0, 0, 180), pivot=(0.45, 1.6, 1.2))
+# A doll's head it picked up and kept, lying face down on its back
+R.add("Torso", move(doll_head(0.28), rot=(0, 0, 25), loc=(0.25, 0.75, 1.95)))
+R.add("Torso", box((0.5, 0.06, 0.03), plain("#7a6a55", grime=0.5), (0.25, 0.75, 1.77), (0, 0, 25), r=0.0, n=1))  # wire tying it down
 R.joint("hip", (0, 0.3, 1.3))
 
 # Head: a flat wedge at the front with a row of four lenses. The lenses go in Extra.
@@ -30,9 +33,10 @@ head = R.add("Head", box((1.1, 0.6, 0.56), white, (0, hy, hz), r=0.16, n=1))
 oil(R, "Head", head, [(-0.4, hz - 0.14, 0.16), (0.3, hz - 0.14, 0.12)])
 R.add("Head", box((0.94, 0.06, 0.24), screen(), (0, hy - 0.3, hz + 0.02), r=0.05, n=1))
 R.add("Head", box((1.16, 0.4, 0.08), joint, (0, hy - 0.06, hz + 0.3), r=0.03, n=1))
-eyes = [(-0.33, 0.02, 0.06), (-0.11, 0.02, 0.075), (0.11, 0.02, 0.075), (0.33, 0.02, 0.06)]
-if NIGHT:  # a spider cluster of seven
-    eyes = [(-0.36, -0.03, 0.055), (-0.12, -0.04, 0.07), (0.12, -0.04, 0.07), (0.36, -0.03, 0.055), (-0.24, 0.09, 0.045), (0, 0.1, 0.05), (0.24, 0.09, 0.045)]
+# An off-centre cluster of lenses, all different sizes: low to the floor in the dark, nothing else looks like it
+eyes = [(-0.3, 0.0, 0.085), (-0.12, 0.05, 0.05), (-0.16, -0.07, 0.04), (0.02, -0.02, 0.06), (0.12, 0.07, 0.035), (0.2, -0.05, 0.03)]
+if NIGHT:  # one more, and they grow
+    eyes = [(x, z, r * 1.2) for x, z, r in eyes] + [(-0.42, 0.08, 0.04)]
 for x, z, r in eyes:
     R.add("Extra", cyl(r, 0.04, scan, (x, hy - 0.34, hz + z), (90, 0, 0), seg=10, bevel=0.01))
 R.joint("neck", (0, -1.32, 1.3))
@@ -49,6 +53,13 @@ for side in (-1, 1):
         R.add(leg_n, box((0.26, 0.3, 0.26), dark, h, r=0.04, n=1))
         R.add(leg_n, limb(h, k, 0.2, 0.18, white, 0.17, 0.15, r=0.03))
         R.add(leg_n, box((0.24, 0.26, 0.24), joint, k, r=0.03, n=1))
+        if leg_n == "Leg3":  # back right leg snapped off below the knee: a stump with torn wires, so it limps lopsided
+            stub = k + (f - k) * 0.3
+            R.add(leg_n, limb(k, stub, 0.18, 0.16, white, 0.15, 0.13, r=0.02))
+            for dx, dy in ((0.03, 0.02), (-0.04, -0.01)):
+                R.add(leg_n, box((0.03, 0.03, 0.2), plain("#b0763a", grime=0.4), stub + V((dx, dy, -0.1)), (0, dx * 400, 0), r=0.0, n=1))
+            R.joint(leg_n.lower(), h)
+            continue
         R.add(leg_n, limb(k, f, 0.18, 0.16, white, 0.1, 0.1, r=0.02))
         R.add(leg_n, box((0.26, 0.3, 0.1), dark, (f.x, f.y, 0.05), r=0.02, n=1))
         R.joint(leg_n.lower(), h)

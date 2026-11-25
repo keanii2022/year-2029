@@ -1,4 +1,4 @@
--- brute_night, 8.20 studs tall, feet at 0. Roblox space, for MESH_JOINTS.
+-- brute_night, 8.38 studs tall, feet at 0. Roblox space, for MESH_JOINTS.
 hip = Vector3.new(0.00, 3.60, -0.00),
 neck = Vector3.new(0.00, 7.30, 0.95),
 extra = Vector3.new(0.00, 7.60, 1.66),

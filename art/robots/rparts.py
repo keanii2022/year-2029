@@ -20,11 +20,18 @@ def night(name):
     return name + "_night" if NIGHT else name
 
 
+def blend(a, b, t):
+    """Hex colour a moved t of the way toward b."""
+    ca = [int(a[i:i + 2], 16) for i in (1, 3, 5)]
+    cb = [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(x + (y - x) * t):02x}" for x, y in zip(ca, cb))
+
+
 def shell(color="#f1efe9"):
-    """Clean white company plastic with a few grey chips. At night: scorched, rusty, filthy."""
+    """Old company plastic gone yellow and grimy, chipped down to grey and rust. At night: scorched, rusty, filthy."""
     if NIGHT:
         return paint("#3b3d42", chip=0.6, under="#6b3f22", under2="#1b1714", grime=0.65, streaks=0.7)
-    return paint(color, chip=0.1, under="#b8b5ae", under2="#8c8882", grime=0.16, streaks=0.1)
+    return paint(blend(color, "#c4b99f", 0.55), chip=0.38, under="#8f8b83", under2="#5a4636", grime=0.55, streaks=0.5)
 
 
 def panel(color="#b4b8bd"):
@@ -191,7 +198,7 @@ def label(text, size, at, plate, ink, w=None):
 
 def accent(color):
     """Stripe color by day, red glow at night (Roblox switches these to Neon)."""
-    return glow(NIGHT_RED, amount=0.35) if NIGHT else plain(color, grime=0.3, vary=0.15)
+    return glow(NIGHT_RED, amount=0.35) if NIGHT else plain(blend(color, "#6f6b62", 0.45), grime=0.6, vary=0.25)
 
 
 def scanner():
@@ -230,4 +237,40 @@ def spikes(points, mat):
     out = []
     for x, y, z, h, lean in points:
         out.append(slab([(-h * 0.22, 0), (h * 0.22, 0), (h * 0.08, h)], 0.06, mat, loc=(x, y, z), rot=(0, lean, 0), bevel=0.0))
+    return out
+
+
+# ---------------------------------------------------------------- store junk the robots wear
+def oval(w, h, depth, mat, seg=28):
+    """Flat smooth oval plate in the x-z plane, thick along y."""
+    return slab([(w / 2 * math.cos(math.tau * i / seg), h / 2 * math.sin(math.tau * i / seg)) for i in range(seg)], depth, mat, bevel=depth * 0.3)
+
+
+def mannequin_plate(w=0.36, h=0.48):
+    """A cracked mannequin face plate: a blank smooth oval, no features, built facing -y at the origin."""
+    skin = paint("#d9c6ad", chip=0.3, under="#9c8a74", under2="#5b4a3a", grime=0.45, streaks=0.35)
+    crack = flat("#2a2420")
+    return [oval(w, h, 0.05, skin), box((0.012, 0.02, h * 0.45), crack, (w * 0.12, -0.03, h * 0.12), (0, 18, 0), r=0.0, n=1),
+            box((0.012, 0.02, h * 0.2), crack, (w * 0.2, -0.03, -h * 0.08), (0, -30, 0), r=0.0, n=1)]
+
+
+def hivis(w, h):
+    """A torn scrap of hi-vis safety vest with two dull reflective strips, facing -y at the origin."""
+    vest = cloth(blend("#c9d43a", "#6d6a45", 0.35), dirt=0.7, dirtcolor="#3d3826")
+    strip = plain("#a7aaa8", grime=0.55)
+    rag = [(-w / 2, -h / 2), (-w * 0.2, -h / 2 + 0.08), (w * 0.05, -h / 2 - 0.05), (w * 0.35, -h / 2 + 0.06), (w / 2, -h / 2),
+           (w / 2 - 0.05, h / 2), (w * 0.1, h / 2 - 0.07), (-w / 2 + 0.04, h / 2)]
+    out = [slab(rag, 0.03, vest)]
+    for z in (-h * 0.12, h * 0.18):
+        out.append(box((w * 0.92, 0.035, h * 0.1), strip, (0, -0.005, z), r=0.0, n=1))
+    return out
+
+
+def doll_head(r=0.3):
+    """A doll's head lying face down: a smooth oval with flat tufts of hair on what is now its top."""
+    skin = paint("#e2cdb7", chip=0.35, under="#a08c78", under2="#5b4a3a", grime=0.6, streaks=0.4)
+    hair = plain("#4a3527", grime=0.5)
+    out = [ball((r, r * 1.1, r * 0.92), skin, seg=14, rings=9)]
+    for x, y, a in ((-0.1, 0.05, 20), (0.08, -0.06, -15), (0.0, 0.14, 5), (0.14, 0.1, 35)):
+        out.append(slab([(-0.05, 0), (0.05, 0), (0.0, 0.16)], 0.02, hair, loc=(x * r / 0.3, y * r / 0.3, r * 0.82), rot=(70, 0, a)))
     return out

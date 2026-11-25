@@ -4523,12 +4523,12 @@ return {
 		{
 			name = "brute",
 			group = "robots",
-			size = { 5.184, 8.2, 2.556 },
+			size = { 5.268, 8.384, 2.601 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 7.6, 1.665 },
-					size = { 0.64, 0.07, 0.04 },
+					center = { 0.0, 7.59, 1.665 },
+					size = { 0.621, 0.092, 0.04 },
 					pivot = { 0.0, 7.6, 1.665 },
 				},
 				{
@@ -4539,14 +4539,14 @@ return {
 				},
 				{
 					name = "Hand",
-					center = { -1.856, 2.44, 0.434 },
-					size = { 1.197, 2.22, 1.519 },
+					center = { -2.08, 2.428, 0.715 },
+					size = { 1.0, 2.345, 1.131 },
 					pivot = { -2.08, 3.55, 0.25 },
 				},
 				{
 					name = "Head",
-					center = { 0.0, 7.661, 1.223 },
-					size = { 1.06, 0.742, 0.896 },
+					center = { 0.037, 7.837, 1.197 },
+					size = { 1.134, 1.095, 1.069 },
 					pivot = { 0.0, 7.3, 0.95 },
 				},
 				{
@@ -4557,8 +4557,8 @@ return {
 				},
 				{
 					name = "LeftHand",
-					center = { 1.856, 2.44, 0.434 },
-					size = { 1.197, 2.22, 1.519 },
+					center = { 1.91, 2.706, 0.39 },
+					size = { 0.91, 1.687, 1.154 },
 					pivot = { 2.08, 3.55, 0.25 },
 				},
 				{
@@ -4575,8 +4575,8 @@ return {
 				},
 				{
 					name = "LeftUpperArm",
-					center = { 1.914, 6.278, -0.0 },
-					size = { 1.356, 2.402, 0.975 },
+					center = { 1.904, 6.242, -0.0 },
+					size = { 1.13, 2.33, 0.845 },
 					pivot = { 1.85, 7.05, 0.0 },
 				},
 				{
@@ -4593,14 +4593,14 @@ return {
 				},
 				{
 					name = "Torso",
-					center = { 0.0, 5.825, 0.155 },
-					size = { 3.14, 4.75, 2.051 },
+					center = { 0.0, 5.825, 0.159 },
+					size = { 3.14, 4.75, 2.058 },
 					pivot = { 0.0, 3.6, 0.0 },
 				},
 				{
 					name = "UpperArm",
-					center = { -1.914, 6.278, -0.0 },
-					size = { 1.356, 2.402, 0.975 },
+					center = { -1.932, 6.331, -0.0 },
+					size = { 1.733, 2.509, 1.17 },
 					pivot = { -1.85, 7.05, 0.0 },
 				},
 			},
@@ -4614,18 +4614,16 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 93683239385577,
-			textureId = 118910722607673,
 		},
 		{
 			name = "brute_night",
 			group = "robots",
-			size = { 5.184, 8.2, 2.555 },
+			size = { 5.268, 8.384, 2.602 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 7.6, 1.665 },
-					size = { 0.64, 0.07, 0.04 },
+					center = { 0.0, 7.59, 1.665 },
+					size = { 0.621, 0.092, 0.04 },
 					pivot = { 0.0, 7.6, 1.665 },
 				},
 				{
@@ -4636,14 +4634,14 @@ return {
 				},
 				{
 					name = "Hand",
-					center = { -1.733, 2.304, 0.456 },
-					size = { 1.534, 2.492, 1.701 },
+					center = { -2.08, 2.428, 0.715 },
+					size = { 1.0, 2.345, 1.131 },
 					pivot = { -2.08, 3.55, 0.25 },
 				},
 				{
 					name = "Head",
-					center = { 0.0, 7.661, 1.223 },
-					size = { 1.06, 0.742, 0.896 },
+					center = { 0.037, 7.837, 1.197 },
+					size = { 1.134, 1.095, 1.069 },
 					pivot = { 0.0, 7.3, 0.95 },
 				},
 				{
@@ -4654,8 +4652,8 @@ return {
 				},
 				{
 					name = "LeftHand",
-					center = { 1.733, 2.304, 0.456 },
-					size = { 1.534, 2.492, 1.701 },
+					center = { 1.807, 2.571, 0.412 },
+					size = { 1.205, 1.958, 1.336 },
 					pivot = { 2.08, 3.55, 0.25 },
 				},
 				{
@@ -4672,8 +4670,8 @@ return {
 				},
 				{
 					name = "LeftUpperArm",
-					center = { 1.914, 6.278, -0.0 },
-					size = { 1.356, 2.402, 0.975 },
+					center = { 1.904, 6.242, -0.0 },
+					size = { 1.13, 2.33, 0.845 },
 					pivot = { 1.85, 7.05, 0.0 },
 				},
 				{
@@ -4696,8 +4694,8 @@ return {
 				},
 				{
 					name = "UpperArm",
-					center = { -1.914, 6.278, -0.0 },
-					size = { 1.356, 2.402, 0.975 },
+					center = { -1.932, 6.331, -0.0 },
+					size = { 1.733, 2.509, 1.17 },
 					pivot = { -1.85, 7.05, 0.0 },
 				},
 			},
@@ -4711,8 +4709,6 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 98734512884471,
-			textureId = 75975705997098,
 		},
 		{
 			name = "carrier",
@@ -5293,12 +5289,12 @@ return {
 		{
 			name = "crawler",
 			group = "robots",
-			size = { 3.46, 2.216, 4.797 },
+			size = { 3.46, 2.244, 4.797 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 1.34, 1.96 },
-					size = { 0.78, 0.143, 0.04 },
+					center = { -0.078, 1.318, 1.96 },
+					size = { 0.615, 0.211, 0.04 },
 					pivot = { 0.0, 1.34, 1.96 },
 				},
 				{
@@ -5351,8 +5347,8 @@ return {
 				},
 				{
 					name = "Leg3",
-					center = { -1.11, 0.76, -1.45 },
-					size = { 1.24, 1.52, 0.4 },
+					center = { -0.981, 1.168, -1.415 },
+					size = { 0.982, 0.705, 0.33 },
 					pivot = { -0.62, 0.95, -1.4 },
 				},
 				{
@@ -5381,8 +5377,8 @@ return {
 				},
 				{
 					name = "Torso",
-					center = { 0.0, 1.277, -0.285 },
-					size = { 1.55, 0.965, 3.43 },
+					center = { 0.0, 1.519, -0.285 },
+					size = { 1.55, 1.449, 3.43 },
 					pivot = { 0.0, 1.3, -0.3 },
 				},
 				{
@@ -5402,18 +5398,16 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 102066396945971,
-			textureId = 85225935373490,
 		},
 		{
 			name = "crawler_night",
 			group = "robots",
-			size = { 3.46, 2.216, 4.883 },
+			size = { 3.46, 2.244, 4.883 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 1.34, 1.96 },
-					size = { 0.83, 0.254, 0.04 },
+					center = { -0.112, 1.321, 1.96 },
+					size = { 0.696, 0.234, 0.04 },
 					pivot = { 0.0, 1.34, 1.96 },
 				},
 				{
@@ -5466,8 +5460,8 @@ return {
 				},
 				{
 					name = "Leg3",
-					center = { -1.11, 0.76, -1.45 },
-					size = { 1.24, 1.52, 0.4 },
+					center = { -0.981, 1.168, -1.415 },
+					size = { 0.982, 0.705, 0.33 },
 					pivot = { -0.62, 0.95, -1.4 },
 				},
 				{
@@ -5496,8 +5490,8 @@ return {
 				},
 				{
 					name = "Torso",
-					center = { 0.0, 1.277, -0.285 },
-					size = { 1.55, 0.965, 3.43 },
+					center = { 0.0, 1.519, -0.285 },
+					size = { 1.55, 1.449, 3.43 },
 					pivot = { 0.0, 1.3, -0.3 },
 				},
 				{
@@ -5517,18 +5511,16 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 97066319557719,
-			textureId = 101212385809777,
 		},
 		{
 			name = "scout",
 			group = "robots",
-			size = { 1.812, 7.001, 1.736 },
+			size = { 1.812, 7.001, 1.742 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 6.508, 1.207 },
-					size = { 0.579, 0.579, 0.087 },
+					center = { 0.0, 6.508, 1.21 },
+					size = { 0.784, 0.784, 0.094 },
 					pivot = { 0.0, 6.508, 1.192 },
 				},
 				{
@@ -5614,18 +5606,16 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 105532146113692,
-			textureId = 74837508279462,
 		},
 		{
 			name = "scout_night",
 			group = "robots",
-			size = { 1.812, 7.001, 1.736 },
+			size = { 1.812, 7.001, 1.742 },
 			parts = {
 				{
 					name = "Extra",
-					center = { 0.0, 6.508, 1.207 },
-					size = { 0.579, 0.579, 0.087 },
+					center = { 0.0, 6.508, 1.21 },
+					size = { 0.784, 0.784, 0.094 },
 					pivot = { 0.0, 6.508, 1.192 },
 				},
 				{
@@ -5711,8 +5701,6 @@ return {
 				"walk",
 			},
 			moves = {},
-			assetId = 120900154224628,
-			textureId = 98841042454765,
 		},
 		{
 			name = "blueprint",
@@ -10173,6 +10161,90 @@ return {
 			name = "oil_drip",
 			group = "robots",
 			assetId = 76731051387580,
+		},
+		{
+			name = "robot_broken_welcome",
+			group = "robots",
+		},
+		{
+			name = "robot_ceiling_tick",
+			group = "robots",
+		},
+		{
+			name = "robot_copy_callout_0",
+			group = "robots",
+		},
+		{
+			name = "robot_copy_callout_1",
+			group = "robots",
+		},
+		{
+			name = "robot_copy_callout_2",
+			group = "robots",
+		},
+		{
+			name = "robot_copy_callout_3",
+			group = "robots",
+		},
+		{
+			name = "robot_copy_callout_4",
+			group = "robots",
+		},
+		{
+			name = "robot_copy_callout_5",
+			group = "robots",
+		},
+		{
+			name = "robot_copy_callout_6",
+			group = "robots",
+		},
+		{
+			name = "robot_floor_scrape_drag",
+			group = "robots",
+		},
+		{
+			name = "robot_knockdown_sputter",
+			group = "robots",
+		},
+		{
+			name = "robot_lens_focus",
+			group = "robots",
+		},
+		{
+			name = "robot_neck_crank",
+			group = "robots",
+		},
+		{
+			name = "robot_order_bell",
+			group = "robots",
+		},
+		{
+			name = "robot_pack_chatter",
+			group = "robots",
+		},
+		{
+			name = "robot_reboot_gasp",
+			group = "robots",
+		},
+		{
+			name = "robot_scanner_sweep",
+			group = "robots",
+		},
+		{
+			name = "robot_skitter_burst",
+			group = "robots",
+		},
+		{
+			name = "robot_smile_glitch",
+			group = "robots",
+		},
+		{
+			name = "robot_still_there_hum",
+			group = "robots",
+		},
+		{
+			name = "robot_wet_servo_breath",
+			group = "robots",
 		},
 		{
 			name = "scanner_ping",
