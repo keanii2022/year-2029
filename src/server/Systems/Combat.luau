@@ -3,8 +3,8 @@
 -- selected on the hotbar with each shot and reload; the server checks the player owns it and fires
 -- that gun by its Config.Guns rules (mode, interval, mag, pellets). Tracks each gun's mag and the
 -- reload, published as "Mag<GunId>" and "Reloading" (the gun's id) attributes for the client's HUD.
--- Players take damage; a robot hit goes to Robots.shot (stagger, knockdown, grudge). Anything else a
--- shot hits just throws sparks and stops the shot.
+-- Players take damage; a robot hit goes to Robots.shot (stagger, knockdown, grudge), a store display
+-- mannequin to Sorters.shot. Anything else a shot hits just throws sparks and stops the shot.
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
@@ -23,6 +23,7 @@ local Inventory = require(script.Parent.Inventory)
 local RobotGear = require(script.Parent.RobotGear)
 local Robots = require(script.Parent.Robots)
 local Scores = require(script.Parent.Scores)
+local Sorters = require(script.Parent.Sorters)
 
 local settings = Config.Guns
 
@@ -396,6 +397,10 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any, a
 			local hit = robotDamage[robot] or { damage = 0, at = hitPosition }
 			hit.damage += CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
 			robotDamage[robot] = hit
+		end
+		local display = hitPart and not targetHumanoid and not robot and Sorters.fromPart(hitPart)
+		if display then
+			Sorters.shot(display, player)
 		end
 		if index == 1 then
 			centreHit = hitPosition

@@ -137,6 +137,17 @@ return {
 				{ name = "notes_wall", dx = 9, dz = -3, turn = -60 },
 			},
 		},
+		-- A store display of mannequins; one is a real Sorter robot (Sorters shuffles which spot)
+		display = {
+			count = 6,
+			items = {
+				{ name = "sorter_decoy", dx = -4.5, dz = 0.8, turn = 10 },
+				{ name = "sorter_decoy", dx = -2.2, dz = -0.4, turn = -5 },
+				{ name = "sorter", dx = 0, dz = 0.6, turn = 0 },
+				{ name = "sorter_decoy", dx = 2.3, dz = -0.3, turn = 8 },
+				{ name = "sorter_decoy", dx = 4.6, dz = 0.9, turn = -12 },
+			},
+		},
 		drawings = { count = 10, items = { { name = "drawing_wall", dx = 0, dz = 0, turn = 0 } } },
 		leak = {
 			count = 25,

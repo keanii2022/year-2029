@@ -410,7 +410,7 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 ### 32. Relationships, gunfeel, scarier robots, aisle 40
 - **Status:** current
 - **Dependencies:** 31
-- **Scope:** Companion (robot trust that builds your fort, v2 after a break test and review), Dog (heard from afar, wary but willing, saved rapport), gunfeel (springs, spread, reloads, aim assist, hit feedback), scarier robot behaviour (stillness, stares, nights that learn, rack drops, mimic), audio mix with settings, fort-building sim bots, AI stand-in voices, aisle 40 propaganda and the night manager's office easter egg, redesigned robots (Blender)
+- **Scope:** Companion (robot trust that builds your fort, v2 after a break test and review), Dog (heard from afar, wary but willing, saved rapport), gunfeel (springs, spread, reloads, aim assist, hit feedback), scarier robot behaviour (stillness, stares, nights that learn, rack drops, mimic), audio mix with settings, fort-building sim bots, AI stand-in voices, aisle 40 propaganda and the night manager's office easter egg, redesigned robots (Blender), the Sorter (a real robot hiding in each store display of mannequins: it only moves while nobody looks, hunts at night, goes flat when shot)
 - Done when Keani plays it and it holds up against the Definition of done.
 
 ## Definition of done

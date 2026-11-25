@@ -661,6 +661,7 @@ function Haunts.Start()
 	placeGroups("pigeons", clear, taken, half)
 	placeGroups("rats", clear, taken, half)
 	placeMoths(adoptWarehouseModels(root))
+	folder:SetAttribute("Built", true) -- Sorters waits for this to find the store displays
 
 	local sinceDirector, sinceLife, sinceCams, sinceMannequins, sinceGreeter = 0, 0, 0, 0, 0
 	RunService.Heartbeat:Connect(function(dt)
