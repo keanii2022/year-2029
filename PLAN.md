@@ -387,6 +387,30 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Scope:** a new Rearrange system, the phone handler in Interact, `default.project.json` streaming settings, a new client quality module
 - Overnight the store rearranges itself: loose junk, carts and signs move so the morning layout is different (forts and lockers stay). Night phones play breathing and a giggle or the jingle slowed down. Streaming and effects tuned so phones and slow devices keep up. Done when mornings feel different and a phone can play.
 
+### 29. Admin mode for testing
+- **Status:** current
+- **Dependencies:** 28
+- **Scope:** new Admin system, AdminPanel controller, AdminAccess logic, Config/Admin, new SimPlayers system + SimBrain logic, small hooks in DayNight, DevTeleport, Robots, Combat
+- Keani and their son get an admin panel (F2 / hold Share / ADMIN button) in the live game: any gun, ammo, food and rare items, god mode, speed, fly, jump to players and installations, skip to day / siren / night, freeze robots, and a fake lobby of simulated players with a calm / normal / chaos mood to see how a full server feels. Only their two accounts (and Studio) can open it. Done when both can use it on PS5, phone and keyboard and nobody else sees it.
+
+## After launch: talk about
+
+Two conversations to have once the game is live and real players are in.
+
+Admin mode
+- Keep it just the two of you, or add trusted helpers (moderators) who can only kick, spectate and teleport, with no free guns.
+- Do we want a public "report a player" button and a way for admins to watch a reported player?
+- Should the fake-lobby bots stay as fill-ins when a server is nearly empty, so a lone player still feels hunted?
+
+Robux: what would people pay for here
+- My lean: never sell power. Every gun, the dog and handcuffs stay findable only, because losing it all is the whole game.
+- Looks: blaster skins and wraps, flashlight beam colours, survivor outfits and jumpsuits, dog breeds and collars, spray-paint tag designs.
+- Fort style: decor pieces that look different but are no stronger (neon signs, rugs, old posters).
+- Private servers: cheap, for families and friend groups (you and your son).
+- Emotes and callout voice packs.
+- Maybe: a season pass with only cosmetic rewards, tied to daily missions.
+- Things to decide together: prices, whether anything saves between deaths, and what a new player sees in the shop.
+
 ## Later ideas
 
 - Hard night every 10th night. Foggy days where robots stay awake.
