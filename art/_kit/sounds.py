@@ -1287,91 +1287,162 @@ def tape_rip():
 
 
 # ---------- robots ----------
+# Heavy, old and wrong: big motors under strain, hydraulics, iron feet, joints that need oil. No beeps.
 
 
-@sound("robots", "servo_whirr_1", "normal", "day: soft servo whirr up")
+def motor(sec, freq, strain=0.5, tone=900, teeth=9):
+    """A big worn motor: buzzy low saw whose pitch and grip slip, with gear teeth chattering through it."""
+    n = n_of(sec)
+    f = as_list(freq, n)
+    slip = wobble(sec, 18, 1 - 0.06 * strain, 1 + 0.06 * strain)
+    f = [a * b for a, b in zip(f, slip)]
+    body = layer(osc(f, sec, "saw"), (osc([v * 1.5 for v in f], sec, "saw"), 0, 0.5), (osc([v * 0.5 for v in f], sec, "square"), 0, 0.35))
+    chatter = osc([v * teeth / 4 for v in f], sec, "square")
+    grip = wobble(sec, 30, 1 - strain, 1)
+    body = [b * (0.55 + 0.45 * (c * 0.5 + 0.5)) * g for b, c, g in zip(body, chatter, grip)]
+    return lp(drive(layer(lp(body, tone, 1.2), (bp(body, tone * 2.3, 3), 0, 0.4)), 1.8 + strain * 2), tone * 3)
+
+
+def joint_creak(sec, rate, bands=(140, 290, 560, 1050), q=10):
+    """A dry joint grinding: stick and slip low down, like a metal hinge the size of a car."""
+    return lp(creak(sec, rate, list(bands), q, 0.3), 2200)
+
+
+def hydraulic(sec, lo=900, hi=4000, a=0.01, r=0.25):
+    """Pressure let out of a piston: a hiss that sweeps down as the pressure drops."""
+    e = amp(adsr(sec, a, r), ramp([(0, 1), (sec, 0.4)], sec))
+    return amp(layer(hp(noise(sec), lo), (bp(noise(sec), expo(hi, lo * 1.5, sec), 2), 0, 0.8)), e)
+
+
+def plate(f=95, sec=0.8, weight=1.0):
+    """A thick iron plate hit hard: low, dull, inharmonic."""
+    return lp(modes(sec, [(f, 1, sec / 3), (f * 1.73, 0.7, sec / 4), (f * 2.61, 0.5, sec / 6), (f * 4.07, 0.3, sec / 9), (f * 5.9, 0.15, sec / 14)]), 1400 + 600 * weight)
+
+
+def drip(f=420, sec=0.35):
+    """One thick drop landing in a puddle: a bloop that bends up, with a soft splat."""
+    blip = amp(osc(expo(f, f * 2.6, 0.06) + [f * 2.6] * n_of(sec - 0.06), sec), decay(sec, 0.035, 0.001))
+    splat = lp(amp(noise(0.03), decay(0.03, 0.006)), 1200)
+    return lp(layer((splat, 0, 0.5), (blip, 0.004)), 2600)
+
+
+@sound("robots", "servo_whirr_1", "normal", "day: big servo groaning as a limb lifts")
 def servo_whirr_1():
-    sec = 0.6
-    return amp(servo(sec, ramp([(0, 300), (0.35, 520), (0.6, 470)], sec)), adsr(sec, 0.03, 0.1))
+    sec = 1.1
+    m = amp(motor(sec, ramp([(0, 48), (0.5, 82), (1.1, 74)], sec), 0.6, 700), adsr(sec, 0.08, 0.25))
+    c = amp(joint_creak(sec, ramp([(0, 10), (0.5, 26), (1.1, 14)], sec)), adsr(sec, 0.15, 0.3))
+    return layer(m, (c, 0.05, 0.5), (hydraulic(0.5, 1200, 3500), 0.75, 0.18))
 
 
-@sound("robots", "servo_whirr_2", "normal", "day: short servo whirr down")
+@sound("robots", "servo_whirr_2", "normal", "day: servo settling a limb back down")
 def servo_whirr_2():
-    sec = 0.4
-    return amp(servo(sec, ramp([(0, 480), (0.4, 330)], sec)), adsr(sec, 0.02, 0.08))
+    sec = 0.8
+    m = amp(motor(sec, ramp([(0, 78), (0.8, 44)], sec), 0.5, 650), adsr(sec, 0.04, 0.2))
+    return layer(m, (plate(120, 0.5, 0.6), sec - 0.12, 0.45), (hydraulic(0.6, 1000, 3000), sec - 0.05, 0.22))
 
 
-@sound("robots", "curious_beep_1", "normal", "day: curious beeps, asking")
+@sound("robots", "curious_beep_1", "normal", "day: head tilts with a slow rising creak, asking")
 def curious_beep_1():
-    return tone_seq([(900, 900, 0.07, 0.05), (1200, 1200, 0.06, 0.05), (1000, 1500, 0.14, 0)])
+    sec = 1.3
+    tilt = amp(joint_creak(sec, ramp([(0, 7), (0.9, 30), (1.3, 40)], sec), (180, 360, 700, 1300), 14), adsr(sec, 0.2, 0.15))
+    m = amp(motor(sec, ramp([(0, 40), (1.3, 70)], sec), 0.7, 600), adsr(sec, 0.3, 0.2))
+    return layer(tilt, (m, 0, 0.45), (click(900, 0.03, 2), sec - 0.05, 0.6))
 
 
-@sound("robots", "curious_beep_2", "normal", "day: curious beeps, thinking")
+@sound("robots", "curious_beep_2", "normal", "day: ratcheting, thinking it over")
 def curious_beep_2():
-    return tone_seq([(1400, 1400, 0.05, 0.04), (1100, 1100, 0.05, 0.04), (1250, 1250, 0.05, 0.12), (800, 1300, 0.18, 0)])
+    parts, t = [], 0.0
+    for k in range(7):
+        parts.append((layer(knock(random.uniform(380, 460), 0.08, 1800), (click(1500, 0.01, 2), 0, 0.5)), t, random.uniform(0.5, 0.9)))
+        t += random.uniform(0.08, 0.16) + (0.25 if k == 3 else 0)
+    hum = amp(motor(t + 0.3, ramp([(0, 55), (t, 50)], t + 0.3), 0.8, 500), adsr(t + 0.3, 0.1, 0.2))
+    return layer((hum, 0, 0.5), *parts)
 
 
-@sound("robots", "curious_beep_3", "normal", "day: curious beeps, found something")
+@sound("robots", "curious_beep_3", "normal", "day: groan down and up, then a clunk: found something")
 def curious_beep_3():
-    return tone_seq([(1000, 1600, 0.09, 0.03), (1600, 1600, 0.05, 0.03), (1800, 1800, 0.08, 0)], "sine")
+    sec = 1.0
+    m = amp(motor(sec, ramp([(0, 70), (0.4, 46), (1.0, 92)], sec), 0.5, 750), adsr(sec, 0.05, 0.12))
+    c = amp(joint_creak(sec, ramp([(0, 20), (0.4, 8), (1.0, 34)], sec)), adsr(sec, 0.05, 0.15))
+    return layer(m, (c, 0, 0.45), (plate(110, 0.7, 0.8), sec - 0.05, 0.8), (hydraulic(0.4, 1500, 4000), sec, 0.15))
 
 
 @sound("robots", "fumble", "normal", "day: fumbling with objects")
 def fumble():
     hits = [knock(random.uniform(250, 600), 0.1, 3000), clink(random.uniform(2000, 3500), 0.15), click(1800, 0.015), knock(random.uniform(300, 500), 0.08)]
-    whirr = amp(servo(0.25, 420, 0.3), adsr(0.25, 0.02, 0.05))
+    whirr = amp(motor(0.4, 60, 0.6, 600), adsr(0.4, 0.04, 0.1))
     return layer((whirr, 0, 0.4), *[(h, k * 0.14 + random.uniform(0, 0.05), random.uniform(0.5, 1)) for k, h in enumerate(hits)])
 
 
-@sound("robots", "spot_alert", "loud", "day: sharp two-tone alert when it spots you")
+@sound("robots", "spot_alert", "loud", "day: head snaps round with a grinding lurch when it spots you")
 def spot_alert():
-    hi, lo = beep(1320, 0.09, "square", 6000), beep(880, 0.09, "square", 6000)
-    alert = drive(cat(hi, lo, hi, lo), 1.5)
-    return reverb(alert, 1.4, 0.25, 0.6)
+    sec = 0.9
+    snap_m = amp(motor(0.35, expo(40, 160, 0.35), 0.9, 1200), adsr(0.35, 0.01, 0.05))
+    lock = layer(plate(85, 0.8, 1.2), (thud(45, 0.5, 0.5, 0.6), 0, 0.9))
+    groan = amp(motor(sec, ramp([(0, 160), (sec, 130)], sec), 0.9, 900), adsr(sec, 0.02, 0.5))
+    return reverb(drive(layer(snap_m, (lock, 0.32), (groan, 0.32, 0.5)), 1.6), 1.6, 0.3, 1.0)
 
 
-@sound("robots", "hum_loop", "loud", "night: low robot hum")
+@sound("robots", "hum_loop", "loud", "night: low, dirty electrical drone with crackle")
 def hum_loop():
     sec = 4.0
-    base = circ(lambda x: lp(x, 300), layer(osc(snap(55, sec), sec, "saw"), (osc(snap(55.5, sec), sec, "saw"), 0, 0.8)))
-    whine = amp(osc(snap(2200, sec), sec), [0.5 + 0.5 * math.sin(TAU * snap(1.5, sec) * i / SR) for i in range(n_of(sec))])
-    return layer(base, (whine, 0, 0.04))
+    n = n_of(sec)
+    beat = [0.75 + 0.25 * math.sin(TAU * snap(0.75, sec) * i / SR) for i in range(n)]
+    mains = layer(osc(snap(41, sec), sec, "saw"), (osc(snap(82.3, sec), sec, "square"), 0, 0.3), (osc(snap(41.6, sec), sec, "saw"), 0, 0.8))
+    mains = circ(lambda x: lp(drive(x, 3.0), 520), mains)
+    buzz = circ(lambda x: bp(drive(x, 6), 240, 4), osc(snap(123, sec), sec, "saw"))
+    rumble = circ(lambda x: lp(x, 90), noise(sec))
+    crackle = [(amp(click(random.uniform(1200, 4000), 0.02, 1), random.uniform(0.2, 1)), random.uniform(0, sec), 0.25) for _ in range(22)]
+    sparks = wrap_layer(sec, *crackle)
+    return layer(amp(mains, beat), (buzz, 0, 0.12), (rumble, 0, 1.6), (sparks, 0, 0.6))
 
 
-@sound("robots", "scanner_ping", "loud", "night: scanner ping every few seconds")
+@sound("robots", "scanner_ping", "loud", "night: deep pulse and a grinding lens turn, every few seconds")
 def scanner_ping():
-    ping = layer(amp(osc(expo(1900, 1750, 0.6), 0.6), decay(0.6, 0.12, 0.002)), (amp(osc(2850, 0.4), decay(0.4, 0.05, 0.002)), 0, 0.3))
-    return reverb(ping, 1.6, 0.45, 1.6)
+    pulse = layer(amp(osc(expo(70, 52, 1.2), 1.2), decay(1.2, 0.35, 0.004)), (amp(osc(expo(210, 160, 0.8), 0.8, "saw"), decay(0.8, 0.12, 0.004)), 0, 0.25))
+    pulse = lp(drive(pulse, 2.2), 800)
+    lens, t, gap = [], 0.1, 0.09
+    while t < 0.9:
+        lens.append((click(random.uniform(1800, 2400), 0.012, 3), t, 0.5))
+        t += gap
+        gap *= 0.82
+    whine = amp(motor(0.9, expo(90, 180, 0.9), 0.4, 1100), adsr(0.9, 0.1, 0.3, 0.35))
+    return reverb(layer(pulse, (whine, 0.08), *lens), 1.8, 0.45, 1.8)
 
 
-def heavy_step(f=48, weight=1.0):
-    body = thud(f, 0.5, 0.55, 0.8)
-    metal = lp(modes(0.5, [(210, 1, 0.12), (390, 0.6, 0.08), (720, 0.3, 0.05)]), 1500)
-    hydraulic = amp(hp(noise(0.15), 2500), adsr(0.15, 0.01, 0.12))
-    return layer(body, (metal, 0, 0.35 * weight), (hydraulic, 0.05, 0.12))
+def heavy_step(f=42, weight=1.0):
+    body = thud(f, 0.6, 0.55, 0.9)
+    iron = plate(random.uniform(78, 92), 0.6, weight)
+    knee = amp(joint_creak(0.25, 22), adsr(0.25, 0.02, 0.1))
+    psst = hydraulic(0.3, 1400, 3800, 0.01, 0.2)
+    grit = lp(amp(noise(0.12), decay(0.12, 0.03)), 1500)
+    return drive(layer(body, (iron, 0, 0.55 * weight), (grit, 0, 0.35), (knee, 0.04, 0.3), (psst, 0.12, 0.12)), 1.3)
 
 
-@sound("robots", "heavy_step", "loud", "night: heavy robot step")
+@sound("robots", "heavy_step", "loud", "night: one heavy iron foot coming down, piston hiss")
 def heavy_step_sound():
     return heavy_step()
 
 
-@sound("robots", "chase_servo_scream", "loud", "chase: servos screaming")
+@sound("robots", "chase_servo_scream", "loud", "chase: a horrible rising grind as it lurches into a run")
 def chase_servo_scream():
-    sec = 1.2
-    f = ramp([(0, 900), (0.3, 1700), (0.8, 1500), (1.2, 1800)], sec)
-    f = [v * (1 + 0.04 * math.sin(TAU * 23 * i / SR)) for i, v in enumerate(f)]
-    voices = layer(servo(sec, f, 0.5, 2200, 0.6), (servo(sec, [v * 1.06 for v in f], 0.5, 3000, 0.6), 0, 0.7))
-    return amp(drive(voices, 2.5), adsr(sec, 0.04, 0.2))
+    sec = 2.2
+    f = ramp([(0, 34), (0.5, 60), (1.4, 150), (2.2, 210)], sec)
+    deep = amp(motor(sec, f, 1.0, 900, 11), adsr(sec, 0.05, 0.35))
+    shriek = amp(joint_creak(sec, ramp([(0, 15), (1.0, 60), (2.2, 140)], sec), (420, 880, 1700, 2900), 16), ramp([(0, 0), (0.6, 0.3), (1.8, 1), (2.2, 0)], sec))
+    second = amp(motor(sec, [v * 1.41 for v in f], 1.0, 1300), adsr(sec, 0.5, 0.35, 0.6))
+    blast = hydraulic(0.7, 700, 4500, 0.005, 0.5)
+    hit = layer(plate(70, 0.9, 1.4), (thud(38, 0.6, 0.5, 0.8), 0, 1.0))
+    return drive(layer(hit, (blast, 0, 0.35), (deep, 0.05), (second, 0.05, 0.6), (shriek, 0.05, 0.5)), 2.0)
 
 
 @sound("robots", "chase_steps", "loud", "chase: heavy steps speeding up")
 def chase_steps():
-    parts, t, gap = [], 0.0, 0.5
-    while t < 3.0:
-        parts.append((heavy_step(random.uniform(50, 58), 0.8), t, random.uniform(0.8, 1)))
+    parts, t, gap = [], 0.0, 0.55
+    while t < 3.2:
+        parts.append((heavy_step(random.uniform(40, 48), 0.8), t, random.uniform(0.8, 1)))
         t += gap
-        gap = max(0.17, gap * 0.85)
+        gap = max(0.2, gap * 0.86)
     return layer(*parts)
 
 
@@ -1436,23 +1507,45 @@ def crawler_skitter_loop():
     return wrap_layer(sec, *taps)
 
 
-@sound("robots", "grab_clank", "normal", "grabbing loose stuff: clank")
+@sound("robots", "grab_clank", "normal", "grabbing: a heavy iron clamp slams shut, then hisses")
 def grab_clank():
-    return layer(clang(520, 0.5, 0.8), (knock(300, 0.1), 0, 0.5), (servo(0.15, 500), 0, 0.15))
+    reach = amp(motor(0.3, expo(60, 120, 0.3), 0.7, 800), adsr(0.3, 0.02, 0.03))
+    clamp = layer(plate(130, 0.9, 1.2), (clang(260, 0.6, 0.5), 0, 0.35), (thud(55, 0.4, 0.5, 0.7), 0, 0.9))
+    ratchet = [(click(1400, 0.012, 2.5), 0.4 + k * 0.05, 0.4) for k in range(4)]
+    return drive(layer((reach, 0, 0.6), (clamp, 0.28), *ratchet, (hydraulic(0.5, 1200, 3500), 0.55, 0.25)), 1.5)
 
 
-@sound("robots", "scrape", "normal", "grabbing loose stuff: scrape")
+@sound("robots", "scrape", "normal", "grabbing: metal dragged over concrete, juddering")
 def scrape():
-    sec = 0.8
-    return amp(bp(noise(sec), 1300, 1.5), amp(wobble(sec, 50, 0.3, 1.0), adsr(sec, 0.04, 0.15)))
+    sec = 1.0
+    grind = bp(noise(sec), wobble(sec, 12, 600, 1100), 2)
+    judder = joint_creak(sec, wobble(sec, 6, 18, 40), (230, 470, 900), 9)
+    return amp(layer(amp(grind, wobble(sec, 40, 0.3, 1.0)), (judder, 0, 0.7), (lp(noise(sec), 150), 0, 0.6)), adsr(sec, 0.03, 0.2))
 
 
-@sound("robots", "drag", "normal", "grabbing loose stuff: drag")
+@sound("robots", "drag", "normal", "grabbing: something heavy hauled away across the floor")
 def drag():
-    sec = 1.6
-    grind = amp(bp(noise(sec), 700, 1), wobble(sec, 25, 0.4, 1.0))
-    rumble = lp(noise(sec), 180)
-    return amp(layer(grind, (rumble, 0, 0.8)), adsr(sec, 0.1, 0.3))
+    sec = 2.0
+    grind = amp(bp(noise(sec), wobble(sec, 8, 380, 700), 1.5), wobble(sec, 25, 0.4, 1.0))
+    judder = joint_creak(sec, wobble(sec, 4, 10, 28), (120, 260, 520), 8)
+    rumble = lp(noise(sec), 140)
+    tug = amp(motor(sec, 46, 0.8, 500), 0.25)
+    return amp(layer(grind, (judder, 0, 0.6), (rumble, 0, 1.2), (tug, 0, 0.5)), adsr(sec, 0.12, 0.35))
+
+
+@sound("robots", "oil_drip", "quiet", "idle: thick oil dripping off a robot into a puddle")
+def oil_drip():
+    t, parts = 0.0, []
+    for k in range(3):
+        parts.append((drip(random.uniform(300, 460)), t, random.uniform(0.7, 1)))
+        t += random.uniform(0.55, 0.9)
+    return reverb(layer(*parts), 1.3, 0.35, 0.9, 0.6)
+
+
+@sound("robots", "hydraulic_hiss", "normal", "idle: a piston letting pressure out, with a settling clunk")
+def hydraulic_hiss():
+    sec = 1.4
+    return layer((plate(140, 0.5, 0.5), 0, 0.4), (hydraulic(sec, 900, 4200, 0.008, 0.9), 0.02), (joint_creak(0.4, 14), 0.9, 0.2))
 
 
 @sound("robots", "emp_shutdown", "loud", "hit by EMP: power down whine, then silence")
@@ -1465,20 +1558,17 @@ def emp_shutdown():
     return layer(sparks, (whine, 0, 0.9), (amp(noise(0.03), decay(0.03, 0.008)), 0, 0.8))
 
 
-@sound("robots", "error_stall", "loud", "frozen hunter at lights on: glitchy falling error beep")
+@sound("robots", "error_stall", "loud", "frozen hunter at lights on: motor stalls, tries again, dies")
 def error_stall():
-    steps = [1250, 940, 700, 520]
     parts, t = [], 0.0
-    for k, f in enumerate(steps):
-        b = beep(f, 0.09, "square", 5000)
-        parts.append((b, t))
-        if k in (1, 2):
-            parts.append((b[: at_index(0.03)], t + 0.1))
-            t += 0.04
-        t += 0.12
-    tail = amp(osc(expo(420, 90, 0.5), 0.5, "square"), ramp([(0, 1), (0.42, 0.8), (0.43, 0)], 0.5))
-    parts.append((tail, t))
-    return lp(crush(layer(*parts), 4, 4), 5000)
+    for k, (f0, f1, d) in enumerate([(90, 60, 0.35), (80, 50, 0.3), (70, 22, 0.9)]):
+        tries = amp(motor(d, expo(f0, f1, d), 1.0, 700), ramp([(0, 0), (0.02, 1), (d * 0.7, 0.8), (d, 0)], d))
+        parts.append((tries, t))
+        parts.append((amp(scatter(0.15, lambda: click(random.uniform(2000, 6000), 0.005, 0.8), 6), 0.4), t + d - 0.08))
+        t += d + (0.12 if k < 2 else 0)
+    parts.append((plate(100, 0.8, 1.0), t - 0.1, 0.7))
+    parts.append((hydraulic(1.0, 800, 3000, 0.01, 0.8), t - 0.05, 0.3))
+    return drive(layer(*parts), 1.4)
 
 
 # ---------- players ----------

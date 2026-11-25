@@ -70,7 +70,7 @@ return {
 		DayMusic = 0.35,
 		NightHum = 0.5,
 		NightAmbience = 0.4,
-		Siren = 0.8,
+		Siren = 0.65,
 		Stinger = 0.8,
 		Announcer = 0.9,
 	},
