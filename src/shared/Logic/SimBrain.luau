@@ -21,6 +21,7 @@ export type MoodSettings = {
 	avoid: number, -- chance to back away from someone close
 	freeze: number, -- chance to panic and stand still when a robot comes for it
 	lure: number, -- chance to drop what it's doing for a PA event or bait drop close by
+	defend: number?, -- chance to open fire on someone coming into its fort
 	day: { [string]: number }, -- weights for the lights-on actions
 }
 
@@ -30,6 +31,7 @@ export type Settings = {
 	FightRange: number,
 	AvoidRange: number,
 	ActionTime: { [string]: { number } },
+	BuildFocus: number?, -- chance a bot with an unfinished fort goes back to building by day
 }
 
 export type Seen = { id: any, distance: number }
@@ -42,6 +44,8 @@ export type Input = {
 	enemy: Seen?, -- nearest person in sight
 	attacker: { id: any, distance: number, at: number }?, -- whoever last hit it, while in sight
 	targetSeen: boolean, -- the current action's target is still in sight
+	building: boolean?, -- its crew's fort still has gaps
+	raider: Seen?, -- someone else in or right at its fort
 }
 
 export type Brain = {
@@ -50,6 +54,7 @@ export type Brain = {
 	untilTime: number,
 	phase: string?,
 	answeredHit: number, -- time of the last hit it already reacted to
+	answeredRaider: any?, -- the raider it already rolled to defend against
 }
 
 -- Fixed order so the same roll always lands on the same action.
@@ -133,6 +138,16 @@ function SimBrain.decide(
 		return choose(brain, "avoid", attacker.id, settings, now, random)
 	end
 
+	local raider = input.raider
+	if not raider then
+		brain.answeredRaider = nil
+	elseif armed and raider.id ~= brain.answeredRaider and brain.action ~= "fight" then
+		brain.answeredRaider = raider.id
+		if random() < (mood.defend or 0) then
+			return choose(brain, "fight", raider.id, settings, now, random)
+		end
+	end
+
 	local stillValid = not phaseChanged
 		and (brain.action ~= "fight" or (armed and input.targetSeen))
 		and (brain.action ~= "flee" and brain.action ~= "freeze")
@@ -149,6 +164,9 @@ function SimBrain.decide(
 	end
 	if input.phase == "Siren" or night then
 		return choose(brain, "hide", nil, settings, now, random)
+	end
+	if input.building and random() < (settings.BuildFocus or 0) then
+		return choose(brain, "drag", nil, settings, now, random)
 	end
 	return choose(brain, SimBrain.pickWeighted(mood.day, random()), nil, settings, now, random)
 end

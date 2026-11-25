@@ -408,6 +408,52 @@ function Grab.pryNoise(prop: PVInstance, source: Instance?, soundIndex: number):
 	return pryNoise(prop, source, soundIndex)
 end
 
+-- A sim player picking a piece up: stops any settling fall and drops the placed blocker, the way a
+-- grab does. False when a real player is carrying it.
+function Grab.botTake(prop: PVInstance): boolean
+	if carriedBy[prop] then
+		return false
+	end
+	settle(prop)
+	removeBlocker(prop)
+	return true
+end
+
+-- A sim player setting a piece down at box (its bounding box, size its sides): the same GrabFit
+-- check a player's place goes through, from the bot's own body, then marked placedBy and boxed in
+-- like any placed piece. Returns ok and the GrabRules reason when refused.
+function Grab.botPlace(
+	prop: PVInstance,
+	box: CFrame,
+	size: Vector3,
+	pivotOffset: CFrame,
+	body: { root: BasePart, humanoid: Humanoid, eye: Vector3 },
+	placedBy: number
+): (boolean, string?)
+	if carriedBy[prop] or not prop:IsDescendantOf(workspace) then
+		return false, "taken"
+	end
+	local ok, reason = GrabFit.check({
+		prop = prop,
+		size = size,
+		box = box,
+		carrier = nil :: any, -- no Player: the bot's own body counts as in the way like anyone's
+		root = body.root,
+		humanoid = body.humanoid,
+		eye = body.eye,
+		tolerance = Settings.PlaceTolerance + Settings.PlaceSlack,
+		carrierBlocks = false,
+		groundFound = true,
+	})
+	if not ok then
+		return false, reason
+	end
+	prop:PivotTo(box * pivotOffset)
+	prop:SetAttribute("PlacedBy", placedBy)
+	addBlocker(prop)
+	return true, nil
+end
+
 -- prop starts a pry, nil means the player let go.
 local function onPry(player: Player, prop: any)
 	if prop == nil then
