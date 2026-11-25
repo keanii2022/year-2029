@@ -407,6 +407,12 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Scope:** audits and research by read-only agents, then fixes across Grab, Robots, Combat, Inventory, Saves, Missions, Scores, Hud, Hints, TouchButtons, Locker, Music, new Dawn/Tokens/Files/Footsteps/Subtitles/MoveCheck/FortOutline systems
 - Restore point before this step: git tag `before-polish`, build copy `build/Year2029-before-polish.rbxl`. Building rework (client ghost, square snap, forts that hold), Dawn Report and Tokens, locker banking, forts pay, first day on rails, weekly boards, streaks, 2029 Files, last call and the night sweep, friends spawn together, security fixes, real footsteps, echo, PA subtitles, robot lunge and eye tells, new-player intro, phase clock, phone layout, death cause, more robots. Done when Keani plays it and keeps it, or says undo.
 
+### 32. Relationships, gunfeel, scarier robots, aisle 40
+- **Status:** current
+- **Dependencies:** 31
+- **Scope:** Companion (robot trust that builds your fort, v2 after a break test and review), Dog (heard from afar, wary but willing, saved rapport), gunfeel (springs, spread, reloads, aim assist, hit feedback), scarier robot behaviour (stillness, stares, nights that learn, rack drops, mimic), audio mix with settings, fort-building sim bots, AI stand-in voices, aisle 40 propaganda and the night manager's office easter egg, redesigned robots (Blender)
+- Done when Keani plays it and it holds up against the Definition of done.
+
 ## Definition of done
 
 Year 2029 is done when every box below is true and Keani says so. Draft for Keani to approve.
