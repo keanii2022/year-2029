@@ -793,67 +793,261 @@ function Sets.dead_mall(ctx: Ctx)
 	item(ctx, "crt_tv", ctx.x0 + 10, ctx.z0 + 6, 0, 1)
 end
 
--- c10: megalophobia. A vast hall of still water under a ceiling solid with glowing panels running
--- off forever. A narrow tile walkway leads out over the water and simply stops.
+-- light_grid is laid out in walk-in terms from its doorway: u is how far in from the doorway wall,
+-- p is the position along that wall. box() places a piece from those terms.
+type WalkFrame = {
+	depth: number,
+	pMin: number,
+	pMax: number,
+	pDoor: number,
+	at: (u: number, p: number) -> (number, number),
+	facing: (du: number, dp: number) -> (number, number),
+	box: (u: number, p: number, su: number, sp: number, spec: any) -> any,
+	lane: (p: number, pad: number) -> number,
+}
+
+local function walkFrame(ctx: Ctx): WalkFrame
+	local door = ctx.room.doors[1]
+	local across = door.side == "north" or door.side == "south"
+	local flip = if door.side == "south" or door.side == "east" then -1 else 1
+	local wall = if across
+		then (if flip > 0 then ctx.z0 else ctx.z1)
+		else (if flip > 0 then ctx.x0 else ctx.x1)
+	local pMin = if across then ctx.x0 else ctx.z0
+	local pMax = if across then ctx.x1 else ctx.z1
+	local function at(u: number, p: number): (number, number)
+		if across then
+			return p, wall + flip * u
+		end
+		return wall + flip * u, p
+	end
+	local function facing(du: number, dp: number): (number, number)
+		if across then
+			return dp, flip * du
+		end
+		return flip * du, dp
+	end
+	local function box(u: number, p: number, su: number, sp: number, spec: any)
+		spec.x, spec.z = at(u, p)
+		spec.sx = if across then sp else su
+		spec.sz = if across then su else sp
+		return piece(ctx.layout, spec)
+	end
+	local function lane(p: number, pad: number): number
+		return math.clamp(p, pMin + pad, pMax - pad)
+	end
+	return {
+		depth = if across then ctx.d else ctx.w,
+		pMin = pMin,
+		pMax = pMax,
+		pDoor = pMin + door.at,
+		at = at,
+		facing = facing,
+		box = box,
+		lane = lane,
+	}
+end
+
+-- A door frame of three bars facing down the hall; lift raises it off the floor
+local function lightGridFrame(f: WalkFrame, u: number, p: number, lift: number)
+	f.box(u, p, 0.5, 4.4, { y = lift + 7.4, sy = 0.5, style = "door_frame" })
+	for _, side in { -2, 2 } do
+		f.box(u, p + side, 0.5, 0.4, { y = lift + 3.6, sy = 7.2, style = "door_frame" })
+	end
+end
+
+-- c10: megalophobia with a goal. A vast flooded hall under a ceiling of glowing squares. From the
+-- doorway you see one thing: a lit island far out in the black water, a little living room under a
+-- column of light, robots keeping its chest. A narrow tile walkway jogs out toward it, breaks into
+-- stepping stones under lights that blink as you pass, and joins up again for the last stretch.
+-- Everything else is cover, or wrong.
 function Sets.light_grid(ctx: Ctx)
 	local L, rng = ctx.layout, ctx.rng
 	walls(ctx, ctx.h, "tile_white", nil, 1, 6)
-	Pieces.ceiling(L, ctx.room, ctx.h, "tile_white")
+	Pieces.ceiling(L, ctx.room, ctx.h, "void")
 	Pieces.floor(L, ctx.room, "tile_dark")
-	piece(L, {
-		x = ctx.cx,
-		y = 1.5,
-		z = ctx.cz,
-		sx = ctx.w - 2,
-		sy = 2.6,
-		sz = ctx.d - 2,
-		style = "water_dark",
+	local f = walkFrame(ctx)
+	local depth, span = f.depth, f.pMax - f.pMin
+	local center = (f.pMin + f.pMax) / 2
+	-- side: which way along the doorway wall the island sits; most things mirror off it
+	local side = if f.pDoor < center then 1 else -1
+	local isle = math.clamp(math.floor(math.min(depth, span) * 0.16), 16, 26)
+	local uI = depth - isle / 2 - 7
+	local pI = f.lane(center + side * span * 0.1, isle / 2 + 6)
+	local uA, uB, uC = depth * 0.3, depth * 0.55, uI - isle / 2
+	local waterTop = 0.6
+
+	-- The water: shin deep and black everywhere but the island
+	local function water(u0: number, u1: number, p0: number, p1: number)
+		if u1 - u0 > 0.5 and p1 - p0 > 0.5 then
+			f.box((u0 + u1) / 2, (p0 + p1) / 2, u1 - u0, p1 - p0, {
+				y = (waterTop + 0.1) / 2,
+				sy = waterTop - 0.1,
+				style = "water_dark",
+				collide = false,
+			})
+		end
+	end
+	water(1, uC, f.pMin + 1, f.pMax - 1)
+	water(uI + isle / 2, depth - 1, f.pMin + 1, f.pMax - 1)
+	water(uC, uI + isle / 2, f.pMin + 1, pI - isle / 2)
+	water(uC, uI + isle / 2, pI + isle / 2, f.pMax - 1)
+
+	-- The ceiling: squares of light with dark seams. Over the stepping stones they blink as you
+	-- come near; one square is missing where the ladder goes up.
+	local rows = math.clamp(math.round(depth / 20), 6, 9)
+	local cols = math.clamp(math.round(span / 20), 6, 9)
+	local cu, cp = depth / rows, span / cols
+	local ladderRow = math.clamp(math.floor(uA / cu) + 1, 1, rows)
+	local ladderCol = math.clamp(math.floor((pI - side * span * 0.32 - f.pMin) / cp) + 1, 1, cols)
+	local n = 0
+	for row = 1, rows do
+		for col = 1, cols do
+			local u, p = (row - 0.5) * cu, f.pMin + (col - 0.5) * cp
+			local blink = u > uA and u < uB and math.abs(p - pI) < cp
+			if not (row == ladderRow and col == ladderCol) then
+				n += 1
+				f.box(u, p, cu - 1.6, cp - 1.6, {
+					y = ctx.h - 0.12,
+					sy = 0.2,
+					style = "panel",
+					collide = false,
+					lamp = if blink or n % 8 == 0 then "panel" else nil,
+					flicker = if blink then true else nil,
+				})
+			end
+		end
+	end
+	local uL, pL = (ladderRow - 0.5) * cu, f.pMin + (ladderCol - 0.5) * cp
+	for _, rail in { -0.9, 0.9 } do
+		f.box(uL, pL + rail, 0.3, 0.25, { y = ctx.h / 2, sy = ctx.h, style = "ladder", collide = false })
+	end
+	for y = 1.5, ctx.h - 1, 3 do
+		f.box(uL, pL, 0.25, 1.8, { y = y, sy = 0.15, style = "ladder", collide = false })
+	end
+
+	-- The way out: walkway, a jog, stepping stones, walkway again, lit all along
+	local function path(u: number, p: number, su: number, sp: number)
+		f.box(u, p, su, sp, { y = 0.5, sy = 1, style = "tile_white" })
+	end
+	path((1 + uA) / 2, f.pDoor, uA - 1, 2.6)
+	if math.abs(pI - f.pDoor) > 2.6 then
+		path(uA, (f.pDoor + pI) / 2, 2.6, math.abs(pI - f.pDoor) + 2.6)
+	end
+	for u = uA + 4, uB - 2, 5 do
+		path(u, pI + rng:range(-0.6, 0.6), 3, 3)
+	end
+	path((uB + uC) / 2, pI, uC - uB, 2.6)
+	for _, stop in { { depth * 0.15, f.pDoor }, { (uA + uB) / 2, pI }, { (uB + uC) / 2, pI } } do
+		local x, z = f.at(stop[1], stop[2])
+		lamp(ctx, x, 10, z, "panel")
+	end
+
+	-- The island: a dry floor with a curb, open where the walkway lands, under a column of light
+	f.box(uI, pI, isle, isle, { y = 0.175, sy = 0.35, style = "carpet_blue" })
+	f.box(uI + isle / 2, pI, 0.6, isle + 0.6, { y = 0.4, sy = 0.8, style = "tile_white" })
+	for _, edge in { -1, 1 } do
+		f.box(uI, pI + edge * isle / 2, isle, 0.6, { y = 0.4, sy = 0.8, style = "tile_white" })
+		f.box(uC, pI + edge * (isle / 4 + 1), 0.6, isle / 2 - 2, { y = 0.4, sy = 0.8, style = "tile_white" })
+	end
+	f.box(
+		uI,
+		pI,
+		isle * 0.7,
+		isle * 0.7,
+		{ y = ctx.h / 2, sy = ctx.h - 1, style = "haze_ray", collide = false }
+	)
+	for _, edge in { -1, 1 } do
+		local x, z = f.at(uI, pI + edge * isle / 4)
+		lamp(ctx, x, 12, z, "panel")
+	end
+	local function furnish(name: string, u: number, p: number, du: number, dp: number)
+		local x, z = f.at(u, p)
+		local nx, nz = f.facing(du, dp)
+		item(ctx, name, x, z, nx, nz)
+	end
+	-- The prize chest sits deepest, facing the way in, so loot and the robots' stash land on the island
+	local back, rim = uI + isle / 2 - 3, isle / 2 - 3
+	furnish("toy_chest", back, pI, -1, 0)
+	furnish("armchair", uI, pI - rim, 0, 1)
+	furnish("crt_tv", uI, pI + rim, 0, -1)
+	furnish("floor_lamp", back, pI - rim, -1, 0)
+	for p = pI - 3, pI + 3, 2 do
+		local x, z = f.at(uI - 2, p)
+		Pieces.loose(L, rng:pick(ctx.config.InstallationFill.HumanStuff), x, z, 0)
+	end
+
+	-- Cover along the way: crates, pillars, a shelf on its side, a cubicle, a door frame in the air
+	for _, stack in
+		{ { 0.18, f.pDoor - side * 9, 3 }, { 0.4, pI - side * 7, 2 }, { 0.64, pI + side * 10, 4 } }
+	do
+		local x, z = f.at(depth * stack[1], f.lane(stack[2], 5))
+		Pieces.junkStack(L, rng, x, z, stack[3], stack[3] > 3)
+	end
+	for _, spot in
+		{
+			{ 0.25, f.pDoor + side * 14 },
+			{ 0.25, f.pDoor - side * 16 },
+			{ 0.72, pI - side * 15 },
+			{ 0.72, pI + side * 17 },
+		}
+	do
+		f.box(
+			depth * spot[1],
+			f.lane(spot[2], 4),
+			3.5,
+			3.5,
+			{ y = ctx.h / 2, sy = ctx.h, style = "tile_white", solid = true }
+		)
+	end
+	local uS, pS = depth * 0.47, f.lane(pI + side * 9, 6)
+	for _, y in { 0.2, 2.3 } do
+		f.box(uS + 1.1, pS, 0.4, 9, { y = y, sy = 0.3, style = "rack_upright" })
+	end
+	for _, board in { -4.2, -1.4, 1.4, 4.2 } do
+		f.box(uS, pS + board, 2.4, 0.3, { y = 1.2, sy = 2.4, style = "wood_shelf", solid = true })
+	end
+	local uK, pK = depth * 0.45, f.lane(pI - side * 18, 8)
+	f.box(uK + 4, pK, 0.4, 8, { y = 2.5, sy = 5, style = "office_wall", solid = true })
+	for _, edge in { -4, 4 } do
+		f.box(uK, pK + edge, 8, 0.4, { y = 2.5, sy = 5, style = "office_wall", solid = true })
+	end
+	furnish("desk", uK + 2.2, pK, -1, 0)
+	furnish("office_chair", uK - 0.2, pK, 1, 0)
+	lightGridFrame(f, depth * 0.52, f.lane(pI + side * 5, 4), 1.6)
+
+	-- Wrong things: a chair facing the wall, a desk phone out in the water blinking like it rings,
+	-- a doorway full of light with nothing behind it, a reflection of someone who isn't there
+	local wallP = if side > 0 then f.pMax - 3 else f.pMin + 3
+	local uO = depth * 0.6
+	f.box(uO, wallP, 1.6, 1.6, { y = 0.15, sy = 0.2, style = "chair_grey" })
+	f.box(uO, wallP, 0.3, 0.3, { y = 0.9, sy = 1.3, style = "chair_grey" })
+	f.box(uO, wallP, 1.7, 1.7, { y = 1.7, sy = 0.3, style = "chair_grey" })
+	f.box(uO, wallP - side * 0.75, 1.7, 0.3, { y = 2.9, sy = 2.1, style = "chair_grey" })
+	furnish("vending_machine", depth * 0.35, wallP, 0, -side)
+	local uP, pP = depth * 0.14, f.lane(f.pDoor + side * 9, 4)
+	f.box(uP, pP, 2, 3.6, { y = 2.6, sy = 0.2, style = "wood" })
+	for _, edge in { -1.6, 1.6 } do
+		f.box(uP, pP + edge, 1.8, 0.2, { y = 1.25, sy = 2.5, style = "wood", collide = false })
+	end
+	f.box(uP, pP + 0.6, 1, 1.2, { y = 2.95, sy = 0.5, style = "phone_beige", collide = false })
+	f.box(uP, pP + 0.6, 0.3, 0.3, {
+		y = 3.3,
+		sy = 0.2,
+		style = "neon_yellow",
+		collide = false,
+		lamp = "tv",
+		flicker = true,
+	})
+	local uD, pD = depth * 0.58, f.lane(pI - side * span * 0.38, 5)
+	lightGridFrame(f, uD, pD, 0)
+	f.box(uD, pD, 0.1, 3.6, { y = 3.6, sy = 7.2, style = "exit_glow", collide = false })
+	f.box(depth * 0.2, f.pDoor + 2.4, 0.6, 1.8, {
+		y = waterTop + 0.02,
+		sy = 0.02,
+		style = "silhouette",
 		collide = false,
 	})
-	local door = ctx.room.doors[1]
-	local alongX = door.side == "west" or door.side == "east"
-	local length = (if alongX then ctx.w else ctx.d) * 0.7
-	if alongX then
-		local fromWest = door.side == "west"
-		local x = if fromWest then ctx.x0 + length / 2 else ctx.x1 - length / 2
-		piece(L, {
-			x = x,
-			y = 1.8,
-			z = ctx.z0 + door.at,
-			sx = length,
-			sy = 3.6,
-			sz = 3,
-			style = "tile_white",
-			solid = false,
-		})
-	else
-		local fromNorth = door.side == "north"
-		local z = if fromNorth then ctx.z0 + length / 2 else ctx.z1 - length / 2
-		piece(L, {
-			x = ctx.x0 + door.at,
-			y = 1.8,
-			z = z,
-			sx = 3,
-			sy = 3.6,
-			sz = length,
-			style = "tile_white",
-			solid = false,
-		})
-	end
-	Pieces.panelGrid(L, inner(ctx, 1), ctx.h, 7, 3, "panel", 9)
-	for _ = 1, 5 do
-		piece(L, {
-			x = rng:range(ctx.x0 + 4, ctx.x1 - 4),
-			y = 4,
-			z = rng:range(ctx.z0 + 4, ctx.z1 - 4),
-			sx = 0.4,
-			sy = 0.4,
-			sz = 0.4,
-			style = rng:pick({ "neon_pink", "neon_yellow", "neon_blue" }),
-			collide = false,
-		})
-	end
-	item(ctx, "office_chair", ctx.x0 + 4, ctx.z0 + 4, 1, 1)
 end
 
 -- c11: yellow. Yellow walls in a maze that doesn't make sense, olive patterned carpet, buzzing
