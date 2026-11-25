@@ -3,6 +3,9 @@
 -- (0, 0) is the floor centre, the entrance is the middle of the south wall.
 -- The floor is a grid of square zones split by cross aisles; each zone gets one kind of content
 -- (see WarehouseGenZones). Giant pillars stand on every other cross aisle corner.
+local NightLights = if script
+	then require(script.Parent.WarehouseGenNightLights)
+	else require("./WarehouseGenNightLights")
 local Rng = if script then require(script.Parent.WarehouseGenRng) else require("./WarehouseGenRng")
 local Rooms = if script then require(script.Parent.WarehouseGenRooms) else require("./WarehouseGenRooms")
 local Zones = if script then require(script.Parent.WarehouseGenZones) else require("./WarehouseGenZones")
@@ -61,6 +64,7 @@ export type Piece = {
 	kitOnly: boolean?,
 	skipIfKit: string?,
 	kitFloor: string?,
+	flicker: boolean?,
 }
 export type Pocket = {
 	kind: string,
@@ -427,6 +431,7 @@ function WarehouseGen.generate(config: any, seed: number): Layout
 		)
 	end
 	Clutter.fill(layout, config, rng, WarehouseGen.zoneAt, WarehouseGen.isClear)
+	NightLights.fill(layout, config, WarehouseGen.isClear)
 	addDecals(layout, config, rng)
 	addSpawns(layout, config, rng)
 	layout.addSolid = nil

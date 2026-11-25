@@ -64,7 +64,7 @@ local memory: { [string]: any } = {}
 local memoryBoards: { [string]: { [string]: number } } = {}
 local pendingSaves = 0
 local closing = false
-local spawnSpots: { CFrame }? = nil
+local homeSpots: { CFrame }? = nil
 
 local feedbackRemote: RemoteEvent
 local lockerRemote: RemoteEvent
@@ -352,6 +352,61 @@ local function collectSpawns(container: Instance?, into: { CFrame })
 	end
 end
 
+local WALL_DIRECTIONS = { Vector3.xAxis, -Vector3.xAxis, Vector3.zAxis, -Vector3.zAxis }
+
+-- Loose props and people don't count as a wall to put the locker against
+local function isWall(part: BasePart): boolean
+	if not part.Anchored then
+		return false
+	end
+	local node: Instance? = part
+	while node and node ~= workspace do
+		if CollectionService:HasTag(node, GrabTag) or node:FindFirstChildOfClass("Humanoid") then
+			return false
+		end
+		node = node.Parent
+	end
+	return true
+end
+
+-- The nearest wall in one of the four square directions from a spawn
+local function nearestWall(origin: Vector3): (Vector3?, Vector3?)
+	local bestPoint, bestDirection, bestDistance = nil, nil, math.huge
+	for _, direction in WALL_DIRECTIONS do
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		local skipped = {}
+		for _ = 1, 8 do
+			params.FilterDescendantsInstances = skipped
+			local hit = workspace:Raycast(origin, direction * LockerSettings.WallSearch, params)
+			if not hit then
+				break
+			end
+			if isWall(hit.Instance) then
+				if hit.Distance < bestDistance then
+					bestPoint, bestDirection, bestDistance = hit.Position, direction, hit.Distance
+				end
+				break
+			end
+			table.insert(skipped, hit.Instance)
+		end
+	end
+	return bestPoint, bestDirection
+end
+
+-- Where a spawn's locker and board go: on the floor at the foot of the nearest wall, square to it,
+-- looking out (LookVector) towards the spawn. With no wall close by, a spot out in front of the spawn.
+local function homeFrame(spawnFloor: CFrame): CFrame
+	local floor = spawnFloor.Position
+	local point, direction = nearestWall(floor + Vector3.new(0, LockerSettings.WallProbeHeight, 0))
+	if not point or not direction then
+		direction = Vector3.xAxis
+		point = floor + direction * LockerSettings.OpenFloorGap
+	end
+	local foot = Vector3.new(point.X, floor.Y, point.Z)
+	return CFrame.lookAt(foot, foot - direction)
+end
+
 local function sprayLabel(part: BasePart, text: string)
 	local gui = Instance.new("SurfaceGui")
 	gui.Face = Enum.NormalId.Front
@@ -370,7 +425,7 @@ local function sprayLabel(part: BasePart, text: string)
 	label.Parent = gui
 end
 
-local function placeLocker(spawnFloor: CFrame)
+local function placeLocker(home: CFrame)
 	local model = ModelLibrary.get(LockerSettings.Model)
 	if not model then
 		return
@@ -378,9 +433,13 @@ local function placeLocker(spawnFloor: CFrame)
 	-- Not a warehouse prop: no grabbing, no door-swing interaction, just the stash prompt
 	model:SetAttribute("ModelName", nil)
 	model:SetAttribute("SaveLocker", true)
-	local spot = spawnFloor * CFrame.new(LockerSettings.SpawnOffset)
-	local away = spot.Position + (spot.Position - spawnFloor.Position)
-	model:PivotTo(CFrame.lookAt(spot.Position, Vector3.new(away.X, spot.Position.Y, away.Z)))
+	-- Front (+z in the manifest) faces out from the wall, back flush to it, base on the floor
+	local spot = home * CFrame.new(LockerSettings.WallOffset)
+	local rotation = CFrame.lookAt(Vector3.zero, -home.LookVector)
+	model:PivotTo(rotation)
+	local box, size = model:GetBoundingBox()
+	local target = spot.Position + home.LookVector * (size.Z / 2 + 0.1)
+	model:PivotTo(rotation + (target - (box.Position - Vector3.new(0, size.Y / 2, 0))))
 
 	local body = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
 	if not body then
@@ -873,11 +932,12 @@ function Saves.openLocker(player: Player, locker: Model)
 end
 
 -- Floor CFrames of every live spawn, once the warehouse is built. Yields until then.
-function Saves.spawnSpots(): { CFrame }
-	while not spawnSpots do
+-- One per spawn: floor spot at the foot of the wall its locker stands against, LookVector out
+function Saves.homeSpots(): { CFrame }
+	while not homeSpots do
 		task.wait(0.5)
 	end
-	return spawnSpots :: { CFrame }
+	return homeSpots :: { CFrame }
 end
 
 function Saves.writeBoard(stat: string, userId: number, value: number)
@@ -974,10 +1034,12 @@ function Saves.Start()
 	local spots = {}
 	collectSpawns(root:FindFirstChild("Spawns"), spots)
 	collectSpawns(workspace:FindFirstChild("TestRoom"), spots)
-	for _, spot in spots do
-		placeLocker(spot)
+	local homes = {}
+	for index, spot in spots do
+		homes[index] = homeFrame(spot)
+		placeLocker(homes[index])
 	end
-	spawnSpots = spots
+	homeSpots = homes
 end
 
 return Saves

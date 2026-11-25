@@ -27,8 +27,12 @@ return {
 		Blocked = { StarterBlaster = true },
 		Range = 10, -- studs from the locker to use it
 		PromptHold = 0.3,
-		-- One locker beside every spawn, this far out and turned to face it
-		SpawnOffset = Vector3.new(6, 0, 0),
+		-- One locker per spawn, backed against the nearest wall within WallSearch studs, facing out.
+		-- WallOffset is along that wall (x), so it stands beside the board rather than in it.
+		WallSearch = 24,
+		WallProbeHeight = 3,
+		WallOffset = Vector3.new(-3.5, 0, 0),
+		OpenFloorGap = 8, -- no wall in reach: stands this far from the spawn, facing it
 	},
 
 	Blueprint = {
@@ -65,8 +69,8 @@ return {
 			{ stat = "PlayerKills", title = "MOST TAKEDOWNS" },
 			{ stat = "RobotKills", title = "MOST ROBOTS DISABLED" },
 		},
-		-- Stands beside each spawn's locker
-		Offset = Vector3.new(6, 0, 4),
+		-- Against the same wall as each spawn's locker; Offset.X is along the wall
+		Offset = Vector3.new(3, 0, 0),
 		PartSize = Vector3.new(9, 6, 0.4),
 	},
 
