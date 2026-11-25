@@ -11,9 +11,19 @@ export type RobotLines = {
 	CalmStates: { string },
 }
 
--- Callouts are numbered 0..count-1; holding the button steps to the next one and wraps round.
-function VoiceLines.nextCallout(index: number, count: number): number
-	return (index + 1) % count
+-- Callouts are numbered 0..count-1; stepping past either end wraps round.
+function VoiceLines.stepCallout(index: number, step: number, count: number): number
+	return (index + step) % count
+end
+
+-- The callout a stick pushed toward (x, y) points at on the wheel: 0 at the top, going clockwise.
+-- y is up. Returns nil for a stick near the centre.
+function VoiceLines.calloutAt(x: number, y: number, count: number, deadZone: number): number?
+	if x * x + y * y < deadZone * deadZone then
+		return nil
+	end
+	local turn = math.atan2(x, y) / (2 * math.pi)
+	return math.floor(turn * count + 0.5) % count
 end
 
 function VoiceLines.validCallout(index: unknown, count: number): boolean

@@ -4,7 +4,6 @@ local GrabMath = {}
 
 export type Axis = "Turn" | "Tip" | "Roll"
 
-local AXIS_ORDER: { Axis } = { "Turn", "Tip", "Roll" }
 local EPSILON = 1e-4
 
 function GrabMath.snapToGrid(value: number, grid: number): number
@@ -19,30 +18,34 @@ function GrabMath.wrapAngle(angle: number): number
 	return wrapped
 end
 
--- One step on the rotation grid. An angle left between grid lines by free rotation
--- moves to the next grid line in that direction instead of a full step past it.
-function GrabMath.stepAngle(angle: number, direction: number, step: number): number
-	local index = angle / step
-	local nearest = math.floor(index + 0.5)
-	local onGrid = math.abs(index - nearest) < EPSILON
-	local target
-	if onGrid then
-		target = (nearest + direction) * step
-	elseif direction > 0 then
-		target = math.ceil(index) * step
-	else
-		target = math.floor(index) * step
+-- Degrees per second for a rotate input held heldFor seconds: nothing until delay (a tap only
+-- steps), then startSpeed ramping up to maxSpeed over rampSeconds.
+function GrabMath.rotateSpeed(
+	heldFor: number,
+	delay: number,
+	startSpeed: number,
+	maxSpeed: number,
+	rampSeconds: number
+): number
+	if heldFor < delay then
+		return 0
 	end
-	return GrabMath.wrapAngle(target)
+	local ramp = if rampSeconds > 0 then math.clamp((heldFor - delay) / rampSeconds, 0, 1) else 1
+	return startSpeed + (maxSpeed - startSpeed) * ramp
 end
 
-function GrabMath.nextAxis(axis: Axis): Axis
-	for i, name in AXIS_ORDER do
-		if name == axis then
-			return AXIS_ORDER[i % #AXIS_ORDER + 1]
-		end
-	end
-	return "Turn"
+-- The extra degrees that round a hold's total turn to the nearest step, so a prop that started on
+-- the grid lands back on it when the input is let go.
+function GrabMath.snapTurn(turned: number, step: number): number
+	return math.floor(turned / step + 0.5) * step - turned
+end
+
+-- The camera's yaw in degrees, snapped to the nearest quarter turn. Tip and roll follow this
+-- instead of the exact camera so props stay square with the walls. lookX / lookZ are the camera's
+-- look vector; Roblox yaw 0 looks down -Z.
+function GrabMath.quarterYaw(lookX: number, lookZ: number): number
+	local yaw = math.deg(math.atan2(-lookX, -lookZ))
+	return GrabMath.wrapAngle(math.floor(yaw / 90 + 0.5) * 90)
 end
 
 function GrabMath.clampHoldDistance(distance: number, min: number, max: number): number

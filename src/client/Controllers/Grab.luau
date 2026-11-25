@@ -1,9 +1,11 @@
 -- Grab and build controls. Grabbing works like shooting: with empty hands (the HANDS hotbar slot)
 -- Fire grabs and, while carrying, drops; F on the keyboard empties your hands and does the same.
--- While carrying, Grab takes over the keys that move the prop: D-pad / arrows / R T turn and tip
--- (L2 or right mouse + left/right rolls), L1 / R1 / the wheel bring it closer or push it away, and
--- phone players get TURN, TIP, NEAR and FAR buttons. A tap steps; holding keeps going smoothly.
--- Asks the server to grab or drop, streams aim and rotation, and draws the ghost and axis arrow.
+-- While carrying, Grab takes over the keys that move the prop: D-pad / arrows left and right spin it
+-- flat, up and down tip it forward and back, and L2 or right mouse + left / right (or Z / X) roll
+-- it sideways; R and T spin and tip one way. L1 / R1 / the wheel bring it closer or push it away.
+-- Phone players get SPIN, TIP, ROLL, NEAR and FAR buttons. A tap steps; holding keeps turning,
+-- faster the longer it's held, and snaps to the step when let go.
+-- Asks the server to grab or drop, streams aim and rotation, and draws the placement ghost.
 -- Someone else's placed piece needs the button held while a pry bar fills; the server times it too.
 local CollectionService = game:GetService("CollectionService")
 local ContextActionService = game:GetService("ContextActionService")
@@ -25,14 +27,9 @@ local player = Players.LocalPlayer
 
 local GHOST_OK = Color3.fromRGB(120, 220, 140)
 local GHOST_BAD = Color3.fromRGB(230, 80, 70)
-local AXIS_COLORS = {
-	Turn = Color3.fromRGB(255, 210, 80),
-	Tip = Color3.fromRGB(90, 200, 255),
-	Roll = Color3.fromRGB(200, 120, 255),
-}
 local HANDS_SLOT = "Hands"
--- Turn and tip keys: which axis and which way. Left / right roll instead while L2 or the right
--- mouse button is held.
+-- Rotate keys: which axis and which way (1 = front right, top away, top right). Left / right
+-- roll instead while L2 or the right mouse button is held.
 type RotateKey = { axis: GrabMath.Axis, direction: number, rolls: boolean? }
 local ROTATE_KEYS: { [Enum.KeyCode]: RotateKey } = {
 	[Enum.KeyCode.DPadLeft] = { axis = "Turn", direction = -1, rolls = true },
@@ -43,8 +40,19 @@ local ROTATE_KEYS: { [Enum.KeyCode]: RotateKey } = {
 	[Enum.KeyCode.Right] = { axis = "Turn", direction = 1, rolls = true },
 	[Enum.KeyCode.Up] = { axis = "Tip", direction = 1 },
 	[Enum.KeyCode.Down] = { axis = "Tip", direction = -1 },
+	[Enum.KeyCode.Z] = { axis = "Roll", direction = -1 },
+	[Enum.KeyCode.X] = { axis = "Roll", direction = 1 },
 	[Enum.KeyCode.R] = { axis = "Turn", direction = 1 },
 	[Enum.KeyCode.T] = { axis = "Tip", direction = 1 },
+}
+-- Phone rotate buttons, by Input action
+local TOUCH_ROTATE: { [string]: RotateKey } = {
+	CarrySpinLeft = { axis = "Turn", direction = -1 },
+	CarrySpinRight = { axis = "Turn", direction = 1 },
+	CarryTipForward = { axis = "Tip", direction = 1 },
+	CarryTipBack = { axis = "Tip", direction = -1 },
+	CarryRollLeft = { axis = "Roll", direction = -1 },
+	CarryRollRight = { axis = "Roll", direction = 1 },
 }
 -- Casts that hit something see-through or non-solid and untagged try again past it, this many times
 local LOOK_THROUGH = 3
@@ -63,19 +71,20 @@ local ghostRemote: UnreliableRemoteEvent
 local pryRemote: RemoteEvent
 
 local holding: PVInstance? = nil
-local angles = { Tip = 0, Turn = 0, Roll = 0 }
-local axis: GrabMath.Axis = "Turn"
+-- The carried prop's rotation, turned about world axes so every axis keeps working whatever the
+-- prop's already been turned to (separate tip / turn / roll angles lock up once tipped 90 degrees).
+local rotation = CFrame.identity
 local holdDistance = Settings.DefaultHoldDistance
 local rollModifier = false
--- Turn / tip / distance keys held right now, by key name: what they move and since when
-type Held = { axis: GrabMath.Axis?, direction: number, since: number }
+-- Rotate / distance keys held right now, by key name: what they move, since when, and how many
+-- degrees this hold has turned (for the snap on release)
+type Held = { axis: GrabMath.Axis?, direction: number, since: number, turned: number }
 local held: { [string]: Held } = {}
 local lastAim = 0
 local prying: { prop: PVInstance, startedAt: number }? = nil
 local lastTarget: "grab" | "pry" | nil = nil
 
 local ghost: BoxHandleAdornment
-local arrow: ConeHandleAdornment
 local pryBar: Frame
 local pryFill: Frame
 
@@ -194,11 +203,27 @@ local function onGrabKey(began: boolean, device: Input.Device)
 	onToggle(began, device)
 end
 
+-- The world axis each rotate input turns about. Tip and roll follow the camera, squared to the
+-- nearest wall, so "forward" is always away from you.
+local function axisVector(turnAxis: GrabMath.Axis): Vector3
+	if turnAxis == "Turn" then
+		return -Vector3.yAxis
+	end
+	local camera = workspace.CurrentCamera
+	local look = if camera then camera.CFrame.LookVector else -Vector3.zAxis
+	local facing = CFrame.fromEulerAnglesYXZ(0, math.rad(GrabMath.quarterYaw(look.X, look.Z)), 0)
+	return if turnAxis == "Tip" then -facing.RightVector else facing.LookVector
+end
+
+local function turnBy(turnAxis: GrabMath.Axis, degrees: number)
+	rotation = (CFrame.fromAxisAngle(axisVector(turnAxis), math.rad(degrees)) * rotation):Orthonormalize()
+end
+
 local function startHold(key: string, turnAxis: GrabMath.Axis?, direction: number)
-	held[key] = { axis = turnAxis, direction = direction, since = os.clock() }
+	local step = if turnAxis then direction * Settings.RotateStep else 0
+	held[key] = { axis = turnAxis, direction = direction, since = os.clock(), turned = step }
 	if turnAxis then
-		angles[turnAxis] = GrabMath.stepAngle(angles[turnAxis], direction, Settings.RotateStep)
-		axis = turnAxis
+		turnBy(turnAxis, step)
 	else
 		holdDistance = GrabMath.clampHoldDistance(
 			holdDistance + direction * Settings.WheelStep,
@@ -208,12 +233,20 @@ local function startHold(key: string, turnAxis: GrabMath.Axis?, direction: numbe
 	end
 end
 
+local function endHold(key: string)
+	local hold = held[key]
+	held[key] = nil
+	if hold and hold.axis then
+		turnBy(hold.axis, GrabMath.snapTurn(hold.turned, Settings.RotateStep))
+	end
+end
+
 local function onRotate(_, inputState: Enum.UserInputState, input: InputObject)
 	local key = ROTATE_KEYS[input.KeyCode]
 	if inputState == Enum.UserInputState.Begin and key then
 		startHold(input.KeyCode.Name, if key.rolls and rollModifier then "Roll" else key.axis, key.direction)
 	elseif inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel then
-		held[input.KeyCode.Name] = nil
+		endHold(input.KeyCode.Name)
 	end
 	return Enum.ContextActionResult.Sink
 end
@@ -246,19 +279,9 @@ local function touchHold(key: string, turnAxis: GrabMath.Axis?, direction: numbe
 		if began then
 			startHold(key, turnAxis, direction)
 		else
-			held[key] = nil
+			endHold(key)
 		end
 	end
-end
-
-local function axisDirection(): Vector3
-	local turn, tip = math.rad(angles.Turn), math.rad(angles.Tip)
-	if axis == "Tip" then
-		return CFrame.fromEulerAnglesYXZ(0, turn, 0).RightVector
-	elseif axis == "Roll" then
-		return CFrame.fromEulerAnglesYXZ(tip, turn, 0).LookVector
-	end
-	return Vector3.yAxis
 end
 
 -- High priority so the arrow keys move the prop instead of the character and camera. The phone's
@@ -301,21 +324,14 @@ local function onState(prop: PVInstance?)
 	holding = prop
 	stopPry(false)
 	if prop then
-		local boxCFrame = boxOf(prop)
-		local tip, turn, roll = boxCFrame:ToEulerAnglesYXZ()
-		angles.Tip = GrabMath.wrapAngle(math.deg(tip))
-		angles.Turn = GrabMath.wrapAngle(math.deg(turn))
-		angles.Roll = GrabMath.wrapAngle(math.deg(roll))
-		axis = "Turn"
+		rotation = boxOf(prop).Rotation
 		holdDistance = Settings.DefaultHoldDistance
 		bindCarryControls()
-		arrow.Visible = true
 		Hints.set("grabTarget", nil)
 		Hints.set("carry", Config.Hints.CarryHint, 2)
 	else
 		unbindCarryControls()
 		ghost.Visible = false
-		arrow.Visible = false
 		Hints.set("carry", nil)
 	end
 end
@@ -399,12 +415,21 @@ local function onRender(dt: number)
 
 	local now = os.clock()
 	for _, hold in held do
-		if now - hold.since < Settings.RepeatDelay then
+		local heldFor = now - hold.since
+		if heldFor < Settings.RepeatDelay then
 			continue
 		end
 		if hold.axis then
-			angles[hold.axis] =
-				GrabMath.wrapAngle(angles[hold.axis] + hold.direction * Settings.FreeRotateSpeed * dt)
+			local speed = GrabMath.rotateSpeed(
+				heldFor,
+				Settings.RepeatDelay,
+				Settings.RotateStartSpeed,
+				Settings.RotateMaxSpeed,
+				Settings.RotateRampSeconds
+			)
+			local degrees = hold.direction * speed * dt
+			turnBy(hold.axis, degrees)
+			hold.turned += degrees
 		else
 			holdDistance = GrabMath.clampHoldDistance(
 				holdDistance + hold.direction * Settings.HoldDistanceSpeed * dt,
@@ -417,14 +442,9 @@ local function onRender(dt: number)
 	if now - lastAim >= 1 / Settings.AimRate then
 		lastAim = now
 		local aim = head.Position + camera.CFrame.LookVector * holdDistance
-		aimRemote:FireServer(aim, angles.Tip, angles.Turn, angles.Roll)
+		local tip, turn, roll = rotation:ToEulerAnglesYXZ()
+		aimRemote:FireServer(aim, math.deg(tip), math.deg(turn), math.deg(roll))
 	end
-
-	local boxCFrame, size = boxOf(prop)
-	local direction = axisDirection()
-	local base = boxCFrame.Position + direction * (size.Magnitude / 2 + 0.5)
-	arrow.CFrame = CFrame.lookAt(base, base + direction)
-	arrow.Color3 = AXIS_COLORS[axis]
 end
 
 local function makeAdornments()
@@ -438,16 +458,6 @@ local function makeAdornments()
 	ghost.AlwaysOnTop = false
 	ghost.Visible = false
 	ghost.Parent = gui
-
-	arrow = Instance.new("ConeHandleAdornment")
-	arrow.Name = "GrabAxisArrow"
-	arrow.Adornee = workspace.Terrain
-	arrow.Radius = 0.5
-	arrow.Height = 1.5
-	arrow.AlwaysOnTop = true
-	arrow.ZIndex = 1
-	arrow.Visible = false
-	arrow.Parent = gui
 
 	local screen = Instance.new("ScreenGui")
 	screen.Name = "GrabPry"
@@ -491,8 +501,9 @@ function Grab:Start()
 	RunService.RenderStepped:Connect(onRender)
 	Input.bind("Grab", onGrabKey)
 	Hotbar.onUse("Grab", onToggle)
-	Input.bind("CarryTurn", touchHold("CarryTurn", "Turn", 1))
-	Input.bind("CarryTip", touchHold("CarryTip", "Tip", 1))
+	for action, rotate in TOUCH_ROTATE do
+		Input.bind(action, touchHold(action, rotate.axis, rotate.direction))
+	end
 	Input.bind("CarryCloser", touchHold("CarryCloser", nil, -1))
 	Input.bind("CarryFarther", touchHold("CarryFarther", nil, 1))
 end

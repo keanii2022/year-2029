@@ -10,9 +10,12 @@ return {
 	WheelStep = 1,
 
 	GridSize = 1,
-	RotateStep = 15,
-	FreeRotateSpeed = 90, -- degrees per second once a turn / tip key is held past RepeatDelay
-	RepeatDelay = 0.3, -- a tap steps RotateStep or WheelStep; holding keeps going smoothly
+	RotateStep = 15, -- a tap turns this much; a hold also snaps to it when let go
+	RepeatDelay = 0.2, -- a tap steps RotateStep or WheelStep; holding past this keeps going
+	-- Holding a spin / tip / roll input: degrees per second, from start to max over RotateRampSeconds
+	RotateStartSpeed = 180,
+	RotateMaxSpeed = 540,
+	RotateRampSeconds = 0.8,
 	HoldDistanceSpeed = 6, -- studs per second while closer / farther is held
 	MaxPlaceAboveFeet = 12, -- tallest a stack can get: prop bottom above the placer's feet
 	MaxDropFall = 60,

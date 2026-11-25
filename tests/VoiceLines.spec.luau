@@ -15,10 +15,17 @@ local LINES = {
 }
 
 return {
-	["callouts start at 0, step up and wrap back round"] = function()
-		expect(VoiceLines.nextCallout(0, 7)).toBe(1)
-		expect(VoiceLines.nextCallout(5, 7)).toBe(6)
-		expect(VoiceLines.nextCallout(6, 7)).toBe(0)
+	["callouts step both ways and wrap round"] = function()
+		expect(VoiceLines.stepCallout(0, 1, 7)).toBe(1)
+		expect(VoiceLines.stepCallout(6, 1, 7)).toBe(0)
+		expect(VoiceLines.stepCallout(0, -1, 7)).toBe(6)
+	end,
+	["the stick picks the callout it points at on the wheel"] = function()
+		expect(VoiceLines.calloutAt(0, 1, 7, 0.5)).toBe(0)
+		expect(VoiceLines.calloutAt(1, 0.2, 7, 0.5)).toBe(2)
+		expect(VoiceLines.calloutAt(-0.1, -1, 7, 0.5)).toBe(4)
+		expect(VoiceLines.calloutAt(-1, 0.4, 7, 0.5)).toBe(6)
+		expect(VoiceLines.calloutAt(0.2, 0.2, 7, 0.5)).toBe(nil)
 	end,
 	["only whole callout numbers in range are accepted"] = function()
 		expect(VoiceLines.validCallout(0, 7)).toBe(true)

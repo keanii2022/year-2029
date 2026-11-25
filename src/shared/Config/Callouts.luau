@@ -1,16 +1,22 @@
 -- Callouts (Q / Circle / CALL): Keani's recorded call, heard by players nearby from where you stand.
--- Robots hear it as a normal noise. Hold the button to switch to the next call.
+-- Robots hear it as a normal noise. Hold the button to open the call wheel and pick one by name.
 return {
 	Sounds = { "callout_0", "callout_1", "callout_2", "callout_3", "callout_4", "callout_5", "callout_6" },
+	-- What the wheel and the label call each sound, same order as Sounds
+	Names = { "Waddup twin", "Yyyyo", "Yyyyyoooooo", "Whisper hey", "HEY", "Hey.....", "Whistle" },
 	HearRange = 70, -- studs; only players this close get it
 	Cooldown = 0.2, -- seconds between calls per player (server enforced); a new call cuts the last off
-	HoldTime = 0.4, -- holding the button this long switches calls instead of calling
+	HoldTime = 0.4, -- holding the button this long opens the call wheel instead of calling
 
 	Volume = 0.9,
 	OwnVolume = 0.5, -- how loud your own call is to you
 	RollOff = { 8, 70 },
 
-	-- Small label naming the selected call, shown for a moment after switching
+	-- The call wheel: names in a ring round the screen centre
+	WheelRadius = 130,
+	StickDeadZone = 0.5, -- how far the stick has to lean before it points at a call
+
+	-- Small label naming the selected call, shown for a moment after picking
 	LabelTime = 2.5,
 	LabelFadeTime = 0.6,
 
