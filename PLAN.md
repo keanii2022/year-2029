@@ -391,7 +391,7 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Status:** current
 - **Dependencies:** 28
 - **Scope:** new Admin system, AdminPanel controller, AdminAccess logic, Config/Admin, new SimPlayers system + SimBrain logic, small hooks in DayNight, DevTeleport, Robots, Combat
-- Keani and their son get an admin panel (F2 / hold Share / ADMIN button) in the live game: any gun, ammo, food and rare items, god mode, speed, fly, jump to players and installations, skip to day / siren / night, freeze robots, and a fake lobby of simulated players with a calm / normal / chaos mood to see how a full server feels. Only their two accounts (and Studio) can open it. Done when both can use it on PS5, phone and keyboard and nobody else sees it.
+- Keani and their son get an admin panel (F2 / hold L1+R1 / ADMIN button) in the live game: any gun, ammo, food and rare items, god mode, speed, fly, jump to players and installations, skip to day / siren / night, freeze robots, and a fake lobby of simulated players with a calm / normal / chaos mood to see how a full server feels. Only their two accounts (and Studio) can open it. Done when both can use it on PS5, phone and keyboard and nobody else sees it.
 
 ## After launch: talk about
 
