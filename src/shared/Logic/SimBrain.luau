@@ -13,12 +13,14 @@ export type Action =
 	| "avoid"
 	| "fight"
 	| "freeze"
+	| "chase" -- heading for a PA event or bait drop it heard about
 
 export type MoodSettings = {
 	aggro: number, -- chance to start a fight with someone in range when picking a new action
 	fightBack: number, -- chance to shoot back after being hit
 	avoid: number, -- chance to back away from someone close
 	freeze: number, -- chance to panic and stand still when a robot comes for it
+	lure: number, -- chance to drop what it's doing for a PA event or bait drop close by
 	day: { [string]: number }, -- weights for the lights-on actions
 }
 
@@ -151,7 +153,28 @@ function SimBrain.decide(
 	return choose(brain, SimBrain.pickWeighted(mood.day, random()), nil, settings, now, random)
 end
 
--- A made-up gamer tag from word lists, e.g. "NeonPickle42", "sleepy_toaster" or "xXWaffleXx".
+-- Whether a bot goes for an event pull (0..1, by event) distance studs away. Nearer is likelier,
+-- nothing past range. A bot fleeing, frozen or fighting has better things to do.
+function SimBrain.answersLure(
+	brain: Brain,
+	mood: MoodSettings,
+	pull: number,
+	distance: number,
+	range: number,
+	roll: number
+): boolean
+	if distance > range or brain.action == "flee" or brain.action == "freeze" or brain.action == "fight" then
+		return false
+	end
+	local nearness = 1 - 0.7 * distance / range
+	return roll < mood.lure * pull * nearness
+end
+
+-- Sends the bot off toward spot (any value the caller understands) for its chase time
+function SimBrain.lure(brain: Brain, spot: any, settings: Settings, now: number, random: () -> number): Action
+	return choose(brain, "chase", spot, settings, now, random)
+end
+
 -- Drops a fresh bot straight into an action, as if it had been at it a while (a filled lobby)
 function SimBrain.start(
 	brain: Brain,
@@ -165,6 +188,7 @@ function SimBrain.start(
 	return choose(brain, action, nil, settings, now, random)
 end
 
+-- A made-up gamer tag from word lists, e.g. "NeonPickle42", "sleepy_toaster" or "xXWaffleXx".
 function SimBrain.gamerName(
 	words: { Adjectives: { string }, Nouns: { string } },
 	random: () -> number

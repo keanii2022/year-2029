@@ -40,6 +40,7 @@ return {
 	HideSearchRange = 160,
 	SpotsRefresh = 60, -- seconds between rescans for hiding spots
 	FlashlightChance = 0.6, -- share of bots that turn a flashlight on at lights out
+	LureArrive = 20, -- a bot heading for an event slows to a mill-about this close to the spot
 
 	-- Shooting: degrees of aim error, plus more per stud of distance
 	Aim = {
@@ -64,16 +65,19 @@ return {
 		avoid = { 2, 4 },
 		fight = { 4, 9 },
 		freeze = { 1.5, 3 },
+		chase = { 35, 60 }, -- long enough to get there and hang around for the crate
 	},
 
 	-- aggro: chance to start a fight with someone in range. fightBack: chance to shoot back once hit.
 	-- avoid: chance to back away from someone close. freeze: chance to panic when a robot comes.
+	-- lure: chance to go for a PA event or bait drop close by (scaled by Config.Director.BotPull).
 	Moods = {
 		calm = {
 			aggro = 0.02,
 			fightBack = 0.35,
 			avoid = 0.6,
 			freeze = 0.1,
+			lure = 0.35,
 			day = { wander = 3, loot = 4, sneak = 1, drag = 2.5, group = 3 },
 		},
 		normal = {
@@ -81,6 +85,7 @@ return {
 			fightBack = 0.75,
 			avoid = 0.25,
 			freeze = 0.2,
+			lure = 0.55,
 			day = { wander = 3, loot = 4, sneak = 2, drag = 1.5, group = 1.5 },
 		},
 		chaos = {
@@ -88,16 +93,18 @@ return {
 			fightBack = 1,
 			avoid = 0,
 			freeze = 0.25,
+			lure = 0.75,
 			day = { wander = 3, loot = 2, sneak = 2, drag = 0.5, group = 1 },
 		},
 	},
 	DefaultMood = "normal",
 
-	-- Fill lobby: a public server already running when you drop in. Bots is the Large-warehouse
-	-- range, scaled down by area on smaller ones. Groups are 1 to 3; Openings is what each group is
+	-- Fill lobby: a public server already running when you drop in. Bots is the range on a BotsAt-stud
+	-- warehouse (Standard), scaled by area on other sizes and capped at Max. Groups are 1 to 3; Openings is what each group is
 	-- busy with when it appears (drag is fort building). The rest of a group starts on "group".
 	Lobby = {
-		Bots = { 20, 26 },
+		Bots = { 15, 20 },
+		BotsAt = 2080,
 		Mood = "normal",
 		SoloShare = 0.45,
 		TrioShare = 0.2,

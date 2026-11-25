@@ -41,6 +41,7 @@ export type Chest = {
 	edge: BasePart?,
 	stacks: { InventoryLogic.Stack },
 	opened: boolean,
+	locked: boolean, -- a bait crate counting down: glows but can't be pried yet
 	prying: { [Player]: boolean },
 }
 
@@ -84,7 +85,7 @@ local function refresh(chest: Chest)
 	end
 	local prompt = chest.prompt
 	if not chest.opened then
-		prompt.Enabled = true
+		prompt.Enabled = not chest.locked
 		prompt.ActionText = "Pry open"
 		prompt.ObjectText = "PRIZE CRATE"
 		prompt.HoldDuration = Settings.OpenHold
@@ -127,7 +128,7 @@ local function alive(player: Player): boolean
 end
 
 local function onTriggered(chest: Chest, player: Player)
-	if not alive(player) or not chest.model.Parent then
+	if not alive(player) or not chest.model.Parent or chest.locked then
 		return
 	end
 	if not chest.opened then
@@ -141,7 +142,7 @@ end
 
 -- Prying makes noise the whole time the button is held
 local function onHoldBegan(chest: Chest, player: Player)
-	if chest.opened or chest.prying[player] then
+	if chest.opened or chest.locked or chest.prying[player] then
 		return
 	end
 	chest.prying[player] = true
@@ -237,6 +238,7 @@ function PrizeChests.spawn(spec: Spec): Chest?
 		edge = edge,
 		stacks = {},
 		opened = false,
+		locked = false,
 		prying = {},
 	}
 	prompt.Triggered:Connect(function(player)
@@ -276,6 +278,11 @@ function PrizeChests.remove(chest: Chest)
 	if chest.model.Parent then
 		chest.model.Parent:Destroy()
 	end
+end
+
+function PrizeChests.setLocked(chest: Chest, locked: boolean)
+	chest.locked = locked
+	refresh(chest)
 end
 
 function PrizeChests.isEmpty(chest: Chest): boolean
