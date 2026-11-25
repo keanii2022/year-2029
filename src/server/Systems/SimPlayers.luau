@@ -304,6 +304,7 @@ local function setFlashlight(bot: Bot, on: boolean)
 		light.Angle = 50
 		light.Range = 45
 		light.Brightness = 2.5
+		light.Shadows = false
 		light.Face = Enum.NormalId.Front
 		light.Parent = head
 		bot.flashlight = light
@@ -663,12 +664,11 @@ local function shoot(bot: Bot, model: Model, root: BasePart, target: Person, now
 		end
 		victim:TakeDamage(damage)
 	end
-	if next(robotDamage) then
-		local Robots = require(script.Parent.Robots) :: any
-		for robot, hit in robotDamage do
-			Robots.shot(robot, bot.handle, hit.damage, origin, hit.at)
-		end
+	local Robots = require(script.Parent.Robots) :: any
+	for robot, hit in robotDamage do
+		Robots.shot(robot, bot.handle, hit.damage, origin, hit.at)
 	end
+	Robots.heardShot(origin)
 	sendWhizzes(target.model, origin, centreHit)
 	Loudness.emit(origin, "loud", model)
 	Inventory.remove(bot.handle :: any, gun.ammo, 1)

@@ -24,7 +24,7 @@ return {
 		Model = "locker",
 		Slots = 12,
 		-- The spawn kit comes back every life, so storing it would be free loot
-		Blocked = { StarterBlaster = true },
+		Blocked = { StarterBlaster = true, BlasterCells = true },
 		Range = 10, -- studs from the locker to use it
 		PromptHold = 0.3,
 		-- One locker per spawn, backed against the nearest wall within WallSearch studs, facing out.

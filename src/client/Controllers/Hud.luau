@@ -244,6 +244,16 @@ function Hud.Init()
 end
 
 function Hud.Start()
+	-- No reset button: every spawn hands out the kit, so resetting would be free ammo.
+	-- SetCore errors until the core scripts have registered it, so keep trying.
+	task.spawn(function()
+		for _ = 1, 30 do
+			if pcall(StarterGui.SetCore, StarterGui, "ResetButtonCallback", false) then
+				return
+			end
+			task.wait(1)
+		end
+	end)
 	gui.Parent = player:WaitForChild("PlayerGui")
 	Gun.onChanged(refreshAmmo)
 	Gun.onHit(showHitMarker)

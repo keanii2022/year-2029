@@ -1,6 +1,8 @@
 -- Greybox test room built from code: concrete floor, walls, shelving rows, box cover,
 -- a metal floor patch (for footstep tests later) and crates to jump on. Stand-in until
 -- the real warehouse exists.
+local RunService = game:GetService("RunService")
+
 local TestRoom = {}
 
 local ROOM_SIZE = 160
@@ -169,6 +171,9 @@ local function buildSpawns(parent: Instance)
 end
 
 function TestRoom.Init()
+	if not RunService:IsStudio() then
+		return -- Studio only; live servers spawn straight into the warehouse
+	end
 	local room = Instance.new("Folder")
 	room.Name = "TestRoom"
 	buildShell(room)

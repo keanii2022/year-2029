@@ -18,6 +18,7 @@ local DayNight = require(script.Parent.DayNight)
 local PaEvents = require(script.Parent.PaEvents)
 local DevTeleport = require(script.Parent.DevTeleport)
 local Inventory = require(script.Parent.Inventory)
+local MoveCheck = require(script.Parent.MoveCheck)
 local Robots = require(script.Parent.Robots)
 local SizeServers = require(script.Parent.SizeServers)
 
@@ -224,6 +225,7 @@ local function teleportToPlayer(player: Player, userId: unknown): string
 		return "Can't reach them"
 	end
 	-- A few studs behind them, facing the same way
+	MoveCheck.grace(player)
 	character:PivotTo(targetRoot.CFrame * CFrame.new(0, 0, 4))
 	return `Went to {target.DisplayName}`
 end
@@ -235,6 +237,7 @@ local function teleportToSpawn(player: Player): string
 	end
 	for _, descendant in workspace:GetDescendants() do
 		if descendant:IsA("SpawnLocation") and descendant.Enabled then
+			MoveCheck.grace(player)
 			character:PivotTo(descendant.CFrame + Vector3.new(0, 4, 0))
 			return "Back at spawn"
 		end

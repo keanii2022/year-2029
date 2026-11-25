@@ -194,6 +194,10 @@ local function buildPile(position: Vector3, contents: { Stack }): Model
 	CollectionService:AddTag(pile, settings.LootPileTag)
 	piles[pile] = contents
 	pile.Parent = pilesFolder
+	task.delay(settings.LootPileLifetime, function()
+		piles[pile] = nil
+		pile:Destroy()
+	end)
 	return pile
 end
 
@@ -244,7 +248,7 @@ local function onQuickRequest(player: Player, action: any, itemId: any, index: a
 		if QuickSlots.clear(quick, index) then
 			syncQuick(player)
 		end
-	elseif action == "drop" and validItem then
+	elseif action == "drop" and validItem and player:GetAttribute("Cuffed") ~= true then
 		local now = os.clock()
 		if now - (lastDrop[player] or 0) >= settings.DropCooldown then
 			lastDrop[player] = now
@@ -267,6 +271,13 @@ function Inventory.Init()
 		syncQuick(player)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
+		-- leaving mid-fight or while cuffed still leaves the loot behind
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if humanoid and humanoid.Health > 0 and root and root:IsA("BasePart") then
+			Inventory.dropAll(player, root.Position)
+		end
 		bags[player] = nil
 		quicks[player] = nil
 		lastDrop[player] = nil

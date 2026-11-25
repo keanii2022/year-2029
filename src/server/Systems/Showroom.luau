@@ -2,6 +2,7 @@
 -- Off with Config.Models.ShowroomEnabled.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local ManifestLayout = require(ReplicatedStorage.Shared.Logic.ManifestLayout)
@@ -48,7 +49,8 @@ end
 
 function Showroom:Start()
 	local settings = Config.Models
-	if not settings.ShowroomEnabled then
+	-- Studio only: live servers never build the model rows
+	if not settings.ShowroomEnabled or not RunService:IsStudio() then
 		return
 	end
 

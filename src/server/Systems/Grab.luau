@@ -398,7 +398,8 @@ local function canGrabNow(player: Player, prop: PVInstance): (boolean, BasePart?
 		distance = distanceTo(root, prop),
 		reach = Settings.GrabReach,
 	})
-	return ok and humanoid ~= nil, root, humanoid, reason
+	local cuffed = player:GetAttribute("Cuffed") == true
+	return ok and humanoid ~= nil and not cuffed, root, humanoid, reason
 end
 
 -- Says why a grab or drop didn't happen instead of doing nothing

@@ -101,6 +101,20 @@ function Combat.lineOfSightClear(targetDistance: number, firstHitAt: number?, sl
 	return firstHitAt == nil or firstHitAt >= targetDistance - slack
 end
 
+-- Only a real player other than the shooter counts, and the same victim once per window.
+function Combat.countsKill(
+	isPlayer: boolean,
+	isShooter: boolean,
+	lastKillAt: number?,
+	now: number,
+	window: number
+): boolean
+	if not isPlayer or isShooter then
+		return false
+	end
+	return lastKillAt == nil or now - lastKillAt >= window
+end
+
 function Combat.respawnSecondsLeft(downUntil: number, now: number): number
 	return math.max(0, math.ceil(downUntil - now))
 end

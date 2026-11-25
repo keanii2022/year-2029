@@ -188,7 +188,9 @@ local function alivePlayers(): { Alive }
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		local root = character and character:FindFirstChild("HumanoidRootPart")
-		if humanoid and humanoid.Health > 0 and root and root:IsA("BasePart") then
+		-- SpawnGrace (Combat): freshly spawned players aren't targets yet
+		local inGrace = player:GetAttribute("SpawnGrace") == true
+		if humanoid and humanoid.Health > 0 and root and root:IsA("BasePart") and not inGrace then
 			table.insert(alive, {
 				player = player,
 				character = character :: Model,
@@ -281,7 +283,23 @@ local function removeStash(roomKey: number, pickup: Model)
 end
 
 -- A small crate holding items, with a Take prompt. roomKey 0 = not in any room (a wreck).
+-- A room's shelf crates merge by item and are capped, so catches and loot spawns can't pile up.
 local function placeStash(roomKey: number, itemId: string, count: number, position: Vector3): Model
+	local shelf = stash[roomKey]
+	if roomKey ~= 0 and shelf then
+		for _, existing in shelf do
+			local prompt = existing:FindFirstChildWhichIsA("ProximityPrompt", true)
+			if existing:GetAttribute("ItemId") == itemId and prompt then
+				local total = (existing:GetAttribute("Count") :: number) + count
+				existing:SetAttribute("Count", total)
+				stashLabel(prompt, itemId, total)
+				return existing
+			end
+		end
+		while #shelf >= settings.StashPerRoom do
+			removeStash(roomKey, shelf[1])
+		end
+	end
 	local pickup = Instance.new("Model")
 	pickup.Name = "RobotStash"
 	local crate = Instance.new("Part")
@@ -1127,6 +1145,11 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 		target.humanoid.Health = 0
 		return
 	end
+	for key, untilTime in robot.ignore do
+		if untilTime <= now then
+			robot.ignore[key] = nil
+		end
+	end
 	robot.ignore[player] = now + settings.CaughtGraceSeconds
 	-- the client throws itself down (it owns its body); the server only takes the health
 	local humanoid = target.humanoid
@@ -1790,6 +1813,9 @@ local function onPhaseChanged(phase: string)
 		dayStartedAt = now
 		table.clear(destroyedRooms)
 		table.clear(roomWant) -- rooms you thinned out overnight fill back up
+		for _, pickup in table.clone(stash[0] or {}) do
+			removeStash(0, pickup) -- last night's wreck crates
+		end
 	end
 	for _, robot in robots do
 		RobotBrain.phaseChanged(robot.brain, phase, now)
@@ -2062,6 +2088,20 @@ function Robots.destroy(robot: Robot, byPlayer: Player?)
 	end
 end
 
+-- A real gunshot at origin; only Combat (after its checks) and SimPlayers' bots call this.
+function Robots.heardShot(position: Vector3)
+	local now = os.clock()
+	for i = #gunshots, 1, -1 do
+		if now - gunshots[i].time > 3 then
+			table.remove(gunshots, i)
+		end
+	end
+	if #gunshots >= settings.MaxGunshots then
+		table.remove(gunshots, 1)
+	end
+	table.insert(gunshots, { position = position, rank = LoudnessLogic.rank("loud"), time = now })
+end
+
 function Robots.Init()
 	folder = Instance.new("Folder")
 	folder.Name = "Robots"
@@ -2091,14 +2131,9 @@ function Robots.Start()
 	end)
 	-- Made up front so clients waiting on it don't hang until the first catch
 	Net.event("RobotCaught")
-	Net.event("GunFire").OnServerEvent:Connect(function(player)
-		local character = player.Character
-		local root = character and character:FindFirstChild("HumanoidRootPart")
-		if root and root:IsA("BasePart") then
-			table.insert(
-				gunshots,
-				{ position = root.Position, rank = LoudnessLogic.rank("loud"), time = os.clock() }
-			)
+	Players.PlayerRemoving:Connect(function(player)
+		for _, robot in robots do
+			robot.ignore[player] = nil
 		end
 	end)
 

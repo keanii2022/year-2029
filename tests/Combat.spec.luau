@@ -82,6 +82,13 @@ return {
 		expect(Combat.lineOfSightClear(50, 49.8, 0.5)).toBeTruthy()
 		expect(Combat.lineOfSightClear(50, 20, 0.5)).toBeFalsy()
 	end,
+	["countsKill only counts other real players, once per window"] = function()
+		expect(Combat.countsKill(true, false, nil, 10, 300)).toBe(true)
+		expect(Combat.countsKill(false, false, nil, 10, 300)).toBe(false)
+		expect(Combat.countsKill(true, true, nil, 10, 300)).toBe(false)
+		expect(Combat.countsKill(true, false, 10, 200, 300)).toBe(false)
+		expect(Combat.countsKill(true, false, 10, 310, 300)).toBe(true)
+	end,
 	["respawnSecondsLeft counts whole seconds down to zero"] = function()
 		expect(Combat.respawnSecondsLeft(10, 4.2)).toBe(6)
 		expect(Combat.respawnSecondsLeft(10, 12)).toBe(0)

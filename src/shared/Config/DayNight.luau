@@ -90,7 +90,8 @@ return {
 		Range = 60,
 		Angle = 45,
 		Color = Color3.fromRGB(255, 240, 215),
-		Shadows = true,
+		Shadows = true, -- only your own beam; shadow-casting lights are costly, so other beams never do
+		OtherBeamRange = 150, -- other players' and bots' beams switch off past this far from your camera
 		ToggleCooldown = 0.2,
 	},
 }

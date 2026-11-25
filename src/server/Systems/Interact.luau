@@ -696,6 +696,9 @@ local function onUse(player: Player, model: any, partName: any)
 		leave(player, true)
 		return
 	end
+	if player:GetAttribute("Cuffed") == true then
+		return
+	end
 	if typeof(model) ~= "Instance" or not model:IsA("Model") or not model:IsDescendantOf(workspace) then
 		return
 	end

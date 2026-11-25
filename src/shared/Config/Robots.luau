@@ -328,6 +328,8 @@ return {
 	-- Stolen items sit on a shelf in the robot's room
 	StashColor = Color3.fromRGB(70, 64, 58),
 	StashPickupRange = 8,
+	StashPerRoom = 8, -- crates one room's shelves hold; the oldest goes when another lands
+	MaxGunshots = 24, -- gunshots robots remember at once; each robot checks every one per tick
 	StashPickupHold = 0.8,
 	StashHeight = 3.5,
 

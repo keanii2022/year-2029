@@ -7,6 +7,8 @@ return {
 	MaxHealth = 100,
 	HealthRegen = false, -- healing comes from supplies later, not from standing still
 	RespawnDelay = 6,
+	KillRepeatWindow = 300, -- downing the same player again within this many seconds isn't a new kill
+	SpawnGraceSeconds = 10, -- after spawning robots ignore you and you take no damage; firing ends it
 
 	-- rank orders the gun slots on the hotbar, best first. The server fires the gun selected there.
 	-- Damage is full up to falloffStart studs, sliding down to minDamage at falloffEnd.
@@ -349,6 +351,7 @@ return {
 	LootPileTag = "LootPile",
 	LootPickupRange = 8,
 	LootPickupHold = 0.6,
+	LootPileLifetime = 1300, -- seconds a loot pile lasts, about two full day-night cycles
 
 	-- Sound names from the manifest. Each gun's shot is in ShotFeel; impacts land where the shot
 	-- hits, picked by the surface (Impact on players), Empty is the dry click with no cells.

@@ -36,6 +36,8 @@ type PlayerState = {
 	reloadId: number,
 }
 local states: { [Player]: PlayerState } = {}
+-- shooter -> victim UserId -> os.clock() of the last kill that counted
+local lastKills: { [Player]: { [number]: number } } = {}
 local hitRemote: RemoteEvent
 local fxRemote: UnreliableRemoteEvent
 local whizRemote: UnreliableRemoteEvent
@@ -274,6 +276,29 @@ local function trace(
 	return hitPosition, hitPart, hitNormal
 end
 
+local function endSpawnGrace(player: Player, character: Model)
+	player:SetAttribute("SpawnGrace", nil)
+	local shield = character:FindFirstChild("SpawnShield")
+	if shield then
+		shield:Destroy()
+	end
+end
+
+-- A real player downing another real player, at most once per victim per KillRepeatWindow
+local function countKill(shooter: Player, target: Player?, now: number): boolean
+	local kills = lastKills[shooter] or {}
+	lastKills[shooter] = kills
+	local isPlayer = target ~= nil
+	local userId = if target then target.UserId else 0
+	if
+		not CombatLogic.countsKill(isPlayer, target == shooter, kills[userId], now, settings.KillRepeatWindow)
+	then
+		return false
+	end
+	kills[userId] = now
+	return true
+end
+
 local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	if not isFiniteVector(origin) or not isFiniteVector(direction) then
 		return
@@ -320,6 +345,8 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	if not ok then
 		return
 	end
+	Robots.heardShot(origin)
+	endSpawnGrace(player, character)
 
 	held.burstShots =
 		CombatModes.burstAfterShot(gun, held.burstShots, sinceLastShot, settings.FireIntervalSlack)
@@ -337,6 +364,7 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	local aim = direction.Unit
 	local look = CFrame.lookAt(Vector3.zero, aim)
 	local damageTo: { [Humanoid]: number } = {}
+	local victims: { [Humanoid]: Player? } = {}
 	local robotDamage: { [any]: { damage: number, at: Vector3 } } = {}
 	local centreHit = origin + aim * gun.range
 	local centreTarget: Player? = nil
@@ -354,6 +382,7 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 		if (target or simPlayer) and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
 			local damage = CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
 			damageTo[targetHumanoid] = (damageTo[targetHumanoid] or 0) + damage
+			victims[targetHumanoid] = target
 			hitPlayer = true
 		end
 		local robot = hitPart and not targetHumanoid and Robots.fromPart(hitPart)
@@ -374,7 +403,7 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	for targetHumanoid, damage in damageTo do
 		targetHumanoid:TakeDamage(damage)
 		local downed = targetHumanoid.Health <= 0
-		if downed then
+		if downed and countKill(player, victims[targetHumanoid], now) then
 			Scores.add(player, "PlayerKills", 1)
 		end
 		hitRemote:FireClient(player, downed)
@@ -409,6 +438,17 @@ local function setUpCharacter(player: Player, character: Model)
 	for _, item in settings.StartingLoadout do
 		Inventory.add(player, item.id, item.count)
 	end
+	-- Spawn grace: robots skip SpawnGrace players and the hidden ForceField blocks TakeDamage
+	local shield = Instance.new("ForceField")
+	shield.Name = "SpawnShield"
+	shield.Visible = false
+	shield.Parent = character
+	player:SetAttribute("SpawnGrace", true)
+	task.delay(settings.SpawnGraceSeconds, function()
+		if player.Character == character then
+			endSpawnGrace(player, character)
+		end
+	end)
 	-- Every spawn starts with full mags and no reload in progress.
 	local state = stateOf(player)
 	cancelReload(player, state)
@@ -460,6 +500,7 @@ function Combat.Init()
 	Players.PlayerAdded:Connect(setUpPlayer)
 	Players.PlayerRemoving:Connect(function(player)
 		states[player] = nil
+		lastKills[player] = nil
 	end)
 	for _, player in Players:GetPlayers() do
 		setUpPlayer(player)

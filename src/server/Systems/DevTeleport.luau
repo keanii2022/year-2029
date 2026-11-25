@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Net = require(ReplicatedStorage.Shared.Net)
+local MoveCheck = require(script.Parent.MoveCheck)
 local Warehouse = require(script.Parent.Warehouse)
 
 local DevTeleport = {}
@@ -59,6 +60,7 @@ function DevTeleport.step(player: Player, step: unknown)
 	tour.index = (tour.index + (step :: number) - 1) % count + 1
 	local hall = tour.order[tour.index]
 	local spot, facing = doorway(hall)
+	MoveCheck.grace(player)
 	character:PivotTo(CFrame.lookAt(spot + Vector3.new(0, 3.5, 0), spot + Vector3.new(0, 3.5, 0) + facing))
 	Net.event("DevTeleported"):FireClient(player, hall.kind, tour.index, count)
 end

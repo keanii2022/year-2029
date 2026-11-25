@@ -495,7 +495,8 @@ local function onLockerMove(player: Player, action: any, id: any, count: any)
 		return
 	end
 	local session = sessions[player]
-	if not session or not session.canSave or not nearLocker(player) then
+	local cuffed = player:GetAttribute("Cuffed") == true
+	if not session or not session.canSave or cuffed or not nearLocker(player) then
 		return
 	end
 	local amount = math.clamp(math.floor(count), 1, MAX_MOVE)

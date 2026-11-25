@@ -187,6 +187,9 @@ local function onMove(player: Player, model: any, direction: any, itemId: any, c
 	if typeof(model) ~= "Instance" or type(itemId) ~= "string" or not InventoryItems[itemId] then
 		return
 	end
+	if player:GetAttribute("Cuffed") == true then
+		return
+	end
 	local box = boxes[model]
 	local root = rootOf(player)
 	if not box or not model:IsDescendantOf(workspace) then
