@@ -1,7 +1,8 @@
--- The hotbar: what's in your bag as slots along the bottom centre, the selected one in your hands.
--- Number keys or the mouse wheel pick a slot on keyboard, L1 / R1 step through on gamepad, a tap
--- picks one on a phone; the keys show as glyphs on the bar. The first slot is empty hands, where
--- Fire grabs furniture. The Fire action does what the selected item does: other controllers
+-- The hotbar: a short fixed row along the bottom centre, HANDS and LIGHT then the quick slots the
+-- player fills from the bag (Backpack); the selected one is in your hands. The server owns which
+-- item sits in which quick slot ("QuickSlotsChanged"). Number keys or the mouse wheel pick a slot
+-- on keyboard, L1 / R1 step through filled slots on gamepad, a tap picks one on a phone (an empty
+-- one opens the bag); the keys show as glyphs on the bar. On HANDS, Fire grabs furniture. The Fire action does what the selected item does: other controllers
 -- register that with Hotbar.onUse(use, handler) and read Hotbar.selected(). While carrying, the
 -- pick stays on empty hands (the keys move the prop then).
 local Players = game:GetService("Players")
@@ -9,9 +10,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local HotbarLogic = require(ReplicatedStorage.Shared.Logic.Hotbar)
 local Net = require(ReplicatedStorage.Shared.Net)
 local NeedsLogic = require(ReplicatedStorage.Shared.Logic.Needs)
+local QuickSlots = require(ReplicatedStorage.Shared.Logic.QuickSlots)
 local Glyphs = require(script.Parent.Glyphs)
 local Hints = require(script.Parent.Hints)
 local Input = require(script.Parent.Input)
@@ -28,6 +31,7 @@ type Handler = (began: boolean, device: Input.Device) -> ()
 local Hotbar = {}
 
 local bag: { NeedsLogic.Stack } = {}
+local quick: QuickSlots.Quick = QuickSlots.new(settings.QuickSlots)
 local slots: { HotbarLogic.Slot } = {}
 local selectedId: string? = nil
 local shownId: string? = nil
@@ -60,13 +64,17 @@ function Hotbar.selected(): HotbarLogic.Slot?
 	return (HotbarLogic.find(slots, selectedId))
 end
 
--- The bar's slots in order and the raw bag, for the backpack panel
+-- The bar's slots in order, the raw bag and the quick slot groups, for the bag panel
 function Hotbar.slots(): { HotbarLogic.Slot }
 	return slots
 end
 
 function Hotbar.bag(): { NeedsLogic.Stack }
 	return bag
+end
+
+function Hotbar.quick(): QuickSlots.Quick
+	return quick
 end
 
 local function missing(): NeedsLogic.Missing
@@ -130,7 +138,10 @@ local function cell(index: number): TextButton
 	end
 	button.Activated:Connect(function()
 		local slot = slots[index]
-		if slot then
+		if slot and slot.empty then
+			Input.press("Backpack", true)
+			Input.press("Backpack", false)
+		elseif slot then
 			Hotbar.select(slot.id)
 		end
 	end)
@@ -142,16 +153,20 @@ end
 local function redraw()
 	local device = Glyphs.device()
 	local showKeys = device == "Keyboard"
-	local onPad = device == "Gamepad" and #slots > 1
+	local filled = 0
+	for _, slot in slots do
+		filled += if slot.empty then 0 else 1
+	end
+	local onPad = device == "Gamepad" and filled > 1
 	padPrevious.Visible = onPad
 	padNext.Visible = onPad
 	for index, slot in slots do
 		local button = cell(index)
 		local selected = slot.id == selectedId
 		button.Visible = true
-		button.BackgroundTransparency = if selected then 0.1 else 0.45
+		button.BackgroundTransparency = if selected then 0.1 elseif slot.empty then 0.75 else 0.45
 		local stroke = button:FindFirstChild("Stroke") :: UIStroke
-		stroke.Transparency = if selected then 0.1 else 0.85
+		stroke.Transparency = if selected then 0.1 elseif slot.empty then 0.93 else 0.85
 		stroke.Thickness = if selected then 2 else 1
 		local label = button:FindFirstChild("Label") :: TextLabel
 		label.Text = slot.label
@@ -175,7 +190,7 @@ local function notify()
 end
 
 local function rebuild()
-	slots = HotbarLogic.slots(settings.Slots, bag, Config.Supplies.Uses, guns, missing())
+	slots = HotbarLogic.slots(settings.Slots, bag, Config.Supplies.Uses, guns, missing(), quick)
 	selectedId = HotbarLogic.keep(slots, selectedId)
 	redraw()
 	local selected = Hotbar.selected()
@@ -233,6 +248,7 @@ local function onWheel(input: InputObject, gameProcessed: boolean)
 		gameProcessed
 		or input.UserInputType ~= Enum.UserInputType.MouseWheel
 		or player:GetAttribute("CarrySpeedMultiplier") ~= nil
+		or Input.exclusiveAction() ~= nil
 	then
 		return
 	end
@@ -288,6 +304,16 @@ function Hotbar.Start()
 		if type(snapshot) == "table" then
 			bag = snapshot
 			rebuild()
+		end
+	end)
+	Net.event("QuickSlotsChanged").OnClientEvent:Connect(function(snapshot, inBag)
+		if type(snapshot) == "table" then
+			quick = snapshot
+			rebuild()
+		end
+		local item = type(inBag) == "string" and InventoryItems[inBag]
+		if item then
+			Hints.flash("inBag", string.format(Config.Hints.InBagToast, item.name), Config.Hints.InBagSeconds)
 		end
 	end)
 	Net.event("InventorySync"):FireServer()

@@ -132,7 +132,10 @@ local function giveAllGuns(player: Player): string
 		end
 	end
 	local total = #gunIdsByRank()
-	return if given == total then "Gave every gun" else `Gave {given} of {total} guns, bag full`
+	local bagSize = Config.Guns.BaseSlots
+	return if given == total
+		then "Gave every gun, the ones past your quick slots are in the bag"
+		else `Gave {given} of {total} guns, bag full ({bagSize} stacks)`
 end
 
 -- A full stack of ammo for every gun carried

@@ -3,7 +3,7 @@
 -- Gamepad names are Roblox's Xbox names; the PS button is in the comment beside each. The layout
 -- follows what shooter players already know: R2 fire / use what you hold (empty hands: grab),
 -- L2 aim, Square use/reload, Cross jump, L1 / R1 step the hotbar (empty hands is a slot),
--- Triangle opens the backpack. Circle calls out (hold: pick a call), R3 crouches.
+-- Triangle opens the bag. Circle calls out (hold: pick a call), R3 crouches.
 -- While carrying, Grab takes over L1 / R1 / L2 and the D-pad to move the prop.
 -- Glyphs draws these keys on screen.
 -- Other controllers call Input.bind / Input.isDown instead of reading keys themselves.
@@ -75,7 +75,8 @@ local actions: { [string]: Binding } = {
 	CarryCloser = {},
 	CarryFarther = {},
 }
--- Number keys pick hotbar slots (Slot1 .. Slot9); the mouse wheel is read by Hotbar itself.
+-- Number keys pick hotbar slots (Slot1 .. Slot6: HANDS, LIGHT and the quick slots); the mouse
+-- wheel is read by Hotbar itself.
 local NUMBER_KEYS = {
 	Enum.KeyCode.One,
 	Enum.KeyCode.Two,
@@ -83,10 +84,8 @@ local NUMBER_KEYS = {
 	Enum.KeyCode.Four,
 	Enum.KeyCode.Five,
 	Enum.KeyCode.Six,
-	Enum.KeyCode.Seven,
-	Enum.KeyCode.Eight,
-	Enum.KeyCode.Nine,
 }
+Input.NumberKeys = table.freeze(table.clone(NUMBER_KEYS))
 for number, key in NUMBER_KEYS do
 	actions[`Slot{number}`] = { keyboard = key, freeHands = true }
 end
@@ -218,6 +217,11 @@ end
 -- Only this action's presses go through until it's cleared with nil. Releases always do.
 function Input.setExclusive(action: string?)
 	exclusive = action
+end
+
+-- The action holding exclusive input, if any (a menu or the call wheel is open)
+function Input.exclusiveAction(): string?
+	return exclusive
 end
 
 function Input.isDown(action: string): boolean
