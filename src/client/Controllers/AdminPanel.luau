@@ -120,6 +120,15 @@ local function gunSpecs(): { ButtonSpec }
 	local specs: { ButtonSpec } = {
 		{ text = "ALL GUNS", command = "give_all_guns" },
 		{ text = "AMMO", command = "give_ammo" },
+		{
+			text = function()
+				return onOff("INFINITE AMMO", isOn("InfiniteAmmo"))
+			end,
+			command = "infinite_ammo",
+			on = function()
+				return isOn("InfiniteAmmo")
+			end,
+		},
 	}
 	local ids = {}
 	for id in blasters do
@@ -262,9 +271,12 @@ local function refreshLabels()
 	if countLabel then
 		countLabel.Text = if simCount then `LIVE: {simCount}` else "LIVE: -"
 	end
-	local god, fly = isOn("God"), isOn("Fly")
-	tag.Visible = god or fly
-	tag.Text = "ADMIN" .. (if god then "  GOD" else "") .. (if fly then "  FLY" else "")
+	local god, fly, ammo = isOn("God"), isOn("Fly"), isOn("InfiniteAmmo")
+	tag.Visible = god or fly or ammo
+	tag.Text = "ADMIN"
+		.. (if god then "  GOD" else "")
+		.. (if fly then "  FLY" else "")
+		.. (if ammo then "  AMMO" else "")
 end
 
 local function usingPad(): boolean
@@ -673,7 +685,7 @@ local function enable()
 		simCount = count
 		refreshLabels()
 	end)
-	for _, name in { "God", "Fly", "AdminSpeed" } do
+	for _, name in { "God", "Fly", "AdminSpeed", "InfiniteAmmo" } do
 		player:GetAttributeChangedSignal(name):Connect(refreshLabels)
 	end
 	for _, name in { "ClockFrozen", "RobotsFrozen" } do

@@ -551,7 +551,9 @@ local function fireCheck(
 		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = true,
 		reloading = reloadStartedAt ~= nil,
-		ammo = CombatReload.loaded(mags[id] or 0, bag),
+		ammo = if player:GetAttribute("InfiniteAmmo") == true
+			then gun.magSize
+			else CombatReload.loaded(mags[id] or 0, bag),
 		sinceLastShot = os.clock() + aheadBy - (lastShotAt[id] or 0),
 		minInterval = minInterval,
 	})
@@ -583,9 +585,11 @@ local function fireOnce(minInterval: number?): boolean
 	local feel = feelOf(gunId)
 	playShotSound(feel, nil)
 	-- Spend the round now so the HUD and the next shot don't wait on the server's reply.
-	carried[gun.ammo] -= 1
-	mags[gunId] = CombatReload.loaded(mag, bag) - 1
-	notifyChanged()
+	if player:GetAttribute("InfiniteAmmo") ~= true then
+		carried[gun.ammo] -= 1
+		mags[gunId] = CombatReload.loaded(mag, bag) - 1
+		notifyChanged()
+	end
 
 	local origin = camera.CFrame.Position
 	local direction = camera.CFrame.LookVector

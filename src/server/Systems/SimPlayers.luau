@@ -36,6 +36,7 @@ type RobotSeen = { model: Model, position: Vector3, chasing: boolean }
 type Bot = {
 	id: number,
 	name: string,
+	home: Vector3?,
 	handle: Handle,
 	brain: SimBrain.Brain,
 	generation: number,
@@ -1002,7 +1003,19 @@ end
 
 -- Life and death ----------------------------------------------------------------------------------
 
-local function spawnSpot(): Vector3
+local function spawnSpot(bot: Bot): Vector3
+	-- Admin-spawned bots appear around whoever spawned them, so the lobby is in view straight away
+	if bot.home then
+		local angle = random:NextNumber(0, math.pi * 2)
+		local distance = random:NextNumber(6, 18)
+		local spot = bot.home + Vector3.new(math.cos(angle) * distance, 0, math.sin(angle) * distance)
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Include
+		params.FilterDescendantsInstances =
+			{ workspace.Terrain, workspace:FindFirstChild("Warehouse") or workspace }
+		local hit = workspace:Raycast(spot + Vector3.new(0, 8, 0), Vector3.new(0, -30, 0), params)
+		return if hit then hit.Position else bot.home
+	end
 	if #spawnSpots > 0 then
 		return pick(spawnSpots)
 	end
@@ -1025,7 +1038,7 @@ local function spawnBody(bot: Bot)
 	humanoid.DisplayName = bot.name
 	humanoid.MaxHealth = guns.MaxHealth
 	humanoid.Health = guns.MaxHealth
-	local at = spawnSpot() + Vector3.new(random:NextNumber(-3, 3), 3.5, random:NextNumber(-3, 3))
+	local at = spawnSpot(bot) + Vector3.new(random:NextNumber(-3, 3), 3.5, random:NextNumber(-3, 3))
 	model:PivotTo(CFrame.new(at) * CFrame.Angles(0, random:NextNumber(0, math.pi * 2), 0))
 	model:SetAttribute("Stance", "Walk")
 	CollectionService:AddTag(model, settings.Tag)
@@ -1176,7 +1189,7 @@ end
 -- Public ------------------------------------------------------------------------------------------
 
 -- Adds up to count bots, never past Config.SimPlayers.Max. Bodies build on their own threads.
-function SimPlayers.spawn(count: number)
+function SimPlayers.spawn(count: number, near: Vector3?)
 	local room = settings.Max - botCount()
 	for _ = 1, math.clamp(math.floor(tonumber(count) or 0), 0, room) do
 		nextId += 1
@@ -1203,6 +1216,7 @@ function SimPlayers.spawn(count: number)
 			hitAt = -math.huge,
 			lastHealth = 0,
 			tracks = {},
+			home = near,
 		}
 		bots[bot.id] = bot
 		task.spawn(spawnBody, bot)

@@ -124,7 +124,9 @@ end
 local function fillMag(player: Player, state: PlayerState, gunId: string)
 	local gun = settings.Blasters[gunId]
 	if gun then
-		gunState(state, gunId).mag = CombatReload.refill(gun.magSize, Inventory.count(player, gun.ammo))
+		gunState(state, gunId).mag = if player:GetAttribute("InfiniteAmmo") == true
+			then gun.magSize
+			else CombatReload.refill(gun.magSize, Inventory.count(player, gun.ammo))
 		publishMag(player, state, gunId)
 	end
 end
@@ -292,7 +294,10 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 		cancelReload(player, state)
 	end
 	local held = gunState(state, id)
-	local mag = CombatReload.loaded(held.mag, Inventory.count(player, gun.ammo))
+	local infinite = player:GetAttribute("InfiniteAmmo") == true
+	local mag = if infinite
+		then gun.magSize
+		else CombatReload.loaded(held.mag, Inventory.count(player, gun.ammo))
 	local sinceLastShot = now - held.lastShotAt
 	local ok = CombatLogic.canFire({
 		alive = humanoid.Health > 0,
@@ -319,8 +324,12 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	held.burstShots =
 		CombatModes.burstAfterShot(gun, held.burstShots, sinceLastShot, settings.FireIntervalSlack)
 	held.lastShotAt = now
-	Inventory.remove(player, gun.ammo, 1)
-	held.mag = mag - 1
+	if infinite then
+		held.mag = gun.magSize
+	else
+		Inventory.remove(player, gun.ammo, 1)
+		held.mag = mag - 1
+	end
 	publishMag(player, state, id)
 
 	-- Every pellet (one for most guns) is its own ray; a target hit by several takes the sum.
@@ -427,6 +436,18 @@ end
 -- Admin gear arrives loaded so testers can fire right away
 function Combat.fillMag(player: Player, gunId: string)
 	fillMag(player, stateOf(player), gunId)
+end
+
+-- Admin infinite ammo: every owned gun shows a full mag and never drains
+function Combat.setInfiniteAmmo(player: Player, on: boolean)
+	player:SetAttribute("InfiniteAmmo", on or nil)
+	local state = stateOf(player)
+	for gunId, gun in settings.Blasters do
+		if Inventory.has(player, gunId) then
+			gunState(state, gunId).mag = if on then gun.magSize else gunState(state, gunId).mag
+			publishMag(player, state, gunId)
+		end
+	end
 end
 
 function Combat.Init()

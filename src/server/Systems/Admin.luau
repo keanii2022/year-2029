@@ -192,6 +192,12 @@ local function cycleSpeed(player: Player): string
 	return `Speed: {level.name}`
 end
 
+local function toggleInfiniteAmmo(player: Player): string
+	local on = player:GetAttribute("InfiniteAmmo") ~= true
+	Combat.setInfiniteAmmo(player, on)
+	return if on then "Infinite ammo on" else "Infinite ammo off"
+end
+
 local function toggleFly(player: Player): string
 	local on = player:GetAttribute("Fly") ~= true
 	player:SetAttribute("Fly", on or nil)
@@ -281,13 +287,14 @@ local function withSim(run: (sim: any) -> string): string
 	return if ok then result else "Sim players failed"
 end
 
-local function simSpawn(count: unknown): string
+local function simSpawn(player: Player, count: unknown): string
 	local amount = AdminAccess.count(count, settings.SimMaxSpawn)
 	if not amount then
 		return "Pick 1 to " .. settings.SimMaxSpawn
 	end
 	return withSim(function(sim)
-		sim.spawn(amount)
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		sim.spawn(amount, root and root.Position)
 		return `Sim players: {sim.count()}`
 	end)
 end
@@ -325,6 +332,7 @@ local commands: { [string]: (player: Player, arg: unknown) -> string? } = {
 	give_item = giveItem,
 	give_food_kit = giveFoodKit,
 	god = toggleGod,
+	infinite_ammo = toggleInfiniteAmmo,
 	speed = cycleSpeed,
 	fly = toggleFly,
 	tp_player = teleportToPlayer,
@@ -347,8 +355,8 @@ local commands: { [string]: (player: Player, arg: unknown) -> string? } = {
 	robots_wake = function()
 		return setRobotsFrozen(false)
 	end,
-	sim_spawn = function(_, count)
-		return simSpawn(count)
+	sim_spawn = function(player, count)
+		return simSpawn(player, count)
 	end,
 	sim_mood = function(_, mood)
 		return simMood(mood)
