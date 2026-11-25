@@ -34,6 +34,16 @@ return {
 	PryOwnerWarning = "Someone is pulling apart your fort",
 	PryOwnerWarningCooldown = 10,
 
+	-- Shown when a grab or drop is refused, keyed by the GrabRules reason
+	Refused = {
+		["too far"] = "Out of reach",
+		taken = "Someone's carrying that",
+		["hands full"] = "Your hands are full",
+		["no ground"] = "Nothing under it to land on",
+		["too high"] = "Too high to stack",
+		blocked = "Something's in the way",
+	},
+
 	SpawnTestProps = true,
 	TestPropsOrigin = Vector3.new(20, 0, 20),
 }

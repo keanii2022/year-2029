@@ -46,6 +46,8 @@ local ROTATE_KEYS: { [Enum.KeyCode]: RotateKey } = {
 	[Enum.KeyCode.R] = { axis = "Turn", direction = 1 },
 	[Enum.KeyCode.T] = { axis = "Tip", direction = 1 },
 }
+-- Casts that hit something see-through or non-solid and untagged try again past it, this many times
+local LOOK_THROUGH = 3
 local DISTANCE_KEYS = {
 	[Enum.KeyCode.ButtonR1] = 1,
 	[Enum.KeyCode.ButtonL1] = -1,
@@ -94,6 +96,42 @@ local function grabbableFrom(instance: Instance?): PVInstance?
 	return nil
 end
 
+local function solid(part: BasePart): boolean
+	return part.CanCollide and part.Transparency < 0.9
+end
+
+-- The grabbable along a ray from the camera. Range counts from the camera, so it adds the camera's
+-- distance to the root on top of the server's reach (measured from the root).
+local function grabbableAlong(origin: Vector3, direction: Vector3): PVInstance?
+	local camera = workspace.CurrentCamera
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not camera or not root then
+		return nil
+	end
+	local ignore: { Instance } = { character :: Instance, camera }
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local range = Settings.GrabReach + (origin - root.Position).Magnitude
+	for _ = 1, LOOK_THROUGH do
+		params.FilterDescendantsInstances = ignore
+		local hit = workspace:Raycast(origin, direction.Unit * range, params)
+		if not hit then
+			return nil
+		end
+		local prop = grabbableFrom(hit.Instance)
+		if prop then
+			return prop
+		end
+		local part = hit.Instance
+		if not part:IsA("BasePart") or solid(part) then
+			return nil
+		end
+		table.insert(ignore, part)
+	end
+	return nil
+end
+
 local function needsPry(prop: PVInstance): boolean
 	local placedBy = prop:GetAttribute("PlacedBy")
 	return GrabPry.needsPry(if type(placedBy) == "number" then placedBy else nil, player.UserId)
@@ -117,22 +155,13 @@ end
 
 local function tryGrab(device: Input.Device)
 	local camera = workspace.CurrentCamera
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if not camera or not root then
+	if not camera then
 		return
 	end
-
 	local usesMouse = device == "Keyboard" and UserInputService.MouseBehavior == Enum.MouseBehavior.Default
 	local screenPoint = if usesMouse then UserInputService:GetMouseLocation() else camera.ViewportSize / 2
 	local ray = camera:ViewportPointToRay(screenPoint.X, screenPoint.Y)
-
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { character :: Instance }
-	local range = Settings.GrabReach + (camera.CFrame.Position - root.Position).Magnitude
-	local hit = workspace:Raycast(ray.Origin, ray.Direction * range, params)
-	local prop = grabbableFrom(hit and hit.Instance)
+	local prop = grabbableAlong(ray.Origin, ray.Direction)
 	if not prop then
 		return
 	end
@@ -316,12 +345,7 @@ local function lookForGrabbable(camera: Camera?, head: BasePart?)
 		Hints.set("grabTarget", nil)
 		return
 	end
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { player.Character :: Instance }
-	local result =
-		workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * Settings.GrabReach, params)
-	local target = result and grabbableFrom(result.Instance)
+	local target = grabbableAlong(camera.CFrame.Position, camera.CFrame.LookVector)
 	local pry = target ~= nil and needsPry(target)
 	lastTarget = if not target then nil elseif pry then "pry" else "grab"
 	local hints = Config.Hints

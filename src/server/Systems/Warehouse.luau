@@ -7,6 +7,7 @@ local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local GrabRules = require(ReplicatedStorage.Shared.Logic.GrabRules)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local WarehouseGen = require(ReplicatedStorage.Shared.Logic.WarehouseGen)
 
@@ -91,6 +92,17 @@ local function placeModel(model: Model, x: number, z: number, facing: Vector3, b
 	model:PivotTo(rotation + (target - bottom))
 end
 
+local function longestSide(size: Vector3): number
+	return math.max(size.X, size.Y, size.Z)
+end
+
+local function tagIfMovable(model: Model, name: string)
+	local _, size = model:GetBoundingBox()
+	if GrabRules.movable(name, longestSide(size), settings.FixedModels, settings.MaxGrabSize) then
+		CollectionService:AddTag(model, Config.Grab.Tag)
+	end
+end
+
 local function spawnModel(
 	name: string,
 	parent: Instance,
@@ -104,9 +116,7 @@ local function spawnModel(
 		return nil
 	end
 	placeModel(model, x, z, facing, backToWall)
-	if not settings.FixedModels[name] then
-		CollectionService:AddTag(model, Config.Grab.Tag)
-	end
+	tagIfMovable(model, name)
 	model.Parent = parent
 	noteBuilt()
 	return model
@@ -123,7 +133,15 @@ local function hasKit(name: string?): boolean
 	return name ~= nil and ModelLibrary.uploaded(name)
 end
 
-local function placeKit(name: string, x: number, z: number, facing: Vector3, lift: number?): Model?
+-- movable: a prop rather than structure, so it gets the grab tag unless it's fixed or too big
+local function placeKit(
+	name: string,
+	x: number,
+	z: number,
+	facing: Vector3,
+	lift: number?,
+	movable: boolean?
+): Model?
 	local model = ModelLibrary.get(name)
 	if not model then
 		return nil
@@ -131,6 +149,9 @@ local function placeKit(name: string, x: number, z: number, facing: Vector3, lif
 	placeModel(model, x, z, facing, false)
 	if lift and lift ~= 0 then
 		model:PivotTo(model:GetPivot() + Vector3.new(0, lift, 0))
+	end
+	if movable then
+		tagIfMovable(model, name)
 	end
 	model.Parent = chunkFor(x, z)
 	noteBuilt()
@@ -678,7 +699,7 @@ local SIDE_FACES = { Enum.NormalId.Front, Enum.NormalId.Back }
 local function buildPiece(spec: WarehouseGen.Piece)
 	if spec.kitOnly then
 		if hasKit(spec.kit) then
-			placeKit(spec.kit :: string, spec.x, spec.z, facingFromTurn(spec.turn), spec.y)
+			placeKit(spec.kit :: string, spec.x, spec.z, facingFromTurn(spec.turn), spec.y, true)
 		end
 		return
 	end
@@ -686,7 +707,7 @@ local function buildPiece(spec: WarehouseGen.Piece)
 		return
 	end
 	if hasKit(spec.kit) then
-		placeKit(spec.kit :: string, spec.x, spec.z, facingFromTurn(spec.turn))
+		placeKit(spec.kit :: string, spec.x, spec.z, facingFromTurn(spec.turn), nil, true)
 		return
 	end
 	if hasKit(spec.kitFloor) then
@@ -790,6 +811,9 @@ local function buildPiece(spec: WarehouseGen.Piece)
 			glow.Shadows = false
 			glow.Parent = part
 		end
+	end
+	if settings.MovableStyles[spec.style] and longestSide(part.Size) <= settings.MaxGrabSize then
+		CollectionService:AddTag(part, Config.Grab.Tag)
 	end
 	part.Parent = parent
 	noteBuilt()

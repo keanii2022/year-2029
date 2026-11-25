@@ -26,9 +26,9 @@ return {
 	},
 	GrabTargetHint = "{Fire} Grab",
 	GrabNeedsHands = {
-		Keyboard = "{Grab} Grab",
-		Gamepad = "{HotbarPrevious} {HotbarNext} HANDS to grab",
-		Touch = "Pick HANDS to grab",
+		Keyboard = "{Slot1} Empty hands to grab   {Grab} Grab",
+		Gamepad = "{HotbarPrevious} {HotbarNext} to HANDS to grab",
+		Touch = "Pick {=HANDS} to grab",
 	},
 	PryHint = "Hold {Fire} Pry it loose",
 	PryNeedsHands = {

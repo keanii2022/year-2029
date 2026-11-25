@@ -57,4 +57,11 @@ return {
 		_, reason = place({ groundFound = false })
 		expect(reason).toBe("no ground")
 	end,
+	["movable keeps fixed structure and oversized pieces in place"] = function()
+		local fixed = { wall_lower = true }
+		expect(GrabRules.movable("pallet_boxes", 6, fixed, 16)).toBeTruthy()
+		expect(GrabRules.movable("couch", 16, fixed, 16)).toBeTruthy()
+		expect(GrabRules.movable("wall_lower", 4, fixed, 16)).toBeFalsy()
+		expect(GrabRules.movable("giant_chair", 16.5, fixed, 16)).toBeFalsy()
+	end,
 }

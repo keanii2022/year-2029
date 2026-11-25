@@ -26,6 +26,7 @@ type Carry = {
 	prop: PVInstance,
 	parts: { BasePart },
 	collide: { [BasePart]: boolean },
+	anchored: { [BasePart]: true }, -- only the parts that were anchored at pickup
 	size: Vector3,
 	pivotOffset: CFrame,
 	pickupPivot: CFrame,
@@ -174,8 +175,11 @@ local function release(player: Player, carry: Carry, pivot: CFrame?, placed: boo
 	if placed then
 		carry.prop:SetAttribute("PlacedBy", player.UserId)
 	end
+	-- Back to how it was, so hinged parts (ModelRig) swing again. Nothing anchored before means
+	-- nothing holds it up, so the whole prop freezes where it lands until the server resets.
+	local anyAnchored = next(carry.anchored) ~= nil
 	for _, part in carry.parts do
-		part.Anchored = true -- frozen where it lands until the server resets
+		part.Anchored = carry.anchored[part] == true or not anyAnchored
 		part.CanCollide = carry.collide[part]
 	end
 	player:SetAttribute("CarrySpeedMultiplier", nil)
@@ -216,16 +220,24 @@ local function distanceTo(root: BasePart?, prop: PVInstance): number
 	return math.max((boxCFrame.Position - root.Position).Magnitude - size.Magnitude / 2, 0)
 end
 
-local function canGrabNow(player: Player, prop: PVInstance): (boolean, BasePart?, Humanoid?)
+local function canGrabNow(player: Player, prop: PVInstance): (boolean, BasePart?, Humanoid?, string?)
 	local root, humanoid = bodyOf(player)
-	local ok = GrabRules.canGrab({
+	local ok, reason = GrabRules.canGrab({
 		alive = root ~= nil,
 		alreadyCarrying = carriers[player] ~= nil,
 		carriedByOther = carriedBy[prop] ~= nil,
 		distance = distanceTo(root, prop),
 		reach = Settings.GrabReach,
 	})
-	return ok and humanoid ~= nil, root, humanoid
+	return ok and humanoid ~= nil, root, humanoid, reason
+end
+
+-- Says why a grab or drop didn't happen instead of doing nothing
+local function refuse(player: Player, reason: string?)
+	local text = reason and Settings.Refused[reason]
+	if text then
+		feedbackRemote:FireClient(player, text)
+	end
 end
 
 local function cancelPry(player: Player)
@@ -279,12 +291,16 @@ local function onPry(player: Player, prop: any)
 		pries[player] = nil
 		return
 	end
-	local valid = isGrabbable(prop)
-		and GrabPry.needsPry(placedByOf(prop), player.UserId)
-		and canGrabNow(player, prop)
-	if not valid then
+	if not (isGrabbable(prop) and GrabPry.needsPry(placedByOf(prop), player.UserId)) then
 		pries[player] = nil
 		pryRemote:FireClient(player, nil)
+		return
+	end
+	local ok, _, _, reason = canGrabNow(player, prop)
+	if not ok then
+		pries[player] = nil
+		pryRemote:FireClient(player, nil)
+		refuse(player, reason)
 		return
 	end
 	pries[player] = { prop = prop, startedAt = os.clock(), lastNoise = nil, soundIndex = 0 }
@@ -295,8 +311,13 @@ local function onGrabRequest(player: Player, prop: any)
 	if not isGrabbable(prop) then
 		return
 	end
-	local ok, root, humanoid = canGrabNow(player, prop)
+	local ok, root, humanoid, reason = canGrabNow(player, prop)
 	if not ok or not humanoid then
+		refuse(player, reason)
+		return
+	end
+	local parts = partsOf(prop)
+	if #parts == 0 then
 		return
 	end
 	if GrabPry.needsPry(placedByOf(prop), player.UserId) then
@@ -318,11 +339,12 @@ local function onGrabRequest(player: Player, prop: any)
 	pries[player] = nil
 	local boxCFrame, size = boxOf(prop)
 
-	local parts = partsOf(prop)
 	local collide = {}
+	local anchored = {}
 	local mass = 0
 	for _, part in parts do
 		collide[part] = part.CanCollide
+		anchored[part] = if part.Anchored then true else nil
 		mass += part:GetMass()
 		part.Anchored = true
 		part.CanCollide = false
@@ -340,6 +362,7 @@ local function onGrabRequest(player: Player, prop: any)
 		prop = prop,
 		parts = parts,
 		collide = collide,
+		anchored = anchored,
 		size = size,
 		pivotOffset = boxCFrame:ToObjectSpace(pivot),
 		pickupPivot = pivot,
@@ -367,11 +390,12 @@ local function onDrop(player: Player)
 	if not carry or not root or not humanoid then
 		return
 	end
-	local landed, ok = findLanding(carry, root, humanoid)
+	local landed, ok, reason = findLanding(carry, root, humanoid)
 	if landed and ok then
 		release(player, carry, landed * carry.pivotOffset, true)
 	else
 		ghostRemote:FireClient(player, landed, carry.size, false)
+		refuse(player, reason)
 	end
 end
 

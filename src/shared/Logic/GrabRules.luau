@@ -1,4 +1,4 @@
--- Who may grab what, and where a carried prop may be placed. Returns ok plus a reason when denied.
+-- Who may grab what, which placed things are movable at all, and where a carried prop may be placed. Returns ok plus a reason when denied.
 local GrabRules = {}
 
 export type GrabCheck = {
@@ -48,6 +48,16 @@ function GrabRules.canPlace(check: PlaceCheck): (boolean, string?)
 		return false, "blocked"
 	end
 	return true, nil
+end
+
+-- Placed world pieces: grabbable unless listed as fixed structure or too big to carry.
+function GrabRules.movable(
+	name: string,
+	longestSide: number,
+	fixed: { [string]: boolean },
+	maxSize: number
+): boolean
+	return not fixed[name] and longestSide <= maxSize
 end
 
 return GrabRules
