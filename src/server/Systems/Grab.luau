@@ -58,6 +58,7 @@ local pries: { [Player]: Pry } = {}
 local settling: { [PVInstance]: { frozen: { BasePart }, welds: { WeldConstraint } } } = {}
 local ownerWarnedAt: { [number]: number } = {}
 local placedListeners: { (Player, PVInstance) -> () } = {}
+local grabbedListeners: { (Player, PVInstance) -> () } = {}
 -- How much a robot companion's tug has already added to each pry; weak, so ended pries drop out
 local tugged: { [Pry]: number } = setmetatable({}, { __mode = "k" }) :: any
 
@@ -462,6 +463,11 @@ function Grab.botPlace(
 	return true, nil
 end
 
+-- Called with (player, prop) every time a player picks a piece up.
+function Grab.onGrabbed(listener: (Player, PVInstance) -> ())
+	table.insert(grabbedListeners, listener)
+end
+
 -- Called with (player, prop) every time a player places a piece.
 function Grab.onPlaced(listener: (Player, PVInstance) -> ())
 	table.insert(placedListeners, listener)
@@ -593,6 +599,9 @@ local function onGrabRequest(player: Player, prop: any)
 	carriedBy[prop] = player
 	prop:SetAttribute("CarriedBy", player.UserId)
 	stateRemote:FireClient(player, prop)
+	for _, listener in grabbedListeners do
+		task.spawn(listener, player, prop)
+	end
 end
 
 -- letGo: the hold-to-drop escape, which always lets the prop fall right where it's held.

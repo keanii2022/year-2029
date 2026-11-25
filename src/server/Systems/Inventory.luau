@@ -21,6 +21,7 @@ Inventory.Items = InventoryItems
 
 local bags: { [Player]: { Stack } } = {}
 local quicks: { [Player]: QuickSlots.Quick } = {}
+local addedListeners: { (Player, string) -> () } = {}
 local lastDrop: { [Player]: number } = {}
 local piles: { [Model]: { Stack } } = {}
 local changedRemote: RemoteEvent
@@ -86,8 +87,16 @@ function Inventory.add(player: Player, itemId: string, count: number?): number
 	if added > 0 then
 		sync(player)
 		placeQuick(player, { itemId })
+		for _, listener in addedListeners do
+			task.spawn(listener, player, itemId)
+		end
 	end
 	return added
+end
+
+-- Called with (player, itemId) whenever something lands in a bag (starting kit included)
+function Inventory.onAdded(listener: (Player, string) -> ())
+	table.insert(addedListeners, listener)
 end
 
 -- Removes up to count (default 1). Returns how many were removed.
