@@ -1100,9 +1100,8 @@ local function updateDown(pal: Pal, now: number)
 			-- only when they or a robot knocked it down (anyone else would be stealing it for free),
 			-- and not after a night with the pack, which already cost one at dawn.
 			local by = pal.downBy
-			local byOwnerOrRobot = (pal.ownerId ~= nil and userIdOf(by) == pal.ownerId)
-				or (type(by) == "table" and by.brain ~= nil)
-			if pal.ownerId and byOwnerOrRobot and pal.nightResult ~= "taken" then
+			local byRobot = type(by) == "table" and by.brain ~= nil
+			if pal.ownerId and byRobot and pal.nightResult ~= "taken" then
 				loseStage(pal, pal.ownerId)
 			end
 			pal.homeUntil = now + settings.HomeSeconds
@@ -1347,6 +1346,9 @@ end
 
 local function onBuild(pal: Pal, player: Player)
 	if player.UserId ~= pal.ownerId or ownerStage(pal) ~= "bonded" then
+		return
+	end
+	if Robots.isDown(pal.robot) or not pal.robot.brain.companion then
 		return
 	end
 	if not canUse(pal, pal.buildPrompt, player, settings.GiveReach) then
@@ -1693,6 +1695,10 @@ function Companion.Start()
 	Grab.onPlaced(onPlaced)
 	DayNight.onPhaseChanged(onPhaseChanged)
 	Players.PlayerRemoving:Connect(function(player)
+		local current = Players:GetPlayerByUserId(player.UserId)
+		if current and current ~= player then
+			return
+		end
 		leftAt[player.UserId] = os.clock()
 		for _, pal in pals do
 			if pal.ownerId == player.UserId then
@@ -1727,21 +1733,27 @@ function Companion.Start()
 		while true do
 			local dt = task.wait(interval)
 			local now = os.clock()
-			refreshAlive()
-			forgetOld(now)
-			for robot, pal in table.clone(pals) do
-				if robot.dead then
-					removePal(pal)
-				else
-					local ok, problem = pcall(stepPal, pal, dt, now)
-					if not ok then
-						warn(`[Companion] {problem}`)
+			-- One error anywhere in a tick must never stop the loop for the rest of the server
+			local tickOk, tickProblem = pcall(function()
+				refreshAlive()
+				forgetOld(now)
+				for robot, pal in table.clone(pals) do
+					if robot.dead then
+						removePal(pal)
+					else
+						local ok, problem = pcall(stepPal, pal, dt, now)
+						if not ok then
+							warn(`[Companion] {problem}`)
+						end
 					end
 				end
-			end
-			if DayNight.phase() == "Day" and now >= repickAt then
-				repickAt = now + settings.RepickEvery
-				fillCurious()
+				if DayNight.phase() == "Day" and now >= repickAt then
+					repickAt = now + settings.RepickEvery
+					fillCurious()
+				end
+			end)
+			if not tickOk then
+				warn(`[Companion] tick: {tickProblem}`)
 			end
 		end
 	end)
