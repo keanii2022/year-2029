@@ -14,7 +14,6 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Glyphs = require(script.Parent.Glyphs)
 local Gun = require(script.Parent.Gun)
-local Movement = require(script.Parent.Movement)
 local TouchButtons = require(script.Parent.TouchButtons)
 
 local settings = Config.Guns
@@ -28,7 +27,6 @@ local PILE_SECONDS = 60 -- the dropped-pile marker fades out over this long
 local AMMO_TOUCH_AT = Vector2.new(-246, -168) -- above AIM / RELOAD, in TouchButtons' layout
 local HEALTH_TOUCH_AT = Vector2.new(156, 90) -- right of the ? / RECORD buttons
 local PHASE_WORDS = { Day = "DAY", Siren = "LIGHTS OUT", Night = "NIGHT" }
-local STANCE_WORDS = { Crouch = "CROUCH", Sprint = "SPRINT" }
 local TOUCH_BAR_WIDTH = 220 -- leaves room for the TODAY list on a 667-wide phone
 
 local Hud = {}
@@ -38,7 +36,6 @@ local downGui: ScreenGui
 local healthPanel: Frame
 local healthFill: Frame
 local healthTitle: TextLabel
-local stanceLabel: TextLabel
 local ammoLabel: TextLabel
 local reserveLabel: TextLabel
 local ammoKindLabel: TextLabel
@@ -143,16 +140,6 @@ local function buildHealth()
 		Text = "HEALTH",
 		TextSize = 12,
 		TextTransparency = 0.3,
-		TextXAlignment = Enum.TextXAlignment.Left,
-	}, panel)
-	-- Just after the HEALTH word
-	stanceLabel = label({
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.fromOffset(64, -4),
-		Size = UDim2.fromOffset(70, 14),
-		Text = "",
-		TextSize = 12,
-		TextColor3 = SPRAY_RED,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	}, panel)
 end
@@ -387,7 +374,7 @@ local function place()
 		ammoPanel.Position = UDim2.new(1, -24, 1, -20)
 	end
 	local small = if touch then 14 else 12
-	for _, text in { healthTitle, stanceLabel, tokensLabel, ammoKindLabel } do
+	for _, text in { healthTitle, tokensLabel, ammoKindLabel } do
 		text.TextSize = small
 	end
 end
@@ -425,7 +412,6 @@ local function update()
 		downByLabel.Text = if type(by) == "string" then by else ""
 	end
 
-	stanceLabel.Text = STANCE_WORDS[Movement.getStance()] or ""
 	updateClock()
 	updatePileMarker()
 end

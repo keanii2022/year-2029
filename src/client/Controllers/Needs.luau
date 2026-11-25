@@ -12,6 +12,7 @@ local NeedsLogic = require(ReplicatedStorage.Shared.Logic.Needs)
 local Glyphs = require(script.Parent.Glyphs)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
+local Movement = require(script.Parent.Movement)
 
 local settings = Config.Supplies
 local needSettings = settings.Needs
@@ -20,6 +21,8 @@ local player = Players.LocalPlayer
 local PANEL = Color3.fromRGB(12, 12, 14)
 local TEXT = Color3.fromRGB(225, 222, 215)
 local SPRAY_RED = Color3.fromRGB(200, 28, 22)
+local STANCE_WORDS = { Crouch = "CROUCH", Sprint = "SPRINT" }
+local stanceLabel: TextLabel
 local FEEDBACK_TIME = 2
 local BAR_WIDTH = 240
 -- Phone spots, matching Hud's touch health bar (156, 90, 220 wide)
@@ -264,6 +267,19 @@ function Needs.Init()
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	buildBar("Energy", 70)
+	-- Crouch / sprint shows by the ENERGY word, since sprinting is what drains it
+	stanceLabel = label({
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, 0, 0, -4),
+		Size = UDim2.fromOffset(90, 14),
+		Text = "",
+		TextSize = 12,
+		TextColor3 = SPRAY_RED,
+		TextXAlignment = Enum.TextXAlignment.Right,
+	}, bars.Energy.panel)
+	RunService.Heartbeat:Connect(function()
+		stanceLabel.Text = STANCE_WORDS[Movement.getStance()] or ""
+	end)
 	buildBar("Hunger", 100)
 	buildHint()
 	buildShoppingList()
