@@ -58,6 +58,8 @@ return {
 		expect(reason).toBe("player")
 		_, reason = place({ groundFound = false })
 		expect(reason).toBe("no ground")
+		_, reason = place({ sightBlocked = true, blocked = true })
+		expect(reason).toBe("through wall")
 	end,
 	["movable keeps fixed structure and oversized pieces in place"] = function()
 		local fixed = { wall_lower = true }

@@ -17,6 +17,7 @@ export type PlaceCheck = {
 	maxHeightAboveFeet: number,
 	blocked: boolean,
 	playerInWay: boolean?,
+	sightBlocked: boolean?, -- something solid between the placer's camera and the spot
 }
 
 function GrabRules.canGrab(check: GrabCheck): (boolean, string?)
@@ -41,6 +42,9 @@ function GrabRules.canPlace(check: PlaceCheck): (boolean, string?)
 	end
 	if check.distance > check.reach then
 		return false, "too far"
+	end
+	if check.sightBlocked then
+		return false, "through wall"
 	end
 	if check.heightAboveFeet > check.maxHeightAboveFeet then
 		return false, "too high"

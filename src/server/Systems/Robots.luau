@@ -25,6 +25,7 @@ local RobotRooms = require(ReplicatedStorage.Shared.Logic.RobotRooms)
 local RobotSenses = require(ReplicatedStorage.Shared.Logic.RobotSenses)
 local RobotWeapons = require(ReplicatedStorage.Shared.Logic.RobotWeapons)
 local DayNight = require(script.Parent.DayNight)
+local Grab = require(script.Parent.Grab)
 local Interact = require(script.Parent.Interact)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
@@ -73,6 +74,8 @@ export type Robot = {
 	sweepSide: number, -- which way the broom last swung, so dust puffs at each end of a stroke
 	loose: Loose?,
 	looseAt: number,
+	-- a brute pulling a fortified piece loose: since when, last frame at it, next creak, which creak
+	pry: { instance: PVInstance, since: number, lastAt: number, noiseAt: number, sound: number }?,
 	heardUpTo: number,
 	ignore: { [Player]: number },
 	lastPoses: { [string]: number },
@@ -677,6 +680,7 @@ local function spawnRobot(
 		sweepSide = 0,
 		loose = nil,
 		looseAt = 0,
+		pry = nil,
 		heardUpTo = now,
 		ignore = {},
 		lastPoses = {},
@@ -784,7 +788,8 @@ local function grabbableOf(part: BasePart): PVInstance?
 	return nil
 end
 
-local function isLoose(instance: PVInstance, position: Vector3): boolean
+-- Fortified fort pieces hold against everything but a brute, which pries them out (prySpot).
+local function isLoose(instance: PVInstance, position: Vector3, typeName: string): boolean
 	if claimed[instance] or inAnyRoom(position) then
 		return false
 	end
@@ -792,7 +797,30 @@ local function isLoose(instance: PVInstance, position: Vector3): boolean
 	if math.max(size.X, size.Y, size.Z) > settings.MaxHaulSize then
 		return false
 	end
-	return instance:GetAttribute("CarriedBy") == nil
+	if instance:GetAttribute("CarriedBy") ~= nil then
+		return false
+	end
+	return typeName == "brute" or not Grab.isFortified(instance)
+end
+
+-- A brute at a fortified piece: creaks loudly through Grab's pry noise until BrutePrySeconds of
+-- prying are done. Returns true once it's loose. Walking off for a moment starts over.
+local function pryLoose(robot: Robot, instance: PVInstance, now: number): boolean
+	local pry = robot.pry
+	if not pry or pry.instance ~= instance or now - pry.lastAt > 1 then
+		pry = { instance = instance, since = now, lastAt = now, noiseAt = now, sound = 0 }
+		robot.pry = pry
+	end
+	pry.lastAt = now
+	if now >= pry.noiseAt then
+		pry.noiseAt = now + Config.Grab.PryNoiseInterval
+		pry.sound = Grab.pryNoise(instance, robot.model, pry.sound)
+	end
+	if now - pry.since < Config.Grab.BrutePrySeconds then
+		return false
+	end
+	robot.pry = nil
+	return true
 end
 
 local function findLoose(robot: Robot): Loose?
@@ -820,7 +848,7 @@ local function findLoose(robot: Robot): Loose?
 			checked[prop] = true
 			local position = prop:GetPivot().Position
 			local d = flatDistance(position, robot.position)
-			if d < bestDistance and isLoose(prop, position) then
+			if d < bestDistance and isLoose(prop, position, robot.typeName) then
 				best, bestDistance = { instance = prop, kind = "prop", position = position }, d
 			end
 		end
@@ -912,6 +940,24 @@ local function turnToward(robot: Robot, direction: Vector3, dt: number)
 	end
 end
 
+-- Robots are moved with PivotTo, so nothing physical stops them: walking straight (close goals, or
+-- when no path exists because a fort is sealed) went right through placed pieces. A low ray ahead
+-- stops them at any piece a player placed instead.
+local fortParams = RaycastParams.new()
+fortParams.FilterType = Enum.RaycastFilterType.Exclude
+fortParams.RespectCanCollide = true
+
+local function fortInTheWay(robot: Robot, direction: Vector3, step: number): boolean
+	fortParams.FilterDescendantsInstances = { folder, stashFolder }
+	local from = robot.position + Vector3.yAxis
+	local hit = workspace:Raycast(from, direction * (settings.AgentRadius * 0.5 + step), fortParams)
+	if not hit then
+		return false
+	end
+	local prop = grabbableOf(hit.Instance :: BasePart)
+	return prop ~= nil and prop:GetAttribute("PlacedBy") ~= nil and prop:GetAttribute("CarriedBy") == nil
+end
+
 local function moveStep(robot: Robot, dt: number)
 	if robot.knockedUntil or os.clock() < robot.staggerUntil then
 		robot.moving = false
@@ -935,6 +981,12 @@ local function moveStep(robot: Robot, dt: number)
 		return
 	end
 	local step = math.min(offset.Magnitude, robot.speed * dt)
+	if fortInTheWay(robot, offset.Unit, step) then
+		robot.moving = false
+		turnToward(robot, offset, dt)
+		place(robot)
+		return
+	end
 	robot.position = onGround(robot.position + offset.Unit * step, robot.position.Y)
 	robot.stride += step * 0.9
 	robot.moving = true
@@ -1324,8 +1376,12 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 			if atHome then randomRoomPoint(robot.room, 4) else robot.position + robot.facing * 3
 		)
 	end
-	if intent.pickup and robot.loose then
-		pickUp(robot, robot.loose)
+	local loose = robot.loose
+	if intent.pickup and loose then
+		local fortified = loose.kind == "prop" and Grab.isFortified(loose.instance)
+		if not fortified or pryLoose(robot, loose.instance, now) then
+			pickUp(robot, loose)
+		end
 	end
 	if intent.catch then
 		catch(robot, intent.catch, alive, now)

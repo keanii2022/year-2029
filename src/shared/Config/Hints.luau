@@ -37,10 +37,12 @@ return {
 		Touch = "Pick HANDS to pry",
 	},
 	CarryHint = {
-		Keyboard = "{Fire} Place   Hold {Fire} Let go   {=Arrows} Spin / tip   {=Z} {=X} Roll   {=Scroll} Closer / farther   Hold to spin faster",
-		Gamepad = "{Fire} Place   Hold {Fire} Let go   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther   Hold to spin faster",
-		Touch = "{Fire} Place   Hold {Fire} Let go   {=SPIN} {=TIP} {=ROLL} Turn it, hold to go faster   {CarryCloser} {CarryFarther} Distance",
+		Keyboard = "{Fire} Place   Hold {Fire} Let go   {=R} Spin   {=T} Tip   Hold {=Shift} Fine, no snap   {=Scroll} Closer / farther",
+		Gamepad = "{Fire} Place   Hold {Fire} Let go   {=DPadLeft} {=DPadRight} Spin   {=DPadUp} {=DPadDown} Tip   Hold {=L2} Fine, no snap   {=L1} {=R1} Closer / farther",
+		Touch = "{Fire} Place   Hold {Fire} Let go   {CarrySpin} Spin, hold: fine   {CarryTip} Tip   {CarryCloser} {CarryFarther} Distance",
 	},
+	-- Once, the first time you stand near a fort of your own
+	FortNudge = "This is your fort",
 
 	ItemNudge = {
 		Keyboard = "{=1} - {=6} or {=Scroll} picks what you hold   {Backpack} Bag",
@@ -119,11 +121,11 @@ return {
 				{ "{Emp}", "Throw an EMP" },
 				{ "{Disruptor}", "Fire the disruptor" },
 				{ "CARRYING" },
-				{ "{Fire}", "Drop it" },
-				{ "{=Arrows}", "Left / right spin, up / down tip" },
-				{ "{=Z} {=X}", "Roll it (or {=RMB} + left / right)" },
-				{ "{=R} {=T}", "Spin, tip. Hold any: faster" },
+				{ "{Fire}", "Place it. Hold: let go" },
+				{ "{=R} {=T}", "Spin, tip a quarter turn" },
+				{ "{=Shift} + {=R} {=T}", "Fine turn, no snapping" },
 				{ "{=Scroll}", "Closer or farther" },
+				{ "{Grab}", "Drop it" },
 			},
 		},
 		-- Callouts beside the pad drawing: left half of the pad on the left, right half on the right
@@ -147,7 +149,7 @@ return {
 				{ "{=RS}", "Look. Click: crouch" },
 			},
 			footer = "{=Touchpad} Tap: this card. Hold: your record   {=Options} Menu",
-			carry = "Carrying:   {=R2} Place, hold to let go   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther",
+			carry = "Carrying:   {=R2} Place, hold to let go   {=DPad} Spin / tip   Hold {=L2} Fine, no snap   {=L1} {=R1} Closer / farther",
 		},
 		Touch = {
 			left = {
@@ -170,7 +172,7 @@ return {
 				{ "{=Tap bar}", "Pick what you hold" },
 				{ "{Backpack}", "Bag. Tap item, tap slot" },
 				{ "{Aim} {Reload}", "Show while you hold a gun" },
-				{ "{=SPIN} {=TIP} {=ROLL}", "Carrying: turn it every way" },
+				{ "{CarrySpin} {CarryTip}", "Carrying: spin (hold: fine), tip" },
 				{ "{CarryCloser} {CarryFarther}", "Carrying: closer, farther" },
 			},
 		},

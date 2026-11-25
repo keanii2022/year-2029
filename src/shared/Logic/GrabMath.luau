@@ -2,7 +2,7 @@
 -- Angles are degrees in [0, 360).
 local GrabMath = {}
 
-export type Axis = "Turn" | "Tip" | "Roll"
+export type Axis = "Turn" | "Tip"
 
 local EPSILON = 1e-4
 
@@ -18,29 +18,7 @@ function GrabMath.wrapAngle(angle: number): number
 	return wrapped
 end
 
--- Degrees per second for a rotate input held heldFor seconds: nothing until delay (a tap only
--- steps), then startSpeed ramping up to maxSpeed over rampSeconds.
-function GrabMath.rotateSpeed(
-	heldFor: number,
-	delay: number,
-	startSpeed: number,
-	maxSpeed: number,
-	rampSeconds: number
-): number
-	if heldFor < delay then
-		return 0
-	end
-	local ramp = if rampSeconds > 0 then math.clamp((heldFor - delay) / rampSeconds, 0, 1) else 1
-	return startSpeed + (maxSpeed - startSpeed) * ramp
-end
-
--- The extra degrees that round a hold's total turn to the nearest step, so a prop that started on
--- the grid lands back on it when the input is let go.
-function GrabMath.snapTurn(turned: number, step: number): number
-	return math.floor(turned / step + 0.5) * step - turned
-end
-
--- The camera's yaw in degrees, snapped to the nearest quarter turn. Tip and roll follow this
+-- The camera's yaw in degrees, snapped to the nearest quarter turn. Tip follows this
 -- instead of the exact camera so props stay square with the walls. lookX / lookZ are the camera's
 -- look vector; Roblox yaw 0 looks down -Z.
 function GrabMath.quarterYaw(lookX: number, lookZ: number): number

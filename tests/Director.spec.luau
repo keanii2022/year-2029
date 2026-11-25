@@ -49,6 +49,7 @@ return {
 		expect(big.count).toBe(3)
 		expect(big.x).toBeNear(30)
 		expect(big.z).toBeNear(0)
+		expect(#(big.members :: { number })).toBe(3)
 		expect(#Director.cluster({}, 45)).toBe(0)
 	end,
 	["groups within meet range count as together"] = function()

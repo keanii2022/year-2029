@@ -478,7 +478,7 @@ Best guesses made during the /parallel run. Change any of them in the step's Con
 - Step 3: Grab/drop on F / R1, since E and Square stay free for using objects.
 - Step 3: Free rotate is hold Left Alt + R on keyboard (the plan only gave L1 for the pad). Gamepad gets no closer/farther control because the plan only named the mouse wheel.
 - Step 3: Ghost is soft green when the spot's OK and red when it's blocked; the rotate arrow is yellow for turn, light blue for tip, purple for roll. Readable in a dim room.
-- Step 3: Limits: stack up to 12 studs above your feet, grab from 12, place up to 18, hold 4-12 out. Heavy props slow you down to 55% (a couch is about 72%). A fort's walls end up roughly double your height.
+- Step 3: Limits: stack up to 20 studs above your feet, grab from 12, place up to 24, hold 4-12 out. Heavy props slow you down to 55% (a couch is about 72%). A fort's walls end up roughly double your height.
 - Step 2: Showroom at (2000, 0, 0) on dark concrete, rows by group with uppercase labels and name tags within 60 studs. Kept far from the test room so they never overlap.
 - Step 2: You spawn in the test room; set `Config.Models.ShowroomSpawnPlayers = true` to spawn in the showroom instead. Keeps step 1 testing clean.
 - Step 2: Demo motion is on: every moving part opens and closes on a 4-second loop (doors 100°, slides 80%, levers 30°). Lets you check the hinges at a glance.
