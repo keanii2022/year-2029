@@ -1039,6 +1039,8 @@ local function spawnBody(bot: Bot)
 	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart
 	model.Name = bot.name
 	humanoid.DisplayName = bot.name
+	humanoid.NameDisplayDistance = Config.Game.NameDistance
+	humanoid.NameOcclusion = Enum.NameOcclusion.OccludeAll
 	humanoid.MaxHealth = guns.MaxHealth
 	humanoid.Health = guns.MaxHealth
 	local at = spawnSpot(bot) + Vector3.new(random:NextNumber(-3, 3), 3.5, random:NextNumber(-3, 3))

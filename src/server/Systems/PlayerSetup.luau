@@ -22,6 +22,8 @@ local function setUpCharacter(character: Model)
 	humanoid.WalkSpeed = settings.WalkSpeed
 	humanoid.UseJumpPower = false
 	humanoid.JumpHeight = settings.JumpHeight
+	humanoid.NameDisplayDistance = Config.Game.NameDistance
+	humanoid.NameOcclusion = Enum.NameOcclusion.OccludeAll
 end
 
 local function setUpPlayer(player: Player)
