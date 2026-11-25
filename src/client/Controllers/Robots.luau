@@ -735,7 +735,8 @@ local function voice(model: Model)
 		end
 		if state == "suspicious" then
 			popMark(model, "?", settings.SuspiciousEyeColor)
-			if model:GetAttribute("Role") == "chore" then
+			-- Keani's recorded notice line wins; the broken welcome only fills in when no voice line played
+			if model:GetAttribute("Role") == "chore" and not line then
 				playOnce(body, sounds.ChoreNotice, sounds.ChoreNoticeVolume, night, "SFX")
 			end
 		end
