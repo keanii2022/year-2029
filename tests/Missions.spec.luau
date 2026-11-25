@@ -151,4 +151,50 @@ return {
 		expect(rows[1].done).toBe(false)
 		expect(rows[1].reward).toBe("+12 Blaster Cells")
 	end,
+	["the first day is a chain: haul, loot, bank, survive"] = function()
+		local list = Missions.firstDay(config)
+		expect(#list).toBe(4)
+		expect(list[1].kind).toBe("haul")
+		expect(list[2].kind).toBe("loot")
+		expect(list[3].kind).toBe("bank")
+		expect(list[4].kind).toBe("survive")
+		local live = Missions.active(list)
+		expect(#live).toBe(1)
+		expect(live[1]).toBe(list[1])
+		list[1].done = true
+		expect(Missions.active(list)[1]).toBe(list[2])
+	end,
+	["only the live chain step shows an arrow; later steps wait"] = function()
+		local list = Missions.firstDay(config)
+		list[1].target = "here"
+		list[2].target = "there"
+		local rows = Missions.snapshot(config, list)
+		expect(rows[1].target).toBe("here")
+		expect(rows[1].waiting).toBe(false)
+		expect(rows[2].target).toBe(nil)
+		expect(rows[2].waiting).toBe(true)
+	end,
+	["a normal list keeps every unfinished mission live"] = function()
+		local list = { mission("haul"), mission("hide", { done = true }), mission("deep") }
+		expect(#Missions.active(list)).toBe(2)
+	end,
+	["loot only counts what goes in the bag inside a robot room"] = function()
+		local m = mission("loot")
+		expect(Missions.check(m, facts({ inRoom = false, carried = 2 }), 2)).toBe(false)
+		expect(Missions.check(m, facts({ inRoom = false, carried = 5 }), 2)).toBe(false)
+		expect(Missions.check(m, facts({ inRoom = true, carried = 5 }), 2)).toBe(false)
+		expect(Missions.check(m, facts({ inRoom = true, carried = 6 }), 2)).toBe(true)
+	end,
+	["bank needs the locker to gain something"] = function()
+		local m = mission("bank")
+		expect(Missions.check(m, facts({ banked = 3 }), 2)).toBe(false)
+		expect(Missions.check(m, facts({ banked = 1 }), 2)).toBe(false)
+		expect(Missions.check(m, facts({ banked = 2 }), 2)).toBe(true)
+	end,
+	["lore finishes once today's piece is read"] = function()
+		local m = Missions.lore(config, rolls({ 0.5 }))
+		expect(m.kind).toBe("lore")
+		expect(Missions.check(m, facts({}), 2)).toBe(false)
+		expect(Missions.check(m, facts({ readLore = true }), 2)).toBe(true)
+	end,
 }

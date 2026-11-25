@@ -1,6 +1,7 @@
 -- The locker and your record. Opening a locker shows STASH: your bag and your saved locker side
 -- by side, click a stack to move it. M (or Select on gamepad) opens RECORD anywhere: stats,
--- earned looks and laying out your blueprint. Same dark look as Hud; warnings in red spray paint.
+-- earned looks and laying out your blueprint. FILES is the 2029 Files: chapters and the lore you've
+-- found, with a reader. Same dark look as Hud; warnings in red spray paint.
 local ContextActionService = game:GetService("ContextActionService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
@@ -9,6 +10,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local FilesLogic = require(ReplicatedStorage.Shared.Logic.Files)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ScoresLogic = require(ReplicatedStorage.Shared.Logic.Scores)
@@ -29,6 +31,7 @@ local SLOTS = { "Hat", "Colour", "Trail" }
 -- Hats and trails can be taken off; everyone always wears a colour
 local CAN_REMOVE = { Hat = true, Trail = true }
 
+type View = "stash" | "record" | "files"
 type Stack = { id: string, count: number }
 type Record = {
 	stats: { [string]: number },
@@ -57,8 +60,18 @@ local layOutButton: TextButton
 local feedbackLabel: TextLabel
 local looks: { [string]: { name: TextLabel, hint: TextLabel } } = {}
 local browsing: { [string]: number } = {}
+-- FILES page
+local FilesSettings = Config.Files
+local filesCatalog = FilesLogic.catalog(FilesSettings, Config.NightTricks.Journals)
+local filesTab: TextButton
+local filesView: Frame
+local filesHeader: TextLabel
+local filesList: ScrollingFrame
+local readerTitle: TextLabel
+local readerText: TextLabel
+local filesFound: { string } = {}
 
-local view: "stash" | "record" | nil = nil
+local view: View? = nil
 local lockerOpen = false
 local lockerPosition: Vector3? = nil
 local stash: { Stack } = {}
@@ -233,7 +246,7 @@ local function refreshRecord()
 		for index, def in Settings.Stats do
 			local row = frame({
 				LayoutOrder = index,
-				Size = UDim2.new(1, 0, 0, 24),
+				Size = UDim2.new(1, 0, 0, 22),
 				BackgroundTransparency = 1,
 			}, statsList)
 			label({
@@ -264,7 +277,7 @@ local function refreshRecord()
 	end
 end
 
-local show: (target: "stash" | "record" | nil) -> ()
+local show: (target: View?) -> ()
 
 -- Circle shuts the panel. Input drops the pad's buttons while the panel holds the selection, so
 -- without this the only way out on a controller was finding the close button.
@@ -275,7 +288,87 @@ local function onPad(_action: string, inputState: Enum.UserInputState): Enum.Con
 	return Enum.ContextActionResult.Sink
 end
 
-function show(target: "stash" | "record" | nil)
+-- 2029 Files ------------------------------------------------------------------------------------
+
+local function read(title: string, text: string)
+	readerTitle.Text = title
+	readerText.Text = text
+end
+
+local function fileRow(order: number, text: string, open: boolean, onClick: () -> ())
+	button({
+		LayoutOrder = order,
+		Size = UDim2.new(1, -8, 0, 26),
+		Text = text,
+		TextSize = 12,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextTransparency = if open then 0 else 0.55,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		AutoButtonColor = open,
+	}, filesList, onClick)
+end
+
+local function refreshFiles()
+	clearRows(filesList)
+	local count = FilesLogic.count(filesFound, filesCatalog)
+	local chapters = FilesSettings.Chapters
+	local per = FilesSettings.PerChapter
+	local open = FilesLogic.chaptersOpen(count, per, #chapters)
+	local nextAt = FilesLogic.nextChapterAt(count, per, #chapters)
+	filesHeader.Text = `FOUND {count}/{#filesCatalog}`
+		.. (if nextAt then `   NEXT CHAPTER AT {nextAt}` else "")
+	read("2029 FILES", FilesSettings.Prologue)
+	for index, chapter in chapters do
+		local isOpen = index <= open
+		fileRow(
+			index,
+			if isOpen then string.upper(chapter.title) else `CHAPTER {index}  ({index * per} found)`,
+			isOpen,
+			function()
+				if isOpen then
+					read(chapter.title, chapter.text)
+				end
+			end
+		)
+	end
+	for index, entry in filesCatalog do
+		local found = table.find(filesFound, entry.id) ~= nil
+		fileRow(#chapters + index, if found then entry.title else `???  ({entry.kind})`, found, function()
+			if found then
+				read(entry.title, entry.text)
+			end
+		end)
+	end
+end
+
+local function buildFiles()
+	filesView = frame({
+		Position = UDim2.fromOffset(20, 56),
+		Size = UDim2.new(1, -40, 1, -76),
+		BackgroundTransparency = 1,
+	}, panel)
+	filesHeader =
+		label({ Size = UDim2.new(0.45, 0, 0, 20), TextSize = 13, TextTransparency = 0.3 }, filesView)
+	filesList = list({ Position = UDim2.fromOffset(0, 26), Size = UDim2.new(0.45, 0, 1, -26) }, filesView)
+	readerTitle = label({
+		Position = UDim2.new(0.5, 10, 0, 0),
+		Size = UDim2.new(0.5, -10, 0, 30),
+		Font = Enum.Font.PermanentMarker,
+		TextColor3 = SPRAY_RED,
+		TextSize = 18,
+		TextWrapped = true,
+	}, filesView)
+	readerText = label({
+		Position = UDim2.new(0.5, 10, 0, 40),
+		Size = UDim2.new(0.5, -10, 1, -40),
+		TextSize = 14,
+		TextWrapped = true,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		Font = Enum.Font.Gotham,
+	}, filesView)
+end
+
+function show(target: View?)
 	if target == nil and lockerOpen then
 		lockerOpen = false
 		closeRemote:FireServer()
@@ -297,15 +390,22 @@ function show(target: "stash" | "record" | nil)
 	end
 	stashView.Visible = target == "stash"
 	recordView.Visible = target == "record"
+	filesView.Visible = target == "files"
 	stashTab.Visible = lockerOpen
-	titleLabel.Text = if target == "stash" then "YOUR LOCKER" else "YOUR RECORD"
+	titleLabel.Text = if target == "stash"
+		then "YOUR LOCKER"
+		elseif target == "files" then "2029 FILES"
+		else "YOUR RECORD"
 	stashTab.BackgroundTransparency = if target == "stash" then 0 else 0.6
 	recordTab.BackgroundTransparency = if target == "record" then 0 else 0.6
+	filesTab.BackgroundTransparency = if target == "files" then 0 else 0.6
 	if target == "stash" then
 		refreshStash()
 	elseif target == "record" then
 		table.clear(browsing)
 		refreshRecord()
+	elseif target == "files" then
+		refreshFiles()
 	end
 	if target and UserInputService.GamepadEnabled then
 		GuiService.SelectedObject = closeButton
@@ -324,7 +424,7 @@ local function buildPanel()
 		Visible = false,
 	}, gui)
 	titleLabel =
-		label({ Position = UDim2.fromOffset(20, 14), Size = UDim2.fromOffset(300, 28), TextSize = 20 }, panel)
+		label({ Position = UDim2.fromOffset(20, 14), Size = UDim2.fromOffset(200, 28), TextSize = 20 }, panel)
 	closeButton = button(
 		{
 			AnchorPoint = Vector2.new(1, 0),
@@ -339,7 +439,7 @@ local function buildPanel()
 	)
 	stashTab = button(
 		{
-			Position = UDim2.fromOffset(330, 14),
+			Position = UDim2.fromOffset(224, 14),
 			Size = UDim2.fromOffset(100, 28),
 			Text = "STASH",
 			TextSize = 12,
@@ -351,7 +451,7 @@ local function buildPanel()
 	)
 	recordTab = button(
 		{
-			Position = UDim2.fromOffset(436, 14),
+			Position = UDim2.fromOffset(330, 14),
 			Size = UDim2.fromOffset(100, 28),
 			Text = "RECORD",
 			TextSize = 12,
@@ -359,6 +459,18 @@ local function buildPanel()
 		panel,
 		function()
 			show("record")
+		end
+	)
+	filesTab = button(
+		{
+			Position = UDim2.fromOffset(436, 14),
+			Size = UDim2.fromOffset(100, 28),
+			Text = "FILES",
+			TextSize = 12,
+		},
+		panel,
+		function()
+			show("files")
 		end
 	)
 end
@@ -566,6 +678,7 @@ function Locker.Init()
 	buildPanel()
 	buildStash()
 	buildRecord()
+	buildFiles()
 	buildFeedback()
 end
 
@@ -607,7 +720,16 @@ function Locker.Start()
 			end
 		end
 	end)
+	Net.event("FilesState").OnClientEvent:Connect(function(state)
+		if type(state) == "table" and type(state.found) == "table" then
+			filesFound = state.found
+			if view == "files" then
+				refreshFiles()
+			end
+		end
+	end)
 	Net.event("InventorySync"):FireServer()
+	Net.event("FilesSync"):FireServer()
 	Net.event("RecordSync"):FireServer()
 	Net.event("SavesSync"):FireServer()
 

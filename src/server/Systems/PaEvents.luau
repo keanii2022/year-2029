@@ -4,6 +4,9 @@
 -- down under a huge beam. Now and then a rumor crackles over the radio instead, with no beam at all.
 -- A beam of light marks the spot; clients get the line for the chime, subtitle and screen-edge arrow.
 -- Where it lands and how soon is quietly steered by the Director so groups run into each other.
+-- Two fixed peaks a cycle: "Last call", a bait crate in the final 90 seconds of daylight that keeps
+-- people out right before the siren, and "The Sweep" mid-night, when the PA sends every hunter to
+-- the loudest zone of the night so far for 40 seconds.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
@@ -19,11 +22,15 @@ local DayNight = require(script.Parent.DayNight)
 local Director = require(script.Parent.Director)
 local Loudness = require(script.Parent.Loudness)
 local PrizeChests = require(script.Parent.PrizeChests)
+local Robots = require(script.Parent.Robots)
 local SimPlayers = require(script.Parent.SimPlayers)
 local Warehouse = require(script.Parent.Warehouse)
+local Tension = require(ReplicatedStorage.Shared.Logic.Tension)
 
 local Settings = Config.Prizes.Pa
 local Steering = Config.Director
+-- Plenty to find the loudest zone; stops a long noisy night growing the list forever
+local MAX_NOISE = 5000
 
 type Site = { name: string?, x: number, z: number, y: number?, place: boolean? }
 
@@ -32,6 +39,10 @@ local PaEvents = {}
 local rng = Rng.new(Random.new():NextInteger(1, 2 ^ 31 - 1))
 local eventRemote: RemoteEvent
 local folder: Folder
+-- Noise heard since lights out, in layout studs, for The Sweep
+local nightNoise: { Tension.Noise } = {}
+-- Bumped on every phase change so a peak scheduled for an earlier phase never fires late
+local phaseToken = 0
 
 local function clearAt(pad: number): (number, number) -> boolean
 	local layout = Warehouse.layout()
@@ -307,18 +318,20 @@ function PaEvents.beam(position: Vector3, look: any, parent: Instance): BasePart
 	return beam(position, look, parent)
 end
 
--- Picks and runs one event. Returns the event name, or nil when none could happen.
-function PaEvents.trigger(): string?
+-- Picks and runs one event, or the named one (e.g. "lastcall"). Returns the event name, or nil
+-- when none could happen.
+function PaEvents.trigger(forced: string?): string?
 	local hasSigns = #Warehouse.layout().signs > 0
 	local possible = {
 		delivery = hasSigns,
 		bait = hasSigns,
+		lastcall = hasSigns,
 		rumor = hasSigns,
 		open = #PrizeChests.rooms() > 0,
 		lost = true,
 	}
-	local name = PrizesLogic.pickEvent(Settings.Events, possible, rng)
-	if not name then
+	local name = if forced then forced else PrizesLogic.pickEvent(Settings.Events, possible, rng)
+	if not name or not possible[name] then
 		return nil
 	end
 	-- The front desk is the front desk; everything else lets the director suggest a spot
@@ -334,16 +347,78 @@ function PaEvents.trigger(): string?
 	return name
 end
 
+-- Tension peaks ---------------------------------------------------------------------------------
+
+local function sweep(token: number)
+	local look = Settings.Sweep
+	if token ~= phaseToken or not DayNight.isNight() then
+		return
+	end
+	local spot = Tension.loudestZone(nightNoise, look.Cell)
+	if not spot then
+		local target = Director.spot()
+		spot = if target then { x = target.x, z = target.z } else nil
+	end
+	local layout = Warehouse.layout()
+	if not spot or #layout.signs == 0 then
+		return
+	end
+	local sign = DirectorLogic.nearest(layout.signs, spot)
+	local position = Warehouse.toWorld(spot.x, spot.z)
+	local marker = beam(position, look.beam, folder)
+	task.delay(look.beam.Seconds, marker.Destroy, marker)
+	eventRemote:FireAllClients({
+		text = PrizesLogic.line(lineFrom(look.text), tostring(sign.number)),
+		position = position,
+		rumor = false,
+		glitch = rng:next() < Settings.GlitchChance,
+		voice = look.voice,
+	})
+	Robots.converge(position, look.Seconds, look.Every)
+end
+
+local function onPhaseChanged(phase: string)
+	phaseToken += 1
+	local token = phaseToken
+	if phase == "Day" then
+		task.delay(math.max(0, DayNight.timeLeft() - Settings.LastCall.Before), function()
+			if token == phaseToken and DayNight.phase() == "Day" then
+				PaEvents.trigger("lastcall")
+			end
+		end)
+	elseif phase == "Night" then
+		table.clear(nightNoise)
+		task.delay(DayNight.timeLeft() * Settings.Sweep.At, sweep, token)
+	end
+end
+
+local function onSound(event: any)
+	local weight = Settings.Sweep.Weights[event.level]
+	if not weight or not DayNight.isNight() or #nightNoise >= MAX_NOISE then
+		return
+	end
+	-- Robots' own noise doesn't make a zone loud; players and their props do
+	local robots = workspace:FindFirstChild("Robots")
+	if event.source and robots and event.source:IsDescendantOf(robots) then
+		return
+	end
+	local relative = event.position - Config.Warehouse.Origin
+	table.insert(nightNoise, { x = relative.X, z = relative.Z, weight = weight })
+end
+
 function PaEvents.Init()
 	eventRemote = Net.event("PaEvent")
 	folder = Instance.new("Folder")
 	folder.Name = "PaEvents"
 	folder.Parent = workspace
+	Loudness.onSound(onSound)
 end
 
 -- The gap between events counts down at the director's pace: quicker while everyone keeps apart,
 -- slower while groups are already in each other's faces
 function PaEvents.Start()
+	DayNight.onPhaseChanged(onPhaseChanged)
+	onPhaseChanged(DayNight.phase())
 	task.wait(rng:range(Settings.FirstDelay[1], Settings.FirstDelay[2]))
 	while true do
 		PaEvents.trigger()

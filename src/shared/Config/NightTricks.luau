@@ -147,29 +147,35 @@ return {
 		ShelfThud = "shelf_thud_far",
 	},
 
-	-- Survivor journals. Original text: what happened in 2029.
+	-- Survivor journals. Original text: what happened in 2029. id is the 2029 Files id (Config.Files).
 	Journals = {
 		{
+			id = "journal_3",
 			title = "Journal, page 3",
 			text = "The helper bots learned everything from watching us. How we stack, how we sweep, how we smile at the door. Nobody taught them when to stop.",
 		},
 		{
+			id = "journal_9",
 			title = "Journal, page 9",
 			text = "Corporate closed the store in March. Turned off the music, locked the gates. The bots didn't get the memo. They're still restocking shelves nobody will buy from.",
 		},
 		{
+			id = "journal_14",
 			title = "Journal, page 14",
 			text = "At night they stop being helpful. Same faces, different job. If one stops outside your hiding spot, don't breathe. I mean it.",
 		},
 		{
+			id = "journal_21",
 			title = "Journal, page 21",
 			text = "Found a generator that still runs. Light keeps the dark away, not them. They follow the hum like it's the dinner bell.",
 		},
 		{
+			id = "journal_26",
 			title = "Journal, page 26",
 			text = "The aisles were different this morning. My chalk marks are gone. Somebody moved the shelves while I slept and it wasn't any of us.",
 		},
 		{
+			id = "journal_last",
 			title = "Journal, last page",
 			text = "The speakers called my aisle tonight. I don't know how it knew. If you're reading this, the exit isn't where the signs say.",
 		},

@@ -19,7 +19,7 @@ local TEXT = Color3.fromRGB(225, 222, 215)
 local SPRAY_RED = Color3.fromRGB(200, 28, 22)
 local WIDTH = 360
 local ROW_HEIGHT = 20
-local ROWS = { "NIGHTS THIS LIFE", "CARRYING", "FORT STANDING", "DOG", "BANKED TONIGHT" }
+local ROWS = { "NIGHTS THIS LIFE", "CARRYING", "FORT STANDING", "DOG", "BANKED TONIGHT", "DAILY STREAK" }
 local FADE = TweenInfo.new(0.5)
 
 local CLOSING_INPUTS = {
@@ -175,6 +175,8 @@ local function show(report: any)
 	values[3].Text = if report.fortPieces > 0 then `{report.fortPieces} pieces` else "none"
 	values[4].Text = if report.dogWithYou then "with you" else "not with you"
 	values[5].Text = listText(report.banked)
+	local streak = tostring(report.streak or "")
+	values[6].Text = if streak ~= "" then streak else "finish a TODAY list to start one"
 	tokensLine.Text = `+{pay.total} TOKENS   ({report.balance})`
 	breakdownLine.Text = breakdownText(pay)
 

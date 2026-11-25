@@ -29,6 +29,59 @@ return {
 		haul = { weight = 2, texts = { "Move some furniture. Start a fort", "Drag something heavy around" } },
 	},
 
+	-- Rows the TODAY list has room for: PerDay plus the lore mission, or the whole first-day chain
+	MaxRows = 4,
+	-- Arrow targets that move (nearest prop, nearest room) are only resent past this many studs
+	TargetResend = 12,
+	-- The faint screen-edge arrow toward a live mission's target; hides once you're ArrowHideNear away
+	-- (No Color3 in this file: Lune tests load it)
+	Arrow = { Size = 34, Inset = 0.4, Transparency = 0.6 },
+	ArrowHideNear = 10,
+
+	-- The mission that points at the day's lore piece (Config.Files.Daily), added to every normal list
+	Lore = {
+		texts = {
+			"Find today's lost recording",
+			"Something was left out for you",
+			"Find what's humming in the dark",
+		},
+	},
+
+	-- Brand-new players get this chain instead of a random list until they finish it, one step live
+	-- at a time. Survive finishes at the first dawn they're alive for, even if they joined at night.
+	FirstDay = {
+		Title = "FIRST DAY",
+		Steps = {
+			{
+				kind = "haul",
+				text = "Drag something heavy. Start a fort",
+				reward = { item = "Bandage", count = 1 },
+			},
+			{
+				kind = "loot",
+				text = "Take one thing from the nearest robot room",
+				reward = { item = "BlasterCells", count = 12 },
+			},
+			{
+				kind = "bank",
+				text = "Put something in your locker",
+				reward = { item = "FlashlightBattery", count = 2 },
+			},
+			{ kind = "survive", text = "Survive the night", reward = { item = "RationPack", count = 1 } },
+		},
+		DoneLine = "First day done. Now you're one of us.",
+	},
+
+	-- Daily streak: finishing the whole list counts the day (UTC). Missed days pause it.
+	-- Day 7 unlocks a cosmetic through the StreakDays stat (Config.Saves.Cosmetics).
+	Streak = {
+		Rewards = { { day = 3, tokens = 30 } },
+		Live = "STREAK {days}",
+		Paused = "STREAK {days} PAUSED",
+		CountedLine = "Daily streak: {days} days",
+		RewardLine = "{days}-day streak: +{tokens} Tokens",
+	},
+
 	-- Rewards: { item, count, weight }. Rare is rolled first.
 	Rewards = {
 		{ item = "BlasterCells", count = 12, weight = 4 },

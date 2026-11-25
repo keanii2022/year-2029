@@ -184,6 +184,60 @@ return {
 				value = 0.55,
 				loot = { headline = HEADLINE, fill = FILL, rolls = { 1, 2 } },
 			},
+			-- Last call: never picked at random (weight 0). Runs once a day LastCall.Before seconds
+			-- before the siren, a bait crate that opens with about a minute of daylight left, so the
+			-- greedy are still out when the siren goes.
+			lastcall = {
+				weight = 0,
+				text = {
+					"Last call, shoppers. One final prize in aisle {spot}. The store closes soon.",
+					"Attention shoppers, last chance savings in aisle {spot}. Hurry, we're closing.",
+				},
+				voice = nil,
+				value = 0.9,
+				loot = { headline = HEADLINE, fill = FILL, rolls = { 3, 5 } },
+				jackpot = {
+					chance = 0.2,
+					value = 1,
+					loot = { headline = JACKPOT, fill = JACKPOT_FILL, rolls = { 2, 3 } },
+				},
+				countdown = 25,
+				beam = {
+					Width = 7,
+					Height = 140,
+					Color = Color3.fromRGB(255, 60, 40),
+					Transparency = 0.35,
+					LightRange = 40,
+					LightBrightness = 4,
+					Seconds = 150,
+				},
+			},
+		},
+		LastCall = { Before = 90 },
+		-- The Sweep: once a night, At (share of the night) in, the PA sends every hunter to the
+		-- loudest zone of the night so far for Seconds. Noise is bucketed into Cell-stud zones.
+		-- Calls repeat every Every seconds so robots that lose the trail get pulled back in.
+		Sweep = {
+			At = 0.5,
+			Seconds = 40,
+			Every = 6,
+			Cell = 90,
+			-- How much each loudness level counts toward a zone (Config.Interact.Loudness levels)
+			Weights = { quiet = 1, normal = 2, loud = 4 },
+			text = {
+				"Cleanup crew to aisle {spot}. All units. Cleanup crew to aisle {spot}.",
+				"Attention staff: mess reported in aisle {spot}. All helpers respond.",
+			},
+			voice = nil,
+			beam = {
+				Width = 4,
+				Height = 120,
+				Color = Color3.fromRGB(200, 28, 22),
+				Transparency = 0.45,
+				LightRange = 30,
+				LightBrightness = 3,
+				Seconds = 40,
+			},
 		},
 		Rumor = {
 			Sound = "walkie_static",

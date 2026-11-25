@@ -57,6 +57,10 @@ return {
 		{ key = "Downs", label = "Times down" },
 		{ key = "LongestLife", label = "Longest life", minutes = true },
 		{ key = "MissionsDone", label = "Missions done" },
+		-- Best-of stats: Scores.raise keeps the highest
+		{ key = "BestHaul", label = "Best haul banked" },
+		{ key = "StreakDays", label = "Daily streak" },
+		{ key = "FilesFound", label = "2029 Files found" },
 	},
 
 	Boards = {
@@ -64,8 +68,12 @@ return {
 		Size = 10,
 		ReadInterval = 300,
 		WriteInterval = 300,
+		-- weekly = the value is this week's best nights in one life (saved weekly record, not a stat),
+		-- written to a store named with the week number so the board starts empty every Monday (UTC).
+		-- BestHaul is the most items banked between one siren and lights out.
 		List = {
-			{ stat = "NightsSurvived", title = "MOST NIGHTS SURVIVED" },
+			{ stat = "LongestLifeWeek", title = "LONGEST LIFE THIS WEEK", weekly = true },
+			{ stat = "BestHaul", title = "BEST HAUL BANKED" },
 			{ stat = "PlayerKills", title = "MOST TAKEDOWNS" },
 			{ stat = "RobotKills", title = "MOST ROBOTS DISABLED" },
 		},
@@ -131,6 +139,47 @@ return {
 					},
 				},
 			},
+			-- Day 7 of the daily streak
+			{
+				id = "ShiftCap",
+				label = "Night Shift Cap",
+				unlock = { stat = "StreakDays", at = 7 },
+				parts = {
+					{
+						shape = "Ball",
+						size = Vector3.new(1.25, 1.25, 1.25),
+						offset = Vector3.new(0, 0.5, 0),
+						paint = true,
+					},
+					{
+						shape = "Block",
+						size = Vector3.new(1.1, 0.1, 0.7),
+						offset = Vector3.new(0, 0.5, -0.75),
+						paint = true,
+					},
+				},
+			},
+			-- 10 of the 2029 Files
+			{
+				id = "FoundHeadphones",
+				label = "Found Headphones",
+				unlock = { stat = "FilesFound", at = 10 },
+				parts = {
+					{ shape = "Block", size = Vector3.new(1.5, 0.15, 0.3), offset = Vector3.new(0, 0.7, 0) },
+					{
+						shape = "Block",
+						size = Vector3.new(0.25, 0.6, 0.6),
+						offset = Vector3.new(0.72, 0.15, 0),
+						paint = true,
+					},
+					{
+						shape = "Block",
+						size = Vector3.new(0.25, 0.6, 0.6),
+						offset = Vector3.new(-0.72, 0.15, 0),
+						paint = true,
+					},
+				},
+			},
 		},
 		Colour = {
 			{ id = "Concrete", label = "Concrete", color = Color3.fromRGB(150, 148, 142) },
@@ -158,6 +207,19 @@ return {
 				color = Color3.fromRGB(40, 190, 90),
 				unlock = { stat = "NightsSurvived", at = 10 },
 			},
+			-- 5 and 20 of the 2029 Files
+			{
+				id = "VhsBlue",
+				label = "VHS Blue",
+				color = Color3.fromRGB(58, 88, 170),
+				unlock = { stat = "FilesFound", at = 5 },
+			},
+			{
+				id = "ArchiveSepia",
+				label = "Archive Sepia",
+				color = Color3.fromRGB(150, 112, 72),
+				unlock = { stat = "FilesFound", at = 20 },
+			},
 		},
 		Trail = {
 			{
@@ -184,6 +246,16 @@ return {
 				lifetime = 1.2,
 				width = 0.5,
 				transparency = 0.2,
+			},
+			-- 15 of the 2029 Files
+			{
+				id = "Static",
+				label = "Static",
+				unlock = { stat = "FilesFound", at = 15 },
+				lifetime = 0.25,
+				width = 0.45,
+				transparency = 0.55,
+				neon = true,
 			},
 		},
 	},

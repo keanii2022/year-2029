@@ -65,4 +65,35 @@ return {
 			"Longest life 20 min/20 min"
 		)
 	end,
+	["raise only keeps the best"] = function()
+		local stats = { BestHaul = 5 }
+		local haulDefs = { { key = "BestHaul", label = "Best haul" } }
+		expect(Scores.raise(stats, haulDefs, "BestHaul", 3)).toBe(false)
+		expect(Scores.raise(stats, haulDefs, "BestHaul", 8.6)).toBe(true)
+		expect(stats.BestHaul).toBe(8)
+		expect(Scores.raise(stats, haulDefs, "Nope", 99)).toBe(false)
+		expect(Scores.raise(stats, haulDefs, "BestHaul", 0 / 0)).toBe(false)
+	end,
+	["weeks start on Monday UTC"] = function()
+		local day = 86400
+		expect(Scores.weekOf(0)).toBe(0) -- Thursday 1 Jan 1970
+		expect(Scores.weekOf(4 * day - 1)).toBe(0) -- Sunday night
+		expect(Scores.weekOf(4 * day)).toBe(1) -- Monday
+		expect(Scores.weekOf(11 * day - 1)).toBe(1)
+		expect(Scores.weekOf(11 * day)).toBe(2)
+	end,
+	["the weekly record resets with the week"] = function()
+		local weekly = { week = 10, nights = 4 }
+		expect(Scores.recordWeekLife(weekly, 10, 3)).toBe(false)
+		expect(Scores.recordWeekLife(weekly, 10, 5)).toBe(true)
+		expect(Scores.weekValue(weekly, 10)).toBe(5)
+		expect(Scores.weekValue(weekly, 11)).toBe(0)
+		expect(Scores.recordWeekLife(weekly, 11, 1)).toBe(true)
+		expect(weekly.week).toBe(11)
+		expect(weekly.nights).toBe(1)
+	end,
+	["weekly boards put the week in the store key"] = function()
+		expect(Scores.boardKey("LongestLifeWeek", true, 2970)).toBe("LongestLifeWeek_W2970")
+		expect(Scores.boardKey("BestHaul", false, 2970)).toBe("BestHaul")
+	end,
 }

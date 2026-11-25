@@ -1,7 +1,11 @@
--- The "TODAY" list in the top right (a red spray tick when one's done), a toast with the reward
--- when one finishes and a "NEW DAY" popup each morning. The server decides what's done.
+-- The "TODAY" list in the top right (a red spray tick when one's done, the daily streak in the
+-- header), a toast with the reward when one finishes and a "NEW DAY" popup each morning. On the
+-- first-day chain, steps not reached yet are dimmed. Live missions with a target get a faint
+-- arrow on the screen edge pointing at it (same idea as the Callouts and PA arrows).
+-- The server decides what's done and where the targets are.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -26,7 +30,11 @@ local Missions = {}
 
 local gui: ScreenGui
 local panel: Frame
+local headerTitle: TextLabel
+local headerStreak: TextLabel
 local rows: { Row } = {}
+local arrows: { Frame } = {}
+local targets: { Vector3 } = {}
 local popup: Frame
 local popupTitle: TextLabel
 local popupLine: TextLabel
@@ -65,7 +73,7 @@ local function buildPanel()
 	panel = frame({
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, -24, 0, 64),
-		Size = UDim2.fromOffset(WIDTH, 30 + ROW_HEIGHT * settings.PerDay),
+		Size = UDim2.fromOffset(WIDTH, 30 + ROW_HEIGHT * settings.MaxRows),
 		BackgroundColor3 = PANEL,
 		BackgroundTransparency = 0.35,
 		Visible = false,
@@ -81,15 +89,25 @@ local function buildPanel()
 		BackgroundColor3 = TEXT,
 		BackgroundTransparency = 0.5,
 	}, panel)
-	label({
+	headerTitle = label({
 		Position = UDim2.fromOffset(12, 8),
-		Size = UDim2.new(1, -24, 0, 16),
+		Size = UDim2.new(0.5, -12, 0, 16),
 		Text = settings.ListTitle,
 		TextSize = 12,
 		TextTransparency = 0.3,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	}, panel)
-	for index = 1, settings.PerDay do
+	headerStreak = label({
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -10, 0, 5),
+		Size = UDim2.new(0.5, -10, 0, 20),
+		Text = "",
+		Font = Enum.Font.PermanentMarker,
+		TextColor3 = SPRAY_RED,
+		TextSize = 14,
+		TextXAlignment = Enum.TextXAlignment.Right,
+	}, panel)
+	for index = 1, settings.MaxRows do
 		local top = 28 + (index - 1) * ROW_HEIGHT
 		rows[index] = {
 			tick = label({
@@ -167,17 +185,74 @@ local function showPopup(title: string, line: string)
 	end)
 end
 
+local function arrowBar(parent: Frame, x: number, rotation: number)
+	local line = Instance.new("Frame")
+	line.AnchorPoint = Vector2.new(0.5, 0.5)
+	line.Position = UDim2.fromScale(x, 0.5)
+	line.Size = UDim2.new(0.55, 0, 0, 3)
+	line.Rotation = rotation
+	line.BorderSizePixel = 0
+	line.BackgroundColor3 = SPRAY_RED
+	line.BackgroundTransparency = settings.Arrow.Transparency
+	line.Parent = parent
+end
+
+local function buildArrows()
+	for index = 1, settings.MaxRows do
+		local arrow = frame({
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Size = UDim2.fromOffset(settings.Arrow.Size, settings.Arrow.Size),
+			BackgroundTransparency = 1,
+			Visible = false,
+		}, gui)
+		arrowBar(arrow, 0.32, -45)
+		arrowBar(arrow, 0.68, 45)
+		arrows[index] = arrow
+	end
+end
+
+-- Straight ahead puts the arrow at the top of the screen pointing up; behind you, at the bottom
+local function updateArrows()
+	local camera = workspace.CurrentCamera
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	for index, arrow in arrows do
+		local target = targets[index]
+		local show = camera ~= nil
+			and root ~= nil
+			and target ~= nil
+			and (target - root.Position).Magnitude > settings.ArrowHideNear
+		arrow.Visible = show
+		if show then
+			local relative = camera.CFrame:PointToObjectSpace(target)
+			local angle = math.atan2(relative.X, -relative.Z)
+			local viewport = camera.ViewportSize
+			arrow.Position = UDim2.fromOffset(
+				viewport.X / 2 + math.sin(angle) * viewport.X * settings.Arrow.Inset,
+				viewport.Y / 2 - math.cos(angle) * viewport.Y * settings.Arrow.Inset
+			)
+			arrow.Rotation = math.deg(angle)
+		end
+	end
+end
+
 local function showRows(list: { any })
+	table.clear(targets)
 	for index, row in rows do
 		local entry = list[index]
 		local done = entry and entry.done == true
+		local waiting = entry and entry.waiting == true
 		row.tick.Text = if done then "✓" else ""
 		row.text.Text = if entry then string.upper(tostring(entry.text)) else ""
 		row.text.Font = if done then Enum.Font.PermanentMarker else Enum.Font.GothamBold
 		row.text.TextColor3 = if done then SPRAY_RED else TEXT
-		row.text.TextTransparency = if done then 0.15 else 0
+		row.text.TextTransparency = if done then 0.15 elseif waiting then 0.6 else 0
 		row.reward.Text = if entry then tostring(entry.reward) else ""
+		if entry and typeof(entry.target) == "Vector3" then
+			targets[index] = entry.target
+		end
 	end
+	panel.Size = UDim2.fromOffset(WIDTH, 30 + ROW_HEIGHT * math.max(#list, 1))
 	panel.Visible = #list > 0
 end
 
@@ -189,10 +264,12 @@ local function onState(state: unknown)
 	if type(data.rows) == "table" then
 		showRows(data.rows)
 	end
+	headerTitle.Text = if type(data.title) == "string" then data.title else settings.ListTitle
+	headerStreak.Text = if type(data.streak) == "string" then data.streak else ""
 	if data.reason == "morning" then
 		showPopup(settings.MorningTitle, settings.MorningLine)
 	elseif data.reason == "join" then
-		showPopup(settings.ListTitle, settings.MorningLine)
+		showPopup(headerTitle.Text, settings.MorningLine)
 	elseif data.reason == "done" and type(data.finished) == "table" then
 		-- Hint lines are one row high, so each finished mission gets its own line
 		for index, finished in data.finished do
@@ -212,12 +289,14 @@ function Missions.Init()
 	gui.IgnoreGuiInset = true
 	buildPanel()
 	buildPopup()
+	buildArrows()
 end
 
 function Missions.Start()
 	gui.Parent = player:WaitForChild("PlayerGui")
 	Net.event("MissionsState").OnClientEvent:Connect(onState)
 	Net.event("MissionsSync"):FireServer()
+	RunService.RenderStepped:Connect(updateArrows)
 end
 
 return Missions
