@@ -1,4 +1,4 @@
--- Studio playtest only: jump to the next / previous installation and show which one
+-- Studio playtests and admins only: jump to the next / previous installation and show which one
 -- ("poolroom 3/64"). Keyboard T / Shift+T (not while carrying, where T turns the prop), gamepad
 -- both sticks pressed together (L3 + R3, add L1 to go back), touch the TP buttons top-left.
 local Players = game:GetService("Players")
@@ -13,10 +13,7 @@ local player = Players.LocalPlayer
 
 local DevTeleport = {}
 
-function DevTeleport.Start()
-	if not RunService:IsStudio() then
-		return
-	end
+local function enable()
 	local request = Net.event("DevTeleport")
 	Net.event("DevTeleported").OnClientEvent:Connect(function(kind: string, index: number, count: number)
 		Hints.flash("devTeleport", `[TEST] {kind} {index}/{count}`, 5)
@@ -60,6 +57,21 @@ function DevTeleport.Start()
 		end
 		gui.Parent = player:WaitForChild("PlayerGui")
 	end
+end
+
+function DevTeleport.Start()
+	if RunService:IsStudio() or player:GetAttribute("Admin") == true then
+		enable()
+		return
+	end
+	-- The server decides admins a moment after joining
+	local connection
+	connection = player:GetAttributeChangedSignal("Admin"):Connect(function()
+		if player:GetAttribute("Admin") == true then
+			connection:Disconnect()
+			enable()
+		end
+	end)
 end
 
 return DevTeleport

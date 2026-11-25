@@ -23,6 +23,8 @@ local listeners: { Listener } = {}
 local phaseRemote: RemoteEvent
 local flashlightRemote: RemoteEvent
 local lastToggle: { [Player]: number } = {}
+local frozenLeft: number? = nil
+local frozenPublishedAt = 0
 
 local function publish()
 	ReplicatedStorage:SetAttribute("Phase", state.phase)
@@ -30,7 +32,7 @@ local function publish()
 	ReplicatedStorage:SetAttribute("Day", state.day)
 end
 
-local function step()
+local function advance()
 	local nextState, transitions = Clock.advance(state, workspace:GetServerTimeNow(), lengths)
 	if #transitions == 0 then
 		return
@@ -42,6 +44,20 @@ local function step()
 		for _, listener in listeners do
 			task.spawn(listener, transition.to, transition.from, transition.day)
 		end
+	end
+end
+
+-- While frozen the phase end keeps sliding forward, re-published once a second so clocks hold still
+local function step()
+	if not frozenLeft then
+		advance()
+		return
+	end
+	local now = workspace:GetServerTimeNow()
+	if now - frozenPublishedAt >= 1 then
+		frozenPublishedAt = now
+		state = { phase = state.phase, endsAt = now + frozenLeft, day = state.day }
+		publish()
 	end
 end
 
@@ -112,6 +128,40 @@ function DayNight.onPhaseChanged(listener: Listener): () -> ()
 			table.remove(listeners, index)
 		end
 	end
+end
+
+-- Admin: runs the clock forward to the start of phase, firing every change on the way so robots,
+-- supplies and clients react as if the time had passed. False if phase is unknown or already on.
+function DayNight.skipTo(phase: string): boolean
+	if (lengths :: any)[phase] == nil or state.phase == phase then
+		return false
+	end
+	while state.phase ~= phase do
+		state = { phase = state.phase, endsAt = workspace:GetServerTimeNow(), day = state.day }
+		advance()
+	end
+	if frozenLeft then
+		frozenLeft = lengths[state.phase]
+	end
+	return true
+end
+
+-- Admin: stops the clock where it is, or starts it again with the time that was left.
+function DayNight.setFrozen(frozen: boolean)
+	local now = workspace:GetServerTimeNow()
+	if frozen and not frozenLeft then
+		frozenLeft = Clock.timeLeft(state.endsAt, now)
+		frozenPublishedAt = 0
+	elseif not frozen and frozenLeft then
+		state = { phase = state.phase, endsAt = now + frozenLeft, day = state.day }
+		frozenLeft = nil
+		publish()
+	end
+	ReplicatedStorage:SetAttribute("ClockFrozen", frozenLeft ~= nil)
+end
+
+function DayNight.isFrozen(): boolean
+	return frozenLeft ~= nil
 end
 
 function DayNight.Init()
