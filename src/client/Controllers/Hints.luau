@@ -47,16 +47,31 @@ local function make(className: string, props: { [string]: any }, parent: Instanc
 	return instance
 end
 
+-- A pill wider than the screen allows shrinks to fit once its size is known
+local function shrinkToFit(frame: Frame)
+	local scale = make("UIScale", {}, frame)
+	task.defer(function()
+		local room = list.AbsoluteSize.X
+		local width = frame.AbsoluteSize.X
+		if width > room and width > 0 then
+			scale.Scale = room / width
+		end
+	end)
+end
+
 local function pill(line: Line, layoutOrder: number): Frame
 	local big = line.tone == "nudge"
-	local h = if big then 40 else 30
+	-- A "\n" in the wording for this device stacks the pill into rows
+	local texts = string.split(Glyphs.resolve(line.template), "\n")
+	local rowHeight = if big then 32 else 22
+	local h = rowHeight * #texts + 8
 	local frame = make("Frame", {
 		LayoutOrder = layoutOrder,
 		AutomaticSize = Enum.AutomaticSize.X,
 		Size = UDim2.fromOffset(0, h),
 		BackgroundColor3 = PANEL,
 		BackgroundTransparency = if big then 0.12 else 0.3,
-	})
+	}, list)
 	make("UICorner", { CornerRadius = UDim.new(0, 8) }, frame)
 	make("UIPadding", {
 		PaddingLeft = UDim.new(0, if big then 16 else 10),
@@ -69,17 +84,28 @@ local function pill(line: Line, layoutOrder: number): Frame
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 		}, frame)
 	end
-	local row = make("Frame", {
+	local stack = make("Frame", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.fromScale(0, 0.5),
 		AutomaticSize = Enum.AutomaticSize.X,
-		Size = UDim2.fromScale(0, 1),
+		Size = UDim2.fromOffset(0, rowHeight * #texts),
 		BackgroundTransparency = 1,
 	}, frame)
-	Glyphs.fill(row, line.template, {
-		size = if big then 26 else 20,
-		textSize = if big then 18 else 15,
-		font = if big then Enum.Font.GothamBold else Enum.Font.GothamMedium,
-		color = if line.tone == "warn" then WARN_TEXT else TEXT,
-	})
+	make("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder }, stack)
+	for index, text in texts do
+		local row = make("Frame", {
+			LayoutOrder = index,
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromOffset(0, rowHeight),
+			BackgroundTransparency = 1,
+		}, stack)
+		Glyphs.fill(row, text, {
+			size = if big then 26 else 20,
+			textSize = if big then 18 else 15,
+			font = if big then Enum.Font.GothamBold else Enum.Font.GothamMedium,
+			color = if line.tone == "warn" then WARN_TEXT else TEXT,
+		})
+	end
 	if big then
 		-- The spray-paint tick that marks a nudge as new
 		make("Frame", {
@@ -90,6 +116,7 @@ local function pill(line: Line, layoutOrder: number): Frame
 			BorderSizePixel = 0,
 		}, frame)
 	end
+	shrinkToFit(frame)
 	return frame
 end
 
@@ -112,8 +139,9 @@ local function redraw()
 		end
 		return a.line.order < b.line.order
 	end)
+	local maxLines = if Glyphs.device() == "Touch" then settings.TouchMaxLines else settings.MaxLines
 	for index, entry in sorted do
-		if index > settings.MaxLines then
+		if index > maxLines then
 			break
 		end
 		pill(entry.line, index).Name = entry.id
@@ -149,9 +177,10 @@ function Hints.set(id: string, template: Glyphs.Template?, order: number?, tone:
 	redraw()
 end
 
--- Shows a hint for a few seconds, then clears it
-function Hints.flash(id: string, template: Glyphs.Template, seconds: number?, tone: Tone?)
-	Hints.set(id, template, 0, tone)
+-- Shows a hint for a few seconds, then clears it. order defaults to 0 (top); flavour toasts pass a
+-- higher one so they never push out a hint that matters.
+function Hints.flash(id: string, template: Glyphs.Template, seconds: number?, tone: Tone?, order: number?)
+	Hints.set(id, template, order or 0, tone)
 	task.delay(seconds or 4, function()
 		local line = lines[id]
 		if line and same(line.template, template) then
@@ -538,6 +567,18 @@ local function watch()
 	end
 end
 
+-- First join: what the game is, a line at a time, then where your locker is and the controls card
+local function intro()
+	task.wait(settings.IntroDelay)
+	for _, line in settings.IntroLines do
+		Hints.flash("intro", line, settings.IntroGap, "nudge", 1)
+		task.wait(settings.IntroGap)
+	end
+	Hints.nudge("stash", settings.StashNudge)
+	task.wait(settings.NudgeSeconds)
+	Hints.flash("controls", settings.StartHint, settings.StartHintSeconds)
+end
+
 local function onHidden()
 	local hidden = player:GetAttribute("Hidden") == true
 	Hints.set("hidden", if hidden then settings.HiddenHint else nil, 1)
@@ -556,7 +597,7 @@ function Hints.Start()
 		Name = "Lines",
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0.5, 44),
-		Size = UDim2.fromOffset(700, 200),
+		Size = UDim2.new(1, -24, 0, 200),
 		BackgroundTransparency = 1,
 	}, gui)
 	make("UIListLayout", {
@@ -576,7 +617,7 @@ function Hints.Start()
 	end)
 	player:GetAttributeChangedSignal("Hidden"):Connect(onHidden)
 	onHidden()
-	Hints.flash("controls", settings.StartHint, settings.StartHintSeconds)
+	task.spawn(intro)
 	task.spawn(watch)
 end
 

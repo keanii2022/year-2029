@@ -6,6 +6,7 @@
 -- server's "Mag<GunId>" attributes have the final say.
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
@@ -622,13 +623,52 @@ local function fireOnce(minInterval: number?): boolean
 	return true
 end
 
--- On a gamepad Reload shares Square with Use: it reloads only while a gun is in hand and there's
--- nothing to use: no Interact prompt and no pickup / stash prompt showing.
+-- On a gamepad Reload shares Square with Use. With a gun out, a tap on Square reloads (CombatReload
+-- skips a full mag) unless the crosshair is on something usable. Pickup / stash prompts turn into
+-- holds meanwhile, so near one a tap still reloads and a hold takes the prompt.
+local PAD_PROMPT_HOLD = 0.4 -- seconds
+local padPressAt: number? = nil
+local shownPrompts: { [ProximityPrompt]: true } = {}
+local promptHolds: { [ProximityPrompt]: number } = {} -- prompts made into holds -> their own HoldDuration
+
+local function updatePromptHolds()
+	local wanted = Input.lastDevice() == "Gamepad" and currentGun() ~= nil
+	for proximity, own in promptHolds do
+		if not wanted or not shownPrompts[proximity] then
+			proximity.HoldDuration = own
+			promptHolds[proximity] = nil
+		end
+	end
+	if wanted then
+		for proximity in shownPrompts do
+			if not promptHolds[proximity] then
+				promptHolds[proximity] = proximity.HoldDuration
+				proximity.HoldDuration = math.max(proximity.HoldDuration, PAD_PROMPT_HOLD)
+			end
+		end
+	end
+end
+
 local function onPadUse(began: boolean, device: Input.Device)
-	if not began or device ~= "Gamepad" or not currentGun() or Interact.canUse() then
+	if device ~= "Gamepad" then
 		return
 	end
-	startReload()
+	if began then
+		padPressAt = nil
+		if not currentGun() or Interact.canUse() then
+			return
+		elseif Interact.promptShowing() then
+			padPressAt = os.clock()
+		else
+			startReload()
+		end
+	elseif padPressAt then
+		local tapped = os.clock() - padPressAt < PAD_PROMPT_HOLD
+		padPressAt = nil
+		if tapped then
+			startReload()
+		end
+	end
 end
 
 -- Under the crosshair: Fire / Aim / Reload for a few seconds after you pull the gun out, then
@@ -771,6 +811,14 @@ function Gun.Start()
 		end
 	end)
 	Input.bind("Use", onPadUse)
+	ProximityPromptService.PromptShown:Connect(function(proximity)
+		shownPrompts[proximity] = true
+		updatePromptHolds()
+	end)
+	ProximityPromptService.PromptHidden:Connect(function(proximity)
+		shownPrompts[proximity] = nil
+		updatePromptHolds()
+	end)
 	Net.event("InventoryChanged").OnClientEvent:Connect(function(list: { { id: string, count: number } })
 		table.clear(carried)
 		for _, entry in list do
@@ -814,6 +862,7 @@ function Gun.Start()
 
 	Hotbar.onUse("Fire", onFire)
 	Hotbar.onChanged(notifyChanged)
+	Hotbar.onChanged(updatePromptHolds)
 	RunService:BindToRenderStep("GunAimRestore", Enum.RenderPriority.Camera.Value, restoreFieldOfView)
 	RunService:BindToRenderStep("GunAim", Enum.RenderPriority.Camera.Value + 2, applyAim)
 	RunService.RenderStepped:Connect(moveBullets)
@@ -821,6 +870,7 @@ function Gun.Start()
 		while true do
 			task.wait(0.2)
 			updateHint()
+			updatePromptHolds()
 		end
 	end)
 	Net.event("InventorySync"):FireServer()

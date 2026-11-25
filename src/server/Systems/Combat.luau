@@ -401,6 +401,9 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 		fxRemote:FireAllClients(player, origin, hitPosition, hitNormal, hitPlayer, id, index)
 	end
 	for targetHumanoid, damage in damageTo do
+		local body = targetHumanoid.Parent :: Instance
+		body:SetAttribute("HurtBy", `Shot by {player.DisplayName}`)
+		body:SetAttribute("HurtAt", workspace:GetServerTimeNow())
 		targetHumanoid:TakeDamage(damage)
 		local downed = targetHumanoid.Health <= 0
 		if downed and countKill(player, victims[targetHumanoid], now) then
@@ -417,11 +420,27 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	end
 end
 
+-- What the down screen says got you: the last HurtBy a damage source stamped on the body (robot,
+-- player, hunger, dog) if it's recent, else a fall into the void, else nothing.
+local function downCause(character: Model, spot: Vector3): string?
+	local by = character:GetAttribute("HurtBy")
+	local at = character:GetAttribute("HurtAt")
+	local recent = type(at) == "number" and workspace:GetServerTimeNow() - at <= settings.DownCauseSeconds
+	if type(by) == "string" and recent then
+		return by
+	elseif spot.Y < workspace.FallenPartsDestroyHeight + settings.DownCauseFallMargin then
+		return "You fell."
+	end
+	return nil
+end
+
 local function onDown(player: Player, character: Model)
-	player:SetAttribute("DownUntil", workspace:GetServerTimeNow() + settings.RespawnDelay)
 	local root = character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local spot = if root then root.Position else character:GetPivot().Position
-	Inventory.dropAll(player, spot)
+	player:SetAttribute("DownBy", downCause(character, spot))
+	player:SetAttribute("DownUntil", workspace:GetServerTimeNow() + settings.RespawnDelay)
+	local pile = Inventory.dropAll(player, spot)
+	player:SetAttribute("DownAt", if pile then pile:GetPivot().Position else nil)
 end
 
 local function setUpCharacter(player: Player, character: Model)

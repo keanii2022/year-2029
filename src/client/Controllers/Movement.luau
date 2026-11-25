@@ -45,7 +45,9 @@ local function onCrouch(began: boolean)
 	if began then
 		crouched = not crouched
 		if crouched then
+			-- also the phone's RUN toggle, which holds Sprint down (TouchButtons lets go of it too)
 			sprintToggled = false
+			sprintHeld = false
 		end
 	end
 end

@@ -7,6 +7,10 @@ return {
 	MaxHealth = 100,
 	HealthRegen = false, -- healing comes from supplies later, not from standing still
 	RespawnDelay = 6,
+	-- The down screen names the last thing that hurt you if it was this recent (seconds), or a fall
+	-- if you went down this close above the void
+	DownCauseSeconds = 15,
+	DownCauseFallMargin = 20,
 	KillRepeatWindow = 300, -- downing the same player again within this many seconds isn't a new kill
 	SpawnGraceSeconds = 10, -- after spawning robots ignore you and you take no damage; firing ends it
 

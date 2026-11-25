@@ -25,6 +25,8 @@ local player = Players.LocalPlayer
 local PANEL = Color3.fromRGB(12, 12, 14)
 local TEXT = Color3.fromRGB(225, 222, 215)
 local REFRESH_EVERY = 1 -- seconds; food shown in hand follows hunger, energy and health
+local KIT_GRACE = 5 -- seconds after spawning when bag growth is the starting kit, not a pickup
+local TOAST_ORDER = 15 -- flavour toasts sit under the hints that matter
 
 type Handler = (began: boolean, device: Input.Device) -> ()
 
@@ -46,6 +48,7 @@ local strip: Frame
 local cells: { TextButton } = {}
 local padPrevious: Frame
 local padNext: Frame
+local spawnedAt = os.clock()
 
 local function carrying(): boolean
 	return player:GetAttribute("CarrySpeedMultiplier") ~= nil
@@ -111,7 +114,11 @@ local function cell(index: number): TextButton
 	stroke.Parent = button
 	for name, props in
 		{
-			Label = { Position = UDim2.new(0, 0, 1, -18), Size = UDim2.new(1, 0, 0, 16), TextSize = 10 },
+			Label = {
+				Position = UDim2.new(0, 2, 1, -18),
+				Size = UDim2.new(1, -4, 0, 16),
+				TextScaled = true,
+			},
 			Count = {
 				Position = UDim2.fromOffset(0, 4),
 				Size = UDim2.new(1, -5, 0, 14),
@@ -130,6 +137,9 @@ local function cell(index: number): TextButton
 		end
 		label.Parent = button
 	end
+	local labelSize = Instance.new("UITextSizeConstraint")
+	labelSize.Name = "Fit"
+	labelSize.Parent = button:FindFirstChild("Label")
 	if index <= Input.SlotCount then
 		local key = Glyphs.chip(tostring(index), "Keyboard", 14)
 		key.Name = "Key"
@@ -150,9 +160,24 @@ local function cell(index: number): TextButton
 	return button
 end
 
+-- A phone's small-screen AIM / FIRE buttons sit in the bar's row, so there it moves left of them and
+-- steps aside while carrying (the carry buttons take that row)
+local function place(device: Input.Device)
+	local camera = workspace.CurrentCamera
+	local viewport = if camera then camera.ViewportSize else Vector2.new(844, 390)
+	local cramped = device == "Touch" and math.min(viewport.X, viewport.Y) <= 500
+	strip.AnchorPoint = if cramped then Vector2.new(1, 1) else Vector2.new(0.5, 1)
+	strip.Position = if cramped
+		then UDim2.new(1, -settings.TouchClearRight, 1, -settings.Bottom)
+		else UDim2.new(0.5, 0, 1, -settings.Bottom)
+	strip.Visible = not (cramped and carrying())
+end
+
 local function redraw()
 	local device = Glyphs.device()
 	local showKeys = device == "Keyboard"
+	place(device)
+	local labelMax = if device == "Touch" then settings.TouchLabelSize else settings.LabelSize
 	local filled = 0
 	for _, slot in slots do
 		filled += if slot.empty then 0 else 1
@@ -171,6 +196,7 @@ local function redraw()
 		local label = button:FindFirstChild("Label") :: TextLabel
 		label.Text = slot.label
 		label.TextTransparency = if selected then 0 else 0.35
+		(label:FindFirstChild("Fit") :: UITextSizeConstraint).MaxTextSize = labelMax
 		local count = button:FindFirstChild("Count") :: TextLabel
 		count.Text = if slot.count > 1 then tostring(slot.count) else ""
 		local key = button:FindFirstChild("Key") :: GuiObject?
@@ -199,9 +225,14 @@ local function rebuild()
 		shownId, shownItem = selectedId, item
 		notify()
 	end
-	if #bag > 0 then
-		Hints.nudge("item", Config.Hints.ItemNudge)
+end
+
+local function total(stacks: { NeedsLogic.Stack }): number
+	local count = 0
+	for _, stack in stacks do
+		count += stack.count
 	end
+	return count
 end
 
 -- Says what Fire does with the item just picked ("{Fire} Eat"); Gun shows its own for guns
@@ -210,7 +241,13 @@ local function sayVerb()
 	local verb = slot and slot.use ~= "Fire" and settings.Verbs[slot.use]
 	if verb then
 		local word = string.upper(string.sub(verb, 1, 1)) .. string.lower(string.sub(verb, 2))
-		Hints.flash("held", string.format(Config.Hints.HeldHint, word), Config.Hints.HeldHintSeconds)
+		Hints.flash(
+			"held",
+			string.format(Config.Hints.HeldHint, word),
+			Config.Hints.HeldHintSeconds,
+			nil,
+			TOAST_ORDER
+		)
 	else
 		Hints.set("held", nil)
 	end
@@ -300,12 +337,27 @@ end
 
 function Hotbar.Start()
 	gui.Parent = player:WaitForChild("PlayerGui")
+	local synced = false -- the first snapshot is what you joined with, not a pickup
 	Net.event("InventoryChanged").OnClientEvent:Connect(function(snapshot)
 		if type(snapshot) == "table" then
+			local before = total(bag)
 			bag = snapshot
 			rebuild()
+			local grew = synced and total(bag) > before
+			synced = true
+			if grew and os.clock() - spawnedAt > KIT_GRACE then
+				Hints.nudge("item", Config.Hints.ItemNudge)
+			end
 		end
 	end)
+	player.CharacterAdded:Connect(function()
+		spawnedAt = os.clock()
+	end)
+	player:GetAttributeChangedSignal("CarrySpeedMultiplier"):Connect(redraw)
+	local camera = workspace.CurrentCamera
+	if camera then
+		camera:GetPropertyChangedSignal("ViewportSize"):Connect(redraw)
+	end
 	Net.event("QuickSlotsChanged").OnClientEvent:Connect(function(snapshot, inBag)
 		if type(snapshot) == "table" then
 			quick = snapshot
@@ -313,7 +365,13 @@ function Hotbar.Start()
 		end
 		local item = type(inBag) == "string" and InventoryItems[inBag]
 		if item then
-			Hints.flash("inBag", string.format(Config.Hints.InBagToast, item.name), Config.Hints.InBagSeconds)
+			Hints.flash(
+				"inBag",
+				string.format(Config.Hints.InBagToast, item.name),
+				Config.Hints.InBagSeconds,
+				nil,
+				TOAST_ORDER
+			)
 		end
 	end)
 	Net.event("InventorySync"):FireServer()

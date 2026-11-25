@@ -1,11 +1,15 @@
 -- The "TODAY" list in the top right (a red spray tick when one's done), a toast with the reward
--- when one finishes and a "NEW DAY" popup each morning. The server decides what's done.
+-- when one finishes and a "NEW DAY" popup each morning (unless the Dawn Report card is showing
+-- then). The server decides what's done.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Glyphs = require(script.Parent.Glyphs)
 local Hints = require(script.Parent.Hints)
 
 local settings = Config.Missions
@@ -19,8 +23,15 @@ local WIDTH = 230
 local TOAST_SECONDS = 5
 local POPUP_SECONDS = 4
 local FADE = TweenInfo.new(0.8)
+local TOAST_ORDER = 20 -- below any hint that matters
+local DONE_SOUND = "arcade_coin"
+local DONE_VOLUME = 0.6
+local PULSE = TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+-- The Dawn Report and the morning list arrive together; the popup waits this long to see if a card is coming
+local DAWN_WAIT = 0.5
+local DAWN_RECENT = 3
 
-type Row = { tick: TextLabel, text: TextLabel, reward: TextLabel }
+type Row = { tick: TextLabel, tickScale: UIScale, text: TextLabel, reward: TextLabel }
 
 local Missions = {}
 
@@ -31,6 +42,8 @@ local popup: Frame
 local popupTitle: TextLabel
 local popupLine: TextLabel
 local popupToken = 0
+local titleLabel: TextLabel
+local dawnReportAt = -math.huge
 
 local function frame(props: { [string]: any }, parent: Instance): Frame
 	local f = Instance.new("Frame")
@@ -81,7 +94,7 @@ local function buildPanel()
 		BackgroundColor3 = TEXT,
 		BackgroundTransparency = 0.5,
 	}, panel)
-	label({
+	titleLabel = label({
 		Position = UDim2.fromOffset(12, 8),
 		Size = UDim2.new(1, -24, 0, 16),
 		Text = settings.ListTitle,
@@ -91,15 +104,19 @@ local function buildPanel()
 	}, panel)
 	for index = 1, settings.PerDay do
 		local top = 28 + (index - 1) * ROW_HEIGHT
+		local tick = label({
+			Position = UDim2.fromOffset(8, top),
+			Size = UDim2.fromOffset(20, 18),
+			Text = "",
+			Font = Enum.Font.PermanentMarker,
+			TextColor3 = SPRAY_RED,
+			TextSize = 20,
+		}, panel)
+		local tickScale = Instance.new("UIScale")
+		tickScale.Parent = tick
 		rows[index] = {
-			tick = label({
-				Position = UDim2.fromOffset(8, top),
-				Size = UDim2.fromOffset(20, 18),
-				Text = "",
-				Font = Enum.Font.PermanentMarker,
-				TextColor3 = SPRAY_RED,
-				TextSize = 20,
-			}, panel),
+			tick = tick,
+			tickScale = tickScale,
 			text = label({
 				Position = UDim2.fromOffset(32, top),
 				Size = UDim2.new(1, -40, 0, 18),
@@ -167,6 +184,48 @@ local function showPopup(title: string, line: string)
 	end)
 end
 
+-- Bigger small print on a phone
+local function fitText()
+	local touch = Glyphs.device() == "Touch"
+	titleLabel.TextSize = if touch then 14 else 12
+	for _, row in rows do
+		row.reward.TextSize = if touch then 13 else 10
+		row.reward.Size = UDim2.new(1, -40, 0, if touch then 15 else 12)
+		row.reward.TextTransparency = if touch then 0.3 else 0.5
+	end
+end
+
+local function playDone()
+	local id = ModelLibrary.soundId(DONE_SOUND)
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = DONE_VOLUME
+	sound.Parent = SoundService
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+	sound:Play()
+end
+
+local function pulse(text: string)
+	for _, row in rows do
+		if row.text.Text == string.upper(text) then
+			row.tickScale.Scale = 2
+			TweenService:Create(row.tickScale, PULSE, { Scale = 1 }):Play()
+		end
+	end
+end
+
+local function morningPopup()
+	task.wait(DAWN_WAIT)
+	if os.clock() - dawnReportAt > DAWN_RECENT then
+		showPopup(settings.MorningTitle, settings.MorningLine)
+	end
+end
+
 local function showRows(list: { any })
 	for index, row in rows do
 		local entry = list[index]
@@ -190,17 +249,19 @@ local function onState(state: unknown)
 		showRows(data.rows)
 	end
 	if data.reason == "morning" then
-		showPopup(settings.MorningTitle, settings.MorningLine)
+		task.spawn(morningPopup)
 	elseif data.reason == "join" then
 		showPopup(settings.ListTitle, settings.MorningLine)
 	elseif data.reason == "done" and type(data.finished) == "table" then
 		-- Hint lines are one row high, so each finished mission gets its own line
 		for index, finished in data.finished do
 			local text = `{fill(settings.DoneLine, { text = tostring(finished.text) })}   {finished.reward}`
-			Hints.flash(`mission{index}`, text, TOAST_SECONDS)
+			Hints.flash(`mission{index}`, text, TOAST_SECONDS, nil, TOAST_ORDER)
+			pulse(tostring(finished.text))
 		end
+		playDone()
 		if data.allDone then
-			Hints.flash("missionsAll", settings.AllDoneLine, TOAST_SECONDS)
+			Hints.flash("missionsAll", settings.AllDoneLine, TOAST_SECONDS, nil, TOAST_ORDER)
 		end
 	end
 end
@@ -216,6 +277,11 @@ end
 
 function Missions.Start()
 	gui.Parent = player:WaitForChild("PlayerGui")
+	Net.event("DawnReport").OnClientEvent:Connect(function()
+		dawnReportAt = os.clock()
+	end)
+	Glyphs.onChanged(fitText)
+	fitText()
 	Net.event("MissionsState").OnClientEvent:Connect(onState)
 	Net.event("MissionsSync"):FireServer()
 end

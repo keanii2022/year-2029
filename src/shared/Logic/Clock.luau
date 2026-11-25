@@ -50,4 +50,10 @@ function Clock.timeLeft(endsAt: number, now: number): number
 	return math.max(0, endsAt - now)
 end
 
+-- "4:05" for the on-screen clock, rounded up so it reads 0:00 only when the phase is over
+function Clock.readout(seconds: number): string
+	local whole = math.max(0, math.ceil(seconds))
+	return string.format("%d:%02d", whole // 60, whole % 60)
+end
+
 return Clock

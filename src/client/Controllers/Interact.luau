@@ -3,6 +3,8 @@
 -- hidden the same button gets you out; Hints shows that line, so nothing floats mid-screen.
 -- Also draws the server's ProximityPrompts (pickups, stashes, the dog, uncuffing) in the same
 -- style instead of Roblox's default, with the right key glyph and a fill bar for hold prompts.
+-- One prompt shows at a time, and while one is up the crosshair use stands down, so a single press
+-- never does two things.
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -91,11 +93,15 @@ local function pill(parent: GuiObject): Frame
 	return row
 end
 
--- True when Square / E would do something here, so Gun leaves reloading to an empty Square
+-- True while one of the server's ProximityPrompts is showing
+function Interact.promptShowing(): boolean
+	return next(shownPrompts) ~= nil
+end
+
+-- True when the crosshair use would fire on Square / E, so Gun leaves that press alone
 function Interact.canUse(): boolean
-	return (prompt ~= nil and prompt.Enabled)
-		or next(shownPrompts) ~= nil
-		or player:GetAttribute("Hidden") == true
+	return player:GetAttribute("Hidden") == true
+		or (prompt ~= nil and prompt.Enabled and not Interact.promptShowing())
 end
 
 local function refresh()
@@ -105,7 +111,7 @@ local function refresh()
 		return
 	end
 	target, targetPart = look()
-	if not target or not targetPart then
+	if not target or not targetPart or Interact.promptShowing() then
 		prompt.Enabled = false
 		return
 	end
@@ -233,12 +239,15 @@ end
 local function adopt(instance: Instance)
 	if instance:IsA("ProximityPrompt") then
 		instance.Style = Enum.ProximityPromptStyle.Custom
-		instance:GetPropertyChangedSignal("ActionText"):Connect(function()
+		local function refill()
 			local shown = shownPrompts[instance]
 			if shown then
 				fillShown(instance, shown)
 			end
-		end)
+		end
+		instance:GetPropertyChangedSignal("ActionText"):Connect(refill)
+		-- Gun turns prompts into holds while a gun is out on a pad
+		instance:GetPropertyChangedSignal("HoldDuration"):Connect(refill)
 		instance.Destroying:Connect(function()
 			hidePrompt(instance)
 		end)
@@ -278,7 +287,7 @@ function Interact.Init()
 		end
 		if player:GetAttribute("Hidden") == true then
 			useRemote:FireServer(nil, nil)
-		elseif target and targetPart then
+		elseif target and targetPart and not Interact.promptShowing() then
 			useRemote:FireServer(target, targetPart.Name)
 			Hands.reach(targetPart.Position)
 		end
@@ -287,6 +296,7 @@ end
 
 function Interact.Start()
 	useRemote = Net.event("InteractUse")
+	ProximityPromptService.MaxPromptsVisible = 1
 	buildPrompt()
 	watchPrompts()
 	Glyphs.onChanged(function()

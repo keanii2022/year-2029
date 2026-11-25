@@ -12,6 +12,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ScoresLogic = require(ReplicatedStorage.Shared.Logic.Scores)
+local Glyphs = require(script.Parent.Glyphs)
 local Input = require(script.Parent.Input)
 
 local Settings = Config.Saves
@@ -25,6 +26,8 @@ local SPRAY_RED = Color3.fromRGB(200, 28, 22)
 local FEEDBACK_TIME = 2.5
 local PAD_ACTION = "LockerPad"
 local ROW_HEIGHT = 30
+local PANEL_SIZE = Vector2.new(600, 430)
+local TOUCH_TARGET = 44 -- smallest comfortable tap
 local SLOTS = { "Hat", "Colour", "Trail" }
 -- Hats and trails can be taken off; everyone always wears a colour
 local CAN_REMOVE = { Hat = true, Trail = true }
@@ -55,6 +58,7 @@ local savingNote: TextLabel
 local blueprintLabel: TextLabel
 local layOutButton: TextButton
 local feedbackLabel: TextLabel
+local footer: Frame
 local looks: { [string]: { name: TextLabel, hint: TextLabel } } = {}
 local browsing: { [string]: number } = {}
 
@@ -266,6 +270,16 @@ end
 
 local show: (target: "stash" | "record" | nil) -> ()
 
+-- What closes the panel (and on the stash, how to move things) for the device in use
+local function fillFooter()
+	local template = if view == "stash" then Config.Hints.LockerFooter else Config.Hints.RecordFooter
+	Glyphs.fill(footer, if view then template else "", {
+		size = 18,
+		textSize = 12,
+		color = Color3.fromRGB(150, 146, 136),
+	})
+end
+
 -- Circle shuts the panel. Input drops the pad's buttons while the panel holds the selection, so
 -- without this the only way out on a controller was finding the close button.
 local function onPad(_action: string, inputState: Enum.UserInputState): Enum.ContextActionResult
@@ -297,6 +311,7 @@ function show(target: "stash" | "record" | nil)
 	end
 	stashView.Visible = target == "stash"
 	recordView.Visible = target == "record"
+	fillFooter()
 	stashTab.Visible = lockerOpen
 	titleLabel.Text = if target == "stash" then "YOUR LOCKER" else "YOUR RECORD"
 	stashTab.BackgroundTransparency = if target == "stash" then 0 else 0.6
@@ -318,11 +333,32 @@ local function buildPanel()
 	panel = frame({
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromOffset(600, 430),
+		Size = UDim2.fromOffset(PANEL_SIZE.X, PANEL_SIZE.Y),
 		BackgroundColor3 = PANEL,
 		BackgroundTransparency = 0.08,
 		Visible = false,
 	}, gui)
+	-- Phones held sideways are short; shrink to fit (same as the bag)
+	local scale = Instance.new("UIScale")
+	scale.Parent = panel
+	local function fit()
+		local camera = workspace.CurrentCamera
+		if camera then
+			local viewport = camera.ViewportSize
+			scale.Scale = math.min(1, (viewport.X - 24) / PANEL_SIZE.X, (viewport.Y - 24) / PANEL_SIZE.Y)
+		end
+	end
+	fit()
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(fit)
+	if workspace.CurrentCamera then
+		workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(fit)
+	end
+	footer = frame({
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 20, 1, -8),
+		Size = UDim2.new(1, -40, 0, 22),
+		BackgroundTransparency = 1,
+	}, panel)
 	titleLabel =
 		label({ Position = UDim2.fromOffset(20, 14), Size = UDim2.fromOffset(300, 28), TextSize = 20 }, panel)
 	closeButton = button(
@@ -366,7 +402,7 @@ end
 local function buildStash()
 	stashView = frame({
 		Position = UDim2.fromOffset(20, 56),
-		Size = UDim2.new(1, -40, 1, -76),
+		Size = UDim2.new(1, -40, 1, -92),
 		BackgroundTransparency = 1,
 	}, panel)
 	label(
@@ -384,7 +420,7 @@ local function buildStash()
 		AnchorPoint = Vector2.new(0, 1),
 		Position = UDim2.fromScale(0, 1),
 		Size = UDim2.new(1, 0, 0, 18),
-		Text = "Click a stack to move it. The locker follows you to every server. Your bag doesn't.",
+		Text = "The locker follows you to every server. Your bag doesn't.",
 		TextSize = 11,
 		TextTransparency = 0.45,
 	}, stashView)
@@ -393,23 +429,29 @@ end
 local function buildLookRow(slot: string, index: number, parent: Instance)
 	local row = frame({
 		LayoutOrder = index,
-		Size = UDim2.new(1, 0, 0, 46),
+		Size = UDim2.new(1, 0, 0, TOUCH_TARGET + 16),
 		BackgroundTransparency = 1,
 	}, parent)
-	label(
-		{ Size = UDim2.fromOffset(70, 28), Text = string.upper(slot), TextSize = 12, TextTransparency = 0.3 },
-		row
-	)
+	label({
+		Size = UDim2.fromOffset(70, TOUCH_TARGET),
+		Text = string.upper(slot),
+		TextSize = 12,
+		TextTransparency = 0.3,
+	}, row)
 	button(
-		{ Position = UDim2.fromOffset(70, 0), Size = UDim2.fromOffset(28, 28), Text = "<" },
+		{
+			Position = UDim2.fromOffset(70, 0),
+			Size = UDim2.fromOffset(TOUCH_TARGET, TOUCH_TARGET),
+			Text = "<",
+		},
 		row,
 		function()
 			browse(slot, -1)
 		end
 	)
 	local name = label({
-		Position = UDim2.fromOffset(102, 0),
-		Size = UDim2.new(1, -136, 0, 28),
+		Position = UDim2.fromOffset(74 + TOUCH_TARGET, 0),
+		Size = UDim2.new(1, -(78 + TOUCH_TARGET * 2), 0, TOUCH_TARGET),
 		TextSize = 14,
 		TextXAlignment = Enum.TextXAlignment.Center,
 	}, row)
@@ -417,7 +459,7 @@ local function buildLookRow(slot: string, index: number, parent: Instance)
 		{
 			AnchorPoint = Vector2.new(1, 0),
 			Position = UDim2.fromScale(1, 0),
-			Size = UDim2.fromOffset(28, 28),
+			Size = UDim2.fromOffset(TOUCH_TARGET, TOUCH_TARGET),
 			Text = ">",
 		},
 		row,
@@ -426,7 +468,7 @@ local function buildLookRow(slot: string, index: number, parent: Instance)
 		end
 	)
 	local hint = label({
-		Position = UDim2.fromOffset(70, 28),
+		Position = UDim2.fromOffset(70, TOUCH_TARGET),
 		Size = UDim2.new(1, -70, 0, 16),
 		TextSize = 13,
 		Font = Enum.Font.PermanentMarker,
@@ -440,7 +482,7 @@ end
 local function buildRecord()
 	recordView = frame({
 		Position = UDim2.fromOffset(20, 56),
-		Size = UDim2.new(1, -40, 1, -76),
+		Size = UDim2.new(1, -40, 1, -92),
 		BackgroundTransparency = 1,
 	}, panel)
 	label(
@@ -474,7 +516,7 @@ local function buildRecord()
 	}, recordView)
 	local looksList = frame({
 		Position = UDim2.new(0.5, 10, 0, 26),
-		Size = UDim2.new(0.5, -10, 0, 160),
+		Size = UDim2.new(0.5, -10, 0, (TOUCH_TARGET + 16) * #SLOTS),
 		BackgroundTransparency = 1,
 	}, recordView)
 	local looksLayout = Instance.new("UIListLayout")
@@ -627,6 +669,7 @@ function Locker.Start()
 		end
 	end
 	Input.bind("Record", onRecord)
+	Glyphs.onChanged(fillFooter)
 	RunService.RenderStepped:Connect(update)
 end
 

@@ -66,4 +66,10 @@ return {
 		expect(Clock.timeLeft(100, 40)).toBe(60)
 		expect(Clock.timeLeft(100, 140)).toBe(0)
 	end,
+	["the readout shows minutes and padded seconds, rounded up"] = function()
+		expect(Clock.readout(245)).toBe("4:05")
+		expect(Clock.readout(0.2)).toBe("0:01")
+		expect(Clock.readout(0)).toBe("0:00")
+		expect(Clock.readout(-3)).toBe("0:00")
+	end,
 }

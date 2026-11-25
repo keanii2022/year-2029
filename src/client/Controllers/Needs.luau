@@ -1,6 +1,7 @@
 -- Hunger and energy bars above the health bar, the supplies shopping list, the quick-use actions
 -- (gamepad D-pad, or the hotbar's food, drink and bandage slots) and short feedback text. Same
--- look as Hud.
+-- look as Hud. On a phone the bars sit under Hud's health bar top-left and the list goes under the
+-- ? / RECORD buttons, clear of the thumbstick and the hotbar.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -20,13 +21,19 @@ local PANEL = Color3.fromRGB(12, 12, 14)
 local TEXT = Color3.fromRGB(225, 222, 215)
 local SPRAY_RED = Color3.fromRGB(200, 28, 22)
 local FEEDBACK_TIME = 2
+local BAR_WIDTH = 240
+-- Phone spots, matching Hud's touch health bar (156, 90, 220 wide)
+local TOUCH_BAR_X = 156
+local TOUCH_BAR_WIDTH = 220
+local TOUCH_BAR_TOP = { Hunger = 130, Energy = 164 }
+local TOUCH_LIST_AT = Vector2.new(16, 140)
 -- Words per need: normal, low, empty
 local NEED_WORDS = {
 	Hunger = { "HUNGER", "HUNGRY", "STARVING" },
 	Energy = { "ENERGY", "TIRED", "EXHAUSTED" },
 }
 
-type Bar = { fill: Frame, title: TextLabel }
+type Bar = { panel: Frame, fill: Frame, title: TextLabel, bottom: number }
 
 local Needs = {}
 
@@ -34,6 +41,10 @@ local gui: ScreenGui
 local bars: { [string]: Bar } = {}
 local listRows: { TextLabel } = {}
 local hintRow: Frame
+local listPanel: Frame
+local listLayout: UIListLayout
+local listTitle: TextLabel
+local touch = false
 local feedbackLabel: TextLabel
 local feedbackUntil = 0
 local bag: { NeedsLogic.Stack } = {}
@@ -67,7 +78,7 @@ local function buildBar(name: string, bottom: number)
 	local panel = frame({
 		AnchorPoint = Vector2.new(0, 1),
 		Position = UDim2.new(0, 24, 1, -bottom),
-		Size = UDim2.fromOffset(240, 8),
+		Size = UDim2.fromOffset(BAR_WIDTH, 8),
 		BackgroundColor3 = PANEL,
 		BackgroundTransparency = 0.3,
 	}, gui)
@@ -84,7 +95,7 @@ local function buildBar(name: string, bottom: number)
 		TextTransparency = 0.3,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	}, panel)
-	bars[name] = { fill = fill, title = title }
+	bars[name] = { panel = panel, fill = fill, title = title, bottom = bottom }
 end
 
 local function buildShoppingList()
@@ -94,11 +105,12 @@ local function buildShoppingList()
 		Size = UDim2.fromOffset(160, 18 * #settings.ShoppingList + 18),
 		BackgroundTransparency = 1,
 	}, gui)
-	local layout = Instance.new("UIListLayout")
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-	layout.Parent = panel
-	label({
+	listPanel = panel
+	listLayout = Instance.new("UIListLayout")
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	listLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	listLayout.Parent = panel
+	listTitle = label({
 		LayoutOrder = 0,
 		Size = UDim2.new(1, 0, 0, 18),
 		Text = "SUPPLIES",
@@ -186,14 +198,18 @@ local function showBar(name: string, value: number, forceEmpty: boolean)
 	bar.title.Font = if warn then Enum.Font.PermanentMarker else Enum.Font.GothamBold
 	bar.title.TextColor3 = if warn then SPRAY_RED else TEXT
 	bar.title.TextTransparency = if warn then 0 else 0.3
-	bar.title.TextSize = if warn then 14 else 12
+	bar.title.TextSize = if warn or touch then 14 else 12
 end
 
 local function refreshList(state: NeedsLogic.State)
 	local rows = NeedsLogic.shoppingList(settings.ShoppingList, bag, settings.Uses, state, needSettings)
 	for index, row in rows do
 		local text = listRows[index]
-		text.Text = `{string.upper(row.label)}  {row.have}/{row.want}`
+		-- Once there's enough, a tick instead of a count that looks over the limit ("CELLS 36/30")
+		local enough = row.have >= row.want
+		text.Text = if enough
+			then `{string.upper(row.label)}  {row.have} ✓`
+			else `{string.upper(row.label)}  {row.have}/{row.want}`
 		text.Font = if row.low then Enum.Font.PermanentMarker else Enum.Font.GothamBold
 		text.TextColor3 = if row.low then SPRAY_RED else TEXT
 		text.TextTransparency = if row.low then 0 else 0.4
@@ -215,9 +231,31 @@ local function showFeedback(text: unknown)
 	end
 end
 
+local function place()
+	for name, bar in bars do
+		if touch then
+			bar.panel.AnchorPoint = Vector2.zero
+			bar.panel.Position = UDim2.fromOffset(TOUCH_BAR_X, TOUCH_BAR_TOP[name])
+			bar.panel.Size = UDim2.fromOffset(TOUCH_BAR_WIDTH, 8)
+		else
+			bar.panel.AnchorPoint = Vector2.new(0, 1)
+			bar.panel.Position = UDim2.new(0, 24, 1, -bar.bottom)
+			bar.panel.Size = UDim2.fromOffset(BAR_WIDTH, 8)
+		end
+	end
+	listPanel.AnchorPoint = if touch then Vector2.zero else Vector2.new(0, 1)
+	listPanel.Position = if touch
+		then UDim2.fromOffset(TOUCH_LIST_AT.X, TOUCH_LIST_AT.Y)
+		else UDim2.new(0, 24, 1, -152)
+	listLayout.VerticalAlignment = if touch then Enum.VerticalAlignment.Top else Enum.VerticalAlignment.Bottom
+	listTitle.TextSize = if touch then 14 else 12
+end
+
 local function onLastInput(now: Input.Device)
 	device = now
+	touch = now == "Touch"
 	refreshHint()
+	place()
 end
 
 function Needs.Init()
@@ -260,8 +298,7 @@ function Needs.Start()
 		Input.bind(entry.action, quickUse)
 		Hotbar.onUse(entry.action, use)
 	end
-	device = Glyphs.device()
-	refreshHint()
+	onLastInput(Glyphs.device())
 	Glyphs.onChanged(onLastInput)
 	RunService.RenderStepped:Connect(update)
 end

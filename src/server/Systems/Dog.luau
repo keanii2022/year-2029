@@ -397,6 +397,10 @@ local function bite(current: Dog, target: Target, now: number)
 		DogGuard.remember(bittenRobots, target.robot.id, now + settings.RobotRebiteSeconds)
 		sparks(target.position)
 	elseif target.humanoid then
+		-- For the down screen (Combat): what got you
+		local body = target.humanoid.Parent :: Instance
+		body:SetAttribute("HurtBy", "Bitten by a dog")
+		body:SetAttribute("HurtAt", workspace:GetServerTimeNow())
 		target.humanoid:TakeDamage(settings.BiteDamage)
 		playSound(target.root, sounds.Yelp, "normal")
 	end

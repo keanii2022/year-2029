@@ -42,6 +42,8 @@ local flashing = false
 local nightToken = 0
 local noteToken = 0
 local lastFlickerSound = 0
+local refusedUntil = 0
+local REFUSED_SECONDS = 0.6 -- the battery bar flashes red this long when the light won't come on
 
 local function makeSound(name: string, volume: number, looped: boolean): Sound?
 	local id = ModelLibrary.soundId(name)
@@ -85,7 +87,7 @@ local function label(props: { [string]: any }, parent: Instance): TextLabel
 	return text
 end
 
-local function bar(name: string, bottom: number, parent: Instance): Frame
+local function bar(name: string, title: string, bottom: number, parent: Instance): Frame
 	local rules = Settings.Battery.Bar
 	local back = Instance.new("Frame")
 	back.Name = name
@@ -102,6 +104,18 @@ local function bar(name: string, bottom: number, parent: Instance): Frame
 	fill.BackgroundColor3 = rules.Color
 	fill.BorderSizePixel = 0
 	fill.Parent = back
+	-- Says what the bar is, just left of it
+	label({
+		Name = "Title",
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(0, -8, 0.5, 0),
+		Size = UDim2.fromOffset(60, 14),
+		Text = title,
+		Font = Enum.Font.GothamBold,
+		TextSize = 11,
+		TextTransparency = 0.25,
+		TextXAlignment = Enum.TextXAlignment.Right,
+	}, back)
 	back.Parent = parent
 	return back
 end
@@ -187,9 +201,9 @@ local function buildGui()
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 2
 	peek = buildPeek(gui)
-	batteryBar = bar("Battery", 72, gui)
+	batteryBar = bar("Battery", "LIGHT", 72, gui)
 	-- The "hold breath" key shows in Hints' hidden line, under the crosshair with "get out"
-	breathBar = bar("Breath", 92, gui)
+	breathBar = bar("Breath", "BREATH", 92, gui)
 	note = label({
 		Name = "Note",
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -238,12 +252,20 @@ end
 
 -- Battery and breath ------------------------------------------------------------------------------
 
+-- Flashlight asks for this when the server wouldn't switch the light on: the bar flashes red with a
+-- dead click
+function NightTricks.lightRefused()
+	refusedUntil = os.clock() + REFUSED_SECONDS
+	playOnce(Sounds.DeadClick, 0.6)
+end
+
 local function updateFlashlight()
 	local level = player:GetAttribute("Battery") or Settings.Battery.Max
 	local on = player:GetAttribute("FlashlightOn") == true
 	local low = level < Settings.Battery.LowAt
-	batteryBar.Visible = on or low
-	setBar(batteryBar, level / Settings.Battery.Max, low)
+	local refused = os.clock() < refusedUntil
+	batteryBar.Visible = on or low or refused
+	setBar(batteryBar, level / Settings.Battery.Max, low or refused)
 
 	local beam = workspace.CurrentCamera:FindFirstChild("FlashlightBeam")
 	local light = beam and beam:FindFirstChildOfClass("SpotLight")

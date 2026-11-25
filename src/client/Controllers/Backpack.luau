@@ -749,6 +749,17 @@ function Backpack.Start()
 	GuiService.MenuOpened:Connect(Backpack.close)
 	player:GetAttributeChangedSignal("CarrySpeedMultiplier"):Connect(Backpack.close)
 	player.CharacterRemoving:Connect(Backpack.close)
+	-- Shut the moment you go down, not when the body's cleared away seconds later
+	local function watchDeath(character: Model)
+		local humanoid = character:WaitForChild("Humanoid", 10) :: Humanoid?
+		if humanoid then
+			humanoid.Died:Connect(Backpack.close)
+		end
+	end
+	player.CharacterAdded:Connect(watchDeath)
+	if player.Character then
+		task.spawn(watchDeath, player.Character)
+	end
 end
 
 return Backpack

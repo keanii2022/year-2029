@@ -176,6 +176,9 @@ local function tick(dt: number)
 			local nextState, damage = Needs.step(state, dt, { sprinting = sprinting }, NeedSettings)
 			publish(player, nextState)
 			if damage > 0 then
+				-- For the down screen (Combat): what got you
+				character:SetAttribute("HurtBy", "Starved.")
+				character:SetAttribute("HurtAt", workspace:GetServerTimeNow())
 				humanoid:TakeDamage(damage)
 			end
 		end
@@ -243,7 +246,7 @@ local function buildPickup(roll: Loot.Roll, spot: Loot.Spot, turn: number)
 	prompt.ObjectText = pickupText(roll.item, remaining)
 	prompt.HoldDuration = Settings.PickupHold
 	prompt.MaxActivationDistance = Settings.PickupRange
-	prompt.RequiresLineOfSight = false
+	prompt.RequiresLineOfSight = true -- no looting through a wall
 	prompt.Parent = root
 	prompt.Triggered:Connect(function(player)
 		if remaining <= 0 or not bodyOf(player) then
