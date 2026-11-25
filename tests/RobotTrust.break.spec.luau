@@ -1,5 +1,5 @@
--- Trying to break the robot companion's trust rules (and its saved rapport). Tests marked BUG fail
--- on purpose: each names the bug it shows. Leave them failing until the code is fixed.
+-- Trying to break the robot companion's trust rules (and its saved rapport). Tests marked FIXED
+-- once failed on purpose; each names the bug it showed.
 local RobotTrust = require("../src/shared/Logic/RobotTrust")
 local Saves = require("../src/shared/Logic/Saves")
 local expect = require("./expect")
@@ -201,11 +201,11 @@ return {
 		RobotTrust.decay(r, 1e6, true, SETTINGS)
 		expect(r.trust).toBe(60)
 	end,
-	-- BUG (design clash, Systems/Companion decayAll + mode "build"): a bonded robot builds "whether or
-	-- not you're around", but trust decays a point a minute the whole time its owner is off looting.
-	-- Ten minutes away (under two days' cycle) drops a fresh bond below 75, so it stops building and,
-	-- below bonded, anyone with more trust can take it.
-	["BUG: a bonded owner looting for ten minutes while it builds stays bonded"] = function()
+	-- FIXED (design clash, Systems/Companion decayAll + mode "build"): a bonded robot builds "whether
+	-- or not you're around", but trust decayed a point a minute the whole time its owner was off
+	-- looting. Now a bond holds through BondedGraceSeconds away, and Companion doesn't decay the
+	-- owner at all while they're alive in the server or it's building.
+	["FIXED: a bonded owner looting for ten minutes while it builds stays bonded"] = function()
 		local r = record(80, true)
 		for _ = 1, 10 * 60 * 5 do
 			RobotTrust.decay(r, 0.2, false, SETTINGS)
@@ -302,11 +302,10 @@ return {
 		expect(chosen).toBe("griefer")
 		expect(switched).toBe(false) -- no lock: the hold only follows a switch
 	end,
-	-- BUG (Systems/Companion updateOwner, ~line 829-875): owners are compared as Player objects. A
-	-- bonded owner who rejoins comes back as a new Player with the same record (same trust), so the
-	-- "challenger" never has MORE trust than the stale owner and can't win it; the robot sits in
-	-- "wait" for LeftHoldSeconds and then wipes the returning player's record (records[UserId] = nil).
-	["BUG: a bonded owner who rejoins (new player object, same record) gets their robot back"] = function()
+	-- FIXED (Systems/Companion updateOwner): owners were compared as Player objects, so a bonded
+	-- owner who rejoined (new Player, same record) could never win it back and the robot wiped their
+	-- record after LeftHoldSeconds. Now owners match by user id.
+	["FIXED: a bonded owner who rejoins (new player object, same record) gets their robot back"] = function()
 		local oldSelf = { userId = 7, session = 1 }
 		local newSelf = { userId = 7, session = 2 }
 		local chosen = RobotTrust.chooseOwner(ownerInput({
@@ -352,9 +351,8 @@ return {
 		RobotTrust.decay(r, math.huge, false, SETTINGS)
 		expect(r.trust).toBe(0)
 	end,
-	-- BUG (hardening, Logic/RobotTrust decay): a negative dt adds trust past Max. The server only
-	-- passes task.wait's dt today, so it's not reachable, but nothing clamps it.
-	["BUG: a negative time step never adds trust"] = function()
+	-- FIXED (hardening, Logic/RobotTrust decay): a negative dt added trust past Max. Now clamped.
+	["FIXED: a negative time step never adds trust"] = function()
 		local r = record(90, true)
 		RobotTrust.decay(r, -60 * 60, false, SETTINGS)
 		expect(r.trust <= 90).toBeTruthy()

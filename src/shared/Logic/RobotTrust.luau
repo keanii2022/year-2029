@@ -22,6 +22,7 @@ export type Record = {
 	teachDay: number,
 	teachCount: number,
 	survivedNight: boolean,
+	away: number, -- seconds in a row the player has been away from it
 }
 export type Settings = {
 	Max: number,
@@ -34,6 +35,7 @@ export type Settings = {
 	Repair: number,
 	Hide: number,
 	RapportDaySeconds: number,
+	BondedGraceSeconds: number?,
 }
 export type Refusal = "day" | "full" | "given" | "lessons" | "own"
 export type Point = { x: number, z: number }
@@ -46,6 +48,7 @@ export type OwnerInput = {
 	lockedUntil: number, -- no switching before this
 	now: number,
 	goneSeconds: number,
+	margin: number?, -- how much more trust than the owner a challenger needs (none when nil)
 	candidates: { Candidate },
 }
 export type ModeInput = {
@@ -62,6 +65,8 @@ local RobotTrust = {}
 
 RobotTrust.STAGES = { "curious", "watching", "learning", "bonded" } :: { Stage }
 local RANK: { [Stage]: number } = { curious = 1, watching = 2, learning = 3, bonded = 4 }
+-- A bonded robot keeps its bond through a loot run or a death this long before it starts to fade
+local DEFAULT_BONDED_GRACE = 900
 
 function RobotTrust.new(trust: number?): Record
 	return {
@@ -72,6 +77,7 @@ function RobotTrust.new(trust: number?): Record
 		teachDay = 0,
 		teachCount = 0,
 		survivedNight = false,
+		away = 0,
 	}
 end
 
@@ -141,6 +147,24 @@ function RobotTrust.canGift(record: Record, item: string, day: number): boolean
 	return record.gifts[item] ~= day
 end
 
+-- Why a gift would be refused right now, without changing anything: checked before the item is
+-- taken, so a refused gift keeps it.
+function RobotTrust.giftRefusal(record: Record, item: string, day: number, settings: Settings): Refusal?
+	if record.gifts[item] == day then
+		return "given"
+	elseif record.trust >= settings.Max then
+		return "full"
+	elseif record.day == day and record.dayGain >= settings.DayCap then
+		return "day"
+	end
+	return nil
+end
+
+-- A bonded rapport from an earlier server: the first gift starts from at least this much trust.
+function RobotTrust.headStart(record: Record, start: number)
+	record.trust = math.max(record.trust, start)
+end
+
 -- A piece placed near it that stayed put and fortified: small, a few times a day.
 function RobotTrust.teach(record: Record, day: number, settings: Settings): (number, Refusal?)
 	if record.teachDay ~= day then
@@ -175,10 +199,18 @@ function RobotTrust.hide(record: Record, day: number, settings: Settings): (numb
 end
 
 function RobotTrust.decay(record: Record, dt: number, near: boolean, settings: Settings)
+	dt = if dt == dt then math.max(0, dt) else 0
 	if near then
+		record.away = 0
 		return
 	end
-	record.trust = math.max(0, record.trust - settings.DecayPerMinute * dt / 60)
+	local away = (record.away or 0) + dt
+	record.away = away
+	local grace = if RobotTrust.stage(record, settings) == "bonded"
+		then settings.BondedGraceSeconds or DEFAULT_BONDED_GRACE
+		else 0
+	local fading = math.min(dt, math.max(0, away - grace))
+	record.trust = math.max(0, record.trust - settings.DecayPerMinute * fading / 60)
 end
 
 -- A whole stage lost (you shot it, or the pack took it for a night): back to the start of the stage
@@ -213,11 +245,37 @@ function RobotTrust.canSwitch(
 	return ownerGoneFor >= goneSeconds or ownerStage == nil or RANK[ownerStage] < RANK.bonded
 end
 
-local function best(candidates: { Candidate }, above: number): Candidate?
+-- The same person: equal ids, or a rejoin (a new player object with the same user id).
+local function personOf(id: any): any
+	if typeof(id) == "Instance" then
+		return (id :: any).UserId
+	elseif type(id) == "table" and id.userId ~= nil then
+		return id.userId
+	end
+	return id
+end
+
+local function samePerson(a: any, b: any): boolean
+	return a == b or (a ~= nil and b ~= nil and personOf(a) == personOf(b))
+end
+
+-- The most trusting free candidate with more than `above` and at least `atLeast`; on a tie, the
+-- current owner first, then whoever comes first.
+local function best(candidates: { Candidate }, above: number, atLeast: number, owner: any?): Candidate?
 	local found: Candidate? = nil
 	for _, candidate in candidates do
-		if candidate.free and RANK[candidate.stage] >= RANK.watching and candidate.trust > above then
-			if not found or candidate.trust > found.trust then
+		local trust = candidate.trust
+		if
+			candidate.free
+			and RANK[candidate.stage] >= RANK.watching
+			and trust > above
+			and trust >= atLeast
+		then
+			if
+				not found
+				or trust > found.trust
+				or (trust == found.trust and owner ~= nil and samePerson(candidate.id, owner))
+			then
 				found = candidate
 			end
 		end
@@ -234,13 +292,19 @@ function RobotTrust.chooseOwner(input: OwnerInput): (any?, boolean)
 		owner = nil -- trust slipped back to curious: it belongs to nobody again
 	end
 	if owner == nil then
-		local first = best(input.candidates, -math.huge)
+		local first = best(input.candidates, -math.huge, -math.huge, input.owner)
 		return if first then first.id else nil, false
 	end
-	local challenger = best(input.candidates, input.ownerTrust)
+	for _, candidate in input.candidates do
+		if candidate.id ~= owner and samePerson(candidate.id, owner) then
+			owner = candidate.id -- the owner rejoined: same person, new player object
+			break
+		end
+	end
+	local challenger = best(input.candidates, input.ownerTrust, input.ownerTrust + (input.margin or 0), owner)
 	if
 		challenger
-		and challenger.id ~= owner
+		and not samePerson(challenger.id, owner)
 		and RobotTrust.canSwitch(
 			ownerStage,
 			input.ownerGoneFor,

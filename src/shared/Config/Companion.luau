@@ -41,12 +41,18 @@ return {
 		Repair = 8, -- standing it back up; nothing for the one who knocked it down
 		Hide = 12, -- it ended the night with you or inside your fort
 		RapportDaySeconds = 86400, -- saved rapport drops one stage per this many real seconds away
+		BondedGraceSeconds = 900, -- a bond holds this long away (dead, or out of the server) before fading
 	},
 
 	-- Ownership
-	OwnerGoneSeconds = 180, -- someone else can win it once its owner has been away this long
+	OwnerGoneSeconds = 180, -- someone else can win it once its owner has been dead or out this long
+	SwitchMargin = 5, -- a challenger needs this much more trust than the owner; a tie stays put
 	LeftHoldSeconds = 300, -- owner left the server: it waits this long, then goes back to curious
 	StageLossCooldown = 20, -- one burst of your shots costs one stage, not one per bullet
+	-- Shooting it: no trust from it for the rest of the day, and it backs off you, chirping
+	WaryRange = 10,
+	WaryBackOff = 8,
+	WaryChirpEvery = 4,
 
 	-- Movement (studs)
 	NoticeRange = 32, -- a curious robot turns to look at players this close
@@ -101,6 +107,7 @@ return {
 	GiveHold = 0.5,
 	GiveReach = 10,
 	BuildHold = 1,
+	HoldSlack = 0.25, -- the server's hold timer may run this much short of a prompt's (lag)
 
 	-- Builder (Bonded + a fort plan near your spot). Plan limits are SimPlayers.Forts.Plan.
 	Build = {
@@ -111,11 +118,14 @@ return {
 		Repaths = 2, -- re-paths before giving up on this leg
 		ProgressStep = 1, -- studs closer that count as progress
 		PlaceTries = 3, -- refused set-downs before planning around whatever's in the slot
+		PlayerPlaceTries = 8, -- refused because a player stands in the slot: wait longer, then move on
 		PickupTime = 1.5,
 		PlaceTime = 2.2,
 		RestTime = 2,
 		PickRetry = 4,
 		SkipFor = 120, -- a piece it gave up on is left alone this long
+		-- One fort a day per owner: MaxPieces new pieces a day across every "Build here", repairs free
+		FoundCooldown = 30, -- seconds between "Build here" presses
 	},
 
 	-- Sounds (names in the sound pack; silent until uploaded), all through Mix.route SFX
@@ -130,6 +140,18 @@ return {
 		Repair = "hydraulic_hiss",
 		Flicker = "scout_eye_whine",
 		Volume = 0.8,
+	},
+
+	-- Keani's robot voice (the robots copy the ghost kid's dad), kept soft and spaced out
+	Voice = {
+		Notice = "robot_notice", -- turns to look at you
+		Gift = "robot_chatter",
+		Bonded = "robot_resume",
+		BuildStart = "robot_task",
+		BuildDone = "robot_chatter",
+		Down = "robot_error",
+		Volume = 0.55,
+		Cooldown = 12, -- seconds between lines from one robot
 	},
 
 	-- A Bonded robot wears your colour on its head when you never gave it anything

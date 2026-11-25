@@ -31,11 +31,13 @@ local settings = Config.Companion
 local trustSettings: RobotTrust.Settings = settings.Trust
 local build = settings.Build
 local sounds = settings.Sounds
+local voice = settings.Voice
 local grabTag = Config.Grab.Tag
 
 type Robot = Robots.Robot
 type Alive = { player: Player, root: BasePart, position: Vector3, look: Vector3, crouching: boolean }
 type Lesson = { by: number, at: number, position: Vector3 }
+type Hold = { began: number, ended: number? }
 type Pal = {
 	robot: Robot,
 	records: { [number]: RobotTrust.Record }, -- by UserId
@@ -52,6 +54,8 @@ type Pal = {
 	repaired: boolean,
 	homeUntil: number,
 	shotLossAt: { [number]: number },
+	shunned: { [number]: number }, -- UserId -> the day they shot it: no trust from it that day
+	waryAt: number,
 	nightResult: ("kept" | "taken")?,
 	lastGift: { [number]: string }, -- the last item each player gave it, for its bonded badge
 	-- learning: one loose prop fetched for you
@@ -73,6 +77,8 @@ type Pal = {
 	task: ("lift" | "place" | "rest")?,
 	taskUntil: number,
 	nextPickAt: number,
+	crewPeak: number, -- the most pieces its fort has had: refilling below this is a repair
+	playerRefusals: number, -- set-downs at this slot refused for a player standing in it
 	-- teaching
 	lessons: { [PVInstance]: Lesson },
 	-- curious behaviour
@@ -83,6 +89,10 @@ type Pal = {
 	recheckAt: number, -- an idle builder looks again for loose pieces now and then
 	outside: boolean, -- sets the carried piece down from outside the fort
 	triedBoth: boolean, -- already tried the other side of this slot
+	speaking: Sound?,
+	voiceAt: number,
+	holds: { [ProximityPrompt]: { [number]: Hold } }, -- server-side hold timing, by UserId
+	anchorAt: Vector3?,
 	-- prompts ride an invisible anchor that follows the robot (its model swaps at dusk and dawn)
 	anchor: Part,
 	give: ProximityPrompt,
@@ -100,6 +110,11 @@ local itemModels: { [string]: string } = {}
 local ghostCache: { [string]: Model | false } = {}
 local rapportUsed: { [number]: boolean } = {}
 local leftAt: { [number]: number } = {} -- players who left: when, so their records can be let go
+local builtToday: { [number]: { day: number, placed: number } } = {} -- owner UserId -> new pieces today
+local foundAt: { [number]: number } = {} -- owner UserId -> last "Build here"
+-- Refreshed once a tick, shared by every robot
+local aliveList: { Alive } = {}
+local aliveNow: { [Player]: Alive } = {}
 local repickAt = 0
 local wantOffset = 0
 
@@ -174,6 +189,41 @@ local function happy(robot: Robot)
 			play(robot, sounds.HappyHigh)
 		end
 	end)
+end
+
+-- A line in Keani's robot voice: one at a time, and never more often than the cooldown.
+local function say(pal: Pal, name: string)
+	local now = os.clock()
+	local robot = pal.robot
+	local holder = robot.headPart or robot.model.PrimaryPart
+	local id = ModelLibrary.soundId(name)
+	if now < pal.voiceAt or not holder or not holder.Parent or not id then
+		return
+	end
+	pal.voiceAt = now + voice.Cooldown
+	if pal.speaking then
+		pal.speaking:Destroy()
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = voice.Volume
+	sound.RollOffMinDistance, sound.RollOffMaxDistance = Loudness.rollOff("quiet")
+	sound.Parent = holder
+	Mix.route(sound, "SFX")
+	pal.speaking = sound
+	sound:Play()
+	Debris:AddItem(sound, 10)
+end
+
+local function userIdOf(shooter: any): number?
+	if typeof(shooter) == "Instance" and shooter:IsA("Player") then
+		return shooter.UserId
+	end
+	return nil
+end
+
+local function shuns(pal: Pal, userId: number): boolean
+	return pal.shunned[userId] == DayNight.day()
 end
 
 -- What it holds up and wears ---------------------------------------------------------------------
@@ -312,13 +362,7 @@ end
 local function recordFor(pal: Pal, player: Player): RobotTrust.Record
 	local record = pal.records[player.UserId]
 	if not record then
-		local start = 0
-		if not rapportUsed[player.UserId] then
-			-- a bonded rapport from an earlier server: this server's first robot skips ahead
-			start = RobotTrust.startTrust(savedRapport(player), trustSettings)
-			rapportUsed[player.UserId] = true
-		end
-		record = RobotTrust.new(start)
+		record = RobotTrust.new(0)
 		pal.records[player.UserId] = record
 	end
 	return record
@@ -341,7 +385,7 @@ end
 
 local function ownsOther(player: Player, pal: Pal): boolean
 	for _, other in pals do
-		if other ~= pal and other.owner == player then
+		if other ~= pal and other.ownerId == player.UserId then
 			return true
 		end
 	end
@@ -372,13 +416,39 @@ local function leaveCrew(pal: Pal)
 	end
 end
 
+local function placedToday(userId: number): number
+	local entry = builtToday[userId]
+	return if entry and entry.day == DayNight.day() then entry.placed else 0
+end
+
+local function canPlaceMore(pal: Pal, crew: SimForts.Crew): boolean
+	local ownerId = pal.ownerId
+	return ownerId ~= nil
+		and BuildPlan.canPlace(SimForts.count(crew), pal.crewPeak, placedToday(ownerId), build.MaxPieces)
+end
+
 local function hasWork(pal: Pal): boolean
 	local crew = pal.crew
 	if not crew then
 		return false
 	end
-	return pal.job ~= nil
-		or (SimForts.building(crew) and not BuildPlan.full(SimForts.count(crew), build.MaxPieces))
+	return pal.job ~= nil or (SimForts.building(crew) and canPlaceMore(pal, crew))
+end
+
+-- A piece set down: past the fort's best so far it's new and uses up one of today's pieces.
+local function notePlaced(pal: Pal, crew: SimForts.Crew)
+	local count, ownerId = SimForts.count(crew), pal.ownerId
+	if count <= pal.crewPeak or not ownerId then
+		return
+	end
+	pal.crewPeak = count
+	local day = DayNight.day()
+	local entry = builtToday[ownerId]
+	if not entry or entry.day ~= day then
+		entry = { day = day, placed = 0 }
+		builtToday[ownerId] = entry
+	end
+	entry.placed += 1
 end
 
 local function skipPiece(pal: Pal, prop: Instance, now: number)
@@ -403,6 +473,7 @@ local function startCarry(pal: Pal, job: SimForts.Job, now: number)
 	local outside = flatDistance(standSpot(pal, job), robot.position)
 	pal.outside = outside < inside
 	pal.triedBoth = false
+	pal.playerRefusals = 0
 	pal.leg = BuildPlan.leg("carry", now, math.min(inside, outside))
 end
 
@@ -431,8 +502,18 @@ local function finishTask(pal: Pal, now: number)
 			pal.job, pal.leg = nil, nil
 			pal.task, pal.taskUntil = "rest", now + build.RestTime
 			play(robot, sounds.HappyLow)
-		elseif reason ~= "player" and job.tries >= build.PlaceTries then
-			-- something fixed sits in the slot: plan around it, or give the piece up
+			notePlaced(pal, job.crew)
+			if not canPlaceMore(pal, job.crew) then
+				say(pal, voice.BuildDone)
+			end
+			return
+		end
+		if reason == "player" then
+			pal.playerRefusals += 1
+		end
+		local leg = pal.leg
+		if not leg or BuildPlan.stopPlacing(leg, now, job.tries, pal.playerRefusals, build) then
+			-- something sits in the slot (or someone won't move): plan around it, or give the piece up
 			if SimForts.reslot(job) then
 				startCarry(pal, job, now)
 			else
@@ -584,9 +665,8 @@ local function guard(pal: Pal, now: number)
 		return -- too far off to notice
 	end
 	local intruder = false
-	for _, player in Players:GetPlayers() do
-		local alive = player ~= owner and aliveOf(player)
-		if alive and flatDistance(alive.position, spot) <= settings.GuardRadius then
+	for _, alive in aliveList do
+		if alive.player ~= owner and flatDistance(alive.position, spot) <= settings.GuardRadius then
 			intruder = true
 		end
 	end
@@ -739,18 +819,16 @@ local function doorwayStep(pal: Pal, now: number): Robots.Order
 	spot = spot or robot.home
 	local nearest: Alive? = nil
 	local nearestDistance = settings.NoticeRange
-	for _, player in Players:GetPlayers() do
-		local alive = aliveOf(player)
-		if alive then
-			local distance = flatDistance(alive.position, robot.position)
-			if distance < nearestDistance then
-				nearest, nearestDistance = alive, distance
-			end
+	for _, alive in aliveList do
+		local distance = flatDistance(alive.position, robot.position)
+		if distance < nearestDistance then
+			nearest, nearestDistance = alive, distance
 		end
 	end
 	local tilt = nearest ~= nil and nearestDistance <= settings.TiltRange
 	if nearest and now >= pal.noticedAt then
 		play(robot, sounds.Notice)
+		say(pal, voice.Notice)
 	end
 	if nearest then
 		pal.noticedAt = now + 10
@@ -805,6 +883,12 @@ local function setOwner(pal: Pal, owner: Player?, switched: boolean, now: number
 	if previous == owner then
 		return
 	end
+	if previous and owner and previous.UserId == owner.UserId then
+		-- the same person back on a new player object (a rejoin)
+		pal.owner = owner
+		pal.ownerAwaySince, pal.ownerLeftAt = nil, nil
+		return
+	end
 	if previous and previous.Parent then
 		previous:SetAttribute("RobotStage", nil)
 	end
@@ -838,9 +922,8 @@ local function updateOwner(pal: Pal, now: number)
 		end
 	end
 	if owner then
-		local alive = owner.Parent and aliveOf(owner)
-		local near = alive and flatDistance(alive.position, pal.robot.position) <= trustSettings.NearDistance
-		if near then
+		-- away (so someone else can win it) only while the owner is dead or out of the server
+		if owner.Parent and aliveNow[owner] then
 			pal.ownerAwaySince = nil
 		else
 			pal.ownerAwaySince = pal.ownerAwaySince or now
@@ -854,7 +937,7 @@ local function updateOwner(pal: Pal, now: number)
 				id = player,
 				stage = RobotTrust.stage(record, trustSettings),
 				trust = record.trust,
-				free = player == owner or not ownsOther(player, pal),
+				free = player.UserId == pal.ownerId or not ownsOther(player, pal),
 			})
 		end
 	end
@@ -867,6 +950,7 @@ local function updateOwner(pal: Pal, now: number)
 		lockedUntil = pal.lockedUntil,
 		now = now,
 		goneSeconds = settings.OwnerGoneSeconds,
+		margin = settings.SwitchMargin,
 		candidates = candidates,
 	})
 	setOwner(pal, chosen, switched, now)
@@ -887,40 +971,100 @@ local function reactToStage(pal: Pal, stage: RobotTrust.Stage)
 	end
 	if RobotTrust.rank(stage) > RobotTrust.rank(shown) then
 		happy(pal.robot)
+		if stage == "bonded" then
+			say(pal, voice.Bonded)
+		end
 	else
 		play(pal.robot, sounds.Sad)
 	end
 end
 
-local function loseStage(pal: Pal, player: Player)
-	local record = pal.records[player.UserId]
+local function loseStage(pal: Pal, userId: number)
+	local record = pal.records[userId]
 	if record then
 		RobotTrust.dropStage(record, trustSettings)
 	end
 end
 
+-- It backs off from someone who shot it today, chirping. nil when nobody like that is close.
+local function wary(pal: Pal, now: number): Robots.Order?
+	local robot = pal.robot
+	local nearest: Alive? = nil
+	local nearestDistance = settings.WaryRange
+	for _, alive in aliveList do
+		local distance = flatDistance(alive.position, robot.position)
+		if distance < nearestDistance and shuns(pal, alive.player.UserId) then
+			nearest, nearestDistance = alive, distance
+		end
+	end
+	if not nearest then
+		return nil
+	end
+	if now >= pal.waryAt then
+		pal.waryAt = now + settings.WaryChirpEvery
+		play(robot, sounds.Alarm)
+	end
+	local away = flat(robot.position - nearest.position)
+	away = if away.Magnitude > 0.01 then away.Unit else -robot.facing
+	return {
+		goal = robot.position + away * settings.WaryBackOff,
+		pose = "walk",
+		look = nearest.position + Vector3.yAxis * 1.5,
+	}
+end
+
 -- Each tick ------------------------------------------------------------------------------------
 
-local function decayAll(pal: Pal, dt: number)
+local function forget(pal: Pal, userId: number)
+	pal.records[userId] = nil
+	pal.shotLossAt[userId] = nil
+	pal.lastGift[userId] = nil
+	pal.shunned[userId] = nil
+end
+
+local function decayAll(pal: Pal, dt: number, now: number)
+	local at = pal.robot.position
 	for userId, record in pal.records do
 		local player = Players:GetPlayerByUserId(userId)
-		if player then
-			local alive = aliveOf(player)
-			local near = alive ~= nil
-				and flatDistance(alive.position, pal.robot.position) <= trustSettings.NearDistance
+		if userId == pal.ownerId then
+			-- the owner's trust only fades while they're dead or gone; a builder is working for them
+			local with = pal.mode == "build" or (player ~= nil and aliveNow[player] ~= nil)
+			RobotTrust.decay(record, dt, with, trustSettings)
+		elseif player then
+			local alive = aliveNow[player]
+			local near = alive ~= nil and flatDistance(alive.position, at) <= trustSettings.NearDistance
 			RobotTrust.decay(record, dt, near, trustSettings)
-		elseif pal.ownerId ~= userId then
-			local gone = leftAt[userId]
-			if not gone or os.clock() - gone >= settings.LeftHoldSeconds then
-				pal.records[userId] = nil
+		elseif not leftAt[userId] then
+			forget(pal, userId) -- left over LeftHoldSeconds ago (forgetLeavers dropped leftAt)
+		end
+	end
+	local day = DayNight.day()
+	for userId, last in pal.shotLossAt do
+		if now - last >= settings.StageLossCooldown then
+			pal.shotLossAt[userId] = nil
+		end
+	end
+	for userId, shotOn in pal.shunned do
+		if shotOn ~= day then
+			pal.shunned[userId] = nil
+		end
+	end
+	for userId in pal.lastGift do
+		if not pal.records[userId] then
+			pal.lastGift[userId] = nil
+		end
+	end
+	for _, holds in pal.holds do
+		for userId, hold in holds do
+			if now - hold.began > 60 then
+				holds[userId] = nil
 			end
 		end
 	end
 	-- anyone close enough to be noticed starts a record
-	for _, player in Players:GetPlayers() do
-		local alive = aliveOf(player)
-		if alive and flatDistance(alive.position, pal.robot.position) <= settings.NoticeRange then
-			recordFor(pal, player)
+	for _, alive in aliveList do
+		if flatDistance(alive.position, at) <= settings.NoticeRange then
+			recordFor(pal, alive.player)
 		end
 	end
 end
@@ -935,7 +1079,7 @@ local function checkLessons(pal: Pal, now: number)
 		local stayed = prop:IsDescendantOf(workspace)
 			and prop:GetAttribute("PlacedBy") == lesson.by
 			and (prop:GetPivot().Position - lesson.position).Magnitude <= settings.TeachMoved
-		if player and stayed and Grab.isFortified(prop) then
+		if player and stayed and not shuns(pal, lesson.by) and Grab.isFortified(prop) then
 			local added = RobotTrust.teach(recordFor(pal, player), DayNight.day(), trustSettings)
 			if added > 0 then
 				play(pal.robot, sounds.Notice)
@@ -952,9 +1096,14 @@ local function updateDown(pal: Pal, now: number)
 	elseif not down and pal.downSince then
 		pal.downSince = nil
 		if not pal.repaired then
-			-- nobody fixed it: it rebooted on its own and wanders home, a stage lower
-			if pal.owner then
-				loseStage(pal, pal.owner)
+			-- nobody fixed it: it rebooted on its own and wanders home. That costs the owner a stage
+			-- only when they or a robot knocked it down (anyone else would be stealing it for free),
+			-- and not after a night with the pack, which already cost one at dawn.
+			local by = pal.downBy
+			local byOwnerOrRobot = (pal.ownerId ~= nil and userIdOf(by) == pal.ownerId)
+				or (type(by) == "table" and by.brain ~= nil)
+			if pal.ownerId and byOwnerOrRobot and pal.nightResult ~= "taken" then
+				loseStage(pal, pal.ownerId)
 			end
 			pal.homeUntil = now + settings.HomeSeconds
 			play(robot, sounds.Sad)
@@ -962,7 +1111,7 @@ local function updateDown(pal: Pal, now: number)
 		pal.repaired = false
 		pal.downBy = nil
 	end
-	pal.repair.Enabled = down
+	pal.repair.Enabled = down and robot.brain.companion
 	pal.give.Enabled = not down and pal.wants ~= nil and robot.brain.companion
 	pal.anchor:SetAttribute("Down", down or nil)
 end
@@ -970,13 +1119,13 @@ end
 local function stepPal(pal: Pal, dt: number, now: number)
 	local robot = pal.robot
 	local phase = DayNight.phase()
-	decayAll(pal, dt)
+	decayAll(pal, dt, now)
 	updateOwner(pal, now)
 	updateDown(pal, now)
 	checkLessons(pal, now)
 
 	local owner = pal.owner
-	local ownerAlive = owner and owner.Parent and aliveOf(owner)
+	local ownerAlive = owner and aliveNow[owner]
 	local stage = ownerStage(pal)
 	local crew = pal.crew
 	if crew and crew.idle and now >= pal.recheckAt then
@@ -1061,6 +1210,9 @@ local function stepPal(pal: Pal, dt: number, now: number)
 		guard(pal, now)
 		order = tug(pal, dt) or keepNear(pal, ownerAlive, settings.FollowDistance, "idle")
 	end
+	if not pal.task then
+		order = wary(pal, now) or order
+	end
 	if robot.brain.companion then
 		Robots.drive(robot, order)
 	end
@@ -1086,31 +1238,74 @@ local function prompt(
 	return made
 end
 
+local function onHoldBegan(pal: Pal, made: ProximityPrompt, player: Player)
+	pal.holds[made][player.UserId] = { began = os.clock() }
+end
+
+local function onHoldEnded(pal: Pal, made: ProximityPrompt, player: Player)
+	local hold = pal.holds[made][player.UserId]
+	if hold and not hold.ended then
+		hold.ended = os.clock()
+	end
+end
+
+-- Server-side checks before a prompt counts: the hold really lasted (timed here, not trusted from
+-- the client), and the player is alive, uncuffed, empty-handed and still within reach.
+local function canUse(pal: Pal, made: ProximityPrompt, player: Player, reach: number): boolean
+	local hold = pal.holds[made][player.UserId]
+	pal.holds[made][player.UserId] = nil
+	if not hold or (hold.ended or os.clock()) - hold.began < made.HoldDuration - settings.HoldSlack then
+		return false
+	end
+	if player:GetAttribute("Cuffed") == true or Grab.isCarrying(player) then
+		return false
+	end
+	local alive = aliveOf(player)
+	return alive ~= nil and flatDistance(alive.position, pal.robot.position) <= reach + settings.ArriveSlack
+end
+
+local REFUSALS: { [RobotTrust.Refusal]: string } = {
+	day = "It needs time. Come back tomorrow.",
+	full = "It already trusts you all it can.",
+	given = "It already has that from you today.",
+}
+
 local function onGive(pal: Pal, player: Player)
 	local wants = pal.wants
-	if not wants or Robots.isDown(pal.robot) then
+	if not wants or Robots.isDown(pal.robot) or not pal.robot.brain.companion then
+		return
+	end
+	if not canUse(pal, pal.give, player, settings.GiveReach) then
 		return
 	end
 	if not Inventory.has(player, wants) then
 		Saves.tell(player, `It wants {itemName(wants)}.`)
 		return
 	end
-	local record = recordFor(pal, player)
-	local day = DayNight.day()
-	local added, refusal = RobotTrust.gift(record, wants, day, trustSettings)
-	if added <= 0 then
-		Saves.tell(
-			player,
-			if refusal == "day"
-				then "It needs time. Come back tomorrow."
-				else "It already trusts you all it can."
-		)
+	if shuns(pal, player.UserId) then
+		Saves.tell(player, "It won't take anything from you today.")
 		return
 	end
-	Inventory.remove(player, wants, 1)
+	local record = recordFor(pal, player)
+	local day = DayNight.day()
+	local refusal = RobotTrust.giftRefusal(record, wants, day, trustSettings)
+	if refusal then
+		Saves.tell(player, REFUSALS[refusal] or REFUSALS.full)
+		return
+	end
+	if Inventory.remove(player, wants, 1) < 1 then
+		return
+	end
+	if not rapportUsed[player.UserId] then
+		-- a bonded rapport from an earlier server: the first gift here starts from watching
+		rapportUsed[player.UserId] = true
+		RobotTrust.headStart(record, RobotTrust.startTrust(savedRapport(player), trustSettings))
+	end
+	RobotTrust.gift(record, wants, day, trustSettings)
 	pal.lastGift[player.UserId] = wants
 	pal.wants = RobotTrust.nextWant(wantsList, wants, 0)
 	happy(pal.robot)
+	say(pal, voice.Gift)
 end
 
 local function repairItem(player: Player): { id: string, count: number }?
@@ -1123,7 +1318,10 @@ local function repairItem(player: Player): { id: string, count: number }?
 end
 
 local function onRepair(pal: Pal, player: Player)
-	if not Robots.isDown(pal.robot) then
+	if not Robots.isDown(pal.robot) or not pal.robot.brain.companion then
+		return
+	end
+	if not canUse(pal, pal.repair, player, settings.RepairReach) then
 		return
 	end
 	local item = repairItem(player)
@@ -1131,11 +1329,16 @@ local function onRepair(pal: Pal, player: Player)
 		Saves.tell(player, "It needs a battery, or a handful of blaster cells.")
 		return
 	end
-	Inventory.remove(player, item.id, item.count)
+	if Inventory.remove(player, item.id, item.count) < item.count then
+		return
+	end
 	pal.repaired = true
 	Robots.standUp(pal.robot)
 	play(pal.robot, sounds.Repair)
-	local knockedItDown = pal.downBy == player
+	if shuns(pal, player.UserId) then
+		return -- fixed, but no trust from it today
+	end
+	local knockedItDown = userIdOf(pal.downBy) == player.UserId
 	local added = RobotTrust.repair(recordFor(pal, player), DayNight.day(), knockedItDown, trustSettings)
 	if added > 0 then
 		happy(pal.robot)
@@ -1143,13 +1346,24 @@ local function onRepair(pal: Pal, player: Player)
 end
 
 local function onBuild(pal: Pal, player: Player)
-	if player ~= pal.owner or ownerStage(pal) ~= "bonded" then
+	if player.UserId ~= pal.ownerId or ownerStage(pal) ~= "bonded" then
 		return
 	end
-	local alive = aliveOf(player)
-	if not alive then
+	if not canUse(pal, pal.buildPrompt, player, settings.GiveReach) then
 		return
 	end
+	local alive = aliveOf(player) :: Alive
+	local now = os.clock()
+	local last = foundAt[player.UserId]
+	if last and now - last < build.FoundCooldown then
+		Saves.tell(player, "Give it a moment.")
+		return
+	end
+	if placedToday(player.UserId) >= build.MaxPieces then
+		Saves.tell(player, "It's built all it can today. It'll still fix what it built.")
+		return
+	end
+	foundAt[player.UserId] = now
 	leaveCrew(pal)
 	local crew = SimForts.found(alive.position, alive.look, player.UserId)
 	if not crew then
@@ -1158,9 +1372,11 @@ local function onBuild(pal: Pal, player: Player)
 	end
 	SimForts.join(crew, pal)
 	pal.crew = crew
+	pal.crewPeak = 0
 	pal.fortAt = 0
 	pal.nextPickAt = 0
 	happy(pal.robot)
+	say(pal, voice.BuildStart)
 	Saves.tell(
 		player,
 		if DayNight.phase() == "Day" then "It starts building." else "It'll build here at first light."
@@ -1199,6 +1415,8 @@ local function makePal(robot: Robot): Pal
 		repaired = false,
 		homeUntil = 0,
 		shotLossAt = {},
+		shunned = {},
+		waryAt = 0,
 		nightResult = nil,
 		lastGift = {},
 		scavenge = nil,
@@ -1217,6 +1435,8 @@ local function makePal(robot: Robot): Pal
 		task = nil,
 		taskUntil = 0,
 		nextPickAt = 0,
+		crewPeak = 0,
+		playerRefusals = 0,
 		lessons = {},
 		noticedAt = 0,
 		tilting = false,
@@ -1225,6 +1445,10 @@ local function makePal(robot: Robot): Pal
 		recheckAt = 0,
 		outside = false,
 		triedBoth = false,
+		speaking = nil,
+		voiceAt = 0,
+		holds = {},
+		anchorAt = nil,
 		anchor = anchor,
 		give = prompt(anchor, "Give", "Give", settings.GiveHold, settings.GiveReach),
 		repair = prompt(anchor, "Repair", "Repair", settings.RepairHold, settings.RepairReach),
@@ -1243,6 +1467,15 @@ local function makePal(robot: Robot): Pal
 	pal.buildPrompt.Triggered:Connect(function(player)
 		onBuild(pal, player)
 	end)
+	for _, made in { pal.give, pal.repair, pal.buildPrompt } do
+		pal.holds[made] = {}
+		made.PromptButtonHoldBegan:Connect(function(player)
+			onHoldBegan(pal, made, player)
+		end)
+		made.PromptButtonHoldEnded:Connect(function(player)
+			onHoldEnded(pal, made, player)
+		end)
+	end
 	pals[robot] = pal
 	Robots.befriend(robot)
 	return pal
@@ -1306,14 +1539,14 @@ local function onDawn()
 		local record = owner and pal.records[owner.UserId]
 		if pal.nightResult == "taken" and owner then
 			-- back from the pack, still recoverable
-			loseStage(pal, owner)
+			loseStage(pal, owner.UserId)
 		elseif pal.nightResult == "kept" and owner and record and aliveOf(owner) then
 			record.survivedNight = true
 			local alive = aliveOf(owner) :: Alive
 			pal.fortAt = 0
 			refreshFort(pal, os.clock())
 			local together = flatDistance(alive.position, pal.robot.position) <= settings.KeepRadius
-			if together or hiddenInFort(pal) then
+			if (together or hiddenInFort(pal)) and not shuns(pal, owner.UserId) then
 				RobotTrust.hide(record, day, trustSettings)
 			end
 		end
@@ -1351,24 +1584,33 @@ end
 
 local function onShot(robot: Robot, shooter: any, knockedDown: boolean)
 	local pal = pals[robot]
-	if not pal or not robot.brain.companion then
+	if not pal then
+		return
+	end
+	if knockedDown then
+		-- recorded even for a pack hunter, so whoever downed it can't repair it for trust
+		pal.downBy = shooter
+		pal.repaired = false
+	end
+	if not robot.brain.companion then
 		return -- a robot hunting you with the pack can be shot back at no cost
 	end
 	local now = os.clock()
-	if typeof(shooter) == "Instance" and shooter:IsA("Player") and pal.records[shooter.UserId] then
-		local last = pal.shotLossAt[shooter.UserId]
-		if not last or now - last >= settings.StageLossCooldown then
-			pal.shotLossAt[shooter.UserId] = now
-			loseStage(pal, shooter)
+	local shooterId = userIdOf(shooter)
+	if shooterId then
+		pal.shunned[shooterId] = DayNight.day()
+		local last = pal.shotLossAt[shooterId]
+		if pal.records[shooterId] and (not last or now - last >= settings.StageLossCooldown) then
+			pal.shotLossAt[shooterId] = now
+			loseStage(pal, shooterId)
 			play(robot, sounds.Sad)
 		end
 	end
 	if knockedDown then
-		pal.downBy = shooter
-		pal.repaired = false
 		dropJob(pal)
 		pal.scavenge = nil
 		Robots.keepDown(robot, settings.DownSeconds)
+		say(pal, voice.Down)
 	end
 end
 
@@ -1381,12 +1623,46 @@ local function onPlaced(player: Player, prop: PVInstance)
 	end
 end
 
+local function refreshAlive()
+	table.clear(aliveList)
+	table.clear(aliveNow)
+	for _, player in Players:GetPlayers() do
+		local alive = aliveOf(player)
+		if alive then
+			table.insert(aliveList, alive)
+			aliveNow[player] = alive
+		end
+	end
+end
+
+-- Players gone longer than LeftHoldSeconds are let go (decayAll drops their records once leftAt
+-- does), along with build limits from earlier days and spent cooldowns.
+local function forgetOld(now: number)
+	for userId, gone in leftAt do
+		if now - gone >= settings.LeftHoldSeconds then
+			leftAt[userId] = nil
+			rapportUsed[userId] = nil
+		end
+	end
+	local day = DayNight.day()
+	for userId, entry in builtToday do
+		if entry.day ~= day then
+			builtToday[userId] = nil
+		end
+	end
+	for userId, at in foundAt do
+		if now - at >= build.FoundCooldown then
+			foundAt[userId] = nil
+		end
+	end
+end
+
 -- Public -------------------------------------------------------------------------------------------
 
 -- The player's robot made it through last night with them (for the Dawn Report).
 function Companion.madeIt(player: Player): boolean
 	for robot, pal in pals do
-		if pal.owner == player and pal.nightResult == "kept" and not robot.dead then
+		if pal.ownerId == player.UserId and pal.nightResult == "kept" and not robot.dead then
 			return true
 		end
 	end
@@ -1419,7 +1695,7 @@ function Companion.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		leftAt[player.UserId] = os.clock()
 		for _, pal in pals do
-			if pal.owner == player then
+			if pal.ownerId == player.UserId then
 				dropJob(pal)
 				pal.scavenge = nil
 				Robots.letGo(pal.robot, pal.robot.position)
@@ -1428,12 +1704,21 @@ function Companion.Start()
 	end)
 	Players.PlayerAdded:Connect(function(player)
 		leftAt[player.UserId] = nil
+		for _, pal in pals do
+			if pal.ownerId == player.UserId then
+				-- back within LeftHoldSeconds: the robot is still theirs
+				pal.owner = player
+				pal.ownerLeftAt, pal.ownerAwaySince = nil, nil
+			end
+		end
 	end)
 
 	RunService.Heartbeat:Connect(function()
 		for robot, pal in pals do
-			if not robot.dead then
-				pal.anchor.CFrame = CFrame.new(robot.position + Vector3.yAxis * 4)
+			local at = robot.position
+			if not robot.dead and (not pal.anchorAt or (at - pal.anchorAt).Magnitude > 0.05) then
+				pal.anchorAt = at
+				pal.anchor.CFrame = CFrame.new(at + Vector3.yAxis * 4)
 			end
 		end
 	end)
@@ -1442,6 +1727,8 @@ function Companion.Start()
 		while true do
 			local dt = task.wait(interval)
 			local now = os.clock()
+			refreshAlive()
+			forgetOld(now)
 			for robot, pal in table.clone(pals) do
 				if robot.dead then
 					removePal(pal)

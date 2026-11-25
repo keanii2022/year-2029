@@ -18,6 +18,11 @@ export type Settings = {
 	Repaths: number,
 	ProgressStep: number,
 }
+export type PlaceSettings = {
+	CarryTimeout: number,
+	PlaceTries: number, -- refusals for something fixed in the slot
+	PlayerPlaceTries: number, -- refusals for a player standing in it: they usually move, so more
+}
 export type Step = "go" | "repath" | "give_up"
 
 local BuildPlan = {}
@@ -50,6 +55,30 @@ function BuildPlan.step(leg: Leg, now: number, distance: number, blocked: boolea
 		return "repath"
 	end
 	return "go"
+end
+
+-- Standing at the slot setting the piece down, where step() doesn't run: whether to stop trying this
+-- slot. playerTries counts the refusals for a player in the way; tries counts every refusal.
+function BuildPlan.stopPlacing(
+	leg: Leg,
+	now: number,
+	tries: number,
+	playerTries: number,
+	settings: PlaceSettings
+): boolean
+	if now - leg.since > settings.CarryTimeout then
+		return true
+	end
+	return tries - playerTries >= settings.PlaceTries or playerTries >= settings.PlayerPlaceTries
+end
+
+-- Whether a builder may set down one more piece. Filling a gap below the most its fort has had
+-- (peak) is a repair and always allowed; a new piece also needs room in the owner's pieces for today.
+function BuildPlan.canPlace(count: number, peak: number, placedToday: number, maxPieces: number): boolean
+	if count >= maxPieces then
+		return false
+	end
+	return count < peak or placedToday < maxPieces
 end
 
 -- The plan has as many pieces as this builder puts up.

@@ -233,4 +233,105 @@ return {
 		expect(RobotTrust.nextWant(list, nil, 4)).toBe("Chips")
 		expect(RobotTrust.nextWant({}, nil, 0)).toBe(nil)
 	end,
+
+	-- Companion v2 fixes -------------------------------------------------------------------------
+
+	["a challenger needs the margin over the owner, and a tie keeps the owner"] = function()
+		local function challenge(trust: number)
+			return RobotTrust.chooseOwner({
+				owner = "owner",
+				ownerStage = "learning",
+				ownerTrust = 50,
+				ownerGoneFor = 0,
+				lockedUntil = 0,
+				now = 0,
+				goneSeconds = 180,
+				margin = 5,
+				candidates = {
+					{ id = "owner", stage = "learning", trust = 50, free = true },
+					{ id = "thief", stage = "learning", trust = trust, free = true },
+				},
+			})
+		end
+		expect((challenge(50))).toBe("owner")
+		expect((challenge(54.9))).toBe("owner")
+		local chosen, switched = challenge(55)
+		expect(chosen).toBe("thief")
+		expect(switched).toBe(true)
+	end,
+	["with nobody owning it, a tie goes to the last owner"] = function()
+		local chosen = RobotTrust.chooseOwner({
+			owner = "old",
+			ownerStage = "curious",
+			ownerTrust = 10,
+			ownerGoneFor = 0,
+			lockedUntil = 0,
+			now = 0,
+			goneSeconds = 180,
+			margin = 5,
+			candidates = {
+				{ id = "new", stage = "watching", trust = 30, free = true },
+				{ id = "old", stage = "watching", trust = 30, free = true },
+			},
+		})
+		expect(chosen).toBe("old")
+	end,
+	["a rejoining owner keeps it without a switch or a new hold"] = function()
+		local newSelf = { userId = 9 }
+		local chosen, switched = RobotTrust.chooseOwner({
+			owner = { userId = 9 },
+			ownerStage = "learning",
+			ownerTrust = 60,
+			ownerGoneFor = 0,
+			lockedUntil = 0,
+			now = 0,
+			goneSeconds = 180,
+			margin = 5,
+			candidates = { { id = newSelf, stage = "learning", trust = 60, free = true } },
+		})
+		expect(chosen).toBe(newSelf)
+		expect(switched).toBe(false)
+	end,
+	["a gift refusal is known before anything changes, and matches the gift"] = function()
+		local record = RobotTrust.new(0)
+		expect(RobotTrust.giftRefusal(record, "Apple", 1, SETTINGS)).toBe(nil)
+		RobotTrust.gift(record, "Apple", 1, SETTINGS)
+		expect(RobotTrust.giftRefusal(record, "Apple", 1, SETTINGS)).toBe("given")
+		RobotTrust.gift(record, "Chips", 1, SETTINGS)
+		local before = record.trust
+		expect(RobotTrust.giftRefusal(record, "Popcorn", 1, SETTINGS)).toBe("day")
+		expect(record.trust).toBe(before)
+		expect(RobotTrust.giftRefusal(record, "Popcorn", 2, SETTINGS)).toBe(nil)
+		expect(RobotTrust.giftRefusal(RobotTrust.new(100), "Popcorn", 2, SETTINGS)).toBe("full")
+	end,
+	["the rapport head start only ever raises trust"] = function()
+		local record = RobotTrust.new(5)
+		RobotTrust.headStart(record, 20)
+		expect(record.trust).toBe(20)
+		RobotTrust.headStart(record, 0)
+		expect(record.trust).toBe(20)
+	end,
+	["a bond holds through the grace away, then fades; coming back resets it"] = function()
+		local settings = table.clone(SETTINGS) :: any
+		settings.BondedGraceSeconds = 600
+		local record = RobotTrust.new(80)
+		record.survivedNight = true
+		RobotTrust.decay(record, 600, false, settings)
+		expect(record.trust).toBe(80)
+		RobotTrust.decay(record, 60, false, settings)
+		expect(record.trust).toBeNear(79)
+		RobotTrust.decay(record, 1, true, settings)
+		RobotTrust.decay(record, 300, false, settings)
+		expect(record.trust).toBeNear(79)
+	end,
+	["below bonded there's no grace"] = function()
+		local record = RobotTrust.new(60)
+		RobotTrust.decay(record, 60, false, SETTINGS)
+		expect(record.trust).toBeNear(59)
+	end,
+	["a NaN time step changes nothing"] = function()
+		local record = RobotTrust.new(50)
+		RobotTrust.decay(record, 0 / 0, false, SETTINGS)
+		expect(record.trust).toBe(50)
+	end,
 }

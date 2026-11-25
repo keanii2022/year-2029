@@ -1076,8 +1076,10 @@ local wallParams = RaycastParams.new()
 wallParams.FilterType = Enum.RaycastFilterType.Exclude
 wallParams.RespectCanCollide = true
 local WALL_HEIGHTS = { 1, 3.5 }
+-- Rebuilt only when a character comes or goes (Start), not every frame per robot
+local wallIgnoreDirty = true
 
-local function wallInTheWay(robot: Robot, direction: Vector3, step: number): boolean
+local function refreshWallIgnore()
 	local ignore: { Instance } = { folder, stashFolder }
 	for _, player in Players:GetPlayers() do
 		if player.Character then
@@ -1089,6 +1091,14 @@ local function wallInTheWay(robot: Robot, direction: Vector3, step: number): boo
 		table.insert(ignore, sims)
 	end
 	wallParams.FilterDescendantsInstances = ignore
+	-- the sim players' folder may not exist yet: look again next time until it does
+	wallIgnoreDirty = sims == nil
+end
+
+local function wallInTheWay(robot: Robot, direction: Vector3, step: number): boolean
+	if wallIgnoreDirty then
+		refreshWallIgnore()
+	end
 	for _, height in WALL_HEIGHTS do
 		local from = robot.position + Vector3.yAxis * height
 		local hit = workspace:Raycast(from, direction * (settings.AgentRadius * 0.5 + step), wallParams)
@@ -1182,9 +1192,11 @@ end
 
 -- From its eyes or its chest: a hanging set piece or a crate it's sitting by can block one but not
 -- both, so a robot never stares straight through you.
+local sightParams = RaycastParams.new()
+sightParams.FilterType = Enum.RaycastFilterType.Exclude
+
 local function lineOfSight(robot: Robot, target: Alive): boolean
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
+	local params = sightParams
 	params.FilterDescendantsInstances = { folder, stashFolder, target.character }
 	local head = target.position + Vector3.yAxis * 1.5
 	for _, height in { sense.EyeHeight, sense.ChestHeight } do
@@ -2785,9 +2797,11 @@ function Robots.doorway(robot: Robot, inset: number): (Vector3?, Vector3?)
 end
 
 -- An awake robot of the pack (not befriended, not down) within range has it in plain sight.
+local scoutParams = RaycastParams.new()
+scoutParams.FilterType = Enum.RaycastFilterType.Exclude
+
 function Robots.scoutSees(robot: Robot, range: number): boolean
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
+	local params = scoutParams
 	params.FilterDescendantsInstances = { folder, stashFolder }
 	local body = robot.position + Vector3.yAxis * sense.ChestHeight
 	for _, other in robots do
@@ -2832,6 +2846,7 @@ function Robots.Init()
 	stashFolder = Instance.new("Folder")
 	stashFolder.Name = "RobotStash"
 	stashFolder.Parent = workspace
+	scoutParams.FilterDescendantsInstances = { folder, stashFolder }
 	fxRemote = Net.event("RobotFx")
 	mimicRemote = Net.event("RobotMimic")
 	Net.event("Callout").OnServerEvent:Connect(heardCallout)
@@ -2858,10 +2873,23 @@ function Robots.Start()
 	-- Made up front so clients waiting on it don't hang until the first catch
 	Net.event("RobotCaught")
 	Players.PlayerRemoving:Connect(function(player)
+		wallIgnoreDirty = true
 		for _, robot in robots do
 			robot.ignore[player] = nil
 		end
 	end)
+	local function watchCharacters(player: Player)
+		local function dirty()
+			wallIgnoreDirty = true
+		end
+		player.CharacterAdded:Connect(dirty)
+		player.CharacterRemoving:Connect(dirty)
+		dirty()
+	end
+	Players.PlayerAdded:Connect(watchCharacters)
+	for _, player in Players:GetPlayers() do
+		watchCharacters(player)
+	end
 
 	RunService.Heartbeat:Connect(function(dt)
 		for _, robot in robots do

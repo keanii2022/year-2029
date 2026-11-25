@@ -8,6 +8,7 @@ local SETTINGS = {
 	Repaths = 2,
 	ProgressStep = 1,
 }
+local PLACE = { CarryTimeout = 45, PlaceTries = 3, PlayerPlaceTries = 8 }
 
 return {
 	["steady progress keeps going"] = function()
@@ -56,5 +57,27 @@ return {
 		expect(BuildPlan.skipping(skipped, 60).crate).toBe(true)
 		expect(BuildPlan.skipping(skipped, 121).crate).toBe(nil)
 		expect(skipped.crate).toBe(nil)
+	end,
+	["a player standing in the slot gets more patience, but not forever"] = function()
+		local leg = BuildPlan.leg("carry", 0, 10)
+		expect(BuildPlan.stopPlacing(leg, 5, 7, 7, PLACE)).toBe(false)
+		expect(BuildPlan.stopPlacing(leg, 5, 8, 8, PLACE)).toBe(true)
+	end,
+	["something fixed in the slot gives up after the place tries"] = function()
+		local leg = BuildPlan.leg("carry", 0, 10)
+		expect(BuildPlan.stopPlacing(leg, 5, 2, 0, PLACE)).toBe(false)
+		expect(BuildPlan.stopPlacing(leg, 5, 5, 2, PLACE)).toBe(true)
+	end,
+	["setting down still runs the carry timeout"] = function()
+		local leg = BuildPlan.leg("carry", 0, 10)
+		expect(BuildPlan.stopPlacing(leg, 45, 0, 0, PLACE)).toBe(false)
+		expect(BuildPlan.stopPlacing(leg, 45.1, 0, 0, PLACE)).toBe(true)
+	end,
+	["one fort's worth of new pieces a day, repairs always allowed"] = function()
+		expect(BuildPlan.canPlace(0, 0, 0, 6)).toBe(true)
+		expect(BuildPlan.canPlace(0, 0, 6, 6)).toBe(false) -- a second fort the same day
+		expect(BuildPlan.canPlace(4, 6, 6, 6)).toBe(true) -- refilling its own fort
+		expect(BuildPlan.canPlace(6, 6, 6, 6)).toBe(false)
+		expect(BuildPlan.canPlace(3, 3, 5, 6)).toBe(true)
 	end,
 }

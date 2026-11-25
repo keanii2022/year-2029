@@ -467,6 +467,10 @@ function Grab.onPlaced(listener: (Player, PVInstance) -> ())
 	table.insert(placedListeners, listener)
 end
 
+function Grab.isCarrying(player: Player): boolean
+	return carriers[player] ~= nil
+end
+
 -- Every pry going on right now.
 function Grab.activePries(): { { player: Player, prop: PVInstance } }
 	local list = {}

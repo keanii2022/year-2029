@@ -20,6 +20,7 @@ local HINT_EVERY = 0.5
 
 local anchors: { [Part]: true } = {}
 local flickering: { [BasePart]: number } = {} -- eye part -> its transparency before the flicker
+local flickerEyes: { BasePart } = {} -- eyes of robots flagged to flicker, found with the hint scan
 
 local function refreshBuild(anchor: Part)
 	local build = anchor:FindFirstChild("Build")
@@ -50,20 +51,18 @@ local function robotsFolder(): Instance?
 	return workspace:FindFirstChild("Robots")
 end
 
--- Siren: an owned robot's eyes stutter on and off until lights out.
-local function flicker(now: number)
+-- Which robots flicker changes a few times a night, so the folder scan runs with the hints, not
+-- every frame. Eyes that stopped flickering get their transparency back.
+local function findFlickerEyes()
 	local folder = robotsFolder()
-	local on = math.floor(now * settings.FlickerRate) % 3 ~= 0
+	table.clear(flickerEyes)
 	local seen = {}
 	for _, model in if folder then folder:GetChildren() else {} do
 		if model:IsA("Model") and model:GetAttribute("Flicker") == true then
 			local eyes = model:FindFirstChild(Config.Robots.EyePart, true)
 			if eyes and eyes:IsA("BasePart") then
 				seen[eyes] = true
-				if flickering[eyes] == nil then
-					flickering[eyes] = eyes.Transparency
-				end
-				eyes.Transparency = if on then flickering[eyes] else 1
+				table.insert(flickerEyes, eyes)
 			end
 		end
 	end
@@ -74,6 +73,17 @@ local function flicker(now: number)
 				eyes.Transparency = before
 			end
 		end
+	end
+end
+
+-- Siren: an owned robot's eyes stutter on and off until lights out.
+local function flicker(now: number)
+	local on = math.floor(now * settings.FlickerRate) % 3 ~= 0
+	for _, eyes in flickerEyes do
+		if flickering[eyes] == nil then
+			flickering[eyes] = eyes.Transparency
+		end
+		eyes.Transparency = if on then flickering[eyes] else 1
 	end
 end
 
@@ -134,6 +144,7 @@ function Companion.Start()
 	task.spawn(function()
 		while true do
 			task.wait(HINT_EVERY)
+			findFlickerEyes()
 			showHints()
 		end
 	end)
