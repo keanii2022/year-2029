@@ -348,30 +348,42 @@ def battery(P):
 
 @item("bandage", "gear")
 def bandage(P):
-    c = cloth("#f2ede2", dirt=0.25, weave=90)
-    P.add("Body", cyl(0.16, 0.16, c, loc=(0, 0, 0.08), seg=16, bevel=0.02))
-    P.add("Body", cyl(0.055, 0.01, flat("#8a7a66"), loc=(0, 0, 0.161), seg=12, bevel=0.0))
-    P.add("Body", box((0.11, 0.008, 0.16), c, loc=(0.02, -0.162, 0.08), r=0.003, n=1))
-    P.add("Body", box((0.11, 0.24, 0.008), c, loc=(0.02, -0.28, 0.004), r=0.003, n=1))
-    P.add("Body", box((0.13, 0.03, 0.014), plain(TEAL, grime=0.2), loc=(0.02, -0.36, 0.01), r=0.004, n=1))
-    P.add("Body", box((0.16, 0.18, 0.012), plain("#cdb98a", grime=0.4), loc=(0.08, -0.04, 0.164), rot=(0, 0, 30), r=0.004, n=1))
+    """A small woven roll lying flat: a spiral showing on top, one loose tail curling off along the floor, a little metal clip."""
+    c = cloth("#dccdae", dirt=0.55, weave=110, dirtcolor="#6a5846")
+    P.add("Body", cyl(0.11, 0.13, c, loc=(0, 0, 0.065), seg=32, bevel=0.02))
+    line = flat("#9c8a6e")
+    for k in range(22):  # the wound layers as a printed spiral on the flat of the top face
+        a = k * 0.55
+        r = 0.02 + k * 0.0028
+        P.add("Body", box((0.012, 0.004, 0.002), line, loc=(r * math.cos(a), r * math.sin(a), 0.1305), rot=(0, 0, math.degrees(a) + 90), r=0.0, n=1))
+    tail = box((0.1, 0.004, 0.12), c, loc=(0.02, -0.112, 0.06), r=0.002, n=1)
+    P.add("Body", tail)
+    floor = box((0.1, 0.24, 0.006), c, loc=(0.02, -0.228, 0.004), r=0.002, n=3)
+    warp(floor, lambda v: V((v.x + 0.03 * math.sin((v.y + 0.12) * 12), v.y, v.z + 0.012 * max(0.0, -(v.y + 0.3)) * 20)))
+    P.add("Body", floor)
+    clip = metal("#b4b8bc", rust=0.2)
+    for x in (-0.025, 0.025):
+        P.add("Body", slab([(-0.022, 0), (0.022, 0), (0.012, 0.045), (-0.012, 0.045)], 0.004, clip, loc=(0.02 + x, -0.3, 0.012), rot=(90, 0, 0)))
+    P.add("Body", box((0.012, 0.03, 0.006), clip, loc=(0.02, -0.3, 0.012), r=0.0, n=1))
 
 
 @item("medkit", "gear")
 def medkit(P):
-    w = plain(WHITE, grime=0.4)
+    """The plastic case, yellowed and scuffed, cross printed flat, big chunky latches, a dirty handle and tape on the lid."""
+    w = paint("#e2d9c2", chip=0.2, under="#9a958b", under2="#5a4636", grime=0.55, streaks=0.4)
     P.add("Body", box((0.8, 0.28, 0.54), w, loc=(0, 0, 0.27), r=0.06, n=1))
-    P.add("Body", box((0.82, 0.3, 0.04), plain(GREY, grime=0.3), loc=(0, 0, 0.36), r=0.015, n=1))
-    k = plain(DARK)
+    P.add("Body", box((0.82, 0.3, 0.04), plain(GREY, grime=0.5), loc=(0, 0, 0.36), r=0.015, n=1))
+    k = plain(DARK, grime=0.6)
     P.add("Body", box((0.3, 0.06, 0.04), k, loc=(0, 0, 0.64), r=0.015, n=1))
     for x in (-0.13, 0.13):
         P.add("Body", box((0.04, 0.06, 0.11), k, loc=(x, 0, 0.58), r=0.012, n=1))
-        P.add("Body", box((0.06, 0.03, 0.1), plain(ORANGE, grime=0.3), loc=(x * 2, -0.15, 0.36), r=0.01, n=1))
-    gr = plain("#3fbf6a", grime=0.2)
-    P.add("Body", box((0.07, 0.024, 0.22), gr, loc=(0, -0.148, 0.2), r=0.01, n=1))
-    P.add("Body", box((0.22, 0.02, 0.07), gr, loc=(0, -0.146, 0.2), r=0.01, n=1))
+        P.add("Body", box((0.1, 0.045, 0.16), plain(ORANGE, grime=0.5), loc=(x * 2, -0.155, 0.36), r=0.015, n=1))
+        P.add("Body", box((0.07, 0.02, 0.03), k, loc=(x * 2, -0.18, 0.32), r=0.006, n=1))
+    gr = plain("#3fbf6a", grime=0.45)
+    P.add("Body", box((0.07, 0.002, 0.22), gr, loc=(0, -0.1405, 0.2), r=0.0, n=1))
+    P.add("Body", box((0.22, 0.002, 0.07), gr, loc=(0, -0.141, 0.2), r=0.0, n=1))
     P.add("Glow", box((0.012, 0.3, 0.025), lit(TEAL), loc=(0.401, 0, 0.45), r=0.004, n=1))
-    P.add("Body", box((0.14, 0.012, 0.05), plain("#f4ecd8", grime=0.2), loc=(0.27, -0.143, 0.47), rot=(0, 8, 0), r=0.004, n=1))
+    P.add("Body", tape(0.34, 0.06, (-0.12, 0.0, 0.542), (0, 0, 1), roll=0, color="#9fb8c8"))
 
 
 @item("loot_crate", "gear", pivots={"Lid": (0, 1.0, 2.1)})

@@ -6,6 +6,22 @@ from ykit import *  # noqa
 PAINT_RED = "#e8361c"
 
 
+def melon_skin():
+    """Pale green rind with dark wavy stripes running the melon's length, plus a creamy field spot."""
+    g = G("melon")
+    band = g.step(g.noise(7.0, 4, (1, 1, 0.05), 0.5), 0.49, 0.53)  # lathe axis is local z, so the stripes stretch along z
+    c = g.mix(band, "#a8c47a", "#24521f")
+    spot = g.step(g.noise(1.4, 2, (1, 1, 0.5), 0.4), 0.62, 0.7)
+    c = g.mix(g.math("MULTIPLY", spot, 0.8), c, "#ddd08c")
+    c = g.mix(g.math("MULTIPLY", g.step(g.noise(3.5, 6, world=True), 0.5, 0.8), 0.35), c, "#6a5646", "MULTIPLY")
+    return g.done(c)
+
+
+def printed(text, size, ink, loc, rot=(0, 0, 0)):
+    """A made-up label printed flat on the surface, not stuck on as a raised slab."""
+    return words(text, size, flat(ink), loc=loc, rot=rot, depth=0.002)
+
+
 @item("canned_food", "food")
 def canned_food(P):
     tin = metal("#b8b4ac", rust=0.25)
@@ -18,31 +34,75 @@ def canned_food(P):
 
 @item("snack_bar", "food")
 def snack_bar(P):
-    P.add("Body", box((0.56, 0.26, 0.07), plain("#f2c94c", grime=0.15), r=0.02, n=1))
-    for x in (-0.31, 0.31):
-        P.add("Body", box((0.07, 0.28, 0.015), plain("#e3b43a", grime=0.15), loc=(x, 0, 0), r=0.005, n=1))
-    P.add("Body", box((0.24, 0.01, 0.05), plain("#c0392b", grime=0.1), loc=(0, -0.131, 0.0), r=0.005, n=1))
-    P.add("Body", words("CRNCH", 0.035, flat("#fff6e0"), loc=(0, -0.137, 0.0), depth=0.005))
+    """A thin foil-wrapped bar, slightly bent, with sawtooth crimp seals fanning out at both ends and the label printed on."""
+    wrap = paint("#e8b93a", chip=0.15, under="#c9cdd2", under2="#9aa0a6", grime=0.45, streaks=0.3)
+    bar = box((0.54, 0.26, 0.06), wrap, r=0.025, n=3)
+    crumple(bar, 0.006, 8, seed=2)
+    warp(bar, lambda v: V((v.x, v.y, v.z + 0.02 * (1 - (v.x / 0.27) ** 2))))
+    P.add("Body", bar)
+    seal = paint("#d9a52e", chip=0.25, under="#c9cdd2", under2="#9aa0a6", grime=0.4, streaks=0.2)
+    for sx in (-1, 1):
+        teeth = [(0, -0.14)] + [(0.07 if k % 2 else 0.055, -0.14 + 0.28 * k / 14) for k in range(15)] + [(0, 0.14)]
+        P.add("Body", slab(teeth, 0.012, seal, loc=(sx * 0.27, 0, 0.012), rot=(90, 0, 0 if sx > 0 else 180)))
+    P.add("Body", box((0.26, 0.002, 0.04), plain("#b03a2e", grime=0.35), loc=(0, -0.131, 0.01), r=0.0, n=1))
+    P.add("Body", printed("CRNCH", 0.03, "#fff3d8", (0, -0.1325, 0.01)))
+    P.add("Body", box((0.07, 0.002, 0.035), plain("#f2ead2", grime=0.5), loc=(0.18, -0.1315, 0.012), rot=(0, 10, 0), r=0.0, n=1))  # price sticker
+    P.add("Body", printed("1.99", 0.016, "#3a2a20", (0.18, -0.1335, 0.012), rot=(0, 10, 0)))
 
 
 @item("sandwich", "food")
 def sandwich(P):
-    bread = plain("#e6c48a", grime=0.2)
-    crust = plain("#a8743a", grime=0.2)
-    tri = [(-0.3, 0), (0.3, 0), (0, 0.42)]
-    for z in (0.0, 0.12):
-        P.add("Body", slab(tri, 0.07, crust, loc=(0, 0, z), rot=(90, 0, 0), bevel=0.02))
-        P.add("Body", slab([(-0.26, 0.025), (0.26, 0.025), (0, 0.38)], 0.072, bread, loc=(0, 0, z), rot=(90, 0, 0)))
-    P.add("Body", slab([(-0.31, -0.01), (0.31, -0.01), (0, 0.43)], 0.02, plain("#7cb342", grime=0.1), loc=(0, 0, 0.045), rot=(90, 0, 0)))
-    P.add("Body", slab([(-0.28, 0.01), (0.28, 0.01), (0, 0.39)], 0.03, plain("#e57373", grime=0.1), loc=(0, 0, 0.07), rot=(90, 0, 0)))
+    """A triangle half standing in a store wedge pack: card tray behind and under, clear rim round the front,
+    soft domed bread with a dark crust, wavy lettuce and filling bulging out past the bread. Faces -y."""
+    bread = plain("#e2c08a", grime=0.35)
+    crust = plain("#9a6430", grime=0.4)
+    tri = lambda inset: [(-0.29 + inset * 1.7, inset), (0.29 - inset * 1.7, inset), (0, 0.41 - inset * 1.4)]
+    for y in (-0.055, 0.055):  # two slices, crust first, soft domed bread face on top of it
+        P.add("Body", slab(tri(0.0), 0.05, crust, loc=(0, y, 0.015), bevel=0.018))
+        dome = slab(tri(0.022), 0.05, bread, loc=(0, y - 0.004 * (1 if y < 0 else -1), 0.015), bevel=0.02)
+        P.add("Body", dome)
+    lettuce = plain("#7aa83e", grime=0.3, vary=0.4)
+    wave = [(-0.31 + 0.62 * i / 16, -0.012 + 0.018 * (i % 2)) for i in range(17)] + [(0.0, 0.43)]
+    ruffle = []
+    for i in range(30):  # lettuce frill all the way round, sticking out past the crust
+        t = i / 30
+        if t < 1 / 3:
+            x, z = -0.3 + 0.6 * t * 3, 0.0
+        elif t < 2 / 3:
+            x, z = 0.3 - 0.3 * (t - 1 / 3) * 3, 0.42 * (t - 1 / 3) * 3
+        else:
+            x, z = -0.3 * (t - 2 / 3) * 3, 0.42 - 0.42 * (t - 2 / 3) * 3
+        cx, cz = x * 1.08, (z - 0.14) * 1.08 + 0.14 + (0.012 if i % 2 else -0.004)
+        ruffle.append((cx, cz))
+    P.add("Body", slab(ruffle, 0.022, lettuce, loc=(0, -0.018, 0.012)))
+    P.add("Body", slab(tri(-0.02), 0.032, plain("#d9827a", grime=0.3), loc=(0, 0.008, 0.012), bevel=0.014))  # ham bulging out
+    P.add("Body", slab(tri(-0.008), 0.016, plain("#f0d27a", grime=0.25), loc=(0, 0.03, 0.012)))  # cheese
+    # the pack: card tray along the bottom and back, clear plastic rim round the front window
+    card = cardboard("#c9b48c")
+    P.add("Body", box((0.62, 0.19, 0.012), card, loc=(0, 0, 0.006), r=0.003, n=1))
+    P.add("Body", slab(tri(-0.01), 0.012, card, loc=(0, 0.089, 0.012)))
+    film = plain("#d8e4e8", grime=0.5, vary=0.3)
+    P.add("Body", box((0.62, 0.012, 0.03), film, loc=(0, -0.09, 0.02), r=0.004, n=1))  # clear lip of the tray at the front
+    # BEST BEFORE sticker on the card, a hand-written price on the rim
+    P.add("Body", box((0.2, 0.004, 0.07), plain("#f2ead2", grime=0.45), loc=(0.13, 0.097, 0.1), r=0.0, n=1))
+    P.add("Body", printed("BEST BEFORE", 0.018, "#3a2a20", (0.13, 0.1, 0.115), rot=(0, 0, 180)))
+    P.add("Body", printed("04 MAR 29", 0.018, "#b03a2e", (0.13, 0.1, 0.085), rot=(0, 0, 180)))
 
 
 @item("apple", "food")
 def apple(P):
-    P.add("Body", lathe([(0, -0.17), (0.1, -0.165), (0.17, -0.1), (0.19, 0.02), (0.16, 0.13), (0.07, 0.16), (0, 0.13)],
-                        plain("#c62828", grime=0.15, vary=0.4), seg=16, lobes=5, lobe=0.015))
-    P.add("Body", box((0.025, 0.025, 0.1), wood("#5d4037", "#3e2723"), loc=(0, 0, 0.18), rot=(0, 12, 0), r=0.01, n=1))
-    P.add("Body", slab([(0, 0), (0.06, 0.03), (0.13, 0), (0.06, -0.03)], 0.01, plain("#558b2f"), loc=(0.02, 0, 0.21), rot=(0, -20, 0)))
+    """Rounded, wide at the shoulders and narrow at the base, with a deep stem dimple and streaky red to yellow-green skin."""
+    skin = fade("#d2b452", "#b8261c", 0.25, 0.75, grime=0.35)
+    # outline sampled finely so it renders round, not faceted: narrow base, wide shoulders, dimples top and bottom
+    outline = [(0, -0.15), (0.03, -0.162)]
+    for k in range(13):
+        t = k / 12
+        a = math.pi * (-0.42 + 0.84 * t)
+        outline.append((0.19 * math.cos(a) * (0.86 + 0.14 * t), -0.008 + 0.168 * math.sin(a)))
+    outline += [(0.022, 0.142), (0, 0.112)]
+    P.add("Body", lathe(outline, skin, seg=36, lobes=5, lobe=0.004, smooth=80))
+    P.add("Body", box((0.03, 0.03, 0.09), wood("#5d4037", "#3e2723"), loc=(0, 0, 0.15), rot=(0, 12, 0), r=0.012, n=1))
+    P.add("Body", slab([(0, 0), (0.06, 0.03), (0.13, 0), (0.06, -0.03)], 0.01, plain("#6b8a3a", grime=0.4), loc=(0.02, 0, 0.19), rot=(0, -20, 0)))
 
 
 @item("water_bottle", "food")
@@ -56,12 +116,25 @@ def water_bottle(P):
 
 @item("energy_drink", "food")
 def energy_drink(P):
-    P.add("Body", lathe([(0, -0.27), (0.08, -0.27), (0.11, -0.23), (0.11, 0.22), (0.085, 0.27), (0, 0.27)],
-                        metal("#39d353", rust=0.0), seg=16))
-    P.add("Body", cyl(0.112, 0.2, plain("#111111", grime=0.1), loc=(0, 0, 0.0), seg=16, bevel=0.0))
-    P.add("Body", slab([(-0.03, 0.08), (0.02, 0.0), (-0.005, 0.0), (0.03, -0.08), (-0.02, 0.0), (0.005, 0.0)], 0.01,
-                       glow("#b9ff3a"), loc=(0, -0.114, 0.0)))
-    P.add("Body", box((0.05, 0.02, 0.008), metal("#cfcfcf", rust=0.0), loc=(0.02, 0, 0.272), r=0.004, n=1))
+    """A tall slim can: concave base, sharp neck taper, rolled rim, recessed lid with a pull tab.
+    Green paint scratched through to silver, a made-up claw-mark logo printed flat, a dent in one side."""
+    can = paint("#2fa84a", chip=0.28, under="#c2c6ca", under2="#8d9196", grime=0.35, streaks=0.2)
+    alu = metal("#c4c8cc", rust=0.05)
+    body = lathe([(0, -0.245), (0.07, -0.272), (0.1, -0.265), (0.11, -0.24), (0.11, 0.19), (0.088, 0.245), (0.084, 0.258), (0, 0.258)],
+                 can, seg=24)
+    crumple(body, 0.004, 6, seed=7)
+    warp(body, lambda v: V((v.x, v.y + 0.018 * max(0.0, 1 - ((v.z + 0.02) / 0.09) ** 2) * max(0.0, -v.y / 0.11) ** 3, v.z)))  # the dent
+    P.add("Body", body)
+    P.add("Body", lathe([(0.068, 0.252), (0.086, 0.258), (0.089, 0.266), (0.084, 0.273), (0.07, 0.268), (0.066, 0.262), (0, 0.262)], alu, seg=24))
+    P.add("Body", box((0.07, 0.035, 0.006), alu, loc=(0.0, 0.012, 0.267), r=0.006, n=1))
+    P.add("Body", cyl(0.011, 0.006, alu, loc=(0, -0.004, 0.268), seg=8, bevel=0.002))
+    P.add("Body", cyl(0.016, 0.004, flat("#2a2c2e"), loc=(0, -0.05, 0.264), seg=10, bevel=0.0))
+    # printed black band with three claw marks and a made-up name, flush with the paint
+    P.add("Body", lathe([(0.1102, -0.08), (0.1102, 0.09)], plain("#151515", grime=0.3), seg=24))
+    for k, x in enumerate((-0.03, 0.0, 0.03)):
+        P.add("Body", slab([(-0.008, -0.05), (0.008, -0.05), (0.012, 0.05), (-0.004, 0.05)], 0.003, flat("#8dff3a"),
+                           loc=(x, -0.1115, 0.02 + 0.006 * (k % 2)), rot=(0, -12, 0)))
+    P.add("Body", printed("RAVAGE", 0.028, "#e8f5d8", (0, -0.1118, -0.055)))
 
 
 @item("dog_treats", "food")
@@ -126,12 +199,15 @@ def cereal_box(P):
 
 @item("noodle_cup", "food", pivots={"Lid": (0, 0.14, 0.35)})
 def noodle_cup(P):
-    P.add("Body", lathe([(0, 0), (0.11, 0), (0.15, 0.33), (0.155, 0.345), (0, 0.345)], plain("#f4f2ee", grime=0.2), seg=16))
-    P.add("Body", lathe([(0, 0.1), (0.128, 0.1), (0.144, 0.26), (0, 0.26)], plain("#d84315", grime=0.15), seg=16))
-    P.add("Body", box((0.16, 0.01, 0.07), plain("#fff3c4", grime=0.1), loc=(0, -0.14, 0.18), rot=(-7, 0, 0), r=0.0, n=1))
-    P.add("Body", words("RAMEN", 0.045, flat("#b71c1c"), loc=(0, -0.147, 0.18), rot=(-7, 0, 0), depth=0.005))
-    P.add("Lid", cyl(0.158, 0.012, metal("#cfd3d8", rust=0.0), loc=(0, 0, 0.352), seg=16, bevel=0.0))
-    P.add("Lid", box((0.08, 0.06, 0.008), metal("#cfd3d8", rust=0.0), loc=(0, -0.18, 0.352), r=0.0, n=1))
+    """Tapered foam cup gone yellow, label printed on, a dirty thumbprint."""
+    P.add("Body", lathe([(0, 0), (0.11, 0), (0.15, 0.33), (0.155, 0.345), (0, 0.345)], plain("#e9e1cc", grime=0.55), seg=24))
+    P.add("Body", lathe([(0, 0.1), (0.128, 0.1), (0.144, 0.26), (0, 0.26)], paint("#c9481e", chip=0.15, under="#e9e1cc", under2="#cfc5ad", grime=0.4, streaks=0.3), seg=24))
+    P.add("Body", printed("RAMEN", 0.045, "#fff3c4", (0, -0.14, 0.18), rot=(-7, 0, 0)))
+    P.add("Body", printed("SPICY ROBOT", 0.016, "#fff3c4", (0, -0.137, 0.135), rot=(-7, 0, 0)))
+    P.add("Body", aim(slab([(0.02 * math.cos(a / 8 * math.tau), 0.026 * math.sin(a / 8 * math.tau)) for a in range(8)], 0.002, flat("#7a6a55")),
+                      V((0.09, -0.1, 0.3)), V((0.6, -0.8, 0.0)).normalized()))
+    P.add("Lid", cyl(0.158, 0.012, metal("#cfd3d8", rust=0.1), loc=(0, 0, 0.352), seg=24, bevel=0.0))
+    P.add("Lid", box((0.08, 0.06, 0.008), metal("#cfd3d8", rust=0.1), loc=(0, -0.18, 0.352), r=0.0, n=1))
 
 
 @item("milk_carton", "food")
@@ -172,18 +248,32 @@ def peanut_butter(P):
 
 @item("juice_box", "food")
 def juice_box(P):
-    P.add("Body", box((0.2, 0.13, 0.33), plain("#7cb342", grime=0.2), loc=(0, 0, 0.165), r=0.01, n=1))
-    P.add("Body", box((0.12, 0.008, 0.1), plain("#ffeb3b", grime=0.1), loc=(0, -0.066, 0.17), r=0.0, n=1))
-    P.add("Body", words("JUICY", 0.035, flat("#33691e"), loc=(0, -0.071, 0.17), depth=0.004))
-    P.add("Body", box((0.022, 0.022, 0.16), plain("#f4f2ee", grime=0.1), loc=(0.05, 0.02, 0.38), rot=(0, -12, 0), r=0.0, n=1))
-    P.add("Body", box((0.03, 0.03, 0.02), plain("#e0e0e0"), loc=(0.05, 0.02, 0.335), r=0.0, n=1))
+    """A crisp carton brick with flaps folded flat on top, a printed fruit and made-up name, a dented face and a bendy straw."""
+    carton = paint("#6da83a", chip=0.12, under="#e8e2d0", under2="#c9c1aa", grime=0.45, streaks=0.3)
+    brick = box((0.2, 0.13, 0.33), carton, loc=(0, 0, 0.165), r=0.004, n=3)
+    warp(brick, lambda v: V((v.x, v.y + 0.012 * max(0.0, 1 - ((v.x + 0.03) / 0.07) ** 2 - ((v.z - 0.12) / 0.09) ** 2) * (1 if v.y < 0 else 0), v.z)))  # dent
+    P.add("Body", brick)
+    for sx in (-1, 1):  # top flaps folded down onto the sides
+        P.add("Body", slab([(-0.065, 0), (0.065, 0), (0, -0.06)], 0.004, carton, loc=(sx * 0.1015, 0, 0.33), rot=(0, 0, 90)))
+    P.add("Body", box((0.2, 0.02, 0.006), carton, loc=(0, 0.055, 0.333), r=0.002, n=1))
+    P.add("Body", cyl(0.045, 0.002, plain("#f2c94c", grime=0.3), loc=(0, -0.066, 0.2), rot=(90, 0, 0), seg=12, bevel=0.0))  # printed orange
+    P.add("Body", printed("JUICY", 0.032, "#f4f2ee", (0, -0.0665, 0.1)))
+    P.add("Body", cyl(0.012, 0.002, metal("#c4c8cc", rust=0.0), loc=(0.05, 0.02, 0.331), seg=10, bevel=0.0))
+    straw = plain("#f4f2ee", grime=0.3)
+    P.add("Body", box((0.018, 0.018, 0.12), straw, loc=(0.05, 0.02, 0.39), r=0.0, n=1))
+    for z in (0.455, 0.47):
+        P.add("Body", box((0.019, 0.019, 0.008), plain("#d84315"), loc=(0.05, 0.02, z), r=0.0, n=1))
+    P.add("Body", box((0.018, 0.018, 0.06), straw, loc=(0.035, 0.02, 0.495), rot=(0, -35, 0), r=0.0, n=1))
 
 
 @item("watermelon", "food", size=1024)
 def watermelon(P):
+    """A slightly squashed oval melon: dark wavy stripes on pale green, a creamy field spot where it sat, a dry stem nub."""
     P.add("Body", lathe([(0, -0.62), (0.2, -0.58), (0.38, -0.42), (0.46, -0.15), (0.47, 0.0), (0.46, 0.15), (0.38, 0.42), (0.2, 0.58), (0, 0.62)],
-                        plain("#2e7d32", grime=0.15, vary=0.5), loc=(0, 0, 0.45), rot=(0, 90, 0), scl=(1, 1, 1), seg=20, lobes=9, lobe=0.012))
-    P.add("Body", box((0.07, 0.07, 0.05), plain("#8d6e63"), loc=(0.62, 0, 0.45), rot=(0, 90, 0), r=0.01, n=1))
+                        melon_skin(), loc=(0, 0, 0.45), rot=(0, 90, 0), scl=(1, 1, 1), seg=24, lobes=0))
+    stem = wood("#8a6a44", "#4a3626", wear=0.6)
+    P.add("Body", cyl(0.035, 0.05, stem, loc=(0.625, 0, 0.45), rot=(0, 90, 0), seg=6, bevel=0.008))
+    P.add("Body", box((0.05, 0.02, 0.02), stem, loc=(0.655, 0.01, 0.46), rot=(0, 20, 30), r=0.005, n=1))
 
 
 @item("watermelon_slice", "food")

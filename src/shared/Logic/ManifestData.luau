@@ -192,19 +192,17 @@ return {
 		{
 			name = "apple",
 			group = "food",
-			size = { 0.377, 0.429, 0.379 },
+			size = { 0.353, 0.409, 0.353 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.214, -0.0 },
-					size = { 0.377, 0.429, 0.379 },
+					center = { 0.0, 0.205, -0.0 },
+					size = { 0.353, 0.409, 0.353 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 107337229758227,
-			textureId = 106309885847121,
 		},
 		{
 			name = "canned_food",
@@ -350,36 +348,32 @@ return {
 		{
 			name = "energy_drink",
 			group = "food",
-			size = { 0.224, 0.546, 0.231 },
+			size = { 0.224, 0.546, 0.224 },
 			parts = {
 				{
 					name = "Body",
 					center = { 0.0, 0.273, -0.0 },
-					size = { 0.224, 0.546, 0.231 },
+					size = { 0.224, 0.546, 0.224 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 116958681408227,
-			textureId = 74223720963736,
 		},
 		{
 			name = "juice_box",
 			group = "food",
-			size = { 0.2, 0.461, 0.138 },
+			size = { 0.207, 0.525, 0.133 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.23, -0.0 },
-					size = { 0.2, 0.461, 0.138 },
+					center = { 0.0, 0.262, -0.0 },
+					size = { 0.207, 0.525, 0.133 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 89209056135204,
-			textureId = 137198373011268,
 		},
 		{
 			name = "lunchbox",
@@ -451,8 +445,6 @@ return {
 					does = "Peels back. Better refill with hot water from the stove.",
 				},
 			},
-			assetId = 76293124703991,
-			textureId = 104513865767004,
 		},
 		{
 			name = "peanut_butter",
@@ -552,36 +544,32 @@ return {
 		{
 			name = "sandwich",
 			group = "food",
-			size = { 0.62, 0.192, 0.44 },
+			size = { 0.648, 0.458, 0.197 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.096, -0.0 },
-					size = { 0.62, 0.192, 0.44 },
+					center = { 0.0, 0.229, -0.0 },
+					size = { 0.648, 0.458, 0.197 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 128981446243886,
-			textureId = 72925389704309,
 		},
 		{
 			name = "snack_bar",
 			group = "food",
-			size = { 0.69, 0.07, 0.28 },
+			size = { 0.68, 0.078, 0.28 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.035, -0.0 },
-					size = { 0.69, 0.07, 0.28 },
+					center = { 0.0, 0.039, -0.0 },
+					size = { 0.68, 0.078, 0.28 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 130763235158114,
-			textureId = 78131090180131,
 		},
 		{
 			name = "water_bottle",
@@ -603,12 +591,12 @@ return {
 		{
 			name = "watermelon",
 			group = "food",
-			size = { 1.265, 0.934, 0.938 },
+			size = { 1.3, 0.94, 0.94 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.467, -0.0 },
-					size = { 1.265, 0.934, 0.938 },
+					center = { 0.0, 0.47, -0.0 },
+					size = { 1.3, 0.94, 0.94 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
@@ -619,8 +607,6 @@ return {
 					does = "Heavy, two hands. Hit it to split it into watermelon slices.",
 				},
 			},
-			assetId = 115190648582879,
-			textureId = 133944026823147,
 		},
 		{
 			name = "watermelon_slice",
@@ -2708,19 +2694,17 @@ return {
 		{
 			name = "bandage",
 			group = "gear",
-			size = { 0.353, 0.17, 0.56 },
+			size = { 0.22, 0.132, 0.458 },
 			parts = {
 				{
 					name = "Body",
-					center = { 0.0, 0.085, -0.0 },
-					size = { 0.353, 0.17, 0.56 },
+					center = { 0.0, 0.066, -0.0 },
+					size = { 0.22, 0.132, 0.458 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 83331125686576,
-			textureId = 132174635828758,
 		},
 		{
 			name = "battery",
@@ -3277,29 +3261,29 @@ return {
 					does = "Scope lens glints. Players far away can spot it.",
 				},
 			},
+			assetId = 100469722825941,
+			textureId = 93919633521586,
 		},
 		{
 			name = "medkit",
 			group = "gear",
-			size = { 0.82, 0.66, 0.316 },
+			size = { 0.82, 0.66, 0.34 },
 			parts = {
 				{
 					name = "Body",
 					center = { 0.0, 0.33, -0.0 },
-					size = { 0.82, 0.66, 0.315 },
+					size = { 0.82, 0.66, 0.34 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 				{
 					name = "Glow",
-					center = { 0.401, 0.45, -0.008 },
+					center = { 0.401, 0.45, -0.02 },
 					size = { 0.012, 0.025, 0.3 },
 					pivot = { 0, 0.0, 0.0 },
 				},
 			},
 			clips = {},
 			moves = {},
-			assetId = 98985221347810,
-			textureId = 90357756530224,
 		},
 		{
 			name = "nail_gun",
@@ -3364,6 +3348,8 @@ return {
 					does = "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward.",
 				},
 			},
+			assetId = 90945189126863,
+			textureId = 94449429450908,
 		},
 		{
 			name = "noise_maker",
@@ -3532,6 +3518,8 @@ return {
 					does = "Steel bolt and orange knob in the right-side port: slides back along +y and snaps forward.",
 				},
 			},
+			assetId = 73916081302194,
+			textureId = 115414722429874,
 		},
 		{
 			name = "riot_helmet",
@@ -3724,6 +3712,8 @@ return {
 					does = "Steel block and orange knob in the right-side port: kicks back along +y each shot.",
 				},
 			},
+			assetId = 90597982866620,
+			textureId = 98276558502726,
 		},
 		{
 			name = "smoke_can",
@@ -3810,6 +3800,8 @@ return {
 					does = "The whole upper slide kicks back along +y on each shot and springs forward. The cell glow stays put, so keep the kick small.",
 				},
 			},
+			assetId = 80396387232984,
+			textureId = 111080717373440,
 		},
 		{
 			name = "supply_locker",
@@ -4614,6 +4606,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 100524899114740,
+			textureId = 77049196469090,
 		},
 		{
 			name = "brute_night",
@@ -4709,6 +4703,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 114762162259220,
+			textureId = 78662316271319,
 		},
 		{
 			name = "carrier",
@@ -4803,6 +4799,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 85760989615016,
+			textureId = 86603087538880,
 		},
 		{
 			name = "carrier_night",
@@ -4897,6 +4895,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 125018308992518,
+			textureId = 104805396844576,
 		},
 		{
 			name = "cleaner",
@@ -4991,6 +4991,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 105017209125621,
+			textureId = 113828078087892,
 		},
 		{
 			name = "cleaner_night",
@@ -5085,6 +5087,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 98561741662473,
+			textureId = 109748912866241,
 		},
 		{
 			name = "cook",
@@ -5179,6 +5183,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 77174023370646,
+			textureId = 122446476425331,
 		},
 		{
 			name = "cook_night",
@@ -5273,6 +5279,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 121373073654010,
+			textureId = 70618161379458,
 		},
 		{
 			name = "crawler",
@@ -5386,6 +5394,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 129818080536947,
+			textureId = 121984062785970,
 		},
 		{
 			name = "crawler_night",
@@ -5499,6 +5509,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 121838516286329,
+			textureId = 134460571507115,
 		},
 		{
 			name = "scout",
@@ -5594,6 +5606,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 120463240710226,
+			textureId = 95397608549962,
 		},
 		{
 			name = "scout_night",
@@ -5689,6 +5703,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 120576769793056,
+			textureId = 75736406553641,
 		},
 		{
 			name = "blueprint",
@@ -6315,6 +6331,8 @@ return {
 					does = "The whole upper slide kicks back along +y on each shot and springs forward. The cell glow stays put, so keep the kick small.",
 				},
 			},
+			assetId = 98439430510455,
+			textureId = 126998666199133,
 		},
 		{
 			name = "aisle_sign_hanging",
@@ -10153,86 +10171,107 @@ return {
 		{
 			name = "robot_broken_welcome",
 			group = "robots",
+			assetId = 115903839927582,
 		},
 		{
 			name = "robot_ceiling_tick",
 			group = "robots",
+			assetId = 98655957950661,
 		},
 		{
 			name = "robot_copy_callout_0",
 			group = "robots",
+			assetId = 101570469285884,
 		},
 		{
 			name = "robot_copy_callout_1",
 			group = "robots",
+			assetId = 78295372822772,
 		},
 		{
 			name = "robot_copy_callout_2",
 			group = "robots",
+			assetId = 117613511569619,
 		},
 		{
 			name = "robot_copy_callout_3",
 			group = "robots",
+			assetId = 130332287614118,
 		},
 		{
 			name = "robot_copy_callout_4",
 			group = "robots",
+			assetId = 104763321946413,
 		},
 		{
 			name = "robot_copy_callout_5",
 			group = "robots",
+			assetId = 78989484759048,
 		},
 		{
 			name = "robot_copy_callout_6",
 			group = "robots",
+			assetId = 97154136575458,
 		},
 		{
 			name = "robot_floor_scrape_drag",
 			group = "robots",
+			assetId = 108578880409491,
 		},
 		{
 			name = "robot_knockdown_sputter",
 			group = "robots",
+			assetId = 120223400585178,
 		},
 		{
 			name = "robot_lens_focus",
 			group = "robots",
+			assetId = 108056414472693,
 		},
 		{
 			name = "robot_neck_crank",
 			group = "robots",
+			assetId = 130086046441162,
 		},
 		{
 			name = "robot_order_bell",
 			group = "robots",
+			assetId = 82652927769589,
 		},
 		{
 			name = "robot_pack_chatter",
 			group = "robots",
+			assetId = 109608375883750,
 		},
 		{
 			name = "robot_reboot_gasp",
 			group = "robots",
+			assetId = 84818466157424,
 		},
 		{
 			name = "robot_scanner_sweep",
 			group = "robots",
+			assetId = 94240731105277,
 		},
 		{
 			name = "robot_skitter_burst",
 			group = "robots",
+			assetId = 117335751834211,
 		},
 		{
 			name = "robot_smile_glitch",
 			group = "robots",
+			assetId = 136620460976232,
 		},
 		{
 			name = "robot_still_there_hum",
 			group = "robots",
+			assetId = 106269904996566,
 		},
 		{
 			name = "robot_wet_servo_breath",
 			group = "robots",
+			assetId = 131810034429952,
 		},
 		{
 			name = "scanner_ping",
@@ -10272,30 +10311,37 @@ return {
 		{
 			name = "announcer_lights_out",
 			group = "voice",
+			assetId = 106154048724115,
 		},
 		{
 			name = "announcer_lights_out_2",
 			group = "voice",
+			assetId = 82584816343263,
 		},
 		{
 			name = "announcer_welcome",
 			group = "voice",
+			assetId = 134167918276763,
 		},
 		{
 			name = "announcer_welcome_2",
 			group = "voice",
+			assetId = 75366960695485,
 		},
 		{
 			name = "button_good_job",
 			group = "voice",
+			assetId = 131253778281121,
 		},
 		{
 			name = "button_task_complete",
 			group = "voice",
+			assetId = 124697319181464,
 		},
 		{
 			name = "button_you_did_it",
 			group = "voice",
+			assetId = 82127345254795,
 		},
 		{
 			name = "callout_0",
@@ -10335,10 +10381,12 @@ return {
 		{
 			name = "dad_last_tape",
 			group = "voice",
+			assetId = 77233937291653,
 		},
 		{
 			name = "dad_phone_bud",
 			group = "voice",
+			assetId = 135400963207091,
 		},
 		{
 			name = "ghost_kid_close",
@@ -10363,90 +10411,112 @@ return {
 		{
 			name = "kid_come_find_me",
 			group = "voice",
+			assetId = 122630187619908,
 		},
 		{
 			name = "kid_found_you",
 			group = "voice",
+			assetId = 112365884584887,
 		},
 		{
 			name = "pa_aisle40_counting",
 			group = "voice",
+			assetId = 97157390769755,
 		},
 		{
 			name = "pa_aisle40_frowning",
 			group = "voice",
+			assetId = 118726654629087,
 		},
 		{
 			name = "pa_aisle40_happy",
 			group = "voice",
+			assetId = 115322434594704,
 		},
 		{
 			name = "pa_aisle40_manager",
 			group = "voice",
+			assetId = 116696341379398,
 		},
 		{
 			name = "pa_aisle40_wider",
 			group = "voice",
+			assetId = 99251285226852,
 		},
 		{
 			name = "pa_aisle_12",
 			group = "voice",
+			assetId = 90218844997918,
 		},
 		{
 			name = "pa_always_happy",
 			group = "voice",
+			assetId = 123367309700811,
 		},
 		{
 			name = "pa_closed",
 			group = "voice",
+			assetId = 135727238231431,
 		},
 		{
 			name = "pa_exit_elsewhere",
 			group = "voice",
+			assetId = 72459259611621,
 		},
 		{
 			name = "pa_fresh_bread",
 			group = "voice",
+			assetId = 124089785986924,
 		},
 		{
 			name = "pa_helpers_looking",
 			group = "voice",
+			assetId = 106846155785832,
 		},
 		{
 			name = "pa_keep_moving",
 			group = "voice",
+			assetId = 85345248353435,
 		},
 		{
 			name = "pa_lost_children",
 			group = "voice",
+			assetId = 132247928049901,
 		},
 		{
 			name = "pa_never_close",
 			group = "voice",
+			assetId = 104190504143215,
 		},
 		{
 			name = "pa_parents",
 			group = "voice",
+			assetId = 72014182750555,
 		},
 		{
 			name = "pa_smiling_mandatory",
 			group = "voice",
+			assetId = 70725392571612,
 		},
 		{
 			name = "pa_special_everything",
 			group = "voice",
+			assetId = 108672133751528,
 		},
 		{
 			name = "pa_thank_you",
 			group = "voice",
+			assetId = 122045886433116,
 		},
 		{
 			name = "pa_your_name",
 			group = "voice",
+			assetId = 138326611021410,
 		},
 		{
 			name = "phone_message",
 			group = "voice",
+			assetId = 75828328485930,
 		},
 		{
 			name = "robot_chatter",
@@ -10476,22 +10546,27 @@ return {
 		{
 			name = "voice_error_data",
 			group = "voice",
+			assetId = 111187212606579,
 		},
 		{
 			name = "voice_error_retry",
 			group = "voice",
+			assetId = 93837931745970,
 		},
 		{
 			name = "voice_error_task",
 			group = "voice",
+			assetId = 84317051040061,
 		},
 		{
 			name = "voice_error_training",
 			group = "voice",
+			assetId = 126531374200869,
 		},
 		{
 			name = "walkie_intro",
 			group = "voice",
+			assetId = 102770349481606,
 		},
 		{
 			name = "distant_hum_loop",
