@@ -97,6 +97,27 @@ local settings = {
 	RackStock = { 2, 3 }, -- runs of boxed stock per deck
 	TapeChance = 0.12,
 	AisleSignGap = 3, -- aisle number signs hang with their top this far above the racks
+	-- Aisle 40, the Smile Aisle (Logic/WarehouseGenSmileAisle): one aisle sign always reads Number,
+	-- on the racking zone nearest Depth; the night manager's office hides in the far end of its racks
+	SmileAisle = {
+		Number = 40,
+		WrongNumber = 41, -- any other sign that rolled Number reads this instead
+		Depth = 0.45,
+		OfficeLength = 24,
+		EndGap = 2.5, -- between the cut racks and the office wall (kit rack ends stick out past the bays)
+		PanelInset = 5, -- the hidden doorway's centre, in from the office's aisle-side end
+		PanelWidth = 4.5,
+		BoothDepth = 2.5,
+		MarkGap = 1.75, -- the STAND HERE mark, out from the booth's screen
+		PosterEvery = 14,
+		PosterHeight = { 5, 8 },
+		StickerEvery = 12,
+		StickerHeight = { 1.2, 3.5 },
+		BannerEvery = 30,
+		BannerY = 19,
+		SprayEvery = 3, -- every third poster has survivor paint over it
+		LostFoundSearch = 120, -- studs walked in from the doors looking for a clear spot
+	},
 	RackWreckChance = 0.03, -- kit only: a collapsed or toppled bay now and then
 	-- Loose stock on the racks: real props you can pick up, in the bays' empty pallet slots
 	ShelfStock = {

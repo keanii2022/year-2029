@@ -137,6 +137,25 @@ return {
 			title = "Sighting: it was listening",
 			text = "A robot down the aisle said \"hey bud\" in a tired man's voice. The kid stepped out of the dark toward it, then stopped, and shook its head, like it knew that wasn't really him.",
 		},
+		-- Secrets (server SmileAisle): the daily piece never hands these out, you have to find them
+		{
+			id = "secret_lost_found",
+			kind = "secret",
+			title = "Lost & found: a yellow raincoat",
+			text = "Folded small, with care. The sticker on the sleeve says LOST CHILD, dated 2026. Pinned under it, in a grown-up's handwriting: \"Bud, if they bring you here, I'm in 40. Wait for me.\"",
+		},
+		{
+			id = "secret_phone",
+			kind = "secret",
+			title = "Call: aisle 40, after dark",
+			text = 'A tired man\'s voice, too close to the mouthpiece: "Hey bud. I\'m in the office, behind the smiles. The booth can\'t tell a smile from a bow. Three little bows." Then the same voice, flatter: "Smile for the helpers, bud." The line goes dead.',
+		},
+		{
+			id = "secret_office",
+			kind = "secret",
+			title = "Tape: night manager, last entry",
+			text = "If you're hearing this, you did the bow. The helpers learned my voice from these tapes, so this is the last one. They can copy how I sound. They can't copy what I'd say. If a helper tells you \"I'll come find you,\" that isn't me. I'd say stay put. Stay put, bud. I'm coming.",
+		},
 	},
 
 	-- Chapter n opens at n * PerChapter finds

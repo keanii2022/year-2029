@@ -72,6 +72,25 @@ return {
 	RackDepth = 5,
 	RackPitch = 14,
 	TapeChance = 0.12,
+	SmileAisle = {
+		Number = 40,
+		WrongNumber = 41, -- any other sign that rolled Number reads this instead
+		Depth = 0.45,
+		OfficeLength = 24,
+		EndGap = 2.5, -- between the cut racks and the office wall (kit rack ends stick out past the bays)
+		PanelInset = 5, -- the hidden doorway's centre, in from the office's aisle-side end
+		PanelWidth = 4.5,
+		BoothDepth = 2.5,
+		MarkGap = 1.75, -- the STAND HERE mark, out from the booth's screen
+		PosterEvery = 14,
+		PosterHeight = { 5, 8 },
+		StickerEvery = 12,
+		StickerHeight = { 1.2, 3.5 },
+		BannerEvery = 30,
+		BannerY = 19,
+		SprayEvery = 3, -- every third poster has survivor paint over it
+		LostFoundSearch = 120, -- studs walked in from the doors looking for a clear spot
+	},
 	LightLength = 10,
 	LightGap = 36,
 	RackLightY = 34,

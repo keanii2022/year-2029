@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Makes stand-in voice clips for every line the game speaks that Keani hasn't recorded.
 
-Reads every { voice = "...", text = "..." } line in src/shared/Config plus the extra ids in
+Reads every { voice = "...", text = "..." } line in src/shared/Config (an optional style = "..."
+after the text picks a treatment from STYLES, default pa) plus the extra ids in
 EXTRA below, and writes art/sounds/voice/<id>.mp3 with the Mac's built-in voices run through a
 store-speaker, robot or whisper treatment. Never overwrites a clip that already exists, so
 Keani's own recordings always win; delete a generated clip to make it again.
@@ -59,13 +60,15 @@ STYLES = {
 def config_lines():
     """{ voice = "id", text = "..." } across config files, on one line or spread over a few."""
     lines = {}
-    pattern = re.compile(r'voice\s*=\s*"([a-z0-9_]+)"\s*,\s*text\s*=\s*"((?:[^"\\]|\\.)*)"', re.S)
+    pattern = re.compile(
+        r'voice\s*=\s*"([a-z0-9_]+)"\s*,\s*text\s*=\s*"((?:[^"\\]|\\.)*)"(?:\s*,\s*style\s*=\s*"([a-z_]+)")?', re.S
+    )
     for name in sorted(os.listdir(CONFIG)):
         if not name.endswith(".luau"):
             continue
         source = open(os.path.join(CONFIG, name)).read()
-        for voice, text in pattern.findall(source):
-            style = "pa_night" if name == "NightTricks.luau" else "pa"
+        for voice, text, style in pattern.findall(source):
+            style = style or ("pa_night" if name == "NightTricks.luau" else "pa")
             lines.setdefault(voice, (style, text.replace('\\"', '"')))
     return lines
 

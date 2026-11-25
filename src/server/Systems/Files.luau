@@ -180,6 +180,15 @@ function Files.readToday(player: Player): boolean
 	return readToday[player] == true
 end
 
+-- Shows an entry on the player's lore note and records it (repeats just show it again)
+function Files.read(player: Player, id: string)
+	local entry = FilesLogic.byId(catalog, id)
+	if entry then
+		loreRemote:FireClient(player, entry.title, entry.text)
+		Files.find(player, id)
+	end
+end
+
 function Files.Init()
 	stateRemote = Net.event("FilesState")
 	loreRemote = Net.event("LoreNote")

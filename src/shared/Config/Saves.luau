@@ -61,6 +61,8 @@ return {
 		{ key = "BestHaul", label = "Best haul banked" },
 		{ key = "StreakDays", label = "Daily streak" },
 		{ key = "FilesFound", label = "2029 Files found" },
+		-- A secret (server SmileAisle): hidden = left off the record, and its unlock reads "???"
+		{ key = "NightManager", label = "Night manager's office", hidden = true },
 	},
 
 	Boards = {
@@ -177,6 +179,32 @@ return {
 						size = Vector3.new(0.25, 0.6, 0.6),
 						offset = Vector3.new(-0.72, 0.15, 0),
 						paint = true,
+					},
+				},
+			},
+			-- Secret: taken from the night manager's hidden office in aisle 40. Hangs on the chest.
+			{
+				id = "NightManagerLanyard",
+				label = "Night Manager's Lanyard",
+				unlock = { stat = "NightManager", at = 1 },
+				parts = {
+					{
+						shape = "Block",
+						size = Vector3.new(0.08, 0.8, 0.05),
+						offset = Vector3.new(0.28, -1.1, -0.5),
+						paint = true,
+					},
+					{
+						shape = "Block",
+						size = Vector3.new(0.08, 0.8, 0.05),
+						offset = Vector3.new(-0.28, -1.1, -0.5),
+						paint = true,
+					},
+					{
+						shape = "Block",
+						size = Vector3.new(0.55, 0.75, 0.04),
+						offset = Vector3.new(0, -1.75, -0.52),
+						color = Color3.fromRGB(226, 222, 210),
 					},
 				},
 			},

@@ -65,6 +65,10 @@ return {
 			"Longest life 20 min/20 min"
 		)
 	end,
+	["a secret stat's unlock gives nothing away"] = function()
+		local secret = { { key = "NightManager", label = "Night manager's office", hidden = true } }
+		expect(Scores.unlockHint({ stat = "NightManager", at = 1 }, secret, {})).toBe("???")
+	end,
 	["raise only keeps the best"] = function()
 		local stats = { BestHaul = 5 }
 		local haulDefs = { { key = "BestHaul", label = "Best haul" } }

@@ -249,6 +249,9 @@ local function refreshRecord()
 	clearRows(statsList)
 	if current then
 		for index, def in Settings.Stats do
+			if def.hidden then
+				continue
+			end
 			local row = frame({
 				LayoutOrder = index,
 				Size = UDim2.new(1, 0, 0, 22),

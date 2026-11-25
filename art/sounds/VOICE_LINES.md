@@ -112,6 +112,17 @@ Plays when a player picks up after `warehouse/phone_ring_far.mp3`. Record close 
 | pa_your_name | If you hear your name, do not answer. |
 | pa_fresh_bread | Fresh bread in the bakery. There is no bakery. |
 
+## Aisle 40 (only heard in the Smile Aisle; the dad lines are the night manager's voice)
+| id | line |
+|---|---|
+| pa_aisle40_counting | Shoppers in aisle 40: please smile for the helpers. The helpers are counting. |
+| pa_aisle40_happy | A happy shopper is a safe shopper. Are you happy, shopper in aisle 40? |
+| pa_aisle40_frowning | Frowning has been detected in aisle 40. Frowning is shoplifting. |
+| pa_aisle40_wider | Wider, please. A little wider. Thank you, aisle 40. |
+| pa_aisle40_manager | Would the night manager please return to aisle 40. Your shift is not over. |
+| dad_phone_bud | (a robot copying him, on the aisle 40 phone) Hey bud. I'm in the office, behind the smiles. The booth can't tell a smile from a bow. Three little bows. ...Smile for the helpers, bud. |
+| dad_last_tape | (his real last tape, tired, quiet) Last tape. They learned my voice from these. If a helper says I'll come find you, that's not me. I'd say stay put. Stay put, bud. I'm coming. |
+
 ## Night phone
 | id | line |
 |---|---|

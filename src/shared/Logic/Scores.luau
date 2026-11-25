@@ -4,7 +4,8 @@ local Scores = {}
 export type Unlock = { stat: string, at: number }
 export type Cosmetic = { id: string, label: string, unlock: Unlock? }
 export type Cosmetics = { [string]: { Cosmetic } }
-export type StatDef = { key: string, label: string, minutes: boolean? }
+-- hidden: a secret's stat, left off the record; its locked cosmetics just say "???"
+export type StatDef = { key: string, label: string, minutes: boolean?, hidden: boolean? }
 
 local function isFinite(value: any): boolean
 	return type(value) == "number" and value == value and math.abs(value) ~= math.huge
@@ -169,7 +170,9 @@ end
 -- "Nights survived 3/5" for a locked cosmetic.
 function Scores.unlockHint(unlock: Unlock, defs: { StatDef }, stats: { [string]: number }): string
 	for _, def in defs do
-		if def.key == unlock.stat then
+		if def.key == unlock.stat and def.hidden then
+			return "???"
+		elseif def.key == unlock.stat then
 			local have = Scores.formatStat(math.min(stats[unlock.stat] or 0, unlock.at), def.minutes)
 			return `{def.label} {have}/{Scores.formatStat(unlock.at, def.minutes)}`
 		end
