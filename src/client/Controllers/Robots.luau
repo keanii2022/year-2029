@@ -1,5 +1,7 @@
 -- Robot gear (EMP G, disruptor V, or Fire with it picked on the hotbar) and the local-only life of stalled
 -- robots: flickering eyes, twitches and the odd "ERROR. NEEDS MORE TRAINING." over the nearest one.
+-- Robots also talk in Keani's robotised voice: chatter nearby, a line when you walk up on one at work,
+-- when one notices you, when it gets back to work, and when it errors out.
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,12 +11,16 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
+local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
 local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
 local Input = require(script.Parent.Input)
 
 local settings = Config.Robots
+local voiceLines = settings.Voice
 local player = Players.LocalPlayer
+
+type Talker = { body: BasePart, speaking: Sound?, nextChatterAt: number, saidTask: boolean }
 
 local Robots = {}
 
@@ -22,6 +28,7 @@ local gearRemote: RemoteEvent
 local random = Random.new()
 local nextTwitch: { [Model]: number } = {}
 local nextLineAt = 0
+local talkers: { [Model]: Talker } = {}
 
 local function useGear(action: string)
 	return function(began: boolean)
@@ -83,14 +90,64 @@ local function sayLine(model: Model)
 	Debris:AddItem(gui, 2.6)
 end
 
+-- One line at a time per robot: a new one cuts off whatever it was saying.
+local function say(talker: Talker, name: string)
+	local id = ModelLibrary.soundId(name)
+	if not id then
+		return
+	end
+	if talker.speaking then
+		talker.speaking:Destroy()
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = voiceLines.Volume
+	sound.RollOffMinDistance = voiceLines.RollOff[1]
+	sound.RollOffMaxDistance = voiceLines.RollOff[2]
+	sound.PlaybackSpeed = random:NextNumber(0.96, 1.04)
+	sound.Parent = talker.body
+	talker.speaking = sound
+	sound:Play()
+	Debris:AddItem(sound, 10)
+end
+
+-- Chatter every so often while it's calm and you're in earshot; one line per errand when you walk
+-- up on it working.
+local function talk(model: Model, distance: number, now: number)
+	local talker = talkers[model]
+	if not talker then
+		return
+	end
+	local state = model:GetAttribute("State")
+	if state ~= "errand" then
+		talker.saidTask = false
+	elseif not talker.saidTask and distance <= voiceLines.TaskRange then
+		talker.saidTask = true
+		talker.nextChatterAt = now + random:NextNumber(table.unpack(voiceLines.ChatterEvery))
+		say(talker, voiceLines.Task)
+		return
+	end
+	if not VoiceLines.isCalm(state, voiceLines) or distance > voiceLines.ChatterRange then
+		return
+	end
+	if now >= talker.nextChatterAt then
+		talker.nextChatterAt = now + random:NextNumber(table.unpack(voiceLines.ChatterEvery))
+		say(talker, voiceLines.Chatter)
+	end
+end
+
 local function step(folder: Instance)
 	local now = os.clock()
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local nearest, nearestDistance = nil, settings.StallLineRange
 	for _, model in folder:GetChildren() do
-		if not model:IsA("Model") then
+		-- the folder also holds the boxes and brooms chore bots carry
+		if not model:IsA("Model") or model:GetAttribute("RobotId") == nil then
 			continue
+		end
+		if root and root:IsA("BasePart") then
+			talk(model, (model:GetPivot().Position - root.Position).Magnitude, now)
 		end
 		local frozen = isFrozen(model)
 		local eyes = model:FindFirstChild(settings.EyePart, true)
@@ -125,6 +182,11 @@ local function step(folder: Instance)
 			nextTwitch[model] = nil
 		end
 	end
+	for model in talkers do
+		if not model.Parent then
+			talkers[model] = nil
+		end
+	end
 end
 
 -- Robot sounds, all local: a hum that follows each robot, a scream when it starts chasing, curious
@@ -146,9 +208,17 @@ end
 
 local function voice(model: Model)
 	local body = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
-	if not body then
+	if not body or model:GetAttribute("RobotId") == nil then
 		return
 	end
+	local talker: Talker = {
+		body = body,
+		speaking = nil,
+		nextChatterAt = os.clock() + random:NextNumber(table.unpack(voiceLines.ChatterEvery)),
+		saidTask = false,
+	}
+	talkers[model] = talker
+	local lastState = model:GetAttribute("State")
 	local hum = soundOn(body, settings.Sounds.Hum, settings.Sounds.HumVolume, true)
 	if hum then
 		hum:Play()
@@ -169,7 +239,13 @@ local function voice(model: Model)
 		end
 	end)
 	model:GetAttributeChangedSignal("State"):Connect(function()
-		local cue = settings.StateSounds[model:GetAttribute("State")]
+		local state = model:GetAttribute("State")
+		local line = VoiceLines.robotStateLine(lastState, state, voiceLines)
+		lastState = state
+		if line then
+			say(talker, line)
+		end
+		local cue = settings.StateSounds[state]
 		if not cue then
 			return
 		end

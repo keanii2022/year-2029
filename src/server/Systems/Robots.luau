@@ -64,6 +64,9 @@ export type Robot = {
 	wanderAt: number,
 	carrying: Carry?,
 	choreBox: PVInstance?,
+	boxPlaced: boolean, -- this errand's box is already on the shelf
+	broom: Model?,
+	sweepSide: number, -- which way the broom last swung, so dust puffs at each end of a stroke
 	loose: Loose?,
 	looseAt: number,
 	heardUpTo: number,
@@ -316,17 +319,94 @@ local function holdInFront(robot: Robot, instance: PVInstance)
 	instance:PivotTo(CFrame.lookAt(held, held - robot.facing) * pivotFromBox)
 end
 
+-- Seconds since a working chore bot reached its spot, or nil while it isn't working there.
+local function workElapsed(robot: Robot, now: number): number?
+	local arrivedAt = robot.brain.arrivedAt
+	return if arrivedAt and robot.brain.state == "errand" then now - arrivedAt else nil
+end
+
+-- The body turn a working robot adds on the spot: a sweeper swings with its broom, a stocker shifts
+-- its weight between reaches. Zero while walking.
+local function bodyYaw(robot: Robot, now: number): number
+	if robot.moving then
+		return 0
+	elseif robot.pose == "sweep" then
+		return chores.SweepYaw * RobotPoses.sweepSwing(now)
+	elseif robot.pose == "restock" or (robot.pose == "shelve" and robot.boxPlaced) then
+		return chores.RestockYaw * math.sin(now * 1.3)
+	end
+	return 0
+end
+
+-- Slides the carried box from its hands onto the shelf in front, then leaves it there.
+local function shelveBox(robot: Robot, box: PVInstance, now: number)
+	local elapsed = workElapsed(robot, now) or 0
+	local progress, placed = RobotChores.shelve(elapsed, chores.ShelveLift, chores.ShelveSlide)
+	holdInFront(robot, box)
+	local held = box:GetPivot()
+	local shelf = robot.position + robot.facing * chores.ShelfReach + Vector3.yAxis * chores.ShelfHeight
+	local eased = progress * progress * (3 - 2 * progress)
+	box:PivotTo(held:Lerp(held.Rotation + shelf, eased))
+	if placed then
+		robot.choreBox = nil
+		robot.boxPlaced = true
+		Debris:AddItem(box, chores.BoxStays)
+	end
+end
+
+-- The broom hangs from its grip at chest height, bristles on the floor ahead, swinging side to side.
+local function holdBroom(robot: Robot, broom: Model, now: number)
+	local side = robot.facing:Cross(Vector3.yAxis)
+	local sweeping = robot.pose == "sweep" and not robot.moving
+	local swing = if sweeping then RobotPoses.sweepSwing(now) else 0
+	local grip = robot.position + robot.facing * 1.2 + Vector3.yAxis * 3.2
+	local bristles = robot.position + robot.facing * 3.4 + side * (1.4 * swing) + Vector3.yAxis * 0.3
+	local up = (grip - bristles).Unit
+	local across = (side - up * side:Dot(up)).Unit
+	broom:PivotTo(CFrame.fromMatrix(grip, across, up))
+	local direction = math.sign(math.cos(now * 3))
+	if sweeping and direction ~= robot.sweepSide then
+		local dust = broom:FindFirstChild("Dust", true)
+		if dust and dust:IsA("ParticleEmitter") then
+			dust:Emit(chores.DustPuff)
+		end
+	end
+	robot.sweepSide = direction
+end
+
 local function place(robot: Robot)
+	local now = os.clock()
 	local pivot = robot.position + Vector3.yAxis * robot.pivotHeight
+	local facing = CFrame.Angles(0, bodyYaw(robot, now), 0):VectorToWorldSpace(robot.facing)
 	-- the art faces +z, lookAt points -z, so look away from the way we want to face
-	local cframe = CFrame.lookAt(pivot, pivot - robot.facing)
+	local cframe = CFrame.lookAt(pivot, pivot - facing)
 	robot.model:PivotTo(cframe)
 	if robot.carrying then
 		holdInFront(robot, robot.carrying.instance)
 	end
 	if robot.choreBox then
-		holdInFront(robot, robot.choreBox)
+		if robot.pose == "shelve" then
+			shelveBox(robot, robot.choreBox, now)
+		else
+			holdInFront(robot, robot.choreBox)
+		end
 	end
+	if robot.broom then
+		holdBroom(robot, robot.broom, now)
+	end
+end
+
+local function gearPart(name: string, size: Vector3, color: Color3, material: Enum.Material): Part
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Size = size
+	part.Color = color
+	part.Material = material
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanTouch = false
+	part.CanQuery = false
+	return part
 end
 
 local function makeChoreBox(): PVInstance
@@ -335,11 +415,19 @@ local function makeChoreBox(): PVInstance
 	if model then
 		box = model
 	else
-		local part = Instance.new("Part")
-		part.Size = chores.BoxSize
-		part.Color = chores.BoxColor
-		part.Material = Enum.Material.Cardboard
-		box = part
+		local body = gearPart("Body", chores.BoxSize, chores.BoxColor, Enum.Material.Cardboard)
+		local tape = gearPart(
+			"Tape",
+			Vector3.new(0.5, 0.05, chores.BoxSize.Z + 0.02),
+			chores.TapeColor,
+			Enum.Material.SmoothPlastic
+		)
+		tape.CFrame = CFrame.new(0, chores.BoxSize.Y / 2, 0)
+		local stand = Instance.new("Model")
+		body.Parent = stand
+		tape.Parent = stand
+		stand.PrimaryPart = body
+		box = stand
 	end
 	box.Name = "ChoreBox"
 	for _, part in partsOf(box) do
@@ -347,8 +435,45 @@ local function makeChoreBox(): PVInstance
 		part.CanCollide = false
 		part.CanTouch = false
 		part.CanQuery = false
+		if part.Name ~= "Tape" then
+			-- shows wherever the texture doesn't load, so it never reads as a black block
+			part.Color = chores.BoxColor
+		end
 	end
 	return box
+end
+
+-- A broom of plain blocks, its pivot at the grip with the handle running down -y.
+local function makeBroom(): Model
+	local broom = Instance.new("Model")
+	broom.Name = "ChoreBroom"
+	local handleLength = 3.4
+	local handle =
+		gearPart("Handle", Vector3.new(0.22, handleLength, 0.22), chores.BroomColor, Enum.Material.Wood)
+	handle.CFrame = CFrame.new(0, -handleLength / 2, 0)
+	local head = gearPart("Head", Vector3.new(2, 0.35, 0.45), chores.BroomColor, Enum.Material.Wood)
+	head.CFrame = CFrame.new(0, -handleLength - 0.1, 0)
+	local bristles =
+		gearPart("Bristles", Vector3.new(1.9, 0.5, 0.4), chores.BristleColor, Enum.Material.Fabric)
+	bristles.CFrame = CFrame.new(0, -handleLength - 0.5, 0)
+	local dust = Instance.new("ParticleEmitter")
+	dust.Name = "Dust"
+	dust.Enabled = false
+	dust.Color = ColorSequence.new(chores.DustColor)
+	dust.Size = NumberSequence.new(0.3, 1.2)
+	dust.Transparency = NumberSequence.new(0.4, 1)
+	dust.Lifetime = NumberRange.new(0.5, 0.9)
+	dust.Speed = NumberRange.new(1.5, 3.5)
+	dust.SpreadAngle = Vector2.new(60, 60)
+	dust.Acceleration = Vector3.new(0, -2, 0)
+	dust.EmissionDirection = Enum.NormalId.Bottom
+	dust.Parent = bristles
+	handle.Parent = broom
+	head.Parent = broom
+	bristles.Parent = broom
+	broom.PrimaryPart = handle
+	broom.WorldPivot = CFrame.identity
+	return broom
 end
 
 -- The box a carrier brings out on its errand: in its hands only while the pose says so.
@@ -362,6 +487,31 @@ local function holdChoreBox(robot: Robot, holding: boolean)
 		robot.choreBox:Destroy()
 		robot.choreBox = nil
 	end
+end
+
+local function carryBroom(robot: Robot, carrying: boolean)
+	if carrying and not robot.broom then
+		local broom = makeBroom()
+		robot.broom = broom
+		holdBroom(robot, broom, os.clock())
+		broom.Parent = folder
+	elseif not carrying and robot.broom then
+		robot.broom:Destroy()
+		robot.broom = nil
+	end
+end
+
+-- What a chore bot has in its hands for the pose it's in: a carrier's box until it's shelved, a
+-- cleaner's broom on the way out and while sweeping.
+local function choreGear(robot: Robot)
+	local errand = robot.brain.errand
+	if not errand then
+		robot.boxPlaced = false
+	end
+	local pose = robot.pose
+	local sweeping = errand ~= nil and errand.chore == "sweep" and robot.brain.state == "errand"
+	holdChoreBox(robot, pose == "carry" or (pose == "shelve" and not robot.boxPlaced))
+	carryBroom(robot, sweeping and (pose == "walk" or pose == "sweep"))
 end
 
 local function dress(robot: Robot)
@@ -444,6 +594,9 @@ local function spawnRobot(typeName: string, room: any?, position: Vector3, facin
 		wanderAt = 0,
 		carrying = nil,
 		choreBox = nil,
+		boxPlaced = false,
+		broom = nil,
+		sweepSide = 0,
 		loose = nil,
 		looseAt = 0,
 		heardUpTo = now,
@@ -702,9 +855,23 @@ local function headTurn(robot: Robot, target: Vector3): number
 	return degrees / Config.Models.MoverDegrees
 end
 
+local WORK_POSES = { sweep = true, restock = true, shelve = true }
+
 local function animate(now: number)
 	for _, robot in robots do
-		local limbs = RobotPoses.limbs(robot.pose, robot.stride, now, robot.moving)
+		local limbName, progress = robot.pose, nil
+		if robot.pose == "shelve" then
+			if robot.boxPlaced then
+				limbName = "restock" -- the box is up: tidy the shelf
+			else
+				progress =
+					RobotChores.shelve(workElapsed(robot, now) or 0, chores.ShelveLift, chores.ShelveSlide)
+			end
+		end
+		if WORK_POSES[robot.pose] and not robot.moving then
+			place(robot) -- the body sway and what's in its hands move every frame, not only on steps
+		end
+		local limbs = RobotPoses.limbs(limbName, robot.stride, now, robot.moving, progress)
 		if robot.lookAt then
 			limbs.Head = headTurn(robot, robot.lookAt)
 		end
@@ -921,7 +1088,7 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 	end
 
 	robot.pose = intent.pose
-	holdChoreBox(robot, robot.pose == "carry")
+	choreGear(robot)
 	robot.face = if intent.face then onFloor(Vector3.new(intent.face.x, 0, intent.face.z)) else nil
 	robot.speed = if intent.speed == "chase"
 		then info.chaseSpeed
@@ -999,6 +1166,7 @@ end
 local function despawn(robot: Robot)
 	dropCarried(robot, robot.position)
 	holdChoreBox(robot, false)
+	carryBroom(robot, false)
 	robot.dead = true
 	robots[robot.id] = nil
 	byModel[robot.model] = nil

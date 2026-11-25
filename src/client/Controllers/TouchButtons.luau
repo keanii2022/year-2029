@@ -66,7 +66,9 @@ local BUTTONS: { Spec } = {
 	},
 	{ name = "Sprint", action = "Sprint", mode = "toggle", size = 56, at = Vector2.new(-60, -222) },
 	{ name = "Flashlight", action = "Flashlight", mode = "tap", size = 56, at = Vector2.new(-136, -226) },
-	{ name = "Psst", action = "Psst", mode = "tap", size = 56, at = Vector2.new(-212, -226) },
+	-- hold, not tap, so a long press on CALL also switches calls like the key does
+	{ name = "Callout", action = "Callout", mode = "hold", size = 56, at = Vector2.new(-212, -226) },
+	{ name = "CalloutNext", action = "CalloutNext", mode = "tap", size = 30, at = Vector2.new(-262, -246) },
 	{
 		name = "CarryTurn",
 		action = "CarryTurn",

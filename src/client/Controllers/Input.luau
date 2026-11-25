@@ -3,7 +3,7 @@
 -- Gamepad names are Roblox's Xbox names; the PS button is in the comment beside each. The layout
 -- follows what shooter players already know: R2 fire / use what you hold (empty hands: grab),
 -- L2 aim, Square use/reload, Cross jump, L1 / R1 step the hotbar (empty hands is a slot),
--- Triangle opens the backpack. Circle psst and R3 crouch stay where players already learned them.
+-- Triangle opens the backpack. Circle calls out (hold: switch call), R3 crouches.
 -- While carrying, Grab takes over L1 / R1 / L2 and the D-pad to move the prop.
 -- Glyphs draws these keys on screen.
 -- Other controllers call Input.bind / Input.isDown instead of reading keys themselves.
@@ -35,7 +35,8 @@ local actions: { [string]: Binding } = {
 		gamepad = Enum.KeyCode.ButtonR3,
 	}, -- R3
 	Jump = { keyboard = Enum.KeyCode.Space, gamepad = Enum.KeyCode.ButtonA }, -- Cross
-	Psst = { keyboard = Enum.KeyCode.Q, gamepad = Enum.KeyCode.ButtonB }, -- Circle
+	-- Tap calls out, hold switches to the next call (Callouts times it)
+	Callout = { keyboard = Enum.KeyCode.Q, gamepad = Enum.KeyCode.ButtonB }, -- Circle
 	Use = { keyboard = Enum.KeyCode.E, gamepad = Enum.KeyCode.ButtonX }, -- Square
 	-- On a gamepad Gun reloads from Square (Use) when there's nothing to use
 	Reload = { keyboard = Enum.KeyCode.R, freeHands = true },
@@ -68,6 +69,8 @@ local actions: { [string]: Binding } = {
 	CarryTip = {},
 	CarryCloser = {},
 	CarryFarther = {},
+	-- Phone-only: the small arrow beside CALL switches calls
+	CalloutNext = {},
 }
 -- Number keys pick hotbar slots (Slot1 .. Slot9); the mouse wheel is read by Hotbar itself.
 local NUMBER_KEYS = {

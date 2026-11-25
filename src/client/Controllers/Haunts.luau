@@ -12,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local HauntSight = require(ReplicatedStorage.Shared.Logic.HauntSight)
+local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
 local Manifest = require(ReplicatedStorage.Shared.Logic.Manifest)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -183,8 +184,9 @@ end
 
 local scares: { [string]: (done: () -> ()) -> () } = {}
 
--- Stands just outside your flashlight cone (or off to the side of your view), tilts its head too
--- far, and is gone when you come close, leaving its stuffed robot.
+-- Stands still just outside your flashlight cone (or off to the side of your view), crying, and tilts
+-- its head too far. It waits long enough to be walked up to, saying a line at each step closer, and
+-- is gone just after the last one, leaving its stuffed robot.
 function scares.kid_peek(done)
 	local kid = spawnModel("lost_kid")
 	if not kid then
@@ -202,16 +204,26 @@ function scares.kid_peek(done)
 		return done()
 	end
 	stand(kid, spot, camera().CFrame.Position)
-	playAt(spot, Settings.Sounds.KidAppear, Settings.Volume * 0.6)
+	playAt(spot, Settings.Sounds.KidAppear, cfg.VoiceVolume)
 	local _, motors = poserFor(kid)
 	local head = motors.Head
+	local played = 0
+	local closeAt = nil
 	every(function(elapsed)
 		if head then
 			local tilt = math.clamp((elapsed - cfg.TiltAfter) / 0.6, 0, 1)
 			head.motor.C0 = head.base * CFrame.Angles(0, 0, math.rad(cfg.TiltDegrees * tilt))
 		end
-		local close = (camera().CFrame.Position - spot).Magnitude < cfg.VanishDistance
-		if not close and elapsed < cfg.Hold then
+		local due = VoiceLines.kidCue(cfg.Voice, (camera().CFrame.Position - spot).Magnitude, played)
+		if due then
+			played = due
+			playAt(spot, cfg.Voice[due].sound, cfg.VoiceVolume)
+			if due == #cfg.Voice then
+				closeAt = elapsed
+			end
+		end
+		local gone = if closeAt then elapsed - closeAt >= cfg.VanishAfterClose else elapsed >= cfg.Hold
+		if not gone then
 			return false
 		end
 		local toy = spawnModel("stuffed_robot")

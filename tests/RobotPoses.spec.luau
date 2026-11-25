@@ -33,6 +33,18 @@ return {
 		local study = RobotPoses.limbs("study", 0, 0, false)
 		expect(reach.UpperArm > study.UpperArm + 1).toBeTruthy()
 	end,
+	["shelving pushes the arms up and out as the box slides on"] = function()
+		local start = RobotPoses.limbs("shelve", 0, 0, false, 0)
+		local done = RobotPoses.limbs("shelve", 0, 0, false, 1)
+		expect(start.UpperArm).toBeNear(2.2)
+		expect(done.UpperArm > start.UpperArm + 1).toBeTruthy()
+		expect(done.Forearm < start.Forearm).toBeTruthy()
+	end,
+	["restocking keeps reaching instead of holding still"] = function()
+		local a = RobotPoses.limbs("restock", 0, 0, false)
+		local b = RobotPoses.limbs("restock", 0, 1.2, false)
+		expect(math.abs(a.UpperArm - b.UpperArm) > 1).toBeTruthy()
+	end,
 	["sweeping swings the arms side to side"] = function()
 		local a = RobotPoses.limbs("sweep", 0, 0.5, false)
 		local b = RobotPoses.limbs("sweep", 0, 1.5, false)
