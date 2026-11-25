@@ -19,7 +19,30 @@ return {
 	BotSpacing = 9, -- robots in a room spawn, study and idle at least this far apart
 	-- One per installation stands in a corner facing the wall. Inside LookRange its head turns to
 	-- follow you; it wakes after staring StareSeconds, when you come inside WakeRange, or on a sound.
-	Watcher = { LookRange = 34, WakeRange = 9, StareSeconds = 4, MaxHeadTurn = 150, CornerPad = 3 },
+	Watcher = { LookRange = 34, WakeRange = 9, StareSeconds = 4, CornerPad = 3 },
+
+	-- Stiff bodies, heads that move too smoothly. The server says where a head looks (LookAt); each
+	-- client turns it there at HeadSpeed degrees a second, slowing over the last HeadEase, with a
+	-- ratchet tick every RatchetGap seconds while it still has more than RatchetMinTurn degrees to go.
+	Motion = {
+		HeadSpeed = 55,
+		HeadEase = 25,
+		MaxHeadTurn = 150,
+		LookRange = 120, -- clients only turn heads this close to the camera
+		Ratchet = "cam_servo",
+		RatchetPitch = 0.6,
+		RatchetVolume = 0.35,
+		RatchetGap = 0.8,
+		RatchetMinTurn = 6,
+		-- a still head leans to one side now and then while it studies you
+		Tilt = { Every = 7, Hold = 1.8, Degrees = 20 },
+		StalledLookRange = 22, -- a hunter frozen by day follows you with its head this close
+		-- awake hunters walking about hold dead still, then move in short fast bursts (Speed x walk)
+		Burst = { Move = { 0.5, 0.9 }, Still = { 0.9, 2.2 }, Speed = 2.2 },
+		-- a studying robot you look straight at (within Angle degrees, Range studs) for Seconds turns its
+		-- head to you and stops working until you've looked away for Release seconds
+		Watched = { Range = 30, Angle = 10, Seconds = 3, Release = 1 },
+	},
 
 	-- Night hunters spawn out of sight near players and stall where they stand at lights on.
 	MaxHunters = 16,
@@ -63,6 +86,9 @@ return {
 		-- Up close at night a chasing hunter bursts past sprint speed (22) for a moment, screeching
 		-- first, then cools down. Speed in studs per second, times in seconds.
 		Lunge = { Range = 15, Speed = 26, Seconds = 1.5, Cooldown = 4 },
+		-- Before a chase it freezes and stares this long (seconds), eyes brighter, hum cut, then goes
+		Stare = { 0.6, 1 },
+		StareGlow = 2.5, -- eye glow brightness and range, times normal, while it stares
 		LungeSound = "chase_servo_scream",
 		LungePitch = 1.35,
 		LungeVolume = 0.9,
@@ -85,6 +111,73 @@ return {
 	-- One robot per installation stands just inside a doorway facing out. Anyone walking (not
 	-- crouched) inside the room within HearRange makes it turn and look.
 	Guard = { Inset = 5, HearRange = 32 },
+
+	-- Nights that learn: each night a server survives adds a little, capped (night 1 is the base).
+	-- Every HardEvery-th night is a hard night: HardHunters more per player and the PA glitching all
+	-- night. The siren says which.
+	Nights = {
+		SightStep = 0.04,
+		SightMax = 0.24,
+		HunterEvery = 2, -- one more hunter per player every this many nights
+		HunterMax = 2,
+		SpeedStep = 0.25,
+		SpeedMax = 1, -- night chase tops out at 21, still under a sprint (22)
+		HardEvery = 10,
+		HardHunters = 2,
+		LearnLine = "Night %d. They're learning.",
+		HardLine = "Night %d. Something's wrong with the PA. More of them tonight.",
+		LineDelay = 1.5, -- seconds after the siren starts
+		LineSeconds = 6,
+		HardPa = "pa_glitch",
+		HardPaGap = { 12, 30 },
+		HardPaVolume = 0.3,
+		HardPaPitch = { 0.8, 1.05 },
+	},
+
+	-- A hunting robot this close that you can't see: the lights round you flicker and the PA hums and
+	-- glitches softly. Level eases up at Rise and down at Fall per second.
+	Presence = {
+		Range = 40,
+		Hum = "distant_hum_loop",
+		HumVolume = 0.25,
+		Glitch = "pa_glitch",
+		GlitchVolume = 0.2,
+		GlitchGap = { 6, 14 },
+		Rise = 0.8,
+		Fall = 0.5,
+	},
+
+	-- One hunter a night (one of the first PickFrom to spawn) makes no footsteps and no hum until it lunges
+	Silent = { PickFrom = 4 },
+
+	-- Some night hunters spawn perched on top of a rack bay near a player instead of far off, hold still
+	-- Perch seconds, then drop into the aisle (DropSeconds) and land hard.
+	Racks = {
+		DropChance = 0.3,
+		Distance = { 16, 34 },
+		Along = { -28, -16, 0, 16, 28 }, -- spots along a rack, from level with the player
+		Inset = 3, -- lands this far out from the rack face
+		Perch = { 1.5, 4 },
+		DropSeconds = 0.45,
+		LandStill = 0.7,
+		Sounds = { "land_thud", "brute_thud" },
+		Volume = 1,
+	},
+
+	-- The mimic: at night, now and then, a robot replays a callout someone made Delay seconds ago from
+	-- where it stands (Offset studs from the caller), pitched slightly wrong. Checked every CheckEvery
+	-- seconds at Chance, then not again for Cooldown.
+	Mimic = {
+		Delay = { 6, 40 },
+		Offset = { 25, 90 },
+		Chance = 0.25,
+		CheckEvery = 5,
+		Cooldown = { 180, 300 },
+		Pitch = 0.92,
+		Volume = 0.8, -- a touch quieter than a real callout, and further off
+		Tail = "walkie_static",
+		TailVolume = 0.15,
+	},
 
 	-- At night a red glow round the eyes, so you see them hunting from far off in the dark
 	EyeGlow = { Range = 7, Brightness = 2.5 },
@@ -145,7 +238,8 @@ return {
 	NightSuffix = "_night", -- night model name = day name .. suffix
 
 	-- Per type. Speeds in studs per second (players walk 14, sprint 22, crouch 7). Every chase
-	-- beats a walk, none beats a sprint.
+	-- beats a walk, none beats a sprint. nightChaseSpeed: hunters at night run close to a sprint, so
+	-- stamina decides who gets away.
 	-- armor: gun damage that knocks it down (starter pistol hits for 22, a close shotgun blast ~96).
 	Types = {
 		cleaner = {
@@ -176,6 +270,7 @@ return {
 			role = "hunter",
 			walkSpeed = 9,
 			chaseSpeed = 17,
+			nightChaseSpeed = 20,
 			sightRange = 70,
 			agentHeight = 7,
 			armor = 150,
@@ -184,6 +279,7 @@ return {
 			role = "hunter",
 			walkSpeed = 8,
 			chaseSpeed = 15,
+			nightChaseSpeed = 19,
 			sightRange = 45,
 			agentHeight = 8,
 			armor = 300,
@@ -192,6 +288,7 @@ return {
 			role = "hunter",
 			walkSpeed = 9,
 			chaseSpeed = 18,
+			nightChaseSpeed = 20,
 			sightRange = 40,
 			agentHeight = 3.5,
 			armor = 110,

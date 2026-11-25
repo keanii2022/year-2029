@@ -158,6 +158,33 @@ return {
 		RobotBrain.update(brain, input({ phase = "Night", focusDistance = 1 }), SETTINGS, 6.5)
 		expect(brain.state).toBe("sweep")
 	end,
+	["at night it freezes and stares before it goes, unless you're in reach"] = function()
+		local settings = table.clone(SETTINGS)
+		settings.Hunt = { NightLoseSeconds = 7, Searches = 2, Stare = { 0.6, 1 } }
+		local brain = RobotBrain.new("hunter", "Night", 0)
+		local intent, now = nil, 0
+		while brain.state == "sweep" and now < 2 do
+			now += 0.2
+			intent = RobotBrain.update(
+				brain,
+				input({ phase = "Night", seen = seenAt(20), roll = 0 }),
+				settings,
+				now
+			)
+		end
+		expect(brain.state).toBe("chase")
+		expect(intent.pose).toBe("stare")
+		expect(intent.goal).toBe(nil)
+		intent = RobotBrain.update(brain, input({ phase = "Night", seen = seenAt(20) }), settings, now + 0.4)
+		expect(intent.pose).toBe("stare")
+		intent = RobotBrain.update(brain, input({ phase = "Night", seen = seenAt(20) }), settings, now + 0.7)
+		expect(intent.goal).toBe("focus")
+		expect(intent.speed).toBe("chase")
+		local close = RobotBrain.new("hunter", "Night", 0)
+		close.state, close.stareUntil, close.targetId, close.lastSeenAt = "chase", 10, "p1", 0
+		intent = RobotBrain.update(close, input({ phase = "Night", seen = seenAt(3) }), settings, 0.2)
+		expect(intent.catch).toBe("p1")
+	end,
 	["at night it notices fast and a catch takes you down"] = function()
 		local brain = RobotBrain.new("hunter", "Night", 0)
 		local _, now = runWhile(brain, "sweep", function()

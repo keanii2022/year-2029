@@ -6,7 +6,7 @@
 -- Everyone by night: sweep -> investigate / chase / carry. Caught at night = catch (the player goes down).
 -- Hunters by day: stalled, harmless. Prowlers run the night machine by day too, with day eyes.
 -- A hunter that loses you searches where it saw you last and a few spots round it; one that spots
--- you calls the others, who rush to cut you off (answerCall).
+-- you freezes and stares for a moment first, then calls the others, who rush to cut you off (answerCall).
 -- Any robot hit by an EMP: disabled until it wears off.
 local RobotChores = if script then require(script.Parent.RobotChores) else require("./RobotChores")
 local RobotSenses = if script then require(script.Parent.RobotSenses) else require("./RobotSenses")
@@ -40,6 +40,7 @@ export type Brain = {
 	errand: Errand?, -- set from leaving on an errand until back home
 	rushing: boolean, -- investigating at a run: answering a call or chasing down where you vanished
 	searchesLeft: number, -- more spots to check near the last sighting before it gives up
+	stareUntil: number, -- a hunter that just spotted you freezes and stares until then, then goes
 }
 export type Seen = { id: any, x: number, z: number, distance: number, range: number }
 export type Loose = { id: any, distance: number }
@@ -54,6 +55,7 @@ export type Input = {
 	seen: Seen?,
 	heard: Point?,
 	loose: Loose?,
+	roll: number?, -- 0..1 from the caller, for how long a stare lasts
 }
 export type Goal = "home" | "focus" | "loose" | "wander" | "study" | "errand"
 export type Intent = {
@@ -86,6 +88,7 @@ function RobotBrain.new(role: Role, phase: string, now: number): Brain
 		errand = nil,
 		rushing = false,
 		searchesLeft = 0,
+		stareUntil = -math.huge,
 	}
 end
 
@@ -207,6 +210,9 @@ local function chase(
 	if now - brain.lastSeenAt > loseSeconds(settings, night) then
 		return nil, false
 	end
+	if now < brain.stareUntil then
+		return { pose = "stare", face = brain.focus }, false
+	end
 	return { goal = "focus", speed = "chase", pose = "chase" }, false
 end
 
@@ -304,6 +310,10 @@ local function hunt(brain: Brain, input: Input, settings: any, now: number, isNi
 		if input.seen and brain.alert >= 1 then
 			local carrying = input.carrying
 			startChase(brain, input.seen, now)
+			local stare = settings.Hunt and settings.Hunt.Stare
+			if stare then
+				brain.stareUntil = now + stare[1] + (stare[2] - stare[1]) * (input.roll or 0.5)
+			end
 			local intent = chase(brain, input, settings, now, isNight)
 			if intent then
 				intent.drop = carrying

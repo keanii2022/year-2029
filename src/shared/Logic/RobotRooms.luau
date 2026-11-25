@@ -80,11 +80,23 @@ function RobotRooms.spreadSpot(candidates: { Point }, taken: { Point }, spacing:
 	return best
 end
 
+local function countWithin(x: number, z: number, points: { Point }, radius: number): number
+	local count = 0
+	for _, point in points do
+		if (point.x - x) ^ 2 + (point.z - z) ^ 2 <= radius * radius then
+			count += 1
+		end
+	end
+	return count
+end
+
+-- Players with fewer than perPlayer (default 1) hunters within nearRadius, one new hunter each per call.
 function RobotRooms.needHunters(
 	players: { Point & { id: any } },
 	hunters: { Point },
 	nearRadius: number,
-	maxHunters: number
+	maxHunters: number,
+	perPlayer: number?
 ): { any }
 	local needing = {}
 	local placed = table.clone(hunters)
@@ -92,7 +104,7 @@ function RobotRooms.needHunters(
 		if #placed >= maxHunters then
 			break
 		end
-		if nearestPlayer(player.x, player.z, placed) > nearRadius then
+		if countWithin(player.x, player.z, placed, nearRadius) < (perPlayer or 1) then
 			table.insert(needing, player.id)
 			-- the hunter about to spawn counts for the next player too, so a group gets one, not one each
 			table.insert(placed, { x = player.x, z = player.z })
