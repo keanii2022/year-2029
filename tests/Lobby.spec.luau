@@ -3,7 +3,8 @@ local config = require("./WarehouseConfig")
 local expect = require("./expect")
 
 local SETTINGS = {
-	Bots = { 20, 26 },
+	Bots = { 15, 20 },
+	BotsAt = 2080,
 	SoloShare = 0.45,
 	TrioShare = 0.2,
 	Openings = { loot = 3, drag = 2, sneak = 1.5 },
@@ -28,13 +29,14 @@ local function grid(n: number, gap: number): { Lobby.Spot }
 end
 
 return {
-	["Large gets 20 to 26 bots and smaller maps fewer"] = function()
+	["Standard gets 15 to 20 bots, smaller maps fewer and bigger ones more"] = function()
 		for seed = 1, 50 do
-			local large = Lobby.botCount(3200, config, SETTINGS, seeded(seed))
-			expect(large >= 20 and large <= 26).toBeTruthy()
+			local standard = Lobby.botCount(2080, config, SETTINGS, seeded(seed))
+			expect(standard >= 15 and standard <= 20).toBeTruthy()
 			local small = Lobby.botCount(1600, config, SETTINGS, seeded(seed))
 			local medium = Lobby.botCount(2400, config, SETTINGS, seeded(seed))
-			expect(small >= 1 and small < medium and medium < large).toBeTruthy()
+			local large = Lobby.botCount(3200, config, SETTINGS, seeded(seed))
+			expect(small >= 1 and small < standard and standard < medium and medium < large).toBeTruthy()
 		end
 	end,
 	["groups are 1 to 3, add up, and mix solos with groups"] = function()

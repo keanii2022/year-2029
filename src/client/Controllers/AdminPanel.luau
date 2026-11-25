@@ -31,7 +31,7 @@ local HEIGHT = 400
 local CELL = Vector2.new(136, 52)
 local GAP = 8
 local PAD_ACTION = "AdminPanelPad"
-local SIZE_ORDER = { "Small", "Medium", "Large" }
+local SIZE_ORDER = { "Small", "Standard", "Medium", "Large" }
 local TABS = { "Guns", "Items", "Moves", "Time", "Robots", "Sim", "Size" }
 
 type ButtonSpec = {

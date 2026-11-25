@@ -1,6 +1,6 @@
 -- PA events heard on the client: the chime (pa_glitch now and then), the line as a [PA] subtitle,
 -- the recorded clip once there is one, and a faint arrow on the screen edge toward the spot for a
--- few seconds (same idea as the Callouts arrow, warmer and slower).
+-- few seconds (same idea as the Callouts arrow, warmer and slower). Rumors only crackle and show the line.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -92,6 +92,12 @@ end
 
 local function onEvent(event: any)
 	if type(event) ~= "table" or type(event.text) ~= "string" then
+		return
+	end
+	-- A rumor is just a crackle and a line: no chime, no [PA], no arrow
+	if event.rumor then
+		playFlat(Settings.Rumor.Sound)
+		Hints.flash("pa_event", event.text, Settings.SubtitleSeconds)
 		return
 	end
 	playFlat(Settings.Sounds.Chime)

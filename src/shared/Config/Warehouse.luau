@@ -12,8 +12,9 @@ local settings = {
 	-- Studs. 3200 at walk speed 14 is a bit under 4 minutes wall to wall: big, but packed.
 	-- Size is what the counts below are tuned for; the live warehouse picks one of Sizes at boot.
 	Size = 3200,
-	Sizes = { Small = 1600, Medium = 2400, Large = 3200 },
-	DefaultSize = "Large",
+	-- Each a whole number of BlockSize zones (160): Standard is 13 across
+	Sizes = { Small = 1600, Standard = 2080, Medium = 2400, Large = 3200 },
+	DefaultSize = "Standard", -- normal servers: about 20 players spread out
 	StudioSize = nil :: string?, -- Studio only: a Sizes name to playtest without a size server
 	TunedSize = 3200,
 	CountScalePower = 0.85, -- below 1 keeps smaller warehouses a bit denser than straight area

@@ -7,11 +7,13 @@ local Lobby = {}
 export type Spot = { x: number, z: number }
 export type Group = { spot: Spot, size: number, opening: string }
 
--- settings: Config.SimPlayers.Lobby. roll returns 0..1.
+-- settings: Config.SimPlayers.Lobby (Bots is the range at BotsAt studs). roll returns 0..1.
 function Lobby.botCount(size: number, warehouseConfig: any, settings: any, roll: () -> number): number
 	local low, high = settings.Bots[1], settings.Bots[2]
-	local large = low + math.floor(roll() * (high - low + 1))
-	return WarehouseSizes.scaled(size, large, warehouseConfig)
+	local count = low + math.floor(roll() * (high - low + 1))
+	local relative = WarehouseSizes.scale(size, warehouseConfig)
+		/ WarehouseSizes.scale(settings.BotsAt, warehouseConfig)
+	return math.max(1, math.floor(count * relative + 0.5))
 end
 
 -- Splits total into groups of 1 to 3: SoloShare of groups alone, TrioShare in threes, the rest pairs

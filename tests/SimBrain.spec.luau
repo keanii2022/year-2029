@@ -118,4 +118,28 @@ return {
 		expect(SimBrain.gamerName(words, rolls(0, 0, 0.5, 0))).toBe("xXPickleXx")
 		expect(#SimBrain.gamerName(words, rolls(0.99, 0.99, 0.99, 0.99)) <= 20).toBeTruthy()
 	end,
+	["bots go for events by mood and distance, never mid-fight"] = function()
+		local eager = { lure = 1 }
+		local brain = SimBrain.new()
+		expect(SimBrain.answersLure(brain, eager, 1, 100, 900, 0.5)).toBeTruthy()
+		expect(SimBrain.answersLure(brain, eager, 1, 1000, 900, 0)).toBeFalsy()
+		expect(SimBrain.answersLure(brain, { lure = 0 }, 1, 10, 900, 0.01)).toBeFalsy()
+		-- far away pulls less than close by
+		expect(SimBrain.answersLure(brain, { lure = 0.5 }, 1, 50, 900, 0.45)).toBeTruthy()
+		expect(SimBrain.answersLure(brain, { lure = 0.5 }, 1, 850, 900, 0.45)).toBeFalsy()
+		brain.action = "fight"
+		expect(SimBrain.answersLure(brain, eager, 1, 10, 900, 0)).toBeFalsy()
+	end,
+	["a lured bot keeps chasing until a robot or a hit changes its mind"] = function()
+		local brain = SimBrain.new()
+		brain.phase = "Day" -- it was already up and about when the PA went
+		local spot = { 1, 2 }
+		local settings = table.clone(SETTINGS)
+		settings.ActionTime = { chase = { 30, 30 } }
+		expect(SimBrain.lure(brain, spot, settings, 0, rolls(0.5))).toBe("chase")
+		expect(brain.target).toBe(spot)
+		expect(SimBrain.decide(brain, input({}), settings, 10, rolls(0.9))).toBe("chase")
+		local robot = input({ robot = { id = "bot", distance = 20, chasing = true } })
+		expect(SimBrain.decide(brain, robot, settings, 11, rolls(0.9))).toBe("flee")
+	end,
 }

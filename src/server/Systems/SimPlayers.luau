@@ -64,6 +64,7 @@ type Bot = {
 	looted: { [Instance]: boolean },
 	dragging: PVInstance?,
 	fortSpot: Vector3?,
+	built: number, -- props it has hauled to its fort spot; the director counts that as a fort
 	fightTarget: Model?,
 	strafeAt: number,
 	nextShotAt: number,
@@ -778,6 +779,7 @@ local function drag(bot: Bot, position: Vector3, now: number)
 			releaseDrag(bot)
 			stop(bot)
 			bot.thing = nil
+			bot.built += 1
 			return
 		end
 		setStance(bot, "Walk")
@@ -835,6 +837,27 @@ local function group(bot: Bot, position: Vector3, now: number)
 	end
 	setStance(bot, "Walk")
 	setGoal(bot, friend.root.Position, now)
+end
+
+-- Off to an event it heard about: hurry there, then hang around the spot like everyone else waiting
+local function chase(bot: Bot, position: Vector3, now: number)
+	local spot = bot.brain.target
+	if typeof(spot) ~= "Vector3" then
+		wander(bot, position, now)
+		return
+	end
+	if flatDistance(spot, position) > settings.LureArrive then
+		setStance(bot, "Sprint")
+		setGoal(bot, spot, now)
+		return
+	end
+	if not bot.spot or flatDistance(bot.spot, position) <= settings.ArriveRange then
+		local angle = random:NextNumber(0, math.pi * 2)
+		bot.spot = spot
+			+ Vector3.new(math.cos(angle), 0, math.sin(angle)) * random:NextNumber(4, settings.LureArrive)
+	end
+	setStance(bot, "Walk")
+	setGoal(bot, bot.spot :: Vector3, now)
 end
 
 local function hide(bot: Bot, position: Vector3, now: number)
@@ -992,6 +1015,8 @@ local function think(
 		group(bot, position, now)
 	elseif action == "hide" then
 		hide(bot, position, now)
+	elseif action == "chase" then
+		chase(bot, position, now)
 	elseif action == "flee" then
 		runFrom(bot, position, if robot then robot.position else position - root.CFrame.LookVector, "Sprint")
 	elseif action == "avoid" then
@@ -1217,6 +1242,7 @@ local function addBot(home: Vector3?, opening: string?)
 		lastMovedAt = 0,
 		lastPosition = Vector3.zero,
 		looted = {},
+		built = 0,
 		strafeAt = 0,
 		nextShotAt = 0,
 		burstLeft = 0,
@@ -1293,6 +1319,37 @@ function SimPlayers.alive(): { any }
 		end
 	end
 	return list
+end
+
+-- Fort spots of bots that have actually hauled something there
+function SimPlayers.forts(): { Vector3 }
+	local list = {}
+	for _, bot in bots do
+		if bot.fortSpot and bot.built > 0 then
+			table.insert(list, bot.fortSpot)
+		end
+	end
+	return list
+end
+
+-- An event at position (pull 0..1, see Config.Director.BotPull): each bot decides by its mood and
+-- distance whether to drop everything and head there, the way some players would and some wouldn't
+function SimPlayers.lure(position: Vector3, pull: number, range: number)
+	local moodSettings = settings.Moods[mood]
+	local now = os.clock()
+	local function roll(): number
+		return random:NextNumber()
+	end
+	for _, bot in bots do
+		local root = bot.root
+		if bot.alive and root then
+			local distance = flatDistance(root.Position, position)
+			if SimBrain.answersLure(bot.brain, moodSettings, pull, distance, range, roll()) then
+				SimBrain.lure(bot.brain, position, settings, now, roll)
+				resetAction(bot, "chase")
+			end
+		end
+	end
 end
 
 function SimPlayers.Init()

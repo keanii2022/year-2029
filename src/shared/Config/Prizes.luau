@@ -43,6 +43,22 @@ local RARE = {
 	{ item = "EmpCharge", model = "emp_charge", count = { 2, 3 }, near = 2, deep = 2 },
 }
 
+-- The bait drop's rare jackpot: one big find plus a pile of the good stuff
+local JACKPOT = {
+	{ item = "MarksmanRifle", model = "marksman_rifle", count = { 1, 1 }, near = 3, deep = 3 },
+	{ item = "Rifle", model = "rifle", count = { 1, 1 }, near = 3, deep = 3 },
+	{ item = "Handcuffs", model = "handcuffs", count = { 2, 2 }, near = 2, deep = 2 },
+	{ item = "Medkit", model = "medkit", count = { 4, 6 }, near = 2, deep = 2 },
+}
+
+local JACKPOT_FILL = {
+	{ item = "Medkit", model = "medkit", count = { 2, 3 }, near = 3, deep = 3 },
+	{ item = "Handcuffs", model = "handcuffs", count = { 1, 1 }, near = 2, deep = 2 },
+	{ item = "EmpCharge", model = "emp_charge", count = { 2, 3 }, near = 2, deep = 2 },
+	{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 1, deep = 1 },
+	{ item = "BlasterCells", model = "ammo_cell", count = { 30, 50 }, near = 2, deep = 2 },
+}
+
 return {
 	Chests = {
 		Model = "loot_crate",
@@ -99,8 +115,9 @@ return {
 		Sounds = { Chime = "pa_chime", Glitch = "pa_glitch" },
 		Volume = 0.6,
 
-		-- text: {spot} becomes the aisle number or installation name. voice: a recorded clip name
-		-- (Music.playVoiceLine) once Keani records one; nil plays only the chime and subtitle.
+		-- text: {spot} becomes the aisle number or installation name (a list picks one line at random).
+		-- voice: a recorded clip name (Music.playVoiceLine) once Keani records one; nil plays only the
+		-- chime and subtitle. Where each one lands is up to the director (Config.Director).
 		Events = {
 			delivery = {
 				weight = 3,
@@ -121,6 +138,62 @@ return {
 				value = 1,
 				loot = { headline = RARE, fill = {}, rolls = { 0, 0 } },
 			},
+			-- The bait: biggest beam in the store, a crate that stays shut for countdown seconds so a
+			-- crowd forms, usually good loot and now and then a jackpot worth chasing every time
+			bait = {
+				weight = 2,
+				text = {
+					"Attention shoppers, a special prize has been left in aisle {spot}.",
+					"Lucky shopper giveaway in aisle {spot}. Lucky shopper giveaway in aisle {spot}.",
+					"Attention shoppers, one lucky winner awaits in aisle {spot}.",
+				},
+				voice = nil,
+				value = 0.85,
+				loot = { headline = HEADLINE, fill = FILL, rolls = { 3, 5 } },
+				jackpot = {
+					chance = 0.15,
+					value = 1,
+					loot = { headline = JACKPOT, fill = JACKPOT_FILL, rolls = { 2, 3 } },
+				},
+				countdown = 25,
+				beam = {
+					Width = 7,
+					Height = 140,
+					Color = Color3.fromRGB(255, 90, 210),
+					Transparency = 0.35,
+					LightRange = 40,
+					LightBrightness = 4,
+					Seconds = 150,
+				},
+			},
+			-- A rumor: no chime, no beam, no arrow. Just a crackle and a line, and a crate waiting
+			-- quietly where it said. place lines are used when the spot is by an installation.
+			rumor = {
+				weight = 1.5,
+				rumor = true,
+				text = {
+					"*crackle* ...someone saw a dog near aisle {spot}...",
+					"*crackle* ...left a stash behind in aisle {spot}, couldn't carry it all...",
+					"*crackle* ...anyone near aisle {spot}? something fell off a robot cart...",
+				},
+				place = {
+					"*crackle* ...the robots dropped something by the {spot}...",
+					"*crackle* ...heard a crate land outside the {spot}...",
+				},
+				voice = nil,
+				value = 0.55,
+				loot = { headline = HEADLINE, fill = FILL, rolls = { 1, 2 } },
+			},
+		},
+		Rumor = {
+			Sound = "walkie_static",
+			PlaceRange = 120, -- studs from an installation's middle to call the spot by its name
+		},
+		Bait = {
+			CountdownText = "OPENS IN {n}",
+			TickSound = "clock_tick_fast_loop",
+			OpenSound = "store_jingle",
+			OpenLoudness = "loud", -- robots hear the prize unlock too
 		},
 
 		-- The delivery crate drops from DropHeight with a bang robots hear
