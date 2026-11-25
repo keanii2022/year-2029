@@ -187,7 +187,7 @@ return {
 			locker = { { id = "Gun", count = 1 } },
 		}, rules)
 		expect(problem).toBe(nil)
-		expect(data.version).toBe(4)
+		expect(data.version).toBe(Saves.VERSION)
 		expect(data.tokens).toBe(12)
 		expect(#data.files).toBe(1)
 		expect(#data.locker).toBe(1)
@@ -214,5 +214,27 @@ return {
 		expect(data.audio.gentle).toBe(false)
 		expect(Saves.load({ version = 4, audio = "loud" }, rules).audio.voice).toBe(1)
 		expect(Saves.cleanAudio({ gentle = true }).gentle).toBe(true)
+	end,
+	["a version 4 save migrates to 5 with no robot rapport, keeping everything else"] = function()
+		local data = Saves.load({
+			version = 4,
+			tokens = 30,
+			audio = { master = 0.5, music = 1, effects = 1, voice = 1, gentle = true },
+		}, rules)
+		expect(data.version).toBe(Saves.VERSION)
+		expect(data.tokens).toBe(30)
+		expect(data.audio.master).toBe(0.5)
+		expect(data.rapport.stage).toBe(0)
+		expect(data.rapport.at).toBe(0)
+	end,
+	["robot rapport is cleaned"] = function()
+		local data = Saves.load({ version = 5, rapport = { stage = 9, at = -5 } }, rules)
+		expect(data.rapport.stage).toBe(4)
+		expect(data.rapport.at).toBe(0)
+		expect(Saves.load({ version = 5, rapport = "bonded" }, rules).rapport.stage).toBe(0)
+		expect(Saves.load({ version = 5, rapport = { stage = 3.7, at = 1700000000 } }, rules).rapport.stage).toBe(
+			3
+		)
+		expect(Saves.default().rapport.stage).toBe(0)
 	end,
 }

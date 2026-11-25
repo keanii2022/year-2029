@@ -131,7 +131,9 @@ end
 
 local function breakdownText(pay: any): string
 	local parts = { `night x{pay.multiplier} +{pay.life}` }
-	for _, part in { { "fort", pay.fort }, { "dog", pay.dog }, { "banked", pay.banked } } do
+	for _, part in
+		{ { "fort", pay.fort }, { "dog", pay.dog }, { "robot", pay.robot }, { "banked", pay.banked } }
+	do
 		if (tonumber(part[2]) or 0) > 0 then
 			table.insert(parts, `{part[1]} +{part[2]}`)
 		end
@@ -176,6 +178,9 @@ local function show(report: any)
 	values[2].Text = listText(report.carrying)
 	values[3].Text = if report.fortPieces > 0 then `{report.fortPieces} pieces` else "none"
 	values[4].Text = if report.dogWithYou then "with you" else "not with you"
+	if report.robotMadeIt == true then
+		values[4].Text ..= "   -   your robot made it"
+	end
 	values[5].Text = listText(report.banked)
 	local streak = tostring(report.streak or "")
 	values[6].Text = if streak ~= "" then streak else "finish a TODAY list to start one"

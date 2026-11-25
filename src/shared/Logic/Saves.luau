@@ -5,7 +5,7 @@ local SavesBlueprint = if script then require(script.Parent.SavesBlueprint) else
 
 local Saves = {}
 
-Saves.VERSION = 4
+Saves.VERSION = 5
 
 type Stack = Inventory.Stack
 
@@ -16,6 +16,9 @@ export type Streak = { days: number, lastDay: number }
 export type Weekly = { week: number, nights: number }
 -- Player audio sliders (0 to 1) and the gentler-scares toggle (client Controllers/AudioSettings)
 export type Audio = { master: number, music: number, effects: number, voice: number, gentle: boolean }
+-- The robot companion: the highest stage rank reached (Logic/RobotTrust, 0 = never met one) and
+-- the os.time() it was last together with its robot. The robot itself never carries over.
+export type Rapport = { stage: number, at: number }
 export type Data = {
 	version: number,
 	locker: { Stack },
@@ -32,6 +35,7 @@ export type Data = {
 	files: { string },
 	weekly: Weekly,
 	audio: Audio,
+	rapport: Rapport,
 }
 export type Rules = {
 	items: Inventory.Items,
@@ -45,6 +49,7 @@ export type Lock = { job: string, at: number }
 local MAX_EXTRAS = 32
 local MAX_KEY_LENGTH = 40
 local MAX_FILES = 200
+local MAX_RAPPORT = 4
 
 -- MIGRATIONS[n] turns a version n-1 save into version n. Version 0 is anything saved without a
 -- version; its fields already match version 1, so it only gets stamped.
@@ -73,6 +78,12 @@ local MIGRATIONS: { [number]: (any) -> any } = {
 	[4] = function(raw)
 		raw.audio = Saves.defaultAudio()
 		raw.version = 4
+		return raw
+	end,
+	-- Version 5 adds the robot companion's rapport; nobody has met a robot yet
+	[5] = function(raw)
+		raw.rapport = { stage = 0, at = 0 }
+		raw.version = 5
 		return raw
 	end,
 }
@@ -127,6 +138,7 @@ function Saves.default(): Data
 		files = {},
 		weekly = { week = 0, nights = 0 },
 		audio = Saves.defaultAudio(),
+		rapport = { stage = 0, at = 0 },
 	}
 end
 
@@ -237,6 +249,13 @@ local function cleanWeekly(raw: any): Weekly
 	return { week = wholeCount(raw.week), nights = wholeCount(raw.nights) }
 end
 
+function Saves.cleanRapport(raw: any): Rapport
+	if type(raw) ~= "table" then
+		return { stage = 0, at = 0 }
+	end
+	return { stage = math.min(wholeCount(raw.stage), MAX_RAPPORT), at = wholeCount(raw.at) }
+end
+
 -- Keeps only fields and values this build understands. Never errors on bad input.
 function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 	return {
@@ -253,6 +272,7 @@ function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 		files = cleanFiles(raw.files),
 		weekly = cleanWeekly(raw.weekly),
 		audio = Saves.cleanAudio(raw.audio),
+		rapport = Saves.cleanRapport(raw.rapport),
 	}
 end
 

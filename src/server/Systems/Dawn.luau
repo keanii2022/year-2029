@@ -2,7 +2,7 @@
 -- player's locker is noted; whatever they add before lights out is "banked tonight". At lights out
 -- the props players placed are noted too. When the lights come back on, every player who was alive
 -- at lights out and still is gets the Dawn Report: their life streak, bag, fort pieces still
--- standing, dog, banked items, daily streak and the Tokens it all paid. Dying resets the streak.
+-- standing, dog, robot companion, banked items, daily streak and the Tokens it all paid. Dying resets the streak.
 -- Someone whose first life this session began after lights out counts as there for the night, so
 -- a new player joining in the dark still gets a card at the next dawn. Lives of Veteran.Nights or
 -- more are marked (brighter beam, faint glint). Banking also feeds the BestHaul stat and nights in
@@ -16,6 +16,7 @@ local DawnScore = require(ReplicatedStorage.Shared.Logic.DawnScore)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local InventoryLogic = require(ReplicatedStorage.Shared.Logic.Inventory)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Companion = require(script.Parent.Companion)
 local DayNight = require(script.Parent.DayNight)
 local Inventory = require(script.Parent.Inventory)
 local PaEvents = require(script.Parent.PaEvents)
@@ -170,11 +171,13 @@ local function report(player: Player, root: BasePart, day: number, fort: { Vecto
 	local dog = dogOf(player)
 	local dogAt = dog and dog:GetPivot().Position
 	local nights = streaks[player] or 1
+	local robotMadeIt = Companion.madeIt(player)
 	local paid = DawnScore.payout({
 		nights = nights,
 		fortPieces = #fort,
 		dogAtFort = dogAt ~= nil and anyWithin(fort, dogAt, settings.DogNearFort),
 		bankedStacks = #banked,
+		robotMadeIt = robotMadeIt,
 	}, rules)
 	Tokens.add(player, paid.total)
 	reportRemote:FireClient(player, {
@@ -183,6 +186,7 @@ local function report(player: Player, root: BasePart, day: number, fort: { Vecto
 		carrying = DawnScore.topLines(Inventory.list(player), InventoryItems, settings.CarryShown),
 		fortPieces = #fort,
 		dogWithYou = dogAt ~= nil and (dogAt - root.Position).Magnitude <= settings.DogWithYou,
+		robotMadeIt = robotMadeIt,
 		banked = DawnScore.topLines(banked, InventoryItems, settings.BankedShown),
 		pay = paid,
 		balance = Tokens.get(player),

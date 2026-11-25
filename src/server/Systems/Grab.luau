@@ -57,6 +57,9 @@ local pries: { [Player]: Pry } = {}
 -- Let-go props still falling: the parts to freeze again and the welds holding them together meanwhile
 local settling: { [PVInstance]: { frozen: { BasePart }, welds: { WeldConstraint } } } = {}
 local ownerWarnedAt: { [number]: number } = {}
+local placedListeners: { (Player, PVInstance) -> () } = {}
+-- How much a robot companion's tug has already added to each pry; weak, so ended pries drop out
+local tugged: { [Pry]: number } = setmetatable({}, { __mode = "k" }) :: any
 
 local requestRemote: RemoteEvent
 local dropRemote: RemoteEvent
@@ -237,6 +240,9 @@ local function release(player: Player, carry: Carry, pivot: CFrame?, placed: boo
 		fall(carry.prop, frozen)
 	elseif placed then
 		addBlocker(carry.prop)
+		for _, listener in placedListeners do
+			task.spawn(listener, player, carry.prop)
+		end
 	end
 	player:SetAttribute("CarrySpeedMultiplier", nil)
 	carriers[player] = nil
@@ -454,6 +460,37 @@ function Grab.botPlace(
 	prop:SetAttribute("PlacedBy", placedBy)
 	addBlocker(prop)
 	return true, nil
+end
+
+-- Called with (player, prop) every time a player places a piece.
+function Grab.onPlaced(listener: (Player, PVInstance) -> ())
+	table.insert(placedListeners, listener)
+end
+
+-- Every pry going on right now.
+function Grab.activePries(): { { player: Player, prop: PVInstance } }
+	local list = {}
+	for player, pry in pries do
+		table.insert(list, { player = player, prop = pry.prop })
+	end
+	return list
+end
+
+-- A robot companion pulling back on the piece player is prying: the pry takes `seconds` longer,
+-- up to `cap` extra in all. The prying player's bar stretches to match. False once capped.
+function Grab.resistPry(player: Player, seconds: number, cap: number): boolean
+	local pry = pries[player]
+	if not pry then
+		return false
+	end
+	local extra = math.min(seconds, cap - (tugged[pry] or 0))
+	if extra <= 0 then
+		return false
+	end
+	tugged[pry] = (tugged[pry] or 0) + extra
+	pry.duration += extra
+	pryRemote:FireClient(player, pry.duration)
+	return true
 end
 
 -- prop starts a pry, nil means the player let go.

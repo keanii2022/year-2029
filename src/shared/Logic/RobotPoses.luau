@@ -130,6 +130,29 @@ function RobotPoses.limbs(
 			pose.Head = 1.1
 			pose.UpperArm = 1.5
 		end
+	elseif name == "crouch" then
+		-- a curious robot copying a crouching player: knees bent, low, arms tucked in
+		pose.Thigh, pose.LeftThigh = 1.6, 1.6
+		pose.Shin, pose.LeftShin = -2.2, -2.2
+		pose.Legs = -0.6
+		pose.UpperArm, pose.LeftUpperArm = 0.8, 0.8
+		pose.Forearm, pose.LeftForearm = 1.4, 1.4
+		pose.Head = 0.25 + 0.1 * math.sin(clock * 0.7)
+	elseif name == "offer" then
+		-- holding the thing it wants up high in both hands, as if showing it to you
+		legs(pose, stride, if moving then 0.7 else 0)
+		pose.UpperArm = 4 + 0.15 * math.sin(clock * 1.5)
+		pose.LeftUpperArm = 4 + 0.15 * math.sin(clock * 1.5 + 0.5)
+		pose.Forearm, pose.LeftForearm = 0.6, 0.6
+		pose.Head = 0.5
+	elseif name == "tug" then
+		-- both hands on a piece someone is prying, leaning back and heaving
+		local heave = math.sin(clock * 5)
+		pose.UpperArm, pose.LeftUpperArm = 2.4 + 0.2 * heave, 2.4 + 0.2 * heave
+		pose.Forearm, pose.LeftForearm = 0.3, 0.3
+		pose.Thigh, pose.LeftThigh = 0.6, -0.4
+		pose.Legs = -0.3 + 0.15 * heave
+		pose.Head = -0.3
 	else -- idle
 		pose.Head = 0.15 * math.sin(clock * 0.8)
 	end

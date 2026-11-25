@@ -497,8 +497,13 @@ local function findThreat(current: Dog, owner: Alive?, alive: { Alive }, now: nu
 	)
 	local candidates = {}
 	local targets: { [string]: Target } = {}
+	local ownerId = current.owner and current.owner.UserId
 	for _, robot in Robots.inRadius(Vector3.new(protect.x, floorY, protect.z), settings.ProtectRadius) do
-		if not robot.dead and not DogGuard.remembers(bittenRobots, robot.id, now) then
+		if
+			not robot.dead
+			and not DogGuard.remembers(bittenRobots, robot.id, now)
+			and DogGuard.biteable(robot.ownerId, ownerId, robot.brain.companion)
+		then
 			local id = `robot{robot.id}`
 			targets[id] = { position = robot.position, robot = robot }
 			table.insert(candidates, { id = id, distance = flatDistance(robot.position, current.position) })
@@ -787,6 +792,16 @@ local function think(now: number, dt: number)
 		current.state = state
 		current.model:SetAttribute("State", state)
 	end
+	-- a befriended robot nobody has bonded with yet gets a low growl
+	if now >= current.nextGrowlAt then
+		for _, robot in Robots.inRadius(current.position, settings.WaryDistance * 2) do
+			if DogGuard.growlsAt(robot.brain.companion, robot.bonded) then
+				current.nextGrowlAt = now + settings.GrowlCooldown
+				playSound(current.model.PrimaryPart, sounds.Growl, "quiet")
+				break
+			end
+		end
+	end
 	current.wagging = current.owner ~= nil
 		or (nearestStage ~= nil and DogTrust.atLeast(nearestStage, "wags") and state ~= "wander")
 	current.speed = if DogBrain.runs(state) then settings.RunSpeed else settings.WalkSpeed
@@ -849,6 +864,23 @@ local function think(now: number, dt: number)
 	if calm and (not current.owner or night) and now >= current.nextWhineAt then
 		current.nextWhineAt = now + randomIn(settings.WhineInterval)
 		playSound(current.model.PrimaryPart, sounds.Whine, "quiet")
+	end
+end
+
+-- A robot companion guarding its owner's fort chirped an alarm at position: the owner's dog, when
+-- it's following or guarding close by, barks along.
+function Dog.backUp(owner: Player, position: Vector3)
+	local current = dog
+	if
+		not current
+		or current.owner ~= owner
+		or (current.command ~= "follow" and current.command ~= "guard")
+	then
+		return
+	end
+	local now = os.clock()
+	if flatDistance(current.position, position) <= settings.ChaseRadius and now >= current.nextBarkAt then
+		bark(current, now)
 	end
 end
 

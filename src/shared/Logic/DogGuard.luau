@@ -35,6 +35,20 @@ function DogGuard.isOffence(
 	return DogGuard.isStranger(byUserId, ownerId) and DogGuard.inRadius(spot, at, radius)
 end
 
+-- A robot it may bite while protecting. Its owner's own robot companion never; neither is any
+-- befriended robot, which hunts nobody (the dog only growls at one until it's bonded).
+function DogGuard.biteable(robotOwnerId: number?, dogOwnerId: number?, befriended: boolean): boolean
+	if robotOwnerId ~= nil and robotOwnerId == dogOwnerId then
+		return false
+	end
+	return not befriended
+end
+
+-- Growls at a befriended robot that isn't bonded to anyone yet.
+function DogGuard.growlsAt(befriended: boolean, bonded: boolean): boolean
+	return befriended and not bonded
+end
+
 function DogGuard.remember(memory: Memory, id: any, untilTime: number)
 	memory[id] = untilTime
 end

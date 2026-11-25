@@ -50,4 +50,19 @@ return {
 		local b = RobotPoses.limbs("sweep", 0, 1.5, false)
 		expect(math.abs(a.UpperArm - b.UpperArm) > 0.3).toBeTruthy()
 	end,
+	["a crouching robot bends its knees low"] = function()
+		local pose = RobotPoses.limbs("crouch", 0, 0, false)
+		expect(pose.Thigh > 1).toBeTruthy()
+		expect(pose.Legs < 0).toBeTruthy()
+	end,
+	["offering holds the arms up higher than carrying"] = function()
+		local offer = RobotPoses.limbs("offer", 0, 0, false)
+		local carry = RobotPoses.limbs("carry", 0, 0, false)
+		expect(offer.UpperArm > carry.UpperArm).toBeTruthy()
+	end,
+	["tugging heaves back and forth"] = function()
+		local a = RobotPoses.limbs("tug", 0, 0, false)
+		local b = RobotPoses.limbs("tug", 0, 0.3, false)
+		expect(math.abs(a.Legs - b.Legs) > 0.05).toBeTruthy()
+	end,
 }

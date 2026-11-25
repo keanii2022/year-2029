@@ -14,13 +14,21 @@ export type Rules = {
 	FortPerPiece: number,
 	FortCap: number,
 	FortDogBonus: number,
+	RobotBonus: number?, -- your robot companion made it through the night
 }
-export type Night = { nights: number, fortPieces: number, dogAtFort: boolean, bankedStacks: number }
+export type Night = {
+	nights: number,
+	fortPieces: number,
+	dogAtFort: boolean,
+	bankedStacks: number,
+	robotMadeIt: boolean?,
+}
 export type Payout = {
 	multiplier: number,
 	life: number,
 	fort: number,
 	dog: number,
+	robot: number,
 	banked: number,
 	total: number,
 }
@@ -36,14 +44,16 @@ function DawnScore.payout(night: Night, rules: Rules): Payout
 	local life = rules.NightBase * multiplier
 	local fort = math.min(night.fortPieces * rules.FortPerPiece, rules.FortCap)
 	local dog = if night.dogAtFort and night.fortPieces > 0 then rules.FortDogBonus else 0
+	local robot = if night.robotMadeIt then rules.RobotBonus or 0 else 0
 	local banked = DawnScore.bankedPay(night.bankedStacks, rules)
 	return {
 		multiplier = multiplier,
 		life = life,
 		fort = fort,
 		dog = dog,
+		robot = robot,
 		banked = banked,
-		total = life + fort + dog + banked,
+		total = life + fort + dog + robot + banked,
 	}
 end
 

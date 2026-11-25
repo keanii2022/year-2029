@@ -15,6 +15,7 @@ return {
 		FortPerPiece = 2,
 		FortCap = 20,
 		FortDogBonus = 5, -- your dog is near your fort at dawn
+		RobotBonus = 6, -- your robot companion made it through the night (Systems/Companion)
 	},
 
 	-- A placed prop still counts as standing if it moved less than this (studs) since lights out
