@@ -10,8 +10,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local GrabRules = require(ReplicatedStorage.Shared.Logic.GrabRules)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
+local ShelfStock = require(ReplicatedStorage.Shared.Logic.ShelfStock)
 local WarehouseGen = require(ReplicatedStorage.Shared.Logic.WarehouseGen)
 local WarehouseSizes = require(ReplicatedStorage.Shared.Logic.WarehouseSizes)
+local ShelfStream = require(script.Parent.ShelfStream)
 local SizeServers = require(script.Parent.SizeServers)
 
 local Warehouse = {}
@@ -517,28 +519,17 @@ local function buildPillars()
 	end
 end
 
-local RACK_BAYS =
-	{ "rack_bay_full", "rack_bay_full", "rack_bay_bulk", "rack_bay_sparse", "rack_bay_furniture" }
 local RACK_WRECKS = { "rack_collapsed", "rack_toppled_beam" }
+local EMPTY_BAY = "rack_bay_empty"
 
--- Loose props across one rack slot. base: the slot's centre at its load bottom, x along the rack.
--- deck lays a wire deck across the beams first, for slots that only have beams under them.
-local function stockSlot(base: CFrame, slot: Vector3, deck: boolean, parent: Instance)
+-- Loose props across one slot of a code-built rack (the fallback before the kit is uploaded).
+-- base: the slot's centre at its load bottom, x along the rack.
+local function stockSlot(base: CFrame, slot: Vector3, parent: Instance)
 	if
 		shelfStocked >= WarehouseSizes.scaled(layout.size, settings.ShelfStockMax, settings)
 		or cosmetic:NextNumber() >= settings.ShelfStockChance
 	then
 		return
-	end
-	if deck then
-		block(
-			parent,
-			"WireDeck",
-			Vector3.new(slot.X, 0.2, slot.Z),
-			base * CFrame.new(0, -0.1, 0),
-			settings.RackDeck,
-			Enum.Material.DiamondPlate
-		)
 	end
 	local left = -slot.X / 2 + 0.2
 	for _ = 1, cosmetic:NextInteger(settings.ShelfStockPerSlot[1], settings.ShelfStockPerSlot[2]) do
@@ -567,21 +558,129 @@ local function stockSlot(base: CFrame, slot: Vector3, deck: boolean, parent: Ins
 	end
 end
 
-local function stockKitBay(bay: Model, name: string)
+-- Streamed shelf props go in their own folder inside the chunk, out of reach of the night rearranging
+local function stockFolder(x: number, z: number): Folder
+	local chunk = chunkFor(x, z)
+	local folder = chunk:FindFirstChild("ShelfStock") :: Folder?
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "ShelfStock"
+		folder.Parent = chunk
+	end
+	return folder :: Folder
+end
+
+local function newBaySeed(): number
+	return cosmetic:NextInteger(1, 2 ^ 31 - 1)
+end
+
+-- A baked bay's empty pallet slots: a wire deck across the beams where there's no floor, and the
+-- slots handed to ShelfStream for props.
+local function stockKitBay(bay: Model, name: string, x: number, z: number)
 	local gaps = settings.KitShelfGaps[name]
 	if not gaps then
 		return
 	end
 	local box, size = bay:GetBoundingBox()
 	local floor = box * CFrame.new(0, -size.Y / 2, 0)
+	local slot = settings.KitShelfSlot
 	for _, gap in gaps do
-		stockSlot(
-			floor * CFrame.new(gap.x, gap.y, 0),
-			settings.KitShelfSlot,
-			gap.y > 0,
-			bay.Parent :: Instance
-		)
+		if gap.y > 0 then
+			block(
+				bay,
+				"WireDeck",
+				Vector3.new(slot.X, 0.2, slot.Z),
+				floor * CFrame.new(gap.x, gap.y - 0.1, 0),
+				settings.RackDeck,
+				Enum.Material.DiamondPlate
+			)
+		end
 	end
+	ShelfStream.addBay(
+		floor,
+		ShelfStock.gapSlots(gaps, slot.X, slot.Y, settings),
+		newBaySeed(),
+		stockFolder(x, z)
+	)
+end
+
+-- rack_bay_empty with its stock streamed. The mesh only shows: its collision hull would wrap the
+-- stock and stop the grab ray, so plain parts do the colliding instead. Decks sit just inside the
+-- mesh decks (solid, so props can be placed on them); the end frames stop players walking through
+-- but stay out of raycasts. Before the mesh is uploaded, posts and beams stand in for it.
+local function buildEmptyBay(x: number, z: number, facing: Vector3)
+	local floor = CFrame.lookAt(toWorld(x, z), toWorld(x, z) - facing)
+	local uploaded = hasKit(EMPTY_BAY)
+	local frame = Instance.new("Model")
+	frame.Name = "RackBay"
+	if uploaded then
+		local mesh = placeKit(EMPTY_BAY, x, z, facing)
+		if mesh then
+			for _, part in mesh:GetDescendants() do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+					part.CanQuery = false
+					part.CanTouch = false
+				end
+			end
+			mesh.Parent = frame
+		end
+	end
+	local halfDepth = settings.ShelfDepth / 2 + 0.1
+	for _, level in settings.ShelfLevels do
+		if level.y > 0 then
+			block(
+				frame,
+				"Deck",
+				Vector3.new(settings.ShelfWidth + 0.1, 0.04, settings.ShelfDepth),
+				floor * CFrame.new(0, level.y - 0.03, 0),
+				settings.RackDeck,
+				Enum.Material.DiamondPlate
+			)
+			if not uploaded then
+				for _, side in { -1, 1 } do
+					local beam = block(
+						frame,
+						"Beam",
+						Vector3.new(settings.ShelfWidth + 0.4, 0.35, 0.15),
+						floor * CFrame.new(0, level.y - 0.2, side * halfDepth),
+						settings.RackBeam,
+						Enum.Material.Metal
+					)
+					detail(beam)
+				end
+			end
+		end
+	end
+	for _, side in { -1, 1 } do
+		local sideX = side * (settings.ShelfWidth / 2 + 0.25)
+		local endFrame = block(
+			frame,
+			"EndFrame",
+			Vector3.new(0.3, settings.RackHeight, halfDepth * 2 + 0.3),
+			floor * CFrame.new(sideX, settings.RackHeight / 2, 0),
+			settings.RackUpright,
+			Enum.Material.Metal
+		)
+		endFrame.Transparency = 1
+		endFrame.CanQuery = false
+		endFrame.CastShadow = false
+		if not uploaded then
+			for _, front in { -1, 1 } do
+				local post = block(
+					frame,
+					"Post",
+					Vector3.new(0.3, settings.RackHeight, 0.3),
+					floor * CFrame.new(sideX, settings.RackHeight / 2, front * halfDepth),
+					settings.RackUpright,
+					Enum.Material.Metal
+				)
+				detail(post)
+			end
+		end
+	end
+	frame.Parent = chunkFor(x, z)
+	ShelfStream.addBay(floor, ShelfStock.levelSlots(settings), newBaySeed(), stockFolder(x, z))
 end
 
 local function buildKitRack(shelf: WarehouseGen.Shelf): boolean
@@ -592,17 +691,22 @@ local function buildKitRack(shelf: WarehouseGen.Shelf): boolean
 	local bays = math.max(1, math.floor(length / 12.1))
 	local step = length / bays
 	for n = 0, bays - 1 do
-		local name = RACK_BAYS[cosmetic:NextInteger(1, #RACK_BAYS)]
+		local name = ShelfStock.pickBay(cosmetic:NextNumber(), settings.RackBays)
 		if cosmetic:NextNumber() < settings.RackWreckChance then
 			name = RACK_WRECKS[cosmetic:NextInteger(1, #RACK_WRECKS)]
 		end
-		if not hasKit(name) then
+		if name ~= EMPTY_BAY and not hasKit(name) then
 			name = "rack_bay_full"
 		end
 		local facing = if cosmetic:NextNumber() < 0.5 then Vector3.new(0, 0, 1) else Vector3.new(0, 0, -1)
-		local bay = placeKit(name, shelf.x0 + (n + 0.5) * step, shelf.z, facing)
-		if bay then
-			stockKitBay(bay, name)
+		local x = shelf.x0 + (n + 0.5) * step
+		if name == EMPTY_BAY then
+			buildEmptyBay(x, shelf.z, facing)
+		else
+			local bay = placeKit(name, x, shelf.z, facing)
+			if bay then
+				stockKitBay(bay, name, x, shelf.z)
+			end
 		end
 	end
 	if hasKit("rack_end") then
@@ -649,7 +753,7 @@ local function buildRack(shelf: WarehouseGen.Shelf)
 		for r = 0, runs - 1 do
 			if cosmetic:NextNumber() >= 0.85 then
 				local base = CFrame.new(toWorld(shelf.x0 + r * slot + slot / 2, shelf.z, y + 0.5))
-				stockSlot(base, Vector3.new(slot * 0.9, 5.5, shelf.depth - 0.4), false, model)
+				stockSlot(base, Vector3.new(slot * 0.9, 5.5, shelf.depth - 0.4), model)
 			else
 				local runLength = slot * cosmetic:NextNumber(0.6, 0.95)
 				local runHeight = cosmetic:NextNumber(3, 5.5)
@@ -1120,6 +1224,7 @@ function Warehouse.Start()
 		marker.Parent = markers
 	end
 	markers.Parent = ReplicatedStorage
+	ShelfStream.setBudget(WarehouseSizes.scaled(layout.size, settings.ShelfStreamBudget, settings))
 	for _, shelf in layout.shelves do
 		buildRack(shelf)
 	end
