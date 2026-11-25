@@ -28,6 +28,49 @@ function Scores.add(stats: { [string]: number }, defs: { StatDef }, key: string,
 	return stats[key]
 end
 
+-- Sets a known stat to value when that beats what's there (best-of stats like BestHaul).
+-- Returns true when it went up.
+function Scores.raise(stats: { [string]: number }, defs: { StatDef }, key: string, value: number): boolean
+	if not isStat(defs, key) or not isFinite(value) or math.floor(value) <= (stats[key] or 0) then
+		return false
+	end
+	stats[key] = math.floor(value)
+	return true
+end
+
+-- Week number for weekly boards: weeks since the Unix epoch, starting Mondays at 00:00 UTC.
+-- Day 0 (1 Jan 1970) was a Thursday, so the first Monday is day 4.
+function Scores.weekOf(unixSeconds: number): number
+	return math.floor((math.floor(unixSeconds / 86400) + 3) / 7)
+end
+
+export type Weekly = { week: number, nights: number }
+
+-- Keeps this week's best nights-in-one-life; a new week starts again from this life.
+-- Returns true when the record changed.
+function Scores.recordWeekLife(weekly: Weekly, week: number, nights: number): boolean
+	if weekly.week ~= week then
+		weekly.week = week
+		weekly.nights = 0
+	end
+	if nights <= weekly.nights then
+		return false
+	end
+	weekly.nights = math.floor(nights)
+	return true
+end
+
+-- This week's best, or 0 when the saved record is from another week
+function Scores.weekValue(weekly: Weekly, week: number): number
+	return if weekly.week == week then weekly.nights else 0
+end
+
+-- OrderedDataStore name suffix for a board: weekly boards get the week number, so each week is a
+-- fresh store and the old ones simply stop being read
+function Scores.boardKey(stat: string, weekly: boolean?, week: number): string
+	return if weekly then `{stat}_W{week}` else stat
+end
+
 -- Keeps the longest life (seconds) on record. Returns true if this one beat it.
 function Scores.recordLife(stats: { [string]: number }, seconds: number): boolean
 	if not isFinite(seconds) or seconds <= (stats.LongestLife or 0) then

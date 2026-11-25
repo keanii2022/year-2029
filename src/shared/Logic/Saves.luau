@@ -5,11 +5,15 @@ local SavesBlueprint = if script then require(script.Parent.SavesBlueprint) else
 
 local Saves = {}
 
-Saves.VERSION = 2
+Saves.VERSION = 3
 
 type Stack = Inventory.Stack
 
 export type LaidOut = { job: string, day: number, at: number }
+-- Daily mission streak: days counted and the last UTC day number that counted (Logic/Streak)
+export type Streak = { days: number, lastDay: number }
+-- Best nights in one life during week number `week` (Logic/Scores.weekOf)
+export type Weekly = { week: number, nights: number }
 export type Data = {
 	version: number,
 	locker: { Stack },
@@ -19,6 +23,12 @@ export type Data = {
 	cosmetics: { [string]: string },
 	extras: { [string]: number },
 	tokens: number,
+	-- True until the first-day mission chain is finished; only brand-new saves start with it
+	firstDay: boolean,
+	streak: Streak,
+	-- Ids of the 2029 Files found (Config.Files)
+	files: { string },
+	weekly: Weekly,
 }
 export type Rules = {
 	items: Inventory.Items,
@@ -31,6 +41,7 @@ export type Lock = { job: string, at: number }
 
 local MAX_EXTRAS = 32
 local MAX_KEY_LENGTH = 40
+local MAX_FILES = 200
 
 -- MIGRATIONS[n] turns a version n-1 save into version n. Version 0 is anything saved without a
 -- version; its fields already match version 1, so it only gets stamped.
@@ -43,6 +54,16 @@ local MIGRATIONS: { [number]: (any) -> any } = {
 	[2] = function(raw)
 		raw.tokens = 0
 		raw.version = 2
+		return raw
+	end,
+	-- Version 3 adds the first-day chain (only for brand-new saves, so everyone here skips it),
+	-- the daily streak, the 2029 Files and the weekly longest life
+	[3] = function(raw)
+		raw.firstDay = false
+		raw.streak = { days = 0, lastDay = 0 }
+		raw.files = {}
+		raw.weekly = { week = 0, nights = 0 }
+		raw.version = 3
 		return raw
 	end,
 }
@@ -68,6 +89,10 @@ function Saves.default(): Data
 		cosmetics = {},
 		extras = {},
 		tokens = 0,
+		firstDay = true,
+		streak = { days = 0, lastDay = 0 },
+		files = {},
+		weekly = { week = 0, nights = 0 },
 	}
 end
 
@@ -147,6 +172,37 @@ local function cleanLaidOut(raw: any): LaidOut?
 	return { job = raw.job, day = raw.day, at = raw.at }
 end
 
+local function cleanStreak(raw: any): Streak
+	if type(raw) ~= "table" then
+		return { days = 0, lastDay = 0 }
+	end
+	return { days = wholeCount(raw.days), lastDay = wholeCount(raw.lastDay) }
+end
+
+-- Unknown ids are kept, so a build that renames an entry never takes a find away
+local function cleanFiles(raw: any): { string }
+	local files = {}
+	if type(raw) ~= "table" then
+		return files
+	end
+	for _, id in raw do
+		if #files >= MAX_FILES then
+			break
+		end
+		if type(id) == "string" and #id <= MAX_KEY_LENGTH and not table.find(files, id) then
+			table.insert(files, id)
+		end
+	end
+	return files
+end
+
+local function cleanWeekly(raw: any): Weekly
+	if type(raw) ~= "table" then
+		return { week = 0, nights = 0 }
+	end
+	return { week = wholeCount(raw.week), nights = wholeCount(raw.nights) }
+end
+
 -- Keeps only fields and values this build understands. Never errors on bad input.
 function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 	return {
@@ -158,6 +214,10 @@ function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 		cosmetics = cleanCosmetics(raw.cosmetics, rules.cosmetics),
 		extras = cleanExtras(raw.extras),
 		tokens = wholeCount(raw.tokens),
+		firstDay = raw.firstDay == true,
+		streak = cleanStreak(raw.streak),
+		files = cleanFiles(raw.files),
+		weekly = cleanWeekly(raw.weekly),
 	}
 end
 

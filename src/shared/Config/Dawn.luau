@@ -23,6 +23,14 @@ return {
 	DogNearFort = 30, -- studs from any standing piece of your fort
 	DogWithYou = 40, -- studs from you for the card's "dog with you" line
 
+	-- Veteran tell: a life this many nights long gets a brighter flashlight beam (as everyone else
+	-- sees it) and a faint glint on the head, so the hunted can hunt back. Gone when that life ends.
+	Veteran = {
+		Nights = 3,
+		BeamBoost = 1.5,
+		Glint = { Range = 6, Brightness = 0.35, Color = Color3.fromRGB(255, 225, 170) },
+	},
+
 	-- The card
 	CarryShown = 4, -- most valuable things in your bag, by name
 	BankedShown = 4,

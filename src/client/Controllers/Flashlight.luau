@@ -1,7 +1,7 @@
 -- Flashlights. The Flashlight action (Input) asks the server to toggle; the server sets the player's
 -- FlashlightOn attribute and every client draws the beams from that. Your own beam follows the
 -- camera so it points where you look, leaving from the held flashlight's Lens when it's in hand;
--- other players' beams shine from their heads. The hotbar's flashlight and battery slots toggle it too.
+-- other players' beams shine from their heads, brighter on a Veteran (a long life, set by Dawn). The hotbar's flashlight and battery slots toggle it too.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -81,6 +81,11 @@ local function updateOther(other: Player)
 	if wanted and not otherBeams[other] then
 		otherBeams[other] = makeLight(head :: Instance, false)
 	end
+	local beam = otherBeams[other]
+	if beam then
+		local boost = if other:GetAttribute("Veteran") == true then Config.Dawn.Veteran.BeamBoost else 1
+		beam.Brightness = Settings.Brightness * boost
+	end
 end
 
 local function watch(other: Player)
@@ -93,6 +98,9 @@ local function watch(other: Player)
 		return
 	end
 	other:GetAttributeChangedSignal("FlashlightOn"):Connect(function()
+		updateOther(other)
+	end)
+	other:GetAttributeChangedSignal("Veteran"):Connect(function()
 		updateOther(other)
 	end)
 	other.CharacterAdded:Connect(function(character)

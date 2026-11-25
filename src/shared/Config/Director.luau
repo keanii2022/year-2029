@@ -29,6 +29,6 @@ return {
 
 	-- How strongly each event pulls the sim bots (times the mood's lure chance), and how far away they
 	-- still care. Rumors are quieter, so fewer bots act on them.
-	BotPull = { bait = 1, delivery = 0.7, open = 0.5, lost = 0.4, rumor = 0.35 },
+	BotPull = { bait = 1, lastcall = 1, delivery = 0.7, open = 0.5, lost = 0.4, rumor = 0.35 },
 	BotLureRange = 900,
 }

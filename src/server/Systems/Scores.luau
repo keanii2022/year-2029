@@ -1,8 +1,8 @@
 -- Stats, all-time leaderboards and cosmetics. Stats live in the player's save (Saves).
 -- Counts downs, longest life and nights survived itself; other systems call Scores.add
 -- (robots: "RobotKills", combat: "PlayerKills").
--- Boards are all-time and global, read from OrderedDataStores every few minutes, so they never
--- show who is on this server right now (the player list stays hidden).
+-- Boards are global, read from OrderedDataStores every few minutes, so they never show who is on
+-- this server right now (the player list stays hidden). Weekly boards use a store per week.
 -- Cosmetics are earned from stats and built from plain parts on the character.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -240,14 +240,25 @@ end
 
 -- Boards ---------------------------------------------------------------------------------------
 
+local function thisWeek(): number
+	return ScoresLogic.weekOf(os.time())
+end
+
+local function boardKey(board: any): string
+	return ScoresLogic.boardKey(board.stat, board.weekly, thisWeek())
+end
+
 local function writeBoards(player: Player, data: SavesData)
 	local written = boardWritten[player] or {}
 	boardWritten[player] = written
 	for _, board in BoardSettings.List do
-		local value = data.stats[board.stat] or 0
-		if value > 0 and value ~= written[board.stat] then
-			written[board.stat] = value
-			Saves.writeBoard(board.stat, player.UserId, value)
+		local value = if board.weekly
+			then ScoresLogic.weekValue(data.weekly, thisWeek())
+			else data.stats[board.stat] or 0
+		local key = boardKey(board)
+		if value > 0 and value ~= written[key] then
+			written[key] = value
+			Saves.writeBoard(key, player.UserId, value)
 		end
 	end
 end
@@ -310,17 +321,19 @@ local function buildBoard(home: CFrame, folder: Folder)
 		column.Position = UDim2.new((index - 1) / columns, 12, 0, 100)
 		column.Size = UDim2.new(1 / columns, -24, 1, -110)
 		column.Parent = gui
-		textLabel(
-			{ Size = UDim2.new(1, 0, 0, 30), Text = board.title, TextSize = 22, TextTransparency = 0.2 },
-			column
-		)
+		textLabel({
+			Size = UDim2.new(1, 0, 0, 30),
+			Text = board.title,
+			TextScaled = true,
+			TextTransparency = 0.2,
+		}, column)
 		local rows = {}
 		for row = 1, BoardSettings.Size do
 			rows[row] = textLabel({
 				Position = UDim2.fromOffset(0, 36 + (row - 1) * 44),
 				Size = UDim2.new(1, 0, 0, 40),
 				Text = "",
-				TextSize = 24,
+				TextSize = 20,
 				TextTruncate = Enum.TextTruncate.AtEnd,
 			}, column)
 		end
@@ -332,7 +345,7 @@ end
 
 local function refreshBoards()
 	for _, board in BoardSettings.List do
-		local rows = Saves.readBoard(board.stat, BoardSettings.Size)
+		local rows = Saves.readBoard(boardKey(board), BoardSettings.Size)
 		if rows then
 			local texts = {}
 			for rank = 1, BoardSettings.Size do
@@ -398,6 +411,26 @@ function Scores.add(player: Player, stat: string, amount: number?)
 	local before = table.clone(data.stats)
 	if ScoresLogic.add(data.stats, Settings.Stats, stat, count) then
 		afterChange(player, before)
+	end
+end
+
+-- Sets a best-of stat (BestHaul, StreakDays, FilesFound) when value beats it.
+function Scores.raise(player: Player, stat: string, value: number)
+	local data = Saves.data(player)
+	if not data then
+		return
+	end
+	local before = table.clone(data.stats)
+	if ScoresLogic.raise(data.stats, Settings.Stats, stat, value) then
+		afterChange(player, before)
+	end
+end
+
+-- Notes nights survived in this one life for the weekly board.
+function Scores.recordWeekLife(player: Player, nights: number)
+	local data = Saves.data(player)
+	if data and ScoresLogic.recordWeekLife(data.weekly, thisWeek(), nights) then
+		Saves.markDirty(player)
 	end
 end
 

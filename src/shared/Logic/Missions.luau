@@ -16,6 +16,10 @@ export type Mission = {
 	low: number?,
 	-- hide: seconds hidden in a row
 	hiddenFor: number?,
+	-- Part of the first-day chain: only the first unfinished step is live
+	chain: boolean?,
+	-- Where the screen-edge arrow points (a Vector3 the server fills in), if anywhere
+	target: any?,
 }
 -- An installation that exists this server and how deep its middle is
 export type Place = { kind: string, depth: number }
@@ -26,6 +30,13 @@ export type Facts = {
 	depth: number,
 	hidden: boolean,
 	hauling: boolean,
+	-- loot: inside a robot room, and how many items are in the bag
+	inRoom: boolean?,
+	carried: number?,
+	-- bank: how many items are in the locker
+	banked: number?,
+	-- lore: read today's lore piece
+	readLore: boolean?,
 }
 
 local Missions = {}
@@ -151,6 +162,55 @@ function Missions.pick(config: any, context: Context, roll: () -> number): { Mis
 	return list
 end
 
+-- The first-day chain from config.FirstDay.Steps, in order, with fixed rewards
+function Missions.firstDay(config: any): { Mission }
+	local list = {}
+	for _, step in config.FirstDay.Steps do
+		table.insert(list, {
+			kind = step.kind,
+			text = step.text,
+			reward = { item = step.reward.item, count = step.reward.count },
+			done = false,
+			chain = true,
+		})
+	end
+	return list
+end
+
+-- The mission that points at today's lore piece
+function Missions.lore(config: any, roll: () -> number): Mission
+	return {
+		kind = "lore",
+		text = pickFrom(config.Lore.texts, roll),
+		reward = Missions.pickReward(config, roll),
+		done = false,
+	}
+end
+
+-- The missions to check right now: a chain's first unfinished step, or every unfinished one
+function Missions.active(list: { Mission }): { Mission }
+	local live = {}
+	for _, mission in list do
+		if not mission.done then
+			table.insert(live, mission)
+			if mission.chain then
+				break
+			end
+		end
+	end
+	return live
+end
+
+-- Counts going up from the lowest seen since the mission started (find, bank)
+local function rose(mission: Mission, count: number): boolean
+	local low = mission.low
+	if low == nil or count < low then
+		mission.low = count
+		return false
+	end
+	return count > low
+end
+
 -- Moves one mission forward by dt seconds of facts. True the moment it's done.
 -- survive is only finished by Missions.dawn.
 function Missions.check(mission: Mission, facts: Facts, dt: number): boolean
@@ -160,13 +220,19 @@ function Missions.check(mission: Mission, facts: Facts, dt: number): boolean
 	local kind = mission.kind
 	local done = false
 	if kind == "find" then
-		local count = facts.count(mission.item :: string)
-		local low = mission.low
-		if low == nil or count < low then
-			mission.low = count
+		done = rose(mission, facts.count(mission.item :: string))
+	elseif kind == "loot" then
+		-- Only what goes into the bag while standing in a robot room counts
+		local carried = facts.carried or 0
+		if facts.inRoom then
+			done = rose(mission, carried)
 		else
-			done = count > low
+			mission.low = carried
 		end
+	elseif kind == "bank" then
+		done = rose(mission, facts.banked or 0)
+	elseif kind == "lore" then
+		done = facts.readLore == true
 	elseif kind == "visit" then
 		done = facts.place == mission.place
 	elseif kind == "deep" then
@@ -205,17 +271,21 @@ function Missions.allDone(list: { Mission }): boolean
 	return #list > 0
 end
 
--- What the client draws: text, done, reward line
-function Missions.snapshot(
-	config: any,
-	list: { Mission }
-): { { text: string, done: boolean, reward: string } }
+export type Row = { text: string, done: boolean, reward: string, waiting: boolean, target: any? }
+
+-- What the client draws: text, done, reward line, whether it's a chain step not reached yet, and
+-- the arrow target of the live ones
+function Missions.snapshot(config: any, list: { Mission }): { Row }
+	local live = Missions.active(list)
 	local rows = {}
 	for _, mission in list do
+		local isLive = table.find(live, mission) ~= nil
 		table.insert(rows, {
 			text = mission.text,
 			done = mission.done,
 			reward = Missions.rewardText(config, mission.reward),
+			waiting = not mission.done and not isLive,
+			target = if isLive then mission.target else nil,
 		})
 	end
 	return rows

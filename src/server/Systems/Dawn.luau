@@ -2,7 +2,11 @@
 -- player's locker is noted; whatever they add before lights out is "banked tonight". At lights out
 -- the props players placed are noted too. When the lights come back on, every player who was alive
 -- at lights out and still is gets the Dawn Report: their life streak, bag, fort pieces still
--- standing, dog, banked items and the Tokens it all paid. Dying resets the streak.
+-- standing, dog, banked items, daily streak and the Tokens it all paid. Dying resets the streak.
+-- Someone whose first life this session began after lights out counts as there for the night, so
+-- a new player joining in the dark still gets a card at the next dawn. Lives of Veteran.Nights or
+-- more are marked (brighter beam, faint glint). Banking also feeds the BestHaul stat and nights in
+-- one life the weekly board.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -16,7 +20,9 @@ local DayNight = require(script.Parent.DayNight)
 local Inventory = require(script.Parent.Inventory)
 local PaEvents = require(script.Parent.PaEvents)
 local Saves = require(script.Parent.Saves)
+local Scores = require(script.Parent.Scores)
 local Tokens = require(script.Parent.Tokens)
+local StreakLogic = require(ReplicatedStorage.Shared.Logic.Streak)
 
 local settings = Config.Dawn
 local rules: DawnScore.Rules = settings.Tokens
@@ -31,6 +37,8 @@ local aliveAtLightsOut: { [Player]: boolean } = {}
 local lockerAtSiren: { [Player]: { Stack } } = {}
 local bankedTonight: { [Player]: { Stack } } = {}
 local placedAtLightsOut: { Placed } = {}
+local joinedAtNight: { [Player]: boolean } = {}
+local hadLife: { [Player]: boolean } = {}
 local beamFolder: Folder
 local reportRemote: RemoteEvent
 
@@ -78,7 +86,13 @@ local function onLightsOut()
 	for player, before in lockerAtSiren do
 		local after = lockerTotals(player)
 		if after then
-			bankedTonight[player] = DawnScore.banked(before, after)
+			local banked = DawnScore.banked(before, after)
+			bankedTonight[player] = banked
+			local haul = 0
+			for _, stack in banked do
+				haul += stack.count
+			end
+			Scores.raise(player, "BestHaul", haul)
 		end
 	end
 	table.clear(lockerAtSiren)
@@ -126,6 +140,32 @@ local function anyWithin(points: { Vector3 }, position: Vector3, radius: number)
 	return false
 end
 
+local function streakText(player: Player): string
+	local data = Saves.data(player)
+	if not data then
+		return ""
+	end
+	return StreakLogic.label(Config.Missions.Streak, data.streak, StreakLogic.dayOf(os.time()))
+end
+
+local function markVeteran(player: Player, nights: number)
+	local look = settings.Veteran
+	local head = player.Character and player.Character:FindFirstChild("Head")
+	if nights < look.Nights or not head then
+		return
+	end
+	player:SetAttribute("Veteran", true)
+	if not head:FindFirstChild("VeteranGlint") then
+		local glint = Instance.new("PointLight")
+		glint.Name = "VeteranGlint"
+		glint.Range = look.Glint.Range
+		glint.Brightness = look.Glint.Brightness
+		glint.Color = look.Glint.Color
+		glint.Shadows = false
+		glint.Parent = head
+	end
+end
+
 local function report(player: Player, root: BasePart, day: number, fort: { Vector3 }, banked: { Stack })
 	local dog = dogOf(player)
 	local dogAt = dog and dog:GetPivot().Position
@@ -146,6 +186,7 @@ local function report(player: Player, root: BasePart, day: number, fort: { Vecto
 		banked = DawnScore.topLines(banked, InventoryItems, settings.BankedShown),
 		pay = paid,
 		balance = Tokens.get(player),
+		streak = streakText(player),
 	})
 end
 
@@ -154,8 +195,10 @@ local function onDawn(day: number)
 	for _, player in Players:GetPlayers() do
 		local root = aliveRoot(player)
 		local banked = bankedTonight[player] or {}
-		if root and aliveAtLightsOut[player] then
+		if root and (aliveAtLightsOut[player] or joinedAtNight[player]) then
 			streaks[player] = (streaks[player] or 0) + 1
+			Scores.recordWeekLife(player, streaks[player])
+			markVeteran(player, streaks[player])
 			report(player, root, day, forts[player.UserId] or {}, banked)
 		elseif #banked > 0 then
 			-- Down at dawn, but what made it into the locker made it out
@@ -165,6 +208,7 @@ local function onDawn(day: number)
 	end
 	table.clear(bankedTonight)
 	table.clear(aliveAtLightsOut)
+	table.clear(joinedAtNight)
 end
 
 local function onPhaseChanged(phase: string, previous: string, day: number)
@@ -178,10 +222,17 @@ local function onPhaseChanged(phase: string, previous: string, day: number)
 end
 
 -- A new body is a new life
+local function onCharacterAdded(player: Player)
+	streaks[player] = 0
+	aliveAtLightsOut[player] = nil
+	player:SetAttribute("Veteran", nil)
+	joinedAtNight[player] = not hadLife[player] and DayNight.phase() == "Night" or nil
+	hadLife[player] = true
+end
+
 local function onPlayerAdded(player: Player)
 	player.CharacterAdded:Connect(function()
-		streaks[player] = 0
-		aliveAtLightsOut[player] = nil
+		onCharacterAdded(player)
 	end)
 end
 
@@ -190,6 +241,8 @@ local function onPlayerRemoving(player: Player)
 	aliveAtLightsOut[player] = nil
 	lockerAtSiren[player] = nil
 	bankedTonight[player] = nil
+	joinedAtNight[player] = nil
+	hadLife[player] = nil
 end
 
 function Dawn.Init()

@@ -112,7 +112,7 @@ return {
 			extras = { DogTrust = 3 },
 		}, rules)
 		expect(problem).toBe(nil)
-		expect(data.version).toBe(2)
+		expect(data.version).toBe(Saves.VERSION)
 		expect(#data.locker).toBe(2)
 		expect(data.locker[2].count).toBe(7)
 		expect(data.stats.NightsSurvived).toBe(6)
@@ -133,5 +133,50 @@ return {
 		expect(Saves.spendTokens(data, -1)).toBe(false)
 		expect(Saves.spendTokens(data, 1.5)).toBe(false)
 		expect(data.tokens).toBe(6)
+	end,
+	["a brand-new save starts on the first day with empty streak, files and week"] = function()
+		local data = Saves.load(nil, rules)
+		expect(data.firstDay).toBe(true)
+		expect(data.streak.days).toBe(0)
+		expect(#data.files).toBe(0)
+		expect(data.weekly.nights).toBe(0)
+	end,
+	["a version 2 save migrates to 3 without the first-day chain and keeps tokens"] = function()
+		local data, problem = Saves.load({
+			version = 2,
+			tokens = 55,
+			stats = { NightsSurvived = 9 },
+			locker = { { id = "Gun", count = 1 } },
+		}, rules)
+		expect(problem).toBe(nil)
+		expect(data.version).toBe(3)
+		expect(data.firstDay).toBe(false)
+		expect(data.tokens).toBe(55)
+		expect(data.stats.NightsSurvived).toBe(9)
+		expect(#data.locker).toBe(1)
+		expect(data.streak.days).toBe(0)
+		expect(data.streak.lastDay).toBe(0)
+		expect(#data.files).toBe(0)
+		expect(data.weekly.week).toBe(0)
+	end,
+	["an unversioned save is an old player and skips the first day"] = function()
+		expect(Saves.load({ locker = {} }, rules).firstDay).toBe(false)
+	end,
+	["version 3 fields are cleaned"] = function()
+		local data = Saves.load({
+			version = 3,
+			firstDay = "yes",
+			streak = { days = 4.7, lastDay = -3 },
+			files = { "tape_1", "tape_1", 7, string.rep("x", 60), "journal_3" },
+			weekly = { week = 2900.2, nights = "lots" },
+		}, rules)
+		expect(data.firstDay).toBe(false)
+		expect(data.streak.days).toBe(4)
+		expect(data.streak.lastDay).toBe(0)
+		expect(#data.files).toBe(2)
+		expect(data.files[2]).toBe("journal_3")
+		expect(data.weekly.week).toBe(2900)
+		expect(data.weekly.nights).toBe(0)
+		expect(Saves.load({ version = 3, firstDay = true }, rules).firstDay).toBe(true)
 	end,
 }

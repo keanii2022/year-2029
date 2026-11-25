@@ -2088,6 +2088,24 @@ function Robots.destroy(robot: Robot, byPlayer: Player?)
 	end
 end
 
+-- The Sweep (PaEvents): for `seconds`, every awake hunter that isn't already chasing someone is
+-- called to position, again every `every` seconds so ones that lose interest get pulled back in.
+function Robots.converge(position: Vector3, seconds: number, every: number)
+	local point = { x = position.X, z = position.Z }
+	local endsAt = os.clock() + seconds
+	task.spawn(function()
+		while os.clock() < endsAt and DayNight.isNight() do
+			local now = os.clock()
+			for _, robot in robots do
+				if robot.role == "hunter" and not robot.dead and not robot.knockedUntil then
+					RobotBrain.answerCall(robot.brain, point, hunt.Searches, now)
+				end
+			end
+			task.wait(every)
+		end
+	end)
+end
+
 -- A real gunshot at origin; only Combat (after its checks) and SimPlayers' bots call this.
 function Robots.heardShot(position: Vector3)
 	local now = os.clock()

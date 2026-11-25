@@ -50,6 +50,7 @@ local folder: Folder
 local random = Random.new()
 local director = HauntDirector.newServer()
 local playerStates: { [Player]: HauntDirector.PlayerState } = {}
+local scareListeners: { (Player, string) -> () } = {}
 local groups: { Group } = {}
 local cams: { Cam } = {}
 local mannequins: { Mannequin } = {}
@@ -581,6 +582,9 @@ local function runDirector()
 		if scare then
 			HauntDirector.record(state, director, scare, now)
 			scareRemote:FireClient(watcher.player, scare)
+			for _, listener in scareListeners do
+				task.spawn(listener, watcher.player, scare)
+			end
 		end
 	end
 end
@@ -615,6 +619,11 @@ local function waitForWarehouse(): Instance
 		root = workspace:FindFirstChild("Warehouse")
 	end
 	return root :: Instance
+end
+
+-- Calls listener(player, scareName) whenever a private scare is sent (the 2029 Files count sightings)
+function Haunts.onScare(listener: (Player, string) -> ())
+	table.insert(scareListeners, listener)
 end
 
 function Haunts.Init()
