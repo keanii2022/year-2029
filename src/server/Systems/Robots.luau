@@ -141,6 +141,34 @@ local function onFloor(v: Vector3): Vector3
 	return Vector3.new(v.X, floorY, v.Z)
 end
 
+-- Robots are anchored, so they follow the ground themselves: up slopes and hills, down drops.
+-- A rise steeper than MaxStepUp in one step is a wall, not a slope, and they stay level.
+local MAX_STEP_UP = 2.5
+local groundParams = RaycastParams.new()
+groundParams.FilterType = Enum.RaycastFilterType.Include
+groundParams.RespectCanCollide = true
+
+local function onGround(v: Vector3, fromY: number): Vector3
+	local warehouse = workspace:FindFirstChild("Warehouse")
+	if not warehouse then
+		return onFloor(v)
+	end
+	groundParams.FilterDescendantsInstances = { warehouse }
+	local hit = workspace:Raycast(
+		Vector3.new(v.X, fromY + MAX_STEP_UP + 0.5, v.Z),
+		Vector3.new(0, -60, 0),
+		groundParams
+	)
+	if not hit then
+		return Vector3.new(v.X, fromY, v.Z)
+	end
+	local y = hit.Position.Y
+	if y > fromY + MAX_STEP_UP then
+		y = fromY
+	end
+	return Vector3.new(v.X, math.max(y, floorY), v.Z)
+end
+
 local function insideRoom(room: any, position: Vector3, pad: number): boolean
 	local x, z = position.X - origin.X, position.Z - origin.Z
 	return x > room.x0 + pad and x < room.x1 - pad and z > room.z0 + pad and z < room.z1 - pad
@@ -907,7 +935,7 @@ local function moveStep(robot: Robot, dt: number)
 		return
 	end
 	local step = math.min(offset.Magnitude, robot.speed * dt)
-	robot.position = onFloor(robot.position + offset.Unit * step)
+	robot.position = onGround(robot.position + offset.Unit * step, robot.position.Y)
 	robot.stride += step * 0.9
 	robot.moving = true
 	turnToward(robot, offset, dt)
@@ -1009,6 +1037,9 @@ local function senseRobot(
 	for _, target in alive do
 		local ignoredUntil = robot.ignore[target.player]
 		local d = flatDistance(target.position, robot.position)
+		-- root sits ~3 above the feet; a big height gap (on a hill, a catwalk) adds to the distance
+		local rise = math.max(0, math.abs(target.position.Y - 3 - robot.position.Y) - 2)
+		d = math.sqrt(d * d + rise * rise)
 		if (ignoredUntil and ignoredUntil > now) or d > reach then
 			continue
 		end
@@ -1417,6 +1448,8 @@ local function grudgeTarget(robot: Robot, alive: { Alive }, now: number): RobotB
 	for _, target in alive do
 		if target.player == robot.grudge then
 			local d = flatDistance(target.position, robot.position)
+			local rise = math.max(0, math.abs(target.position.Y - 3 - robot.position.Y) - 2)
+			d = math.sqrt(d * d + rise * rise)
 			if d > shot.GrudgeRange or Interact.isHidden(target.player) then
 				return nil
 			end
@@ -1445,7 +1478,7 @@ local function keepApart(robot: Robot)
 			local push = if away.Magnitude > 0.01
 				then away.Unit
 				else Vector3.new(random:NextNumber(-1, 1), 0, 1).Unit
-			robot.position = onFloor(robot.position + push * 0.6)
+			robot.position = onGround(robot.position + push * 0.6, robot.position.Y)
 			place(robot)
 			return
 		end
@@ -1884,7 +1917,7 @@ function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, 
 		robot.staggerUntil = now + shot.StaggerSeconds
 		local back = flat(robot.position - from)
 		if back.Magnitude > 0.01 then
-			robot.position = onFloor(robot.position + back.Unit * shot.Knockback)
+			robot.position = onGround(robot.position + back.Unit * shot.Knockback, robot.position.Y)
 			place(robot)
 		end
 	end
