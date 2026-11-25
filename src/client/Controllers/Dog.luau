@@ -1,13 +1,22 @@
 -- The dog, client side: trust hearts over its head that only you see (from your "DogTrust" attribute),
 -- and the right prompt for you: strangers get Feed, its owner gets the follow / guard / stay command.
+-- Also plays the untamed dog's far-off calls (muffled by your distance, with warehouse echo), shows
+-- the crouch hint the first time a wary dog watches you, and tells the server when food is in hand.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local DogCalls = require(ReplicatedStorage.Shared.Logic.DogCalls)
 local DogTrust = require(ReplicatedStorage.Shared.Logic.DogTrust)
+local Mix = require(ReplicatedStorage.Shared.Mix)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
+local Net = require(ReplicatedStorage.Shared.Net)
+local Hints = require(script.Parent.Hints)
+local Hotbar = require(script.Parent.Hotbar)
 
 local settings = Config.Dog
+local calls = settings.Calls
 local player = Players.LocalPlayer
 
 local HEART_FULL = "♥"
@@ -51,11 +60,78 @@ local function refreshPrompts(model: Model)
 	end
 end
 
+local function soundIdFor(key: string): string?
+	for _, name in DogCalls.soundNames(key, settings.Sounds, settings.SoundFallbacks) do
+		local id = ModelLibrary.soundId(name)
+		if id then
+			return id
+		end
+	end
+	return nil
+end
+
+-- One far-off call from where the server bounced it. The muffle is set from this listener's distance.
+local function playCall(key: any, position: any)
+	if type(key) ~= "string" or typeof(position) ~= "Vector3" then
+		return
+	end
+	local id = soundIdFor(key)
+	local camera = workspace.CurrentCamera
+	if not id or not camera then
+		return
+	end
+	local spot = Instance.new("Attachment")
+	spot.WorldPosition = position
+	spot.Parent = workspace.Terrain
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = calls.Volume
+	sound.RollOffMode = Enum.RollOffMode.InverseTapered
+	sound.RollOffMinDistance, sound.RollOffMaxDistance = calls.RollOff[1], calls.RollOff[2]
+	local high, mid = DogCalls.muffle((camera.CFrame.Position - position).Magnitude, calls)
+	local eq = Instance.new("EqualizerSoundEffect")
+	eq.LowGain, eq.MidGain, eq.HighGain = 0, mid, high
+	eq.Parent = sound
+	local reverb = Instance.new("ReverbSoundEffect")
+	for property, value in calls.Reverb do
+		(reverb :: any)[property] = value
+	end
+	reverb.Parent = sound
+	local echo = Instance.new("EchoSoundEffect")
+	for property, value in calls.Echo do
+		(echo :: any)[property] = value
+	end
+	echo.Parent = sound
+	sound.Parent = spot
+	-- part of the warehouse's background, so it dips under the PA and gunfights like the rest of it
+	Mix.route(sound, "Ambience")
+	sound:Play()
+	sound.Ended:Once(function()
+		spot:Destroy()
+	end)
+	task.delay(30, function()
+		if spot.Parent then
+			spot:Destroy()
+		end
+	end)
+end
+
+local function watchFor(model: Model)
+	local function check()
+		if model:GetAttribute("Watching") == player.UserId then
+			Hints.nudge("dog", Config.Hints.DogNudge)
+		end
+	end
+	model:GetAttributeChangedSignal("Watching"):Connect(check)
+	check()
+end
+
 local function onDogAdded(instance: Instance)
 	if not instance:IsA("Model") then
 		return
 	end
 	local model = instance
+	watchFor(model)
 	local head = model:FindFirstChild("Head", true) or model.PrimaryPart
 	if head and head:IsA("BasePart") then
 		local gui = Instance.new("BillboardGui")
@@ -97,6 +173,18 @@ function Dog.Start()
 		task.spawn(onDogAdded, instance)
 	end
 	player:GetAttributeChangedSignal("DogTrust"):Connect(refreshHearts)
+
+	Net.event("DogCall").OnClientEvent:Connect(playCall)
+	local holdingRemote = Net.event("DogHoldingFood")
+	local holding = false
+	Hotbar.onChanged(function()
+		local slot = Hotbar.selected()
+		local now = slot ~= nil and slot.id == "Food" and not slot.empty
+		if now ~= holding then
+			holding = now
+			holdingRemote:FireServer(holding)
+		end
+	end)
 end
 
 return Dog

@@ -87,4 +87,25 @@ return {
 		expect(DogTrust.pickFood({ "Apple", "Sandwich", "RationPack" }, countOf)).toBe("Sandwich")
 		expect(DogTrust.pickFood({ "Apple" }, countOf)).toBe(nil)
 	end,
+	["rapport drops a stage per real day away"] = function()
+		local saved = { level = 3, day = 100 }
+		expect(DogTrust.rapportNow(saved, 100)).toBe(3)
+		expect(DogTrust.rapportNow(saved, 101)).toBe(2)
+		expect(DogTrust.rapportNow(saved, 110)).toBe(0)
+		expect(DogTrust.rapportNow(saved, 90)).toBe(3)
+	end,
+	["reaching a stage raises rapport, never lowers it"] = function()
+		local raised = DogTrust.raiseRapport({ level = 0, day = 0 }, "wags", 200)
+		expect(raised.level).toBe(2)
+		expect(raised.day).toBe(200)
+		expect(DogTrust.raiseRapport({ level = 3, day = 200 }, "eats", 200).level).toBe(3)
+		expect(DogTrust.raiseRapport({ level = 3, day = 198 }, "eats", 200).level).toBe(1)
+	end,
+	["a returning player's next dog starts warmer"] = function()
+		local starts = { 10, 22, 35 }
+		expect(DogTrust.startTrust(0, starts)).toBe(0)
+		expect(DogTrust.startTrust(2, starts)).toBe(22)
+		expect(DogTrust.startTrust(9, starts)).toBe(35)
+		expect(DogTrust.stage(DogTrust.startTrust(3, starts), SETTINGS)).toBe("eats")
+	end,
 }

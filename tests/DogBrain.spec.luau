@@ -89,5 +89,26 @@ return {
 		expect(DogBrain.moves("follow")).toBeTruthy()
 		expect(DogBrain.runs("flee")).toBeTruthy()
 		expect(DogBrain.runs("wander")).toBeFalsy()
+		expect(DogBrain.moves("backoff")).toBeTruthy()
+		expect(DogBrain.moves("creep")).toBeTruthy()
+		expect(DogBrain.moves("sniff")).toBeFalsy()
+	end,
+	["a wary stray shows how it reads you"] = function()
+		local function with(reaction: string): string
+			return decide({ nearestStage = "wary", nearestDistance = 12, reaction = reaction })
+		end
+		expect(with("watch")).toBe("watch")
+		expect(with("backoff")).toBe("backoff")
+		expect(with("run")).toBe("flee")
+		expect(with("stay")).toBe("settle")
+		expect(with("sniff")).toBe("sniff")
+		expect(with("creep")).toBe("creep")
+	end,
+	["a dog that wags ignores wary reactions"] = function()
+		expect(decide({ nearestStage = "wags", nearestDistance = 10, reaction = "watch" })).toBe("approach")
+	end,
+	["a flinch comes first, even at night"] = function()
+		expect(decide({ night = true, flinchUntil = 101 })).toBe("flinch")
+		expect(decide({ night = true, flinchUntil = 99 })).toBe("hide")
 	end,
 }

@@ -18,6 +18,8 @@ export type Settings = {
 	Stages: { Eats: number, Wags: number, Follows: number },
 }
 export type Refusal = "cooldown" | "full" | "visit" | "day"
+-- Saved between sessions: the highest stage reached (0 wary .. 3 follows) and the UTC day it was set
+export type Rapport = { level: number, day: number }
 
 local DogTrust = {}
 
@@ -94,6 +96,10 @@ function DogTrust.stage(trust: number, settings: Settings): Stage
 	return "wary"
 end
 
+function DogTrust.rank(stage: Stage): number
+	return STAGE_RANK[stage]
+end
+
 function DogTrust.atLeast(stage: Stage, wanted: Stage): boolean
 	return STAGE_RANK[stage] >= STAGE_RANK[wanted]
 end
@@ -101,6 +107,22 @@ end
 -- Filled hearts out of count: one per stage passed, the last one fills at Follows.
 function DogTrust.hearts(trust: number, settings: Settings, count: number): number
 	return math.clamp(math.floor(trust / settings.Stages.Follows * count), 0, count)
+end
+
+-- Rapport drops a stage per real day away, never below zero.
+function DogTrust.rapportNow(saved: Rapport, today: number): number
+	local daysAway = math.max(0, today - saved.day)
+	return math.clamp(math.floor(saved.level - daysAway), 0, STAGE_RANK.follows)
+end
+
+-- Reaching a stage raises the saved rapport; returns the new record to save.
+function DogTrust.raiseRapport(saved: Rapport, stage: Stage, today: number): Rapport
+	return { level = math.max(DogTrust.rapportNow(saved, today), STAGE_RANK[stage]), day = today }
+end
+
+-- Trust a new dog starts at for someone with this rapport, so it warms up faster.
+function DogTrust.startTrust(level: number, starts: { number }): number
+	return if level > 0 then starts[math.min(level, #starts)] or 0 else 0
 end
 
 -- First food in the preference list the player has any of.

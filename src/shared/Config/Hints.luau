@@ -25,6 +25,8 @@ return {
 	LitRadius = 40, -- studs from a red emergency light (its strip hangs high) that still count as lit
 
 	RobotNudge = "Robot close. {Crouch} Crouch to stay quiet",
+	-- First time a stray dog watches you
+	DogNudge = "{Crouch} Crouch and move slowly. He's scared.",
 	RobotNudgeDistance = 45,
 
 	HiddenHint = "Hold {Jump} Hold breath   {Use} Get out",

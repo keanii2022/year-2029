@@ -187,7 +187,7 @@ return {
 			locker = { { id = "Gun", count = 1 } },
 		}, rules)
 		expect(problem).toBe(nil)
-		expect(data.version).toBe(4)
+		expect(data.version).toBe(Saves.VERSION)
 		expect(data.tokens).toBe(12)
 		expect(#data.files).toBe(1)
 		expect(#data.locker).toBe(1)
@@ -214,5 +214,28 @@ return {
 		expect(data.audio.gentle).toBe(false)
 		expect(Saves.load({ version = 4, audio = "loud" }, rules).audio.voice).toBe(1)
 		expect(Saves.cleanAudio({ gentle = true }).gentle).toBe(true)
+	end,
+	["a version 4 save migrates to 5 with a fresh dog rapport and keeps its audio"] = function()
+		local data, problem = Saves.load({
+			version = 4,
+			tokens = 12,
+			streak = { days = 4, lastDay = 20000 },
+			files = { "f1" },
+			audio = { master = 0.5, music = 0.2, effects = 1, voice = 1, gentle = true },
+		}, rules)
+		expect(problem).toBe(nil)
+		expect(data.version).toBe(5)
+		expect(data.tokens).toBe(12)
+		expect(data.streak.days).toBe(4)
+		expect(data.files[1]).toBe("f1")
+		expect(data.audio.master).toBe(0.5)
+		expect(data.audio.gentle).toBe(true)
+		expect(data.dog.level).toBe(0)
+		expect(data.dog.day).toBe(0)
+	end,
+	["dog rapport is cleaned to a whole level from 0 to 3"] = function()
+		expect(Saves.load({ version = 5, dog = { level = 9.7, day = 20001 } }, rules).dog.level).toBe(3)
+		expect(Saves.load({ version = 5, dog = { level = -2, day = 5 } }, rules).dog.level).toBe(0)
+		expect(Saves.load({ version = 5, dog = "good boy" }, rules).dog.day).toBe(0)
 	end,
 }

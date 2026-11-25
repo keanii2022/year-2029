@@ -5,7 +5,7 @@ local SavesBlueprint = if script then require(script.Parent.SavesBlueprint) else
 
 local Saves = {}
 
-Saves.VERSION = 4
+Saves.VERSION = 5
 
 type Stack = Inventory.Stack
 
@@ -16,6 +16,8 @@ export type Streak = { days: number, lastDay: number }
 export type Weekly = { week: number, nights: number }
 -- Player audio sliders (0 to 1) and the gentler-scares toggle (client Controllers/AudioSettings)
 export type Audio = { master: number, music: number, effects: number, voice: number, gentle: boolean }
+-- The dog's rapport: highest trust stage reached (0-3) and the UTC day number it was last set (Logic/DogTrust)
+export type DogRapport = { level: number, day: number }
 export type Data = {
 	version: number,
 	locker: { Stack },
@@ -32,6 +34,7 @@ export type Data = {
 	files: { string },
 	weekly: Weekly,
 	audio: Audio,
+	dog: DogRapport,
 }
 export type Rules = {
 	items: Inventory.Items,
@@ -73,6 +76,12 @@ local MIGRATIONS: { [number]: (any) -> any } = {
 	[4] = function(raw)
 		raw.audio = Saves.defaultAudio()
 		raw.version = 4
+		return raw
+	end,
+	-- Version 5 adds the dog's rapport; everyone starts a stranger to it
+	[5] = function(raw)
+		raw.dog = { level = 0, day = 0 }
+		raw.version = 5
 		return raw
 	end,
 }
@@ -127,6 +136,7 @@ function Saves.default(): Data
 		files = {},
 		weekly = { week = 0, nights = 0 },
 		audio = Saves.defaultAudio(),
+		dog = { level = 0, day = 0 },
 	}
 end
 
@@ -237,6 +247,15 @@ local function cleanWeekly(raw: any): Weekly
 	return { week = wholeCount(raw.week), nights = wholeCount(raw.nights) }
 end
 
+local DOG_MAX_LEVEL = 3
+
+local function cleanDog(raw: any): DogRapport
+	if type(raw) ~= "table" then
+		return { level = 0, day = 0 }
+	end
+	return { level = math.min(DOG_MAX_LEVEL, wholeCount(raw.level)), day = wholeCount(raw.day) }
+end
+
 -- Keeps only fields and values this build understands. Never errors on bad input.
 function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 	return {
@@ -253,6 +272,7 @@ function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 		files = cleanFiles(raw.files),
 		weekly = cleanWeekly(raw.weekly),
 		audio = Saves.cleanAudio(raw.audio),
+		dog = cleanDog(raw.dog),
 	}
 end
 

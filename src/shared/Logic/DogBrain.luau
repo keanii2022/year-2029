@@ -1,5 +1,6 @@
 -- What the dog does next. The server senses the world, this picks the state, the server moves it.
 local DogTrust = if script then require(script.Parent.DogTrust) else require("./DogTrust")
+local DogWary = if script then require(script.Parent.DogWary) else require("./DogWary")
 
 export type State =
 	"wander"
@@ -12,6 +13,13 @@ export type State =
 	| "bite"
 	| "sit"
 	| "hide"
+	-- a stray that doesn't trust the nearest player yet (Logic/DogWary)
+	| "watch"
+	| "backoff"
+	| "settle"
+	| "sniff"
+	| "creep"
+	| "flinch"
 export type Command = "follow" | "guard" | "stay"
 export type Input = {
 	now: number,
@@ -26,6 +34,8 @@ export type Input = {
 	nearestStage: DogTrust.Stage?, -- closest player that isn't the owner
 	nearestDistance: number?,
 	threatDistance: number?, -- closest robot or raider near what it protects
+	reaction: DogWary.Reaction?, -- how a stray reacts to the nearest player before it trusts them
+	flinchUntil: number?,
 }
 export type Settings = {
 	NoticeRange: number,
@@ -76,13 +86,28 @@ local function owned(input: Input, settings: Settings): State
 	return if input.night then "hide" else "sit"
 end
 
+local REACTION_STATES: { [DogWary.Reaction]: State } = {
+	run = "flee",
+	backoff = "backoff",
+	watch = "watch",
+	stay = "settle",
+	sniff = "sniff",
+	creep = "creep",
+}
+
 local function stray(input: Input, settings: Settings): State
+	if input.now < (input.flinchUntil or 0) then
+		return "flinch"
+	end
 	if input.night then
 		return "hide"
 	end
 	local stage, distance = input.nearestStage, input.nearestDistance
 	if not stage or not distance or distance > settings.NoticeRange then
 		return "wander"
+	end
+	if input.reaction and not DogTrust.atLeast(stage, "wags") then
+		return REACTION_STATES[input.reaction]
 	end
 	if stage == "wary" then
 		return if distance < settings.WaryDistance then "flee" else "sit"
@@ -111,6 +136,8 @@ function DogBrain.moves(state: State): boolean
 		or state == "guard"
 		or state == "alert"
 		or state == "bite"
+		or state == "backoff"
+		or state == "creep"
 end
 
 function DogBrain.runs(state: State): boolean

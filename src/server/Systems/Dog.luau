@@ -2,7 +2,11 @@
 -- a couple of days earns trust (Logic/DogTrust). Once it trusts a player it follows, guards a spot or
 -- stays on their word, barks when a stranger touches what it guards and bites raiders and robots.
 -- Anchored and moved with PivotTo like the robots; limbs are procedural until the clips are imported.
--- Trust goes out as the player's "DogTrust" attribute; the dog model carries Owner, Command and State.
+-- Trust goes out as the player's "DogTrust" attribute; the dog model carries Owner, Command and State,
+-- plus Watching (the UserId a wary dog is sizing up) for the client's first-sight hint.
+-- Before it trusts you it reads how you move (Logic/DogWary); untamed, it calls out now and then from
+-- somewhere hard to pin down (Logic/DogCalls, played on clients through "DogCall"). Each player's
+-- rapport is saved (Saves data.dog) so a returning player's next dog starts a little warmer.
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local PathfindingService = game:GetService("PathfindingService")
@@ -13,22 +17,27 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local DogBrain = require(ReplicatedStorage.Shared.Logic.DogBrain)
+local DogCalls = require(ReplicatedStorage.Shared.Logic.DogCalls)
 local DogGuard = require(ReplicatedStorage.Shared.Logic.DogGuard)
 local DogPoses = require(ReplicatedStorage.Shared.Logic.DogPoses)
 local DogTrust = require(ReplicatedStorage.Shared.Logic.DogTrust)
+local DogWary = require(ReplicatedStorage.Shared.Logic.DogWary)
 local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
+local WarehouseGen = require(ReplicatedStorage.Shared.Logic.WarehouseGen)
 local DayNight = require(script.Parent.DayNight)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
 local Robots = require(script.Parent.Robots)
+local Saves = require(script.Parent.Saves)
 local Warehouse = require(script.Parent.Warehouse)
 
 local settings = Config.Dog
 local trustSettings = settings.Trust
-local sounds = settings.Sounds
+local wary = settings.Wary
+local calls = settings.Calls
 
 local ACTIONS = { follow = "Follow me", guard = "Guard here", stay = "Stay" }
 local DOING = { follow = "Following you", guard = "Guarding this spot", stay = "Staying" }
@@ -81,6 +90,18 @@ type Dog = {
 	wanderAt: number,
 	placedState: string?,
 	lastPoses: { [string]: number },
+	-- wary but willing
+	spookedUntil: number,
+	flinchUntil: number,
+	calmPlayer: Player?,
+	calmFor: number,
+	stepUntil: number,
+	stepGoal: Vector3?,
+	tell: string?,
+	tellAt: number,
+	tellUntil: number,
+	tellPlayed: boolean,
+	nextCallAt: number,
 	feedPrompt: ProximityPrompt,
 	commandPrompt: ProximityPrompt,
 }
@@ -89,8 +110,14 @@ local Dog = {}
 
 local folder: Folder
 local feedbackRemote: RemoteEvent
+local callRemote: RemoteEvent
+local paRemote: RemoteEvent
 local dog: Dog? = nil
 local records: { [number]: DogTrust.Record } = {}
+-- trust each record started at (from saved rapport), so a head start alone doesn't keep a dog around
+local startTrust: { [number]: number } = {}
+local holdingFood: { [Player]: boolean } = {}
+local rumorToken = 0
 local raiders: DogGuard.Memory = {}
 local bittenRobots: DogGuard.Memory = {}
 local watched: { [Instance]: RBXScriptConnection } = {}
@@ -155,8 +182,19 @@ local function alivePlayers(): { Alive }
 	return alive
 end
 
-local function playSound(parent: Instance?, name: string, level: string)
-	local id = ModelLibrary.soundId(name)
+-- key is a Config.Dog.Sounds key; falls back per SoundFallbacks while a sound has no id yet
+local function soundIdFor(key: string): string?
+	for _, name in DogCalls.soundNames(key, settings.Sounds, settings.SoundFallbacks) do
+		local id = ModelLibrary.soundId(name)
+		if id then
+			return id
+		end
+	end
+	return nil
+end
+
+local function playSound(parent: Instance?, key: string, level: string)
+	local id = soundIdFor(key)
 	if not id or not parent then
 		return
 	end
@@ -267,7 +305,8 @@ end
 
 -- Moving -------------------------------------------------------------------------------------------
 
-local function blocked(from: Vector3, to: Vector3): boolean
+-- Rays that only see the world: not the dog, not players
+local function worldRayParams(): RaycastParams
 	local ignore: { Instance } = { folder }
 	for _, player in Players:GetPlayers() do
 		if player.Character then
@@ -277,7 +316,11 @@ local function blocked(from: Vector3, to: Vector3): boolean
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = ignore
-	return workspace:Raycast(from + Vector3.yAxis * 1.5, flat(to - from), params) ~= nil
+	return params
+end
+
+local function blocked(from: Vector3, to: Vector3): boolean
+	return workspace:Raycast(from + Vector3.yAxis * 1.5, flat(to - from), worldRayParams()) ~= nil
 end
 
 local function walkStraight(current: Dog, goal: Vector3)
@@ -362,7 +405,9 @@ local function moveStep(current: Dog, dt: number): boolean
 	current.position = onFloor(current.position + offset.Unit * step)
 	current.stride += step * 1.4
 	current.moving = true
-	turnToward(current, offset, dt)
+	-- backing off or creeping up, it keeps its eyes on you
+	local watchWhileMoving = (current.state == "backoff" or current.state == "creep") and current.face
+	turnToward(current, if watchWhileMoving then current.face - current.position else offset, dt)
 	return true
 end
 
@@ -371,7 +416,8 @@ local function animate(now: number)
 	if not current then
 		return
 	end
-	local limbs = DogPoses.limbs(current.state, current.stride, now, current.moving, current.wagging)
+	local showing = if now >= current.tellAt and now < current.tellUntil then current.tell else nil
+	local limbs = DogPoses.limbs(current.state, current.stride, now, current.moving, current.wagging, showing)
 	for part, t in limbs do
 		local last = current.lastPoses[part]
 		if last == nil or math.abs(last - t) > 0.02 then
@@ -381,17 +427,173 @@ local function animate(now: number)
 	end
 end
 
+-- Wary but willing, far-off calls, rumors ----------------------------------------------------------
+
+-- A bad move near an untamed dog: a flinch, then it bolts and won't settle for a while.
+local function spook(current: Dog, now: number)
+	if current.owner then
+		return
+	end
+	if now >= current.spookedUntil then
+		current.flinchUntil = now + wary.FlinchSeconds
+		playSound(current.model.PrimaryPart, "Yelp", "quiet")
+	end
+	current.spookedUntil = now + wary.SpookSeconds
+end
+
+local function spookIfNear(position: Vector3)
+	local current = dog
+	if current and flatDistance(position, current.position) <= wary.SpookRadius then
+		spook(current, os.clock())
+	end
+end
+
+local function robotChasingNear(current: Dog): boolean
+	for _, robot in Robots.inRadius(current.position, wary.ChaseRadius) do
+		if not robot.dead and robot.brain.state == "chase" then
+			return true
+		end
+	end
+	return false
+end
+
+-- Small trust tell once it's done eating: a sneeze, a head tilt, sitting down.
+local function queueTell(current: Dog, stage: DogTrust.Stage, now: number)
+	local kind = wary.Tells[stage]
+	if not kind then
+		return
+	end
+	current.tell = kind
+	current.tellAt = math.max(now, current.eatingUntil)
+	current.tellUntil = current.tellAt + wary.TellSeconds
+	current.tellPlayed = false
+end
+
+-- Where a call seems to come from: off toward a wall or down an aisle, never right on the dog.
+local function bouncePoint(current: Dog): Vector3
+	local params = worldRayParams()
+	local origin = current.position + Vector3.yAxis * 1.5
+	local reach = calls.Bounce[2]
+	for _ = 1, calls.BounceTries do
+		local angle = random:NextNumber(0, math.pi * 2)
+		local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
+		local hit = workspace:Raycast(origin, direction * reach, params)
+		local wall = hit and (hit.Position - origin).Magnitude
+		if not wall or wall >= calls.Bounce[1] + calls.WallPad then
+			return origin + direction * DogCalls.bounceDistance(wall, random:NextNumber(), calls)
+		end
+	end
+	-- boxed in on every try: still never right on top of it
+	local angle = random:NextNumber(0, math.pi * 2)
+	return origin + Vector3.new(math.cos(angle), 0, math.sin(angle)) * calls.Bounce[1]
+end
+
+local function callOut(current: Dog, now: number, nearestDistance: number?)
+	local phase = DayNight.phase()
+	local left = DayNight.timeLeft()
+	local length = Config.DayNight.Lengths[phase] or left
+	local mood = DogCalls.mood(phase, math.max(0, length - left), left, calls.EdgeSeconds)
+	local scared = now < current.spookedUntil or robotChasingNear(current)
+	local gap = DogCalls.gap(mood, scared, random:NextNumber(), calls)
+	if not gap then
+		current.nextCallAt = now + calls.NightRecheck
+		return
+	end
+	current.nextCallAt = now + gap
+	if not DogCalls.shouldCall(nearestDistance, calls) then
+		return
+	end
+	local call = DogCalls.pick(mood, scared, random:NextNumber(), calls)
+	callRemote:FireAllClients(call, bouncePoint(current))
+	-- and it moves on before the next one, so following the last call only gets you close
+	current.wanderAt = now
+end
+
+local function zoneName(position: Vector3): string?
+	local ok, room = pcall(Warehouse.roomAt, position)
+	local installation = ok and room and Config.Missions.Places[room.kind]
+	if installation then
+		return installation
+	end
+	local relative = position - Config.Warehouse.Origin
+	local zone = WarehouseGen.zoneAt(Warehouse.layout(), relative.X, relative.Z)
+	return zone and settings.Rumor.Zones[zone.kind]
+end
+
+local function rumor(token: number)
+	local current = dog
+	if token ~= rumorToken or not current or current.owner or DayNight.isNight() then
+		return
+	end
+	local rumors = settings.Rumor
+	local name = zoneName(current.position)
+	local text = rumors.Vague
+	if name then
+		text = string.gsub(rumors.Lines[random:NextInteger(1, #rumors.Lines)], "{spot}", function()
+			return name
+		end)
+	end
+	paRemote:FireAllClients({ text = text, rumor = true })
+end
+
+local function scheduleRumor()
+	rumorToken += 1
+	if random:NextNumber() >= settings.Rumor.Chance then
+		return
+	end
+	task.delay(randomIn(settings.Rumor.Delay), rumor, rumorToken)
+end
+
+-- Rapport ------------------------------------------------------------------------------------------
+
+local function today(): number
+	return os.time() // 86400
+end
+
+local function rapportOf(player: Player): number
+	local data = Saves.data(player)
+	return if data then DogTrust.rapportNow(data.dog, today()) else 0
+end
+
+local function raiseRapport(player: Player, stage: DogTrust.Stage)
+	local data = Saves.data(player)
+	if not data or DogTrust.rank(stage) <= DogTrust.rapportNow(data.dog, today()) then
+		return
+	end
+	data.dog = DogTrust.raiseRapport(data.dog, stage, today())
+	Saves.markDirty(player)
+end
+
+-- A new record starts warmer for someone the dog's kind already knows
+local function recordFor(player: Player): DogTrust.Record
+	local record = records[player.UserId]
+	if not record then
+		record = DogTrust.new()
+		record.trust = DogTrust.startTrust(rapportOf(player), settings.RapportStart)
+		records[player.UserId] = record
+		startTrust[player.UserId] = record.trust
+		publishTrust(player, record)
+	end
+	return record
+end
+
+local function hasDogFood(player: Player): boolean
+	return DogTrust.pickFood(settings.Foods, function(id)
+		return Inventory.count(player, id)
+	end) ~= nil
+end
+
 -- Barking, biting, guarding ------------------------------------------------------------------------
 
 local function bark(current: Dog, now: number)
 	current.nextBarkAt = now + settings.BarkInterval
-	playSound(current.model.PrimaryPart, sounds.Bark, "loud")
+	playSound(current.model.PrimaryPart, "Bark", "loud")
 	Loudness.emit(current.position, "loud", current.model)
 end
 
 local function bite(current: Dog, target: Target, now: number)
 	current.biteReadyAt = now + settings.BiteCooldown
-	playSound(current.model.PrimaryPart, sounds.Bite, "normal")
+	playSound(current.model.PrimaryPart, "Bite", "normal")
 	Loudness.emit(current.position, "normal", current.model)
 	if target.robot then
 		-- a bite only stuns a robot; it can't wreck one
@@ -404,7 +606,7 @@ local function bite(current: Dog, target: Target, now: number)
 		body:SetAttribute("HurtBy", "Bitten by a dog")
 		body:SetAttribute("HurtAt", workspace:GetServerTimeNow())
 		target.humanoid:TakeDamage(settings.BiteDamage)
-		playSound(target.root, sounds.Yelp, "normal")
+		playSound(target.root, "Yelp", "normal")
 	end
 end
 
@@ -567,8 +769,7 @@ local function onFeed(player: Player)
 		tell(player, "You have nothing it would eat")
 		return
 	end
-	local record = records[player.UserId] or DogTrust.new()
-	records[player.UserId] = record
+	local record = recordFor(player)
 	local now = os.clock()
 	local day = DayNight.day()
 	local _, refusal = DogTrust.room(record, now, day, trustSettings)
@@ -584,10 +785,14 @@ local function onFeed(player: Player)
 	DogTrust.feed(record, settings.FoodGain[food], now, day, trustSettings)
 	local stage = DogTrust.stage(record.trust, trustSettings)
 	publishTrust(player, record)
-	playSound(current.model.PrimaryPart, sounds.Eat, "quiet")
+	playSound(current.model.PrimaryPart, "Eat", "quiet")
 	if stage ~= "wary" then
 		current.eatingUntil = now + settings.EatSeconds
 		current.face = body.root.Position
+	end
+	if DogTrust.rank(stage) > DogTrust.rank(before) then
+		queueTell(current, stage, now)
+		raiseRapport(player, stage)
 	end
 
 	if stage == "follows" and not current.owner then
@@ -679,6 +884,14 @@ local function spawnDog()
 		pathBusy = false,
 		wanderAt = now + randomIn(settings.WanderPause),
 		lastPoses = {},
+		spookedUntil = 0,
+		flinchUntil = 0,
+		calmFor = 0,
+		stepUntil = 0,
+		tellAt = 0,
+		tellUntil = 0,
+		tellPlayed = true,
+		nextCallAt = now + randomIn(calls.Gap),
 		feedPrompt = addPrompt(root, "Feed", "Feed", settings.FeedReach, settings.FeedHold),
 		commandPrompt = addPrompt(root, "Command", ACTIONS.follow, settings.CommandReach, 0),
 	}
@@ -710,7 +923,7 @@ local function anyoneCares(): boolean
 		return true
 	end
 	for userId, record in records do
-		if record.trust > 0 and Players:GetPlayerByUserId(userId) then
+		if record.trust > (startTrust[userId] or 0) and Players:GetPlayerByUserId(userId) then
 			return true
 		end
 	end
@@ -720,17 +933,69 @@ end
 -- A dog nobody has started on wanders off overnight and a new one turns up somewhere else.
 local function onMorning()
 	if dog and anyoneCares() then
+		scheduleRumor()
 		return
 	end
 	despawn()
 	table.clear(records)
+	table.clear(startTrust)
 	for _, player in Players:GetPlayers() do
 		publishTrust(player, nil)
 	end
 	spawnDog()
+	scheduleRumor()
 end
 
 -- Thinking -----------------------------------------------------------------------------------------
+
+-- How a stray reacts to the nearest player it doesn't trust yet, from how they're moving.
+local function wariness(
+	current: Dog,
+	nearest: Alive,
+	stage: DogTrust.Stage,
+	distance: number,
+	now: number,
+	dt: number
+): DogWary.Reaction
+	local velocity = flat(nearest.root.AssemblyLinearVelocity)
+	local toward = flat(current.position - nearest.root.Position)
+	local stance = nearest.root.Parent and nearest.root.Parent:GetAttribute("Stance")
+	local input: DogWary.Input = {
+		stage = stage,
+		distance = distance,
+		stance = if type(stance) == "string" then stance else nil,
+		speed = velocity.Magnitude,
+		closing = if toward.Magnitude > 0.1 then velocity:Dot(toward.Unit) else 0,
+		holdingFood = holdingFood[nearest.player] == true and hasDogFood(nearest.player),
+		spooked = now < current.spookedUntil,
+		calmFor = 0,
+	}
+	if not input.spooked and DogWary.isBadMove(input, settings) then
+		spook(current, now)
+		input.spooked = true
+	end
+	if current.calmPlayer ~= nearest.player then
+		current.calmPlayer = nearest.player
+		current.calmFor = 0
+	end
+	local slow = input.stance == "Crouch" and input.speed <= wary.SlowSpeed
+	current.calmFor = if slow and not input.spooked then current.calmFor + dt else 0
+	input.calmFor = current.calmFor
+
+	local reaction = DogWary.react(input, settings)
+	if now < current.stepUntil and (reaction == "stay" or reaction == "sniff" or reaction == "creep") then
+		return "creep"
+	end
+	current.stepGoal = nil
+	if reaction == "creep" and not input.holdingFood and toward.Magnitude > 0.1 then
+		-- one careful step toward you, then back to sniffing
+		local step = math.clamp(distance - DogWary.closest(stage, settings), 0, wary.StepDistance)
+		current.stepGoal = onFloor(current.position - toward.Unit * step)
+		current.stepUntil = now + wary.StepDistance / wary.CreepSpeed
+		current.calmFor = wary.SniffAfter
+	end
+	return reaction
+end
 
 local function think(now: number, dt: number)
 	local current = dog
@@ -755,8 +1020,25 @@ local function think(now: number, dt: number)
 			nearest, nearestDistance = entry, distance
 		end
 	end
-	local nearestRecord = nearest and records[nearest.player.UserId]
+	local noticed = nearest and nearestDistance and nearestDistance <= settings.NoticeRange
+	local nearestRecord = if nearest and noticed
+		then recordFor(nearest.player)
+		else nearest and records[nearest.player.UserId]
 	local nearestStage = nearest and DogTrust.stage(nearestRecord and nearestRecord.trust or 0, trustSettings)
+
+	local reaction: DogWary.Reaction? = nil
+	if not current.owner then
+		if robotChasingNear(current) then
+			spook(current, now)
+		end
+		if nearest and noticed and nearestStage and not DogTrust.atLeast(nearestStage, "wags") then
+			reaction = wariness(current, nearest, nearestStage, nearestDistance :: number, now, dt)
+		end
+		if now >= current.nextCallAt then
+			callOut(current, now, nearestDistance)
+		end
+	end
+	current.model:SetAttribute("Watching", if reaction and nearest then nearest.player.UserId else nil)
 
 	local target, threatDistance = nil, nil
 	if current.owner then
@@ -778,11 +1060,27 @@ local function think(now: number, dt: number)
 		nearestStage = nearestStage,
 		nearestDistance = nearestDistance,
 		threatDistance = threatDistance,
+		reaction = reaction,
+		flinchUntil = current.flinchUntil,
 	}, settings)
+	local telling = current.tell ~= nil and now >= current.tellAt and now < current.tellUntil
+	if telling and not current.tellPlayed then
+		current.tellPlayed = true
+		if current.tell == "sneeze" then
+			playSound(current.model.PrimaryPart, "Sneeze", "quiet")
+		end
+	end
+	if telling and current.tell == "sit" and not DogBrain.moves(state) and state ~= "eat" then
+		state = "sit"
+	end
 	if state ~= current.state then
 		if state == "flee" and now >= current.nextGrowlAt then
 			current.nextGrowlAt = now + settings.GrowlCooldown
-			playSound(current.model.PrimaryPart, sounds.Growl, "quiet")
+			playSound(current.model.PrimaryPart, "Growl", "quiet")
+		elseif state == "settle" and now >= current.nextWhineAt then
+			-- low, unsure: it wants to trust you
+			current.nextWhineAt = now + randomIn(settings.WhineInterval)
+			playSound(current.model.PrimaryPart, "WhineLow", "quiet")
 		end
 		current.state = state
 		current.model:SetAttribute("State", state)
@@ -807,6 +1105,21 @@ local function think(now: number, dt: number)
 		setGoal(current, onFloor(current.position + direction * (settings.WaryDistance + 4)), now)
 	elseif state == "approach" and nearest then
 		setGoal(current, standOff(current.position, nearest.root.Position, settings.CloseDistance - 0.5), now)
+	elseif state == "backoff" and nearest then
+		-- a few steps back, still facing you
+		local away = flat(current.position - nearest.root.Position)
+		local direction = if away.Magnitude > 0.1 then away.Unit else -current.facing
+		current.speed = settings.WalkSpeed * 0.6
+		current.face = nearest.root.Position
+		setGoal(current, onFloor(current.position + direction * 3), now)
+	elseif state == "creep" and nearest then
+		current.speed = wary.CreepSpeed
+		current.face = nearest.root.Position
+		setGoal(
+			current,
+			current.stepGoal or standOff(current.position, nearest.root.Position, wary.FoodDistance),
+			now
+		)
 	elseif state == "follow" and owner then
 		local ownerAt = onFloor(owner.root.Position)
 		local distance = flatDistance(ownerAt, current.position)
@@ -844,11 +1157,12 @@ local function think(now: number, dt: number)
 		current.face = watching and watching.root.Position
 	end
 
-	-- a soft whine helps players find a stray; at night it whimpers whoever it's with
+	-- up close a stray whines softly (far off it's callOut); at night it whimpers whoever it's with
 	local calm = state == "wander" or state == "sit" or state == "hide"
-	if calm and (not current.owner or night) and now >= current.nextWhineAt then
+	local listener = if current.owner then night else noticed
+	if calm and listener and now >= current.nextWhineAt then
 		current.nextWhineAt = now + randomIn(settings.WhineInterval)
-		playSound(current.model.PrimaryPart, sounds.Whine, "quiet")
+		playSound(current.model.PrimaryPart, "Whine", "quiet")
 	end
 end
 
@@ -857,6 +1171,8 @@ function Dog.Init()
 	folder.Name = "Dog"
 	folder.Parent = workspace
 	feedbackRemote = Net.event("SupplyFeedback")
+	callRemote = Net.event("DogCall")
+	paRemote = Net.event("PaEvent")
 end
 
 function Dog.Start()
@@ -880,6 +1196,31 @@ function Dog.Start()
 		if current and current.owner == player then
 			disown(current)
 		end
+		holdingFood[player] = nil
+	end)
+	-- Shots near an untamed dog spook it (Combat validates the shot; this only reads where it was)
+	Net.event("GunFire").OnServerEvent:Connect(function(player)
+		local body = aliveOf(player)
+		if body then
+			spookIfNear(body.root.Position)
+		end
+	end)
+	Loudness.onSound(function(event)
+		if event.level == "loud" and not (event.source and event.source:IsDescendantOf(folder)) then
+			spookIfNear(event.position)
+		end
+	end)
+	-- The hotbar's selection is client-side; the client says when its food slot is in hand
+	Net.event("DogHoldingFood").OnServerEvent:Connect(function(player, holding)
+		holdingFood[player] = holding == true or nil
+	end)
+	-- Rapport fades a stage per real day away; settle it on join so the clock runs from today
+	Saves.onLoaded(function(player, data)
+		local level = DogTrust.rapportNow(data.dog, today())
+		if level ~= data.dog.level or data.dog.day ~= today() then
+			data.dog = { level = level, day = today() }
+			Saves.markDirty(player)
+		end
 	end)
 	DayNight.onPhaseChanged(function(phase, previous)
 		if phase == "Day" and previous ~= "Day" then
@@ -887,6 +1228,7 @@ function Dog.Start()
 		end
 	end)
 	spawnDog()
+	scheduleRumor()
 
 	RunService.Heartbeat:Connect(function(dt)
 		local current = dog

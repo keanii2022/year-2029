@@ -26,12 +26,13 @@ function DogPoses.limbs(
 	stride: number,
 	clock: number,
 	moving: boolean,
-	wagging: boolean
+	wagging: boolean,
+	tell: string?
 ): { [string]: number }
 	local pose = rest()
 	local fast = state == "flee" or state == "alert" or state == "bite"
 	if moving then
-		gait(pose, stride, if fast then 1.3 else 0.8)
+		gait(pose, stride, if fast then 1.3 elseif state == "creep" then 0.45 else 0.8)
 	end
 
 	if state == "sit" then
@@ -50,13 +51,30 @@ function DogPoses.limbs(
 		pose.Head = 0.6 * math.sin(clock * 30)
 	elseif state == "flee" then
 		pose.Jaw = 0.25 -- bared, growling
+	elseif state == "flinch" then
+		pose.Head = 0.5 -- turns its head away
+	elseif state == "sniff" then
+		-- nose working: small quick twitches and a little jaw
+		pose.Head = 0.15 * math.sin(clock * 12)
+		pose.Jaw = 0.12 * math.max(0, math.sin(clock * 10))
+	elseif state == "watch" or state == "backoff" then
+		pose.Head = 0 -- frozen, eyes on you
 	elseif not moving then
 		pose.Head = 0.6 * math.sin(clock * 0.4)
 	end
 
+	if tell == "tilt" then
+		pose.Head = 0.7
+	elseif tell == "sneeze" then
+		pose.Jaw = 0.9 * math.max(0, math.sin(clock * 18))
+		pose.Head = 0.2 * math.sin(clock * 18)
+	end
+
 	if wagging then
 		pose.Tail = 1.2 * math.sin(clock * (if state == "hide" then 4 else 14))
-	elseif state == "flee" or state == "hide" then
+	elseif state == "settle" or state == "sniff" or state == "creep" then
+		pose.Tail = 0.35 * math.sin(clock * 2.5) -- slow, unsure wag
+	elseif state == "flee" or state == "hide" or state == "flinch" or state == "backoff" then
 		pose.Tail = -1 -- tucked
 	end
 	return pose
@@ -70,6 +88,15 @@ function DogPoses.body(state: string): (number, number)
 		return 0.55, 0
 	elseif state == "eat" then
 		return 0.1, -12
+	elseif state == "flinch" then
+		return 0.4, -10
+	elseif state == "watch" or state == "backoff" or state == "creep" then
+		-- low and wary, head below the shoulders (the rig has no ears or neck to lay back)
+		return 0.22, -7
+	elseif state == "sniff" then
+		return 0.15, -9 -- stretched out toward you
+	elseif state == "settle" then
+		return 0.1, -3
 	end
 	return 0, 0
 end
