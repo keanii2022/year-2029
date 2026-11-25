@@ -399,6 +399,12 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Scope:** Grab, Callouts, Input, TouchButtons, Hints, Robots, Combat, SimPlayers, Supplies/Loot, WarehouseGen night lights and set fill, Lighting, Locker, Scores
 - Carrying spins fast on all three axes on every device. Holding call opens a ring of 7 named calls. Night gets natural path lights, exit signs and lamps you can carry. Robot rooms are fuller, with more robots spread out and a guaranteed good find. Robots are loud at night, notice you up close, and can be shot: they stagger, get knocked down for a while, then come back angry. The locker and board stand straight. Then: grab off shelves and place almost anywhere, battery swap slot, robots hunt in packs with day prowlers, glowing prize chests in every hall, PA events with light beams, warehouse size servers (Small/Medium/Large) with a public-lobby bot fill, and a rebuilt light grid hall. Done when Keani and their son play it and it feels right.
 
+### 31. Polish run: research, holes, loop
+- **Status:** current
+- **Dependencies:** 30
+- **Scope:** audits and research by read-only agents, then fixes across Grab, Robots, Combat, Inventory, Saves, Missions, Scores, Hud, Hints, TouchButtons, Locker, Music, new Dawn/Tokens/Files/Footsteps/Subtitles/MoveCheck/FortOutline systems
+- Restore point before this step: git tag `before-polish`, build copy `build/Year2029-before-polish.rbxl`. Building rework (client ghost, square snap, forts that hold), Dawn Report and Tokens, locker banking, forts pay, first day on rails, weekly boards, streaks, 2029 Files, last call and the night sweep, friends spawn together, security fixes, real footsteps, echo, PA subtitles, robot lunge and eye tells, new-player intro, phase clock, phone layout, death cause, more robots. Done when Keani plays it and keeps it, or says undo.
+
 ## After launch: talk about
 
 Two conversations to have once the game is live and real players are in.
