@@ -1,4 +1,4 @@
--- On-screen basics: health bar, ammo, crosshair, hit marker and the "down" screen.
+-- On-screen basics: health bar, Tokens, ammo, crosshair, hit marker and the "down" screen.
 -- Clean and dark; warnings use the red spray-paint look.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -27,6 +27,7 @@ local ammoPanel: Frame
 local hitMarker: Frame
 local downScreen: Frame
 local countdownLabel: TextLabel
+local tokensLabel: TextLabel
 local hitMarkerUntil = 0
 local hitMarkerShownAt = 0
 local hitMarkerScale: UIScale
@@ -119,6 +120,20 @@ local function buildHealth()
 		TextTransparency = 0.3,
 		TextXAlignment = Enum.TextXAlignment.Left,
 	}, panel)
+	tokensLabel = label({
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, 0, 0, -4),
+		Size = UDim2.fromOffset(120, 14),
+		Text = "",
+		TextSize = 12,
+		TextTransparency = 0.3,
+		TextXAlignment = Enum.TextXAlignment.Right,
+	}, panel)
+end
+
+local function refreshTokens()
+	local tokens = player:GetAttribute("Tokens")
+	tokensLabel.Text = if type(tokens) == "number" then `TOKENS {tokens}` else ""
 end
 
 local function buildAmmo()
@@ -248,6 +263,8 @@ function Hud.Start()
 	Gun.onChanged(refreshAmmo)
 	Gun.onHit(showHitMarker)
 	refreshAmmo()
+	player:GetAttributeChangedSignal("Tokens"):Connect(refreshTokens)
+	refreshTokens()
 	RunService.RenderStepped:Connect(update)
 end
 

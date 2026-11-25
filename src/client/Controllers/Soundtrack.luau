@@ -89,6 +89,16 @@ function Soundtrack.Start()
 			loops[name] = sound
 		end
 	end
+	-- The morning always opens on the dawn loop, a full pass, as the release after the night
+	local lastPhase = ReplicatedStorage:GetAttribute("Phase")
+	ReplicatedStorage:GetAttributeChangedSignal("Phase"):Connect(function()
+		local phase = ReplicatedStorage:GetAttribute("Phase")
+		if phase == "Day" and lastPhase == "Night" then
+			lightsTrack = "Dawn"
+			swapAt = os.clock() + settings.RotateSeconds
+		end
+		lastPhase = phase
+	end)
 	local acc = 0
 	RunService.Heartbeat:Connect(function(dt)
 		acc += dt
