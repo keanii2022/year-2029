@@ -194,4 +194,70 @@ return {
 	SpawnMinGap = 260,
 	SpawnCandidates = 24,
 	SpawnClearance = 6,
+	-- Kit bays: mostly empty frames stocked with real props, a share of baked loads for variety
+	RackBays = {
+		rack_bay_empty = 15,
+		rack_bay_bulk = 2,
+		rack_bay_full = 1,
+		rack_bay_sparse = 1,
+		rack_bay_furniture = 1,
+	},
+	-- rack_bay_empty's load surfaces (art/warehouse/racking.py): y a prop rests on, clear height above
+	ShelfLevels = {
+		{ y = 0, clear = 5.0, tier = "floor" },
+		{ y = 5.56, clear = 4.94, tier = "low" },
+		{ y = 11.06, clear = 4.94, tier = "mid" },
+		{ y = 16.56, clear = 4.94, tier = "high" },
+		{ y = 22.06, clear = 3.94, tier = "high" },
+	},
+	ShelfWidth = 11.2, -- usable deck, inside the uprights
+	ShelfDepth = 4.0,
+	-- What each level holds (weights): big boxes low, small stuff up high
+	ShelfTiers = {
+		floor = { box_loose = 8, microwave = 2, oil_drum = 1, toy_chest = 1, nightstand = 1, boombox = 1 },
+		low = {
+			box_loose = 6,
+			microwave = 2,
+			toaster = 2,
+			boombox = 1,
+			record_player = 1,
+			table_fan = 1,
+			leak_bucket = 1,
+		},
+		mid = {
+			box_loose = 5,
+			cereal_box = 2,
+			toaster = 2,
+			crank_radio = 1,
+			rotary_phone = 1,
+			desk_lamp = 1,
+			music_box = 1,
+			jack_in_the_box = 1,
+		},
+		high = {
+			box_loose = 4,
+			cereal_box = 2,
+			canned_food = 2,
+			rubber_duck = 1,
+			music_box = 1,
+			jack_in_the_box = 1,
+		},
+	},
+	ShelfStackable = { box_loose = 3 }, -- most high in one column
+	ShelfMaxPerSlot = 14,
+	ShelfGapChance = 0.12, -- before each pick: a gap where something was taken
+	ShelfGap = { 0.8, 3 },
+	ShelfBareChance = 0.06, -- a whole level cleared out
+	ShelfBackRowChance = 0.3, -- small things get a second row behind the front one
+	ShelfFallenChance = 0.06, -- tall things lying on their side
+	ShelfTurn = 8, -- degrees each prop sits off square
+	ShelfSpillChance = 0.25, -- a bay with something knocked off into the aisle
+	ShelfSpillTier = "mid",
+	ShelfSpill = { 0.4, 2.5 }, -- how far out in front of the rack it landed
+	-- Streaming: only bays near a player carry their props. Budget is live props at TunedSize.
+	ShelfStreamRadius = 135,
+	ShelfStreamKeep = 165, -- a stocked bay stays stocked out to here
+	ShelfStreamBudget = 10000, -- about 47 props a bay, so ~200 bays here, ~100 on Standard
+	ShelfStreamEvery = 1, -- seconds between checks
+	ShelfSpawnPerFrame = 40,
 }
