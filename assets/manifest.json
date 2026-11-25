@@ -21368,7 +21368,7 @@
    "name": "shot_shotgun",
    "group": "gear",
    "file": "art/sounds/gear/shot_shotgun.mp3",
-   "assetId": 104197595163099
+   "assetId": null
   },
   {
    "name": "shot_smg",
@@ -21380,7 +21380,7 @@
    "name": "shotgun_pump",
    "group": "gear",
    "file": "art/sounds/gear/shotgun_pump.mp3",
-   "assetId": 81630168977498
+   "assetId": null
   },
   {
    "name": "smoke_hiss",

@@ -281,7 +281,7 @@ return {
 			shake = 0.8,
 			weight = 1.6,
 			followUp = "shotgun_pump",
-			followUpDelay = 0.35,
+			followUpDelay = 0.52,
 		},
 		nail = { sound = "nail_gun", kick = 1.6, twitch = 0.4, fovPunch = 0.8, shake = 0, weight = 0.7 },
 		flare = { sound = "flare_pop", kick = 2.2, twitch = 0.5, fovPunch = 1.2, shake = 0, weight = 1 },

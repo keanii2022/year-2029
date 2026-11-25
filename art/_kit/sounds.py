@@ -1135,13 +1135,6 @@ def gunshot(punch=70, crack=1.0, blast=1.0, zap=None, zap_len=0.16, mech=1.0, ro
     return reverb(dry, 2.3, min(0.65, 0.38 * room), 1.0 + 0.9 * room, 0.5, 0.84 + 0.04 * min(room, 1.5))
 
 
-@sound("gear", "shotgun_pump", "normal", "shotgun pumped after a shot: rack back, rack forward")
-def shotgun_pump():
-    back = layer(knock(380, 0.08, 2800), (whoosh(0.09, 1200, 2500, 2, 0.01, 0.05), 0, 0.4), (click(2200, 0.02), 0.06, 0.8))
-    fwd = layer(knock(460, 0.1, 3400), (clang(1100, 0.2, 0.4), 0.005, 0.3))
-    return layer(back, (fwd, 0.17))
-
-
 @sound("gear", "shot_revolver", "loud", "revolver: one big slow bang")
 def shot_revolver():
     return gunshot(58, crack=1.6, blast=1.5, zap=1500, zap_len=0.12, mech=0.0, room=1.35, boom=1.5)

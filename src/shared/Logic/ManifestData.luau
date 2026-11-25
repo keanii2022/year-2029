@@ -9580,7 +9580,6 @@ return {
 		{
 			name = "shot_shotgun",
 			group = "gear",
-			assetId = 104197595163099,
 		},
 		{
 			name = "shot_smg",
@@ -9590,7 +9589,6 @@ return {
 		{
 			name = "shotgun_pump",
 			group = "gear",
-			assetId = 81630168977498,
 		},
 		{
 			name = "smoke_hiss",

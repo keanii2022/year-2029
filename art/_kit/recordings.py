@@ -13,7 +13,8 @@ TOY_ECHO = "aecho=0.9:0.9:80|200:0.18|0.08"
 TAKES = [
     ("shot_pistol", "guns_1.m4a", 0.0, 0.5, ECHO),
     ("shot_smg", "guns_1.m4a", 0.47, 1.6, ECHO),
-    ("shot_shotgun", "guns_1.m4a", 1.97, 3.0, ECHO),
+    ("shot_shotgun", "guns_1.m4a", 1.97, 2.45, ECHO),
+    ("shotgun_pump", "guns_1.m4a", 2.49, 2.95, TOY_ECHO),  # the rack right after the blast, about half a second in
     ("shot_rifle", "guns_1.m4a", 3.33, 4.45, ECHO),  # the whole three-round burst in one take
     ("shot_heavy", "guns_1.m4a", 5.31, 6.55, ECHO),
     ("nail_gun", "guns_1.m4a", 7.72, 7.97, ECHO),
