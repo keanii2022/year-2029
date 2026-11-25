@@ -1,8 +1,8 @@
 -- On-screen buttons for phone players, shown only while the last input was a touch. Each button
 -- presses an Input action, so a tap does exactly what the key or gamepad button does.
 -- The cluster wraps round Roblox's jump button (movement stacked above it, actions to its left)
--- and only shows what matters right now: AIM and RELOAD with a gun in hand, TURN / TIP / NEAR /
--- FAR while carrying. The big button says what it'll do: FIRE, EAT, THROW, GRAB, PRY, DROP.
+-- and only shows what matters right now: AIM and RELOAD with a gun in hand, SPIN / TIP / ROLL
+-- (both ways) and NEAR / FAR while carrying. The big button says what it'll do: FIRE, EAT, THROW, GRAB, PRY, DROP.
 -- Roblox's own thumbstick and jump button stay; the jump button also presses Jump (breath, mash).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -66,39 +66,71 @@ local BUTTONS: { Spec } = {
 	},
 	{ name = "Sprint", action = "Sprint", mode = "toggle", size = 56, at = Vector2.new(-60, -222) },
 	{ name = "Flashlight", action = "Flashlight", mode = "tap", size = 56, at = Vector2.new(-136, -226) },
-	-- hold, not tap, so a long press on CALL also switches calls like the key does
+	-- hold, not tap, so a long press on CALL opens the call wheel like the key does
 	{ name = "Callout", action = "Callout", mode = "hold", size = 56, at = Vector2.new(-212, -226) },
-	{ name = "CalloutNext", action = "CalloutNext", mode = "tap", size = 30, at = Vector2.new(-262, -246) },
+	-- Carry buttons: one column per axis, the "right / away" way on top
 	{
-		name = "CarryTurn",
-		action = "CarryTurn",
+		name = "CarrySpinRight",
+		action = "CarrySpinRight",
 		mode = "hold",
-		size = 56,
-		at = Vector2.new(-248, -56),
+		size = 50,
+		at = Vector2.new(-236, -106),
 		when = "carry",
 	},
 	{
-		name = "CarryTip",
-		action = "CarryTip",
+		name = "CarrySpinLeft",
+		action = "CarrySpinLeft",
 		mode = "hold",
-		size = 56,
-		at = Vector2.new(-288, -130),
+		size = 50,
+		at = Vector2.new(-236, -50),
 		when = "carry",
 	},
 	{
-		name = "CarryCloser",
-		action = "CarryCloser",
+		name = "CarryTipForward",
+		action = "CarryTipForward",
 		mode = "hold",
-		size = 56,
-		at = Vector2.new(-324, -56),
+		size = 50,
+		at = Vector2.new(-292, -106),
+		when = "carry",
+	},
+	{
+		name = "CarryTipBack",
+		action = "CarryTipBack",
+		mode = "hold",
+		size = 50,
+		at = Vector2.new(-292, -50),
+		when = "carry",
+	},
+	{
+		name = "CarryRollRight",
+		action = "CarryRollRight",
+		mode = "hold",
+		size = 50,
+		at = Vector2.new(-348, -106),
+		when = "carry",
+	},
+	{
+		name = "CarryRollLeft",
+		action = "CarryRollLeft",
+		mode = "hold",
+		size = 50,
+		at = Vector2.new(-348, -50),
 		when = "carry",
 	},
 	{
 		name = "CarryFarther",
 		action = "CarryFarther",
 		mode = "hold",
-		size = 56,
-		at = Vector2.new(-364, -130),
+		size = 50,
+		at = Vector2.new(-404, -106),
+		when = "carry",
+	},
+	{
+		name = "CarryCloser",
+		action = "CarryCloser",
+		mode = "hold",
+		size = 50,
+		at = Vector2.new(-404, -50),
 		when = "carry",
 	},
 	{ name = "Controls", mode = "tap", size = 56, at = Vector2.new(16, 72), corner = true },

@@ -37,9 +37,9 @@ return {
 		Touch = "Pick HANDS to pry",
 	},
 	CarryHint = {
-		Keyboard = "{Fire} Drop   {=R} Turn   {=T} Tip   {=Scroll} Closer / farther",
-		Gamepad = "{Fire} Drop   {=DPad} Turn / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther",
-		Touch = "{Fire} Drop   {CarryTurn} Turn   {CarryTip} Tip   {CarryCloser} {CarryFarther} Distance",
+		Keyboard = "{Fire} Drop   {=Arrows} Spin / tip   {=Z} {=X} Roll   {=Scroll} Closer / farther   Hold to spin faster",
+		Gamepad = "{Fire} Drop   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther   Hold to spin faster",
+		Touch = "{Fire} Drop   {=SPIN} {=TIP} {=ROLL} Turn it, hold to go faster   {CarryCloser} {CarryFarther} Distance",
 	},
 
 	ItemNudge = {
@@ -62,6 +62,13 @@ return {
 	LowAmmoHint = "{Reload} Reload",
 	LowAmmoShare = 0.25, -- of a full mag
 	NoAmmoHint = "Out of cells",
+
+	-- Under the call wheel (hold {Callout})
+	CallWheelFooter = {
+		Keyboard = "{=1} - {=7} or mouse Pick   Let go of {Callout} Choose",
+		Gamepad = "{=LS} {=DPad} Pick   Let go of {Callout} or {=Cross} Choose",
+		Touch = "Tap a call",
+	},
 
 	CuffHint = "{Fire} Cuff %s",
 	MashHint = "Mash {Jump} to break free",
@@ -88,7 +95,7 @@ return {
 				{ "DO" },
 				{ "{Use}", "Open, sit, hide, switch on" },
 				{ "{Flashlight}", "Flashlight" },
-				{ "{Callout}", "Call out. Hold: switch call" },
+				{ "{Callout}", "Call out. Hold: pick a call" },
 				{ "{Record}", "Your record, looks, blueprint" },
 			},
 			right = {
@@ -104,9 +111,9 @@ return {
 				{ "{Disruptor}", "Fire the disruptor" },
 				{ "CARRYING" },
 				{ "{Fire}", "Drop it" },
-				{ "{=R} {=T}", "Turn it, tip it (hold to keep going)" },
-				{ "{=Arrows}", "Left / right turn, up / down tip" },
-				{ "{=RMB} + {=Arrows}", "Roll it" },
+				{ "{=Arrows}", "Left / right spin, up / down tip" },
+				{ "{=Z} {=X}", "Roll it (or {=RMB} + left / right)" },
+				{ "{=R} {=T}", "Spin, tip. Hold any: faster" },
 				{ "{=Scroll}", "Closer or farther" },
 			},
 		},
@@ -125,13 +132,13 @@ return {
 				{ "{Fire}", "Use it. Empty hands: grab" },
 				{ "{HotbarNext}", "Next item" },
 				{ "{Backpack}", "Backpack" },
-				{ "{Callout}", "Call out. Hold: switch" },
+				{ "{Callout}", "Call out. Hold: pick" },
 				{ "{Jump}", "Jump. Hidden: hold breath" },
 				{ "{Use}", "Use. Nothing there: reload" },
 				{ "{=RS}", "Look. Click: crouch" },
 			},
 			footer = "{=Touchpad} Tap: this card. Hold: your record   {=Options} Menu",
-			carry = "Carrying:   {=R2} Drop   {=DPad} Turn / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther",
+			carry = "Carrying:   {=R2} Drop   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther",
 		},
 		Touch = {
 			left = {
@@ -142,7 +149,7 @@ return {
 				{ "{Crouch}", "Crouch: slow, quiet, hard to spot" },
 				{ "{Sprint}", "Sprint, uses energy" },
 				{ "OTHER" },
-				{ "{Callout} {CalloutNext}", "Call out, switch call" },
+				{ "{Callout}", "Call out. Hold: pick a call" },
 				{ "{Record}", "Your record, looks, blueprint" },
 			},
 			right = {
@@ -154,7 +161,7 @@ return {
 				{ "{=Tap bar}", "Pick what you hold" },
 				{ "{Backpack}", "Everything you carry" },
 				{ "{Aim} {Reload}", "Show while you hold a gun" },
-				{ "{CarryTurn} {CarryTip}", "Carrying: turn it, tip it" },
+				{ "{=SPIN} {=TIP} {=ROLL}", "Carrying: turn it every way" },
 				{ "{CarryCloser} {CarryFarther}", "Carrying: closer, farther" },
 			},
 		},

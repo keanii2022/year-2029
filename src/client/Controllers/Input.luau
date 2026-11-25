@@ -3,7 +3,7 @@
 -- Gamepad names are Roblox's Xbox names; the PS button is in the comment beside each. The layout
 -- follows what shooter players already know: R2 fire / use what you hold (empty hands: grab),
 -- L2 aim, Square use/reload, Cross jump, L1 / R1 step the hotbar (empty hands is a slot),
--- Triangle opens the backpack. Circle calls out (hold: switch call), R3 crouches.
+-- Triangle opens the backpack. Circle calls out (hold: pick a call), R3 crouches.
 -- While carrying, Grab takes over L1 / R1 / L2 and the D-pad to move the prop.
 -- Glyphs draws these keys on screen.
 -- Other controllers call Input.bind / Input.isDown instead of reading keys themselves.
@@ -35,7 +35,7 @@ local actions: { [string]: Binding } = {
 		gamepad = Enum.KeyCode.ButtonR3,
 	}, -- R3
 	Jump = { keyboard = Enum.KeyCode.Space, gamepad = Enum.KeyCode.ButtonA }, -- Cross
-	-- Tap calls out, hold switches to the next call (Callouts times it)
+	-- Tap calls out, hold opens the call wheel (Callouts times it)
 	Callout = { keyboard = Enum.KeyCode.Q, gamepad = Enum.KeyCode.ButtonB }, -- Circle
 	Use = { keyboard = Enum.KeyCode.E, gamepad = Enum.KeyCode.ButtonX }, -- Square
 	-- On a gamepad Gun reloads from Square (Use) when there's nothing to use
@@ -65,12 +65,14 @@ local actions: { [string]: Binding } = {
 	Controls = { keyboard = Enum.KeyCode.H, gamepad = Enum.KeyCode.ButtonSelect },
 	Record = { keyboard = Enum.KeyCode.M },
 	-- Phone-only carry buttons; keyboard and gamepad move props through Grab's own keys
-	CarryTurn = {},
-	CarryTip = {},
+	CarrySpinLeft = {},
+	CarrySpinRight = {},
+	CarryTipForward = {},
+	CarryTipBack = {},
+	CarryRollLeft = {},
+	CarryRollRight = {},
 	CarryCloser = {},
 	CarryFarther = {},
-	-- Phone-only: the small arrow beside CALL switches calls
-	CalloutNext = {},
 }
 -- Number keys pick hotbar slots (Slot1 .. Slot9); the mouse wheel is read by Hotbar itself.
 local NUMBER_KEYS = {
@@ -94,6 +96,8 @@ type Listener = (began: boolean, device: Device) -> ()
 
 local listeners: { [string]: { Listener } } = {}
 local held: { [string]: boolean } = {}
+-- While set, presses of every other action are dropped (the call wheel is open)
+local exclusive: string? = nil
 
 local function isGamepad(input: InputObject): boolean
 	return string.match(input.UserInputType.Name, "^Gamepad") ~= nil
@@ -136,6 +140,9 @@ local function dispatch(input: InputObject, began: boolean)
 		send(action, false, device)
 		return
 	end
+	if exclusive and action ~= exclusive then
+		return
+	end
 	local binding = Input.Actions[action]
 	local carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil
 	if carrying and (binding.freeHands or (device == "Gamepad" and binding.freeHandsOnPad)) then
@@ -167,6 +174,11 @@ end
 function Input.press(action: string, began: boolean)
 	assert(Input.Actions[action], `Unknown input action {action}`)
 	send(action, began, "Touch")
+end
+
+-- Only this action's presses go through until it's cleared with nil. Releases always do.
+function Input.setExclusive(action: string?)
+	exclusive = action
 end
 
 function Input.isDown(action: string): boolean
