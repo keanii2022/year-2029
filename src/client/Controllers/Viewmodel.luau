@@ -36,6 +36,7 @@ local lowerBlend = 1
 local bobAmount = 0
 local phase = 0
 local lastKickAt = -math.huge
+local kickWeight = 1
 local reloadStartedAt = -math.huge
 local reloadDuration = 0
 
@@ -196,8 +197,10 @@ function Viewmodel.setAim(blend: number)
 	aimBlend = blend
 end
 
-function Viewmodel.kick()
+-- weight scales how hard this shot throws the gun back (1 for the starter blaster).
+function Viewmodel.kick(weight: number)
 	lastKickAt = os.clock()
+	kickWeight = weight
 end
 
 local function dropMag(camera: Camera)
@@ -314,7 +317,7 @@ local function update(dt: number)
 		bobAmount * settings.ViewmodelBobScale * (1 - aimBlend)
 	)
 
-	local kick = Viewmodel.recoil()
+	local kick = Viewmodel.recoil() * kickWeight
 	local reloadT = os.clock() - reloadStartedAt
 	local dip =
 		CombatReload.motion(reloadT, reloadDuration, settings.ReloadDipShare, settings.ReloadRiseShare)

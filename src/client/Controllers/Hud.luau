@@ -27,6 +27,8 @@ local hitMarker: Frame
 local downScreen: Frame
 local countdownLabel: TextLabel
 local hitMarkerUntil = 0
+local hitMarkerShownAt = 0
+local hitMarkerScale: UIScale
 
 local function frame(props: { [string]: any }, parent: Instance): Frame
 	local f = Instance.new("Frame")
@@ -86,11 +88,13 @@ local function buildCrosshair()
 		frame({
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.fromOffset(2, 30),
+			Size = UDim2.fromOffset(3, 30),
 			Rotation = angle,
 			BackgroundColor3 = TEXT,
 		}, hitMarker)
 	end
+	hitMarkerScale = Instance.new("UIScale")
+	hitMarkerScale.Parent = hitMarker
 end
 
 local function buildHealth()
@@ -193,9 +197,12 @@ local function refreshAmmo()
 end
 
 local function showHitMarker(down: boolean)
-	hitMarkerUntil = os.clock() + settings.HitMarkerTime * (if down then 3 else 1)
+	hitMarkerShownAt = os.clock()
+	hitMarkerUntil = hitMarkerShownAt + settings.HitMarkerTime * (if down then 3 else 1)
 	for _, line in hitMarker:GetChildren() do
-		(line :: Frame).BackgroundColor3 = if down then SPRAY_RED else TEXT
+		if line:IsA("Frame") then
+			line.BackgroundColor3 = if down then SPRAY_RED else TEXT
+		end
 	end
 end
 
@@ -209,6 +216,9 @@ local function update()
 	healthFill.BackgroundColor3 = if health <= LOW_HEALTH then SPRAY_RED else TEXT
 
 	hitMarker.Visible = os.clock() < hitMarkerUntil
+	-- Pops in big and snaps down to size, so each hit reads as a hit.
+	local pop = math.clamp(1 - (os.clock() - hitMarkerShownAt) / settings.HitMarkerTime, 0, 1)
+	hitMarkerScale.Scale = 1 + (settings.HitMarkerPop - 1) * pop * pop
 
 	local downUntil = player:GetAttribute("DownUntil")
 	downScreen.Visible = type(downUntil) == "number"
