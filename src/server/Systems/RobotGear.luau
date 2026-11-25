@@ -176,6 +176,12 @@ local function fireDisruptor(player: Player, direction: any)
 	end
 end
 
+-- Combat calls this when a disruptor shot goes off, so the gun keeps its robot-killing arc (still
+-- on DisruptorCooldown; between zaps it's a normal gun).
+function RobotGear.zap(player: Player, direction: Vector3)
+	fireDisruptor(player, direction)
+end
+
 local function onUse(player: Player, action: any, direction: any)
 	local now = os.clock()
 	if lastUse[player] and now - lastUse[player] < settings.GearUseInterval then

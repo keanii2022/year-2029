@@ -10,7 +10,7 @@ local gun = {
 	falloffEnd = 140,
 	range = 300,
 	fireInterval = 0.2,
-	automatic = false,
+	mode = "semi",
 	magSize = 12,
 	reloadTime = 1.6,
 }
@@ -32,18 +32,20 @@ return {
 		expect(Combat.damageAt(gun, 140)).toBe(10)
 		expect(Combat.damageAt(gun, 1000)).toBe(10)
 	end,
-	["pickGun takes the highest rank owned"] = function()
-		local guns = { Low = table.clone(gun), High = table.clone(gun) }
-		guns.High.rank = 3
-		expect(Combat.pickGun(guns :: any, function()
+	["selectedGun only hands back a real gun the player owns"] = function()
+		local guns = { Pistol = gun }
+		local function owns(id)
+			return id == "Pistol"
+		end
+		expect(Combat.selectedGun(guns :: any, "Pistol", owns)).toBe(gun)
+		expect(Combat.selectedGun(guns :: any, "Rifle", function()
 			return true
-		end)).toBe("High")
-		expect(Combat.pickGun(guns :: any, function(id)
-			return id == "Low"
-		end)).toBe("Low")
-		expect(Combat.pickGun(guns :: any, function()
+		end)).toBe(nil)
+		expect(Combat.selectedGun(guns :: any, "Pistol", function()
 			return false
 		end)).toBe(nil)
+		expect(Combat.selectedGun(guns :: any, 42, owns)).toBe(nil)
+		expect(Combat.selectedGun(guns :: any, nil, owns)).toBe(nil)
 	end,
 	["canFire allows a ready shot"] = function()
 		expect(fire({})).toBeTruthy()

@@ -10,9 +10,17 @@ export type Gun = {
 	falloffEnd: number,
 	range: number,
 	fireInterval: number,
-	automatic: boolean,
+	mode: "semi" | "auto" | "burst" | "pump" | "single-action",
 	magSize: number,
 	reloadTime: number,
+	burstCount: number?,
+	burstInterval: number?,
+	pellets: number?, -- shotgun: damage is per pellet
+	spread: number?, -- degrees, the pellet pattern's outer ring
+	pumpTime: number?, -- seconds the pump racks after a shot (inside fireInterval)
+	cockTime: number?, -- seconds the hammer takes to come back before a single-action shot
+	flare: boolean?, -- leaves a light burning where it lands
+	robotWeapon: boolean?, -- also fires RobotGear's disruptor arc
 }
 
 export type FireCheck = {
@@ -43,15 +51,12 @@ function Combat.damageAt(gun: Gun, distance: number): number
 	return gun.damage + (gun.minDamage - gun.damage) * t
 end
 
--- The highest-ranked gun the player owns.
-function Combat.pickGun(guns: { [string]: Gun }, owns: (string) -> boolean): string?
-	local bestId, bestRank = nil, -math.huge
-	for id, gun in guns do
-		if gun.rank > bestRank and owns(id) then
-			bestId, bestRank = id, gun.rank
-		end
+-- The gun the client says is in hand, if it's a real gun the player owns.
+function Combat.selectedGun(guns: { [string]: Gun }, gunId: any, owns: (string) -> boolean): Gun?
+	if type(gunId) ~= "string" or not guns[gunId] or not owns(gunId) then
+		return nil
 	end
-	return bestId
+	return guns[gunId]
 end
 
 function Combat.canFire(check: FireCheck): (boolean, string?)

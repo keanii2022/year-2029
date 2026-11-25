@@ -1,8 +1,9 @@
 -- Client side of guns: fires from the camera through the crosshair, flashes the muzzle and sends a
 -- glowing bullet flying to the hit right away, and asks the server to check the shot. Also draws
--- other players' shots, kicks the view on each shot and zooms it while aiming. Reloads the mag
--- from the bag on R / Square / RELOAD and on its own when you fire empty; the server's "Mag" and
--- "Reloading" attributes have the final say.
+-- other players' shots, kicks the view on each shot and zooms it while aiming. Each gun fires by
+-- its mode (Logic/CombatModes): semi, auto, burst, pump or single-action, and keeps its own mag.
+-- Reloads the mag from the bag on R / Square / RELOAD and on its own when you fire empty; the
+-- server's "Mag<GunId>" attributes have the final say.
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,6 +13,7 @@ local TweenService = game:GetService("TweenService")
 
 local CombatFeel = require(ReplicatedStorage.Shared.Logic.CombatFeel)
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
+local CombatModes = require(ReplicatedStorage.Shared.Logic.CombatModes)
 local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
@@ -31,10 +33,13 @@ local Gun = {}
 local carried: { [string]: number } = {}
 local changedListeners: { () -> () } = {}
 local hitListeners: { (down: boolean) -> () } = {}
-local lastShotAt = 0
-local mag = 0
+-- Per gun id: loaded rounds and when it last fired.
+local mags: { [string]: number } = {}
+local lastShotAt: { [string]: number } = {}
+local reloadGun: string? = nil
 local reloadStartedAt: number? = nil
 local reloadId = 0
+local armedId: string? = nil
 local firing = false
 local aimBlend = 0
 local baseFieldOfView: number? = nil
@@ -80,12 +85,19 @@ end
 
 -- Mag, reserve and whether a reload is under way, or nil when holding no gun.
 function Gun.getMagazine(): (number?, number?, boolean)
-	local _, gun = currentGun()
-	if not gun then
+	local id, gun = currentGun()
+	if not id or not gun then
 		return nil, nil, false
 	end
 	local bag = carried[gun.ammo] or 0
-	return CombatReload.loaded(mag, bag), CombatReload.reserve(mag, bag), reloadStartedAt ~= nil
+	local mag = mags[id] or 0
+	return CombatReload.loaded(mag, bag), CombatReload.reserve(mag, bag), reloadGun == id
+end
+
+-- What the gun in hand shoots, for the HUD ("CELLS", "SHELLS"), or nil when holding no gun.
+function Gun.getAmmoLabel(): string?
+	local _, gun = currentGun()
+	return if gun then settings.AmmoLabels[gun.ammo] or string.upper(gun.ammo) else nil
 end
 
 function Gun.onChanged(listener: () -> ())
@@ -97,9 +109,21 @@ function Gun.onHit(listener: (down: boolean) -> ())
 end
 
 local function notifyChanged()
-	local id = currentGun()
+	local id, gun = currentGun()
+	-- Putting a gun away drops its reload.
+	if id ~= armedId then
+		armedId = id
+		if reloadGun and reloadGun ~= id then
+			reloadId += 1
+			reloadGun = nil
+			reloadStartedAt = nil
+		end
+	end
 	local look = id and Config.Hotbar.Guns[id]
-	Viewmodel.setArmed(if id then (look and look.model or id) else nil)
+	Viewmodel.setArmed(if id then (look and look.model or id) else nil, look and look.reload)
+	if id and gun then
+		Viewmodel.setRounds(CombatReload.loaded(mags[id] or 0, carried[gun.ammo] or 0), gun.magSize)
+	end
 	for _, listener in changedListeners do
 		task.spawn(listener)
 	end
@@ -380,8 +404,11 @@ local function playSound(name: string, position: Vector3?, volume: number?, pitc
 	Debris:AddItem(emitter, 4)
 end
 
-local function drawShot(from: Vector3, to: Vector3, normal: Vector3?, hitPlayer: boolean)
-	muzzleFlash(from)
+-- flash: false for a shotgun's extra pellets, so one shot makes one flash.
+local function drawShot(from: Vector3, to: Vector3, normal: Vector3?, hitPlayer: boolean, flash: boolean)
+	if flash then
+		muzzleFlash(from)
+	end
 	launchBullet(from, to, function()
 		local sounds = settings.Sounds
 		if not normal then
@@ -429,8 +456,8 @@ end
 local function startReload()
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local _, gun = currentGun()
-	if not gun or not reloadRemote then
+	local id, gun = currentGun()
+	if not id or not gun or not reloadRemote then
 		return
 	end
 	local ok = CombatReload.canReload({
@@ -439,7 +466,7 @@ local function startReload()
 		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = true,
 		reloading = reloadStartedAt ~= nil,
-		mag = mag,
+		mag = mags[id] or 0,
 		magSize = gun.magSize,
 		bag = carried[gun.ammo] or 0,
 	})
@@ -448,15 +475,33 @@ local function startReload()
 	end
 	reloadId += 1
 	local thisReload = reloadId
+	reloadGun = id
 	reloadStartedAt = os.clock()
-	reloadRemote:FireServer()
+	reloadRemote:FireServer(id)
+	local look = Config.Hotbar.Guns[id]
+	local style = look and look.reload or "mag"
 	Viewmodel.reload(gun.reloadTime)
-	playSound(settings.Sounds.Reload, nil, settings.Sounds.ReloadVolume)
+	local sounds = settings.Sounds
+	if style == "shells" then
+		-- Shells go in one by one, then the pump racks as the gun comes back up.
+		playSound(sounds.ShellReload, nil, sounds.ReloadVolume)
+		local followUp = feelOf(id).followUp
+		if followUp then
+			task.delay(gun.reloadTime * (1 - settings.ReloadRiseShare), function()
+				if reloadId == thisReload then
+					playSound(followUp, nil, sounds.FireVolume)
+				end
+			end)
+		end
+	else
+		playSound(sounds.Reload, nil, sounds.ReloadVolume)
+	end
 	notifyChanged()
 	task.delay(gun.reloadTime, function()
 		if reloadId == thisReload then
+			reloadGun = nil
 			reloadStartedAt = nil
-			mag = CombatReload.refill(gun.magSize, carried[gun.ammo] or 0)
+			mags[id] = CombatReload.refill(gun.magSize, carried[gun.ammo] or 0)
 			notifyChanged()
 		end
 	end)
@@ -464,70 +509,92 @@ end
 
 local function cancelReload()
 	reloadId += 1
+	reloadGun = nil
 	reloadStartedAt = nil
 	notifyChanged()
 end
 
-local function fireOnce(): boolean
-	local camera = workspace.CurrentCamera
+-- Whether the gun in hand could fire aheadBy seconds from now (the revolver checks before it
+-- starts cocking), and why not.
+local function fireCheck(
+	id: string,
+	gun: CombatLogic.Gun,
+	minInterval: number,
+	aheadBy: number
+): (boolean, string?)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local gunId, gun = currentGun()
-	if not camera or not character or not humanoid or not gun then
-		return false
-	end
 	local bag = carried[gun.ammo] or 0
-	local ok, reason = CombatLogic.canFire({
-		alive = humanoid.Health > 0,
+	return CombatLogic.canFire({
+		alive = humanoid ~= nil and humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
 		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = true,
 		reloading = reloadStartedAt ~= nil,
-		ammo = CombatReload.loaded(mag, bag),
-		sinceLastShot = os.clock() - lastShotAt,
-		minInterval = gun.fireInterval,
+		ammo = CombatReload.loaded(mags[id] or 0, bag),
+		sinceLastShot = os.clock() + aheadBy - (lastShotAt[id] or 0),
+		minInterval = minInterval,
 	})
+end
+
+-- One pull of the trigger's worth of shot (all pellets for the shotgun). minInterval: the gap
+-- since this gun's last shot, shorter inside a burst.
+local function fireOnce(minInterval: number?): boolean
+	local camera = workspace.CurrentCamera
+	local character = player.Character
+	local gunId, gun = currentGun()
+	if not camera or not character or not gunId or not gun then
+		return false
+	end
+	local now = os.clock()
+	local bag = carried[gun.ammo] or 0
+	local mag = mags[gunId] or 0
+	local ok, reason = fireCheck(gunId, gun, minInterval or gun.fireInterval, 0)
 	if not ok then
 		if reason == "no ammo" and CombatReload.shouldAutoReload(mag, bag) then
 			startReload()
-		elseif reason == "no ammo" and os.clock() - lastShotAt >= gun.fireInterval then
-			lastShotAt = os.clock()
+		elseif reason == "no ammo" and now - (lastShotAt[gunId] or 0) >= gun.fireInterval then
+			lastShotAt[gunId] = now
 			playSound(settings.Sounds.Empty, nil, 0.7)
 		end
 		return false
 	end
-	lastShotAt = os.clock()
+	lastShotAt[gunId] = now
 	local feel = feelOf(gunId)
 	playShotSound(feel, nil)
-	-- Spend the cell now so the HUD and the next shot don't wait on the server's reply.
+	-- Spend the round now so the HUD and the next shot don't wait on the server's reply.
 	carried[gun.ammo] -= 1
-	mag = CombatReload.loaded(mag, bag) - 1
+	mags[gunId] = CombatReload.loaded(mag, bag) - 1
 	notifyChanged()
 
 	local origin = camera.CFrame.Position
 	local direction = camera.CFrame.LookVector
+	local look = CFrame.lookAt(Vector3.zero, direction)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character, fxFolder }
-	local result = workspace:Raycast(origin, direction * gun.range, params)
-	local hitPosition = if result then result.Position else origin + direction * gun.range
-	local hitPlayer = false
-	if result then
-		local model = result.Instance:FindFirstAncestorOfClass("Model")
-		hitPlayer = model ~= nil and Players:GetPlayerFromCharacter(model) ~= nil
-	end
 	Viewmodel.kick(feel.weight)
-	kickAt = os.clock()
+	kickAt = now
 	kickPitch, kickYaw = CombatFeel.kickAngles(feel.kick, feel.twitch, math.random())
 	kickFovPunch = feel.fovPunch
 	kickShake = feel.shake
-	drawShot(
-		Viewmodel.muzzlePosition() or (camera.CFrame * CFrame.new(settings.MuzzleOffset)).Position,
-		hitPosition,
-		result and result.Normal,
-		hitPlayer
-	)
-	fireRemote:FireServer(origin, direction)
+	local muzzle = Viewmodel.muzzlePosition() or (camera.CFrame * CFrame.new(settings.MuzzleOffset)).Position
+	-- Same fixed pellet pattern as the server, so the tracers land where the hits were counted.
+	for index, offset in CombatModes.pelletOffsets(gun.pellets or 1, gun.spread or 0) do
+		local aim = (look * CFrame.Angles(math.rad(offset.y), math.rad(-offset.x), 0)).LookVector
+		local result = workspace:Raycast(origin, aim * gun.range, params)
+		local hitPosition = if result then result.Position else origin + aim * gun.range
+		local hitPlayer = false
+		if result then
+			local model = result.Instance:FindFirstAncestorOfClass("Model")
+			hitPlayer = model ~= nil and Players:GetPlayerFromCharacter(model) ~= nil
+		end
+		drawShot(muzzle, hitPosition, result and result.Normal, hitPlayer, index == 1)
+	end
+	if gun.mode == "pump" then
+		task.delay(feel.followUpDelay or 0, Viewmodel.pump, gun.pumpTime or 0)
+	end
+	fireRemote:FireServer(origin, direction, gunId)
 	return true
 end
 
@@ -573,15 +640,46 @@ local function onFire(began: boolean)
 	if not began or firing then
 		return
 	end
+	local id, gun = currentGun()
+	if not id or not gun then
+		return
+	end
 	firing = true
-	fireOnce()
-	local _, gun = currentGun()
-	while gun and gun.automatic and Input.isDown("Fire") do
-		task.wait(gun.fireInterval)
-		if not Input.isDown("Fire") or not fireOnce() then
-			break
+	if gun.mode == "single-action" then
+		-- Thumb the hammer back first, then the shot breaks. If it couldn't fire anyway, skip the
+		-- cock so an empty pull still clicks or reloads right away.
+		local cockTime = gun.cockTime or 0
+		if fireCheck(id, gun, gun.fireInterval, cockTime) then
+			Viewmodel.cock(cockTime)
+			playSound(settings.Sounds.Cock, nil, settings.Sounds.CockVolume)
+			task.wait(cockTime)
+			if currentGun() == id then
+				fireOnce()
+			end
+		else
+			fireOnce()
 		end
-		_, gun = currentGun()
+	elseif fireOnce() then
+		local shot = 1
+		while true do
+			local nowId, nowGun = currentGun()
+			if nowId ~= id or not nowGun then
+				break
+			end
+			local burstGoing = shot < CombatModes.shotsPerPull(gun)
+			if not burstGoing and not (CombatModes.holdsToFire(gun) and Input.isDown("Fire")) then
+				break
+			end
+			local gap = CombatModes.gapAfter(gun, shot)
+			task.wait(gap)
+			if not burstGoing and not Input.isDown("Fire") then
+				break
+			end
+			if not fireOnce(gap) then
+				break
+			end
+			shot += 1
+		end
 	end
 	firing = false
 end
@@ -630,15 +728,18 @@ end
 function Gun.Start()
 	fireRemote = Net.event("GunFire")
 	reloadRemote = Net.event("GunReload")
-	local function adoptServerMag()
-		local serverMag = player:GetAttribute("Mag")
-		if type(serverMag) == "number" then
-			mag = serverMag
+	local function adoptServerMag(attribute: string)
+		local id = string.match(attribute, "^Mag(.+)$")
+		local serverMag = player:GetAttribute(attribute)
+		if id and settings.Blasters[id] and type(serverMag) == "number" then
+			mags[id] = serverMag
 			notifyChanged()
 		end
 	end
-	player:GetAttributeChangedSignal("Mag"):Connect(adoptServerMag)
-	adoptServerMag()
+	player.AttributeChanged:Connect(adoptServerMag)
+	for attribute in player:GetAttributes() do
+		adoptServerMag(attribute)
+	end
 	player.CharacterAdded:Connect(cancelReload)
 	Input.bind("Reload", function(began)
 		if began then
@@ -666,14 +767,19 @@ function Gun.Start()
 			hitPosition: Vector3,
 			normal: Vector3?,
 			hitPlayer: boolean,
-			gunId: string?
+			gunId: string?,
+			pellet: number?
 		)
 			if shooter ~= player then
 				local offset = hitPosition - origin
 				local forward = math.min(settings.OthersMuzzleForward, offset.Magnitude)
 				local muzzle = if offset.Magnitude > 0 then origin + offset.Unit * forward else origin
-				drawShot(muzzle, hitPosition, normal, hitPlayer)
-				playShotSound(feelOf(gunId), origin)
+				-- A shotgun sends one of these per pellet; only the first flashes and bangs.
+				local first = pellet == nil or pellet == 1
+				drawShot(muzzle, hitPosition, normal, hitPlayer, first)
+				if first then
+					playShotSound(feelOf(gunId), origin)
+				end
 			end
 		end
 	)

@@ -21,7 +21,6 @@ return {
 		{ id = "Medkit", label = "MEDKIT", use = "Medkit", kind = "Medkit" },
 		{ id = "Battery", label = "BATTERY", use = "Flashlight", items = { "FlashlightBattery" } },
 		{ id = "Emp", label = "EMP", use = "Emp", items = { "EmpCharge" } },
-		{ id = "Disruptor", label = "ZAP", use = "Disruptor", items = { "Disruptor" } },
 		{ id = "Handcuffs", label = "CUFFS", use = "Cuffs", items = { "Handcuffs" } },
 	},
 
@@ -35,15 +34,25 @@ return {
 		Medkit = "HEAL",
 		Flashlight = "LIGHT",
 		Emp = "THROW",
-		Disruptor = "ZAP",
 		Cuffs = "CUFF",
 	},
 
-	-- Per gun: the uploaded viewmodel (ReplicatedStorage.Viewmodels) and its slot label. A gun
-	-- model's Muzzle marker is where shots leave, Grip takes the right glove and Foregrip (two-handed
-	-- guns) the left one.
+	-- Per gun: the uploaded viewmodel (ReplicatedStorage.Viewmodels), its slot label and its reload:
+	-- "mag" drops the Mag part and a fresh one comes up, "drum" swings the revolver's drum out and
+	-- spins it, "shells" keeps the Mag (the shotgun's shell holder) and racks the pump at the end.
+	-- A gun model's Rear -> Muzzle line is the barrel, Muzzle is where shots leave, Grip takes the
+	-- right glove and Foregrip (two-handed guns) the left one.
 	Guns = {
-		StarterBlaster = { model = "viewmodel_blaster", label = "BLASTER" },
+		StarterBlaster = { model = "viewmodel_blaster", label = "BLASTER", reload = "mag" },
+		Smg = { model = "smg", label = "SMG", reload = "mag" },
+		Rifle = { model = "rifle", label = "RIFLE", reload = "mag" },
+		Shotgun = { model = "shotgun", label = "SHOTGUN", reload = "shells" },
+		Revolver = { model = "revolver", label = "REVOLVER", reload = "drum" },
+		MarksmanRifle = { model = "marksman_rifle", label = "MARKSMAN", reload = "mag" },
+		Disruptor = { model = "disruptor", label = "ZAP", reload = "mag" },
+		NailGun = { model = "nail_gun", label = "NAILS", reload = "mag" },
+		FlareGun = { model = "flare_gun", label = "FLARE", reload = "mag" },
+		DartBlaster = { model = "dart_blaster", label = "DARTS", reload = "mag" },
 	},
 
 	-- How non-supply items look in your hand; supplies use Config.Hands.Items. Same fields as there,
@@ -68,13 +77,6 @@ return {
 			shape = "Can",
 			size = Vector3.new(0.26, 0.2, 0.26),
 			color = Color3.fromRGB(60, 120, 200),
-		},
-		Disruptor = {
-			model = "disruptor",
-			shape = "Box",
-			size = Vector3.new(0.2, 0.26, 0.6),
-			color = Color3.fromRGB(120, 60, 160),
-			offset = CFrame.new(0, 0.08, -0.15),
 		},
 		Handcuffs = {
 			model = "handcuffs",

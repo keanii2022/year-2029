@@ -135,6 +135,26 @@ return {
 		{ item = "EmpCharge", model = "emp_charge", count = { 1, 1 }, near = 0, deep = 0.6, minDepth = 0.75 },
 		{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 0, deep = 0.3, minDepth = 0.85 },
 		{ item = "Medkit", model = "medkit", count = { 1, 1 }, near = 0, deep = 1.2, minDepth = 0.6 },
+		-- Guns: the weak ones turn up anywhere, the strong ones only deeper in. The dart blaster is
+		-- rare but can be anywhere. Ammo for the non-cell guns spawns on its own.
+		{ item = "NailGun", model = "nail_gun", count = { 1, 1 }, near = 0.8, deep = 1 },
+		{ item = "FlareGun", model = "flare_gun", count = { 1, 1 }, near = 0.8, deep = 0.8 },
+		{ item = "Smg", model = "smg", count = { 1, 1 }, near = 0.4, deep = 1.2, minDepth = 0.1 },
+		{ item = "Revolver", model = "revolver", count = { 1, 1 }, near = 0.3, deep = 1, minDepth = 0.15 },
+		{ item = "Shotgun", model = "shotgun", count = { 1, 1 }, near = 0.2, deep = 1, minDepth = 0.25 },
+		{ item = "Rifle", model = "rifle", count = { 1, 1 }, near = 0, deep = 0.8, minDepth = 0.35 },
+		{
+			item = "MarksmanRifle",
+			model = "marksman_rifle",
+			count = { 1, 1 },
+			near = 0,
+			deep = 0.5,
+			minDepth = 0.5,
+		},
+		{ item = "DartBlaster", model = "dart_blaster", count = { 1, 1 }, near = 0.3, deep = 0.4 },
+		{ item = "Shells", model = "ammo_shells", count = { 4, 8 }, near = 1, deep = 3, minDepth = 0.15 },
+		{ item = "Flares", model = "ammo_flares", count = { 1, 3 }, near = 1.5, deep = 1.5 },
+		{ item = "Darts", model = "ammo_darts", count = { 2, 4 }, near = 0.8, deep = 1.2 },
 	},
 
 	-- Pickups across the open floor, plus extra in robot rooms (riskier, so rolled deeper)
@@ -157,6 +177,15 @@ return {
 		{ item = "FlashlightBattery", model = "battery", count = { 2, 3 }, near = 4, deep = 4 },
 		{ item = "EmpCharge", model = "emp_charge", count = { 1, 1 }, near = 1, deep = 1 },
 		{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 0.5, deep = 0.5 },
+		{ item = "Shotgun", model = "shotgun", count = { 1, 1 }, near = 1.2, deep = 1.2 },
+		{ item = "Smg", model = "smg", count = { 1, 1 }, near = 1.2, deep = 1.2 },
+		{ item = "Revolver", model = "revolver", count = { 1, 1 }, near = 1, deep = 1 },
+		{ item = "Rifle", model = "rifle", count = { 1, 1 }, near = 0.8, deep = 0.8 },
+		{ item = "MarksmanRifle", model = "marksman_rifle", count = { 1, 1 }, near = 0.6, deep = 0.6 },
+		{ item = "DartBlaster", model = "dart_blaster", count = { 1, 1 }, near = 0.6, deep = 0.6 },
+		{ item = "Shells", model = "ammo_shells", count = { 6, 12 }, near = 3, deep = 3 },
+		{ item = "Darts", model = "ammo_darts", count = { 3, 6 }, near = 1.5, deep = 1.5 },
+		{ item = "Flares", model = "ammo_flares", count = { 2, 3 }, near = 1, deep = 1 },
 	},
 
 	PickupTag = "SupplyPickup",
