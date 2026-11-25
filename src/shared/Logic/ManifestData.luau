@@ -9420,34 +9420,42 @@ return {
 		{
 			name = "dart_pop_1",
 			group = "gear",
+			assetId = 74814350127676,
 		},
 		{
 			name = "dart_pop_2",
 			group = "gear",
+			assetId = 124819876060839,
 		},
 		{
 			name = "dart_pop_3",
 			group = "gear",
+			assetId = 133286160844295,
 		},
 		{
 			name = "dart_pop_4",
 			group = "gear",
+			assetId = 104109768297077,
 		},
 		{
 			name = "dart_pop_5",
 			group = "gear",
+			assetId = 75659767886836,
 		},
 		{
 			name = "dart_pop_6",
 			group = "gear",
+			assetId = 73809822273794,
 		},
 		{
 			name = "dart_pop_7",
 			group = "gear",
+			assetId = 76409659261201,
 		},
 		{
 			name = "dart_pop_8",
 			group = "gear",
+			assetId = 102574359559345,
 		},
 		{
 			name = "disruptor_charge",
@@ -9477,14 +9485,17 @@ return {
 		{
 			name = "flare_burn_loop",
 			group = "gear",
+			assetId = 134805881299247,
 		},
 		{
 			name = "flare_burnout",
 			group = "gear",
+			assetId = 71975879639356,
 		},
 		{
 			name = "flare_pop",
 			group = "gear",
+			assetId = 94707550482747,
 		},
 		{
 			name = "flashlight_click",
@@ -9519,6 +9530,7 @@ return {
 		{
 			name = "nail_gun",
 			group = "gear",
+			assetId = 80046632357866,
 		},
 		{
 			name = "noise_maker_bell",
@@ -9543,6 +9555,7 @@ return {
 		{
 			name = "shot_heavy",
 			group = "gear",
+			assetId = 91860576558668,
 		},
 		{
 			name = "shot_marksman",
@@ -9552,6 +9565,7 @@ return {
 		{
 			name = "shot_pistol",
 			group = "gear",
+			assetId = 118448183642866,
 		},
 		{
 			name = "shot_revolver",
@@ -9561,14 +9575,17 @@ return {
 		{
 			name = "shot_rifle",
 			group = "gear",
+			assetId = 119351692333749,
 		},
 		{
 			name = "shot_shotgun",
 			group = "gear",
+			assetId = 104197595163099,
 		},
 		{
 			name = "shot_smg",
 			group = "gear",
+			assetId = 122904597650261,
 		},
 		{
 			name = "shotgun_pump",

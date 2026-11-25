@@ -6113,8 +6113,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 122191920095643,
+   "textureId": 80223703153040,
    "screenId": null
   },
   {
@@ -6257,8 +6257,8 @@
      "does": "Battery pack swaps out. The zigzag arc between the prongs flashes on fire. Stuns robots."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 140219653963283,
+   "textureId": 76935238719167,
    "screenId": null
   },
   {
@@ -6439,8 +6439,8 @@
      "does": "The flare round. A fired flare lights an area for a while and pulls robots to it."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 99566042749331,
+   "textureId": 109976114213671,
    "screenId": null
   },
   {
@@ -6795,8 +6795,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 116077911489145,
+   "textureId": 80453636665559,
    "screenId": null
   },
   {
@@ -7073,8 +7073,8 @@
      "does": "Scope lens glints. Players far away can spot it."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 138376957148519,
+   "textureId": 98660172159340,
    "screenId": null
   },
   {
@@ -7246,8 +7246,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 82262862907193,
+   "textureId": 86112373986176,
    "screenId": null
   },
   {
@@ -7468,8 +7468,8 @@
      "does": "Cocks back before each shot (pivot at its base), snaps forward on fire."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 126203870142564,
+   "textureId": 91266296248668,
    "screenId": null
   },
   {
@@ -7604,8 +7604,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 91286285412841,
+   "textureId": 107069070653422,
    "screenId": null
   },
   {
@@ -7882,8 +7882,8 @@
      "does": "Racks back toward the grip and forward after each shot."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 75857228033982,
+   "textureId": 77171072365317,
    "screenId": null
   },
   {
@@ -8018,8 +8018,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 133213241536817,
+   "textureId": 129230362597527,
    "screenId": null
   },
   {
@@ -8178,8 +8178,8 @@
      "does": "Lights up while loaded, dims when empty."
     }
    ],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 99546984168124,
+   "textureId": 110943577860214,
    "screenId": null
   },
   {
@@ -14325,8 +14325,8 @@
     }
    ],
    "moves": [],
-   "assetId": null,
-   "textureId": null,
+   "assetId": 89124516666592,
+   "textureId": 81216102281476,
    "screenId": null
   },
   {
@@ -21146,7 +21146,7 @@
    "name": "bullet_whiz",
    "group": "gear",
    "file": "art/sounds/gear/bullet_whiz.mp3",
-   "assetId": null
+   "assetId": 78359321255591
   },
   {
    "name": "cell_eject",
@@ -21173,10 +21173,52 @@
    "assetId": 102275371977321
   },
   {
-   "name": "dart_pop",
+   "name": "dart_pop_1",
    "group": "gear",
-   "file": "art/sounds/gear/dart_pop.mp3",
-   "assetId": 113579670455801
+   "file": "art/sounds/gear/dart_pop_1.mp3",
+   "assetId": 74814350127676
+  },
+  {
+   "name": "dart_pop_2",
+   "group": "gear",
+   "file": "art/sounds/gear/dart_pop_2.mp3",
+   "assetId": 124819876060839
+  },
+  {
+   "name": "dart_pop_3",
+   "group": "gear",
+   "file": "art/sounds/gear/dart_pop_3.mp3",
+   "assetId": 133286160844295
+  },
+  {
+   "name": "dart_pop_4",
+   "group": "gear",
+   "file": "art/sounds/gear/dart_pop_4.mp3",
+   "assetId": 104109768297077
+  },
+  {
+   "name": "dart_pop_5",
+   "group": "gear",
+   "file": "art/sounds/gear/dart_pop_5.mp3",
+   "assetId": 75659767886836
+  },
+  {
+   "name": "dart_pop_6",
+   "group": "gear",
+   "file": "art/sounds/gear/dart_pop_6.mp3",
+   "assetId": 73809822273794
+  },
+  {
+   "name": "dart_pop_7",
+   "group": "gear",
+   "file": "art/sounds/gear/dart_pop_7.mp3",
+   "assetId": 76409659261201
+  },
+  {
+   "name": "dart_pop_8",
+   "group": "gear",
+   "file": "art/sounds/gear/dart_pop_8.mp3",
+   "assetId": 102574359559345
   },
   {
    "name": "disruptor_charge",
@@ -21212,13 +21254,19 @@
    "name": "flare_burn_loop",
    "group": "gear",
    "file": "art/sounds/gear/flare_burn_loop.mp3",
-   "assetId": 87871535597138
+   "assetId": 134805881299247
+  },
+  {
+   "name": "flare_burnout",
+   "group": "gear",
+   "file": "art/sounds/gear/flare_burnout.mp3",
+   "assetId": 71975879639356
   },
   {
    "name": "flare_pop",
    "group": "gear",
    "file": "art/sounds/gear/flare_pop.mp3",
-   "assetId": 78612957490661
+   "assetId": 94707550482747
   },
   {
    "name": "flashlight_click",
@@ -21230,19 +21278,19 @@
    "name": "hit_marker",
    "group": "gear",
    "file": "art/sounds/gear/hit_marker.mp3",
-   "assetId": null
+   "assetId": 117162795531037
   },
   {
    "name": "impact_concrete",
    "group": "gear",
    "file": "art/sounds/gear/impact_concrete.mp3",
-   "assetId": null
+   "assetId": 136670849159058
   },
   {
    "name": "impact_metal",
    "group": "gear",
    "file": "art/sounds/gear/impact_metal.mp3",
-   "assetId": null
+   "assetId": 120577402329050
   },
   {
    "name": "locker_clang",
@@ -21260,7 +21308,7 @@
    "name": "nail_gun",
    "group": "gear",
    "file": "art/sounds/gear/nail_gun.mp3",
-   "assetId": 75343123704751
+   "assetId": 80046632357866
   },
   {
    "name": "noise_maker_bell",
@@ -21290,49 +21338,49 @@
    "name": "shot_heavy",
    "group": "gear",
    "file": "art/sounds/gear/shot_heavy.mp3",
-   "assetId": null
+   "assetId": 91860576558668
   },
   {
    "name": "shot_marksman",
    "group": "gear",
    "file": "art/sounds/gear/shot_marksman.mp3",
-   "assetId": null
+   "assetId": 77934346648120
   },
   {
    "name": "shot_pistol",
    "group": "gear",
    "file": "art/sounds/gear/shot_pistol.mp3",
-   "assetId": null
+   "assetId": 118448183642866
   },
   {
    "name": "shot_revolver",
    "group": "gear",
    "file": "art/sounds/gear/shot_revolver.mp3",
-   "assetId": null
+   "assetId": 121289902501207
   },
   {
    "name": "shot_rifle",
    "group": "gear",
    "file": "art/sounds/gear/shot_rifle.mp3",
-   "assetId": null
+   "assetId": 119351692333749
   },
   {
    "name": "shot_shotgun",
    "group": "gear",
    "file": "art/sounds/gear/shot_shotgun.mp3",
-   "assetId": null
+   "assetId": 104197595163099
   },
   {
    "name": "shot_smg",
    "group": "gear",
    "file": "art/sounds/gear/shot_smg.mp3",
-   "assetId": null
+   "assetId": 122904597650261
   },
   {
    "name": "shotgun_pump",
    "group": "gear",
    "file": "art/sounds/gear/shotgun_pump.mp3",
-   "assetId": null
+   "assetId": 81630168977498
   },
   {
    "name": "smoke_hiss",
@@ -21776,19 +21824,19 @@
    "name": "brute_thud",
    "group": "robots",
    "file": "art/sounds/robots/brute_thud.mp3",
-   "assetId": null
+   "assetId": 103264687073454
   },
   {
    "name": "chase_servo_scream",
    "group": "robots",
    "file": "art/sounds/robots/chase_servo_scream.mp3",
-   "assetId": null
+   "assetId": 107962493179108
   },
   {
    "name": "chase_steps",
    "group": "robots",
    "file": "art/sounds/robots/chase_steps.mp3",
-   "assetId": null
+   "assetId": 84213212027166
   },
   {
    "name": "crawler_skitter_loop",
@@ -21800,25 +21848,25 @@
    "name": "curious_beep_1",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_1.mp3",
-   "assetId": null
+   "assetId": 127121402867108
   },
   {
    "name": "curious_beep_2",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_2.mp3",
-   "assetId": null
+   "assetId": 108060802225897
   },
   {
    "name": "curious_beep_3",
    "group": "robots",
    "file": "art/sounds/robots/curious_beep_3.mp3",
-   "assetId": null
+   "assetId": 133417270148018
   },
   {
    "name": "drag",
    "group": "robots",
    "file": "art/sounds/robots/drag.mp3",
-   "assetId": null
+   "assetId": 133250616663948
   },
   {
    "name": "emp_shutdown",
@@ -21830,37 +21878,37 @@
    "name": "error_stall",
    "group": "robots",
    "file": "art/sounds/robots/error_stall.mp3",
-   "assetId": null
+   "assetId": 103636141797105
   },
   {
    "name": "fumble",
    "group": "robots",
    "file": "art/sounds/robots/fumble.mp3",
-   "assetId": null
+   "assetId": 127025180176602
   },
   {
    "name": "grab_clank",
    "group": "robots",
    "file": "art/sounds/robots/grab_clank.mp3",
-   "assetId": null
+   "assetId": 86559826633529
   },
   {
    "name": "heavy_step",
    "group": "robots",
    "file": "art/sounds/robots/heavy_step.mp3",
-   "assetId": null
+   "assetId": 91588097918585
   },
   {
    "name": "hum_loop",
    "group": "robots",
    "file": "art/sounds/robots/hum_loop.mp3",
-   "assetId": null
+   "assetId": 120604825653371
   },
   {
    "name": "hydraulic_hiss",
    "group": "robots",
    "file": "art/sounds/robots/hydraulic_hiss.mp3",
-   "assetId": null
+   "assetId": 133074424352186
   },
   {
    "name": "jingle_distorted",
@@ -21872,13 +21920,13 @@
    "name": "oil_drip",
    "group": "robots",
    "file": "art/sounds/robots/oil_drip.mp3",
-   "assetId": null
+   "assetId": 76731051387580
   },
   {
    "name": "scanner_ping",
    "group": "robots",
    "file": "art/sounds/robots/scanner_ping.mp3",
-   "assetId": null
+   "assetId": 111722901422626
   },
   {
    "name": "scout_eye_whine",
@@ -21896,121 +21944,121 @@
    "name": "scrape",
    "group": "robots",
    "file": "art/sounds/robots/scrape.mp3",
-   "assetId": null
+   "assetId": 86273468828981
   },
   {
    "name": "servo_whirr_1",
    "group": "robots",
    "file": "art/sounds/robots/servo_whirr_1.mp3",
-   "assetId": null
+   "assetId": 118984836745583
   },
   {
    "name": "servo_whirr_2",
    "group": "robots",
    "file": "art/sounds/robots/servo_whirr_2.mp3",
-   "assetId": null
+   "assetId": 98067518835454
   },
   {
    "name": "spot_alert",
    "group": "robots",
    "file": "art/sounds/robots/spot_alert.mp3",
-   "assetId": null
+   "assetId": 92395665266996
   },
   {
    "name": "callout_0",
    "group": "voice",
    "file": "art/sounds/voice/callout_0.mp3",
-   "assetId": null
+   "assetId": 109091450158742
   },
   {
    "name": "callout_1",
    "group": "voice",
    "file": "art/sounds/voice/callout_1.mp3",
-   "assetId": null
+   "assetId": 95350814187075
   },
   {
    "name": "callout_2",
    "group": "voice",
    "file": "art/sounds/voice/callout_2.mp3",
-   "assetId": null
+   "assetId": 121536614885105
   },
   {
    "name": "callout_3",
    "group": "voice",
    "file": "art/sounds/voice/callout_3.mp3",
-   "assetId": null
+   "assetId": 92928971352250
   },
   {
    "name": "callout_4",
    "group": "voice",
    "file": "art/sounds/voice/callout_4.mp3",
-   "assetId": null
+   "assetId": 107849856758042
   },
   {
    "name": "callout_5",
    "group": "voice",
    "file": "art/sounds/voice/callout_5.mp3",
-   "assetId": null
+   "assetId": 115877998839000
   },
   {
    "name": "callout_6",
    "group": "voice",
    "file": "art/sounds/voice/callout_6.mp3",
-   "assetId": null
+   "assetId": 92441773453435
   },
   {
    "name": "ghost_kid_close",
    "group": "voice",
    "file": "art/sounds/voice/ghost_kid_close.mp3",
-   "assetId": null
+   "assetId": 87204267202159
   },
   {
    "name": "ghost_kid_cry",
    "group": "voice",
    "file": "art/sounds/voice/ghost_kid_cry.mp3",
-   "assetId": null
+   "assetId": 116480066647804
   },
   {
    "name": "ghost_kid_near_1",
    "group": "voice",
    "file": "art/sounds/voice/ghost_kid_near_1.mp3",
-   "assetId": null
+   "assetId": 73398083685902
   },
   {
    "name": "ghost_kid_near_2",
    "group": "voice",
    "file": "art/sounds/voice/ghost_kid_near_2.mp3",
-   "assetId": null
+   "assetId": 83111417982617
   },
   {
    "name": "robot_chatter",
    "group": "voice",
    "file": "art/sounds/voice/robot_chatter.mp3",
-   "assetId": null
+   "assetId": 71290644651510
   },
   {
    "name": "robot_error",
    "group": "voice",
    "file": "art/sounds/voice/robot_error.mp3",
-   "assetId": null
+   "assetId": 102609962424834
   },
   {
    "name": "robot_notice",
    "group": "voice",
    "file": "art/sounds/voice/robot_notice.mp3",
-   "assetId": null
+   "assetId": 89502601556081
   },
   {
    "name": "robot_resume",
    "group": "voice",
    "file": "art/sounds/voice/robot_resume.mp3",
-   "assetId": null
+   "assetId": 112101001652469
   },
   {
    "name": "robot_task",
    "group": "voice",
    "file": "art/sounds/voice/robot_task.mp3",
-   "assetId": null
+   "assetId": 70835749640045
   },
   {
    "name": "distant_hum_loop",
@@ -22420,13 +22468,13 @@
    "name": "bullet_tracer",
    "kind": "effect",
    "file": "art/effects/bullet_tracer.png",
-   "assetId": null
+   "assetId": 86104979749014
   },
   {
    "name": "muzzle_flash_card",
    "kind": "effect",
    "file": "art/effects/muzzle_flash_card.png",
-   "assetId": null
+   "assetId": 108625774648569
   }
  ]
 }

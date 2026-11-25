@@ -1135,38 +1135,11 @@ def gunshot(punch=70, crack=1.0, blast=1.0, zap=None, zap_len=0.16, mech=1.0, ro
     return reverb(dry, 2.3, min(0.65, 0.38 * room), 1.0 + 0.9 * room, 0.5, 0.84 + 0.04 * min(room, 1.5))
 
 
-@sound("gear", "shot_pistol", "loud", "starter pistol shot: crack, punch, teal snap, warehouse echo")
-def shot_pistol():
-    return gunshot(75, zap=1900, mech=1.0, room=1.0)
-
-
-@sound("gear", "shot_smg", "loud", "smg shot: short and tight so bursts stay punchy")
-def shot_smg():
-    return gunshot(92, crack=1.2, blast=0.7, zap=2300, zap_len=0.1, mech=0.7, room=0.55, boom=0.7)
-
-
-@sound("gear", "shot_shotgun", "loud", "shotgun blast: huge low boom with a long roar")
-def shot_shotgun():
-    return gunshot(48, crack=1.1, blast=2.2, zap=850, zap_len=0.22, mech=0.0, room=1.4, boom=1.8)
-
-
 @sound("gear", "shotgun_pump", "normal", "shotgun pumped after a shot: rack back, rack forward")
 def shotgun_pump():
     back = layer(knock(380, 0.08, 2800), (whoosh(0.09, 1200, 2500, 2, 0.01, 0.05), 0, 0.4), (click(2200, 0.02), 0.06, 0.8))
     fwd = layer(knock(460, 0.1, 3400), (clang(1100, 0.2, 0.4), 0.005, 0.3))
     return layer(back, (fwd, 0.17))
-
-
-@sound("gear", "shot_rifle", "loud", "rifle shot: sharp crack with a long rolling echo")
-def shot_rifle():
-    return gunshot(64, crack=1.5, blast=1.2, zap=2700, mech=0.8, room=1.25, boom=1.2)
-
-
-@sound("gear", "shot_heavy", "loud", "heavy blaster: deep violet discharge that shakes the room")
-def shot_heavy():
-    sec = 0.6
-    hum = amp(drive(osc(expo(110, 35, sec), sec, "saw"), 3), decay(sec, 0.15, 0.002))
-    return layer(gunshot(38, crack=0.9, blast=1.6, zap=620, zap_len=0.35, mech=0.0, room=1.6, boom=2.2), (lp(hum, 900), 0, 0.5))
 
 
 @sound("gear", "shot_revolver", "loud", "revolver: one big slow bang")
@@ -1218,31 +1191,6 @@ def shell_clink():
 def cell_eject():
     chirp = amp(osc(expo(600, 2400, 0.15), 0.15, "tri"), adsr(0.15, 0.005, 0.05))
     return layer(hiss(0.18, 2000, 0.005, 0.12), (click(2200, 0.015), 0.01, 0.8), (chirp, 0.05, 0.5))
-
-
-@sound("gear", "dart_pop", "normal", "foam dart pop")
-def dart_pop():
-    return layer(amp(lp(noise(0.06), 1500), decay(0.06, 0.012)), (thud(300, 0.06, 0.5, 0), 0, 0.6), (whoosh(0.18, 3000, 1200, 1.5, 0.01, 0.12), 0.02, 0.3))
-
-
-@sound("gear", "nail_gun", "loud", "pneumatic thunk")
-def nail_gun():
-    air = amp(hp(noise(0.12), 1500), decay(0.12, 0.03))
-    return layer(air, (clang(1400, 0.25, 0.7), 0.005, 0.6), (thud(110, 0.15, 0.5), 0, 0.9))
-
-
-@sound("gear", "flare_pop", "loud", "flare gun pop")
-def flare_pop():
-    return layer(thud(150, 0.2, 0.4, 0.8), (amp(lp(noise(0.1), 3000), decay(0.1, 0.02)), 0, 0.8), (hiss(0.6, 2000, 0.05, 0.4), 0.05, 0.3))
-
-
-@sound("gear", "flare_burn_loop", "loud", "flare fizzing burn")
-def flare_burn_loop():
-    sec = 3.0
-    fizz = circ(lambda x: hp(x, 1500), noise(sec))
-    roar = circ(lambda x: lp(x, 400), noise(sec))
-    pops = [(click(random.uniform(1500, 6000), 0.004, 1), random.uniform(0, sec), random.uniform(0.3, 1)) for _ in range(120)]
-    return layer(amp(fizz, 0.35), (roar, 0, 0.6), wrap_layer(sec, *pops))
 
 
 @sound("gear", "disruptor_charge", "loud", "disruptor rising whine")

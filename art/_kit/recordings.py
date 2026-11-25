@@ -1,0 +1,61 @@
+# Cuts Keani's own recordings into game sounds: trims each take, adds the warehouse echo and sets the level.
+# The raw takes live in art/sounds/recorded_raw/ (kept out of git). Run from art/: python3 _kit/recordings.py
+import os, subprocess, tempfile
+
+ART = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAW = os.path.join(ART, "sounds", "recorded_raw")
+OUT = os.path.join(ART, "sounds", "gear")
+PEAK_DB = -1.0
+ECHO = "aecho=0.85:0.9:95|240|430:0.32|0.2|0.1"  # the hall throwing the shot back
+TOY_ECHO = "aecho=0.9:0.9:80|200:0.18|0.08"
+
+# (name, source file, start sec, end sec, echo); times are where the take sits in the raw recording
+TAKES = [
+    ("shot_pistol", "guns_1.m4a", 0.0, 0.5, ECHO),
+    ("shot_smg", "guns_1.m4a", 0.47, 1.6, ECHO),
+    ("shot_shotgun", "guns_1.m4a", 1.97, 3.0, ECHO),
+    ("shot_rifle", "guns_1.m4a", 3.33, 4.45, ECHO),  # the whole three-round burst in one take
+    ("shot_heavy", "guns_1.m4a", 5.31, 6.55, ECHO),
+    ("nail_gun", "guns_1.m4a", 7.72, 7.97, ECHO),
+    ("flare_pop", "guns_1.m4a", 9.98, 10.65, ECHO),
+    ("flare_burnout", "guns_1.m4a", 25.45, 27.45, None),
+] + [(f"dart_pop_{k + 1}", "guns_1.m4a", start - 0.04, start + 0.5, TOY_ECHO)
+     for k, start in enumerate((28.38, 29.50, 30.52, 31.52, 32.50, 33.48, 34.40, 35.34))]
+
+# The flare's burn becomes a loop: the steady stretch with its own next bit folded over the start, so the seam is seamless.
+BURN = ("flare_burn_loop", "guns_1.m4a", 12.0, 8.0, 0.4)
+
+
+def ffmpeg(*args):
+    subprocess.run(["ffmpeg", "-v", "error", "-y", *args], check=True)
+
+
+def peak_of(path):
+    r = subprocess.run(["ffmpeg", "-i", path, "-af", "volumedetect", "-f", "null", "-"], capture_output=True, text=True)
+    line = next(l for l in r.stderr.splitlines() if "max_volume" in l)
+    return float(line.split("max_volume:")[1].split("dB")[0])
+
+
+def finish(tmp_wav, name):
+    gain = PEAK_DB - peak_of(tmp_wav)
+    ffmpeg("-i", tmp_wav, "-af", f"volume={gain:.2f}dB", "-ac", "1", "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "160k",
+           os.path.join(OUT, name + ".mp3"))
+    print("wrote", name)
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    for name, src, start, end, echo in TAKES:
+        wav = os.path.join(tmp, name + ".wav")
+        chain = ["highpass=f=35", "afade=t=in:d=0.004"]
+        if echo:
+            chain += ["apad=pad_dur=0.6", echo]
+        chain += [f"afade=t=out:st={end - start + (0.4 if echo else 0) :.3f}:d=0.2"]
+        ffmpeg("-ss", f"{start:.3f}", "-to", f"{end:.3f}", "-i", os.path.join(RAW, src), "-af", ",".join(chain), wav)
+        finish(wav, name)
+    name, src, start, length, fold = BURN
+    wav = os.path.join(tmp, name + ".wav")
+    ffmpeg("-ss", f"{start:.3f}", "-t", f"{length + fold:.3f}", "-i", os.path.join(RAW, src), "-filter_complex",
+           f"[0]highpass=f=35,asplit[a][b];[a]atrim=0:{length},afade=t=in:d={fold}[body];"
+           f"[b]atrim={length}:{length + fold},asetpts=PTS-STARTPTS,afade=t=out:d={fold}[tail];"
+           f"[body][tail]amix=inputs=2:normalize=0:duration=first", wav)
+    finish(wav, name)
