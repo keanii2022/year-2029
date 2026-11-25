@@ -208,6 +208,26 @@ return {
 		ClankVolume = 1,
 		Sputter = "emp_shutdown",
 		Reboot = "hydraulic_hiss",
+		-- Knocking one down spills salvage once per robot per day (so it can't be farmed): a few
+		-- rolls from Common, plus one Rare pick at RareChance (brutes always get the rare pick).
+		Salvage = {
+			Rolls = { 2, 3 },
+			Common = {
+				{ id = "BlasterCells", count = 12, weight = 4 },
+				{ id = "FlashlightBattery", count = 1, weight = 3 },
+				{ id = "Shells", count = 4, weight = 2 },
+				{ id = "Bandage", count = 1, weight = 2 },
+				{ id = "EnergyDrink", count = 1, weight = 1 },
+			},
+			RareChance = 0.35,
+			Rare = {
+				{ id = "EmpCharge", count = 1, weight = 4 },
+				{ id = "Medkit", count = 1, weight = 3 },
+				{ id = "Disruptor", count = 1, weight = 1 },
+				{ id = "Handcuffs", count = 1, weight = 1 },
+			},
+			AlwaysRare = { brute = true },
+		},
 	},
 
 	-- Senses

@@ -1887,6 +1887,40 @@ end
 -- A gun hit for damage from shooter (a Player or a simulated player's stand-in), fired from `from`.
 -- The server's raycast already decided it landed. Sparks, a clank and a stagger every time; enough
 -- damage inside Shot.HitMemory knocks it down. Hitting one that's already down only sparks.
+local function pickWeighted(entries: { any }): any
+	local total = 0
+	for _, entry in entries do
+		total += entry.weight
+	end
+	local roll = random:NextNumber(0, total)
+	for _, entry in entries do
+		roll -= entry.weight
+		if roll <= 0 then
+			return entry
+		end
+	end
+	return entries[#entries]
+end
+
+local function spillSalvage(robot: Robot)
+	local today = DayNight.day()
+	if robot.salvagedDay == today then
+		return
+	end
+	robot.salvagedDay = today
+	local salvage = shot.Salvage
+	local contents = {}
+	for _ = 1, random:NextInteger(salvage.Rolls[1], salvage.Rolls[2]) do
+		local entry = pickWeighted(salvage.Common)
+		table.insert(contents, { id = entry.id, count = entry.count })
+	end
+	if salvage.AlwaysRare[robot.typeName] or random:NextNumber() < salvage.RareChance then
+		local entry = pickWeighted(salvage.Rare)
+		table.insert(contents, { id = entry.id, count = entry.count })
+	end
+	Inventory.dropPile(robot.position + Vector3.new(0, 2, 0), contents)
+end
+
 function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, at: Vector3)
 	if robot.dead then
 		return
@@ -1908,6 +1942,7 @@ function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, 
 		robot.knockedUntil = now + shot.DownSeconds
 		Robots.disable(robot, shot.DownSeconds)
 		dropCarried(robot, robot.position)
+		spillSalvage(robot)
 		robot.waypoints, robot.goal = {}, nil
 		place(robot)
 		fxRemote:FireAllClients(robot.model, "down", at)

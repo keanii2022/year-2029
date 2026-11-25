@@ -151,6 +151,14 @@ function Inventory.dropAll(player: Player, position: Vector3): Model?
 	return buildPile(groundBelow(position, player.Character), contents)
 end
 
+-- A loot pile anyone can take from, e.g. salvage spilled by a knocked-down robot
+function Inventory.dropPile(position: Vector3, contents: { Stack }): Model?
+	if #contents == 0 then
+		return nil
+	end
+	return buildPile(groundBelow(position, nil), contents)
+end
+
 function Inventory.Init()
 	changedRemote = Net.event("InventoryChanged")
 	pilesFolder = Instance.new("Folder")
