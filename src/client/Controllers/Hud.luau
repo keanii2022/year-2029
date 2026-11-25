@@ -53,6 +53,9 @@ local pileShownAt = 0
 local hitMarkerUntil = 0
 local hitMarkerShownAt = 0
 local hitMarkerScale: UIScale
+local hitMarkerSize = 1 -- a kill's X is bigger
+local killFlash: Frame
+local killFlashAt = -math.huge
 
 local function frame(props: { [string]: any }, parent: Instance): Frame
 	local f = Instance.new("Frame")
@@ -119,6 +122,24 @@ local function buildCrosshair()
 	end
 	hitMarkerScale = Instance.new("UIScale")
 	hitMarkerScale.Parent = hitMarker
+
+	-- A kill flashes the screen edges red: four strips fading toward the middle.
+	killFlash = frame({ Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false }, gui)
+	local width = settings.KillFlashWidth
+	for _, edge in
+		{
+			{ size = UDim2.fromScale(1, width), at = UDim2.fromScale(0, 0), rotation = 90 },
+			{ size = UDim2.fromScale(1, width), at = UDim2.fromScale(0, 1 - width), rotation = -90 },
+			{ size = UDim2.fromScale(width, 1), at = UDim2.fromScale(0, 0), rotation = 0 },
+			{ size = UDim2.fromScale(width, 1), at = UDim2.fromScale(1 - width, 0), rotation = 180 },
+		}
+	do
+		local strip = frame({ Size = edge.size, Position = edge.at, BackgroundColor3 = SPRAY_RED }, killFlash)
+		local fade = Instance.new("UIGradient")
+		fade.Rotation = edge.rotation
+		fade.Transparency = NumberSequence.new(0.3, 1)
+		fade.Parent = strip
+	end
 end
 
 local function buildHealth()
@@ -383,6 +404,10 @@ end
 local function showHitMarker(down: boolean)
 	hitMarkerShownAt = os.clock()
 	hitMarkerUntil = hitMarkerShownAt + settings.HitMarkerTime * (if down then 3 else 1)
+	hitMarkerSize = if down then settings.KillMarkerScale else 1
+	if down then
+		killFlashAt = hitMarkerShownAt
+	end
 	for _, line in hitMarker:GetChildren() do
 		if line:IsA("Frame") then
 			line.BackgroundColor3 = if down then SPRAY_RED else TEXT
@@ -402,7 +427,8 @@ local function update()
 	hitMarker.Visible = os.clock() < hitMarkerUntil
 	-- Pops in big and snaps down to size, so each hit reads as a hit.
 	local pop = math.clamp(1 - (os.clock() - hitMarkerShownAt) / settings.HitMarkerTime, 0, 1)
-	hitMarkerScale.Scale = 1 + (settings.HitMarkerPop - 1) * pop * pop
+	hitMarkerScale.Scale = hitMarkerSize * (1 + (settings.HitMarkerPop - 1) * pop * pop)
+	killFlash.Visible = os.clock() - killFlashAt < settings.KillFlashTime
 
 	local downUntil = player:GetAttribute("DownUntil")
 	downScreen.Visible = type(downUntil) == "number"

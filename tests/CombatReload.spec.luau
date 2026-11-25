@@ -75,4 +75,27 @@ return {
 		expect(CombatReload.motion(1.6, 1.6, 0.25, 0.2)).toBe(0)
 		expect(CombatReload.motion(1.6 - 0.16, 1.6, 0.25, 0.2)).toBeNear(0.5)
 	end,
+	["timeFor picks tactical, empty or per shell"] = function()
+		local pistol = { magSize = 12, reloadTime = 1.6, emptyReloadTime = 2 }
+		expect(CombatReload.timeFor(pistol, 4)).toBe(1.6)
+		expect(CombatReload.timeFor(pistol, 0)).toBe(2)
+		local revolver = { magSize = 6, reloadTime = 2.4 }
+		expect(CombatReload.timeFor(revolver, 0)).toBe(2.4)
+		local shotgun = { magSize = 6, reloadTime = 2.6, shellReloadTime = 0.4, pumpTime = 0.45 }
+		expect(CombatReload.timeFor(shotgun, 4)).toBeNear(0.8)
+		expect(CombatReload.timeFor(shotgun, 0)).toBeNear(2.85)
+		expect(CombatReload.timeFor(shotgun, 0, 2)).toBeNear(1.25)
+	end,
+	["isEmpty only for guns with an empty reload"] = function()
+		local pistol = { magSize = 12, reloadTime = 1.6, emptyReloadTime = 2 }
+		expect(CombatReload.isEmpty(pistol, 0)).toBeTruthy()
+		expect(CombatReload.isEmpty(pistol, 3)).toBeFalsy()
+		expect(CombatReload.isEmpty({ magSize = 6, reloadTime = 2.4 }, 0)).toBeFalsy()
+	end,
+	["rack pulls back and snaps forward inside its window"] = function()
+		expect(CombatReload.rack(0.7, 0.75, 0.9)).toBe(0)
+		expect(CombatReload.rack(0.85, 0.75, 0.9)).toBeNear(1, 0.01)
+		expect(CombatReload.rack(0.875, 0.75, 0.9)).toBeNear(0.5, 0.01)
+		expect(CombatReload.rack(0.95, 0.75, 0.9)).toBe(0)
+	end,
 }

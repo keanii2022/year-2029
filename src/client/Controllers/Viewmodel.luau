@@ -5,7 +5,9 @@
 -- On reload it dips and its Mag part (a small block on the stand-in) drops out and fades; the
 -- revolver swings its drum out instead and the shotgun racks its pump. Moving parts found by name:
 -- Pump slides back and forward after a shotgun shot, Hammer cocks back about its base and snaps
--- forward, and the revolver's Mag drum turns a chamber per shot.
+-- forward, and the revolver's Mag drum turns a chamber per shot. Slide (pistol, SMG) or Bolt (rifles,
+-- nail gun) kicks back each shot and racks on an empty reload; casings fly from the Eject marker.
+-- Recoil, sway, landing and the equip raise are springs, so fast shots pile up into a climb.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -15,7 +17,9 @@ local CombatFeel = require(ReplicatedStorage.Shared.Logic.CombatFeel)
 local CombatModes = require(ReplicatedStorage.Shared.Logic.CombatModes)
 local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
+local Spring = require(ReplicatedStorage.Shared.Logic.Spring)
 
 local settings = Config.Guns
 local movementSettings = Config.Movement
@@ -23,7 +27,7 @@ local player = Players.LocalPlayer
 
 local Viewmodel = {}
 
-local MARKERS = { "Muzzle", "Grip", "Foregrip", "Lens", "Rear" }
+local MARKERS = { "Muzzle", "Grip", "Foregrip", "Lens", "Rear", "Eject" }
 
 local model: Model? = nil
 local modelName: string? = nil -- uploaded template in use, nil for the stand-in
@@ -34,10 +38,14 @@ local foregripMarker: BasePart? = nil
 local magPart: BasePart? = nil
 local pumpPart: BasePart? = nil
 local hammerPart: BasePart? = nil
+local slidePart: BasePart? = nil -- a Slide or a Bolt, whichever the model has
+local ejectMarker: BasePart? = nil
+local rearMarker: BasePart? = nil
 -- Where each moving part sits in the gun's own space (barrel along -Z), and the hammer's hinge.
 local magRest = CFrame.identity
 local pumpRest = CFrame.identity
 local hammerRest = CFrame.identity
+local slideRest = CFrame.identity
 local hammerHinge = Vector3.zero
 -- Turns the model's own pivot into "barrel along -Z, centred on the body".
 local alignment = CFrame.identity
@@ -54,9 +62,27 @@ local lowerBlend = 1
 local bobAmount = 0
 local phase = 0
 local lastKickAt = -math.huge
-local kickWeight = 1
 local reloadStartedAt = -math.huge
 local reloadDuration = 0
+local reloadEmpty = false
+local magSeated = true
+local boltTravel = math.huge
+local wasAirborne = false
+local lastYaw: number? = nil
+local lastPitch: number? = nil
+local casingAttachment: Attachment
+local casingEmitter: ParticleEmitter
+
+local function newSpring(): Spring.Spring
+	return Spring.new(settings.SpringStiffness, settings.SpringDamping)
+end
+local kickBack = newSpring()
+local kickPitch = newSpring()
+local kickYaw = newSpring()
+local kickRoll = newSpring()
+local swayYaw = newSpring()
+local swayPitch = newSpring()
+local rise = newSpring() -- studs up: landing dip, equip raise, mag seat punch
 
 local function prepare(part: BasePart)
 	part.Anchored = true
@@ -141,6 +167,9 @@ local function use(newModel: Model, newAlignment: CFrame, name: string?)
 	magPart = moving("Mag")
 	pumpPart = moving("Pump")
 	hammerPart = moving("Hammer")
+	slidePart = moving("Slide") or moving("Bolt")
+	ejectMarker = findPart(newModel, "Eject")
+	rearMarker = findPart(newModel, "Rear")
 	pumpStartedAt = -math.huge
 	cockedAt = -math.huge
 	reloadStartedAt = -math.huge
@@ -150,6 +179,9 @@ local function use(newModel: Model, newAlignment: CFrame, name: string?)
 	end
 	if pumpPart then
 		pumpRest = hold:ToObjectSpace(pumpPart.CFrame)
+	end
+	if slidePart then
+		slideRest = hold:ToObjectSpace(slidePart.CFrame)
 	end
 	if hammerPart then
 		hammerRest = hold:ToObjectSpace(hammerPart.CFrame)
@@ -236,11 +268,12 @@ end
 
 -- Gun calls this whenever the gun in hand changes: its viewmodel template name, or nil for none,
 -- and its reload (Config.Hotbar.Guns): "mag" drops the old mag, "drum" swings the revolver's drum
--- out and spins it, "shells" racks the pump as the gun comes back up.
-function Viewmodel.setArmed(name: string?, style: string?)
+-- out and spins it, "shells" loads shell by shell. travel caps how far its Slide or Bolt moves back.
+function Viewmodel.setArmed(name: string?, style: string?, travel: number?)
 	armed = name ~= nil
 	if name then
 		reloadStyle = style or "mag"
+		boltTravel = travel or math.huge
 		wantedName = name
 		refreshModel()
 	end
@@ -263,7 +296,32 @@ end
 -- weight scales how hard this shot throws the gun back (1 for the starter blaster).
 function Viewmodel.kick(weight: number)
 	lastKickAt = os.clock()
-	kickWeight = weight
+	Spring.kick(kickBack, settings.RecoilKickBack * weight)
+	Spring.kick(kickPitch, settings.RecoilKickPitch * weight)
+	Spring.kick(kickYaw, (math.random() * 2 - 1) * settings.RecoilKickYaw * weight)
+	Spring.kick(kickRoll, (math.random() * 2 - 1) * settings.RecoilKickRoll * weight)
+end
+
+-- Gun calls this when a gun comes out: it rises from below. Coming up from no gun at all is the
+-- lowered pose easing out already, so only a swap drops it first.
+function Viewmodel.equip()
+	Spring.reset(rise, -settings.ViewmodelLoweredDrop * (1 - lowerBlend))
+end
+
+-- One casing out of the shared emitter at the gun's Eject marker. Skipped on low Quality.
+function Viewmodel.ejectCasing()
+	local camera = workspace.CurrentCamera
+	if not camera or not model or model.Parent == nil or player:GetAttribute("Quality") == "low" then
+		return
+	end
+	local right = camera.CFrame.RightVector
+	local at = if ejectMarker
+		then ejectMarker.Position
+		elseif rearMarker then rearMarker.Position + right * settings.CasingSideOffset
+		else model:GetPivot().Position + right * settings.CasingSideOffset
+	-- The emitter throws along its Right; tipped about the view axis so casings arc up and out.
+	casingAttachment.WorldCFrame = CFrame.new(at) * camera.CFrame.Rotation * CFrame.Angles(0, 0, math.rad(35))
+	casingEmitter:Emit(1)
 end
 
 local function dropMag(camera: Camera)
@@ -321,12 +379,14 @@ local function dropMag(camera: Camera)
 end
 
 -- Gun calls this when a reload starts: dip the gun for duration seconds and do the gun's own
--- reload (see setArmed).
-function Viewmodel.reload(duration: number)
+-- reload (see setArmed). empty: also rack the slide or bolt (the pump on the shotgun) at the end.
+function Viewmodel.reload(duration: number, empty: boolean)
 	reloadStartedAt = os.clock()
 	reloadDuration = duration
+	reloadEmpty = empty
+	magSeated = false
 	local style = reloadStyle
-	if style == "shells" then
+	if style == "shells" and empty then
 		pumpStartedAt = reloadStartedAt + duration * (1 - settings.ReloadRiseShare)
 		pumpDuration = duration * settings.ReloadRiseShare
 	end
@@ -383,17 +443,29 @@ local function moveParts(hold: CFrame, now: number, reloadT: number, dip: number
 			* about(magRest.Position, CFrame.Angles(0, 0, angle))
 			* magRest
 	elseif magPart then
-		-- The gun's own mag is gone from the drop until the fresh one comes up with the rise.
-		local swapping = reloadStyle == "mag"
-			and reloadT >= 0
-			and reloadT < reloadDuration * (1 - settings.ReloadRiseShare)
-		magPart.LocalTransparencyModifier = if swapping then 1 else 0
+		-- The old mag is gone from the drop; the fresh one slides up into place over ReloadMagIn.
+		local progress = if reloadStyle == "mag"
+				and reloadDuration > 0
+				and reloadT >= 0
+			then reloadT / reloadDuration
+			else 1
+		local magIn = settings.ReloadMagIn
+		local inserted = math.clamp((progress - magIn[1]) / (magIn[2] - magIn[1]), 0, 1)
+		magPart.LocalTransparencyModifier = if progress < magIn[1] then 1 else 0
+		magPart.CFrame = hold * CFrame.new(0, -settings.MagInsertDepth * (1 - inserted), 0) * magRest
 	end
-end
-
--- Current kick strength 0..1, so the camera can tip with the blaster.
-function Viewmodel.recoil(): number
-	return CombatFeel.recoil(os.clock() - lastKickAt, settings.RecoilRise, settings.RecoilSettle)
+	if slidePart then
+		local travel = settings.SlideKick
+			* CombatFeel.recoil(now - lastKickAt, settings.RecoilRise, settings.RecoilSettle)
+		if reloadEmpty and reloadStyle == "mag" and reloadDuration > 0 and reloadT >= 0 then
+			local rack = settings.ReloadRack
+			travel = math.max(
+				travel,
+				settings.RackTravel * CombatReload.rack(reloadT / reloadDuration, rack[1], rack[2])
+			)
+		end
+		slidePart.CFrame = hold * CFrame.new(0, 0, math.min(travel, boltTravel)) * slideRest
+	end
 end
 
 -- Where the barrel tip is right now, or nil when the blaster is out of view.
@@ -412,6 +484,27 @@ local function update(dt: number)
 	if not model or not camera or dt <= 0 then
 		return
 	end
+	local back = Spring.step(kickBack, dt)
+	local pitch = Spring.step(kickPitch, dt)
+	local yaw = Spring.step(kickYaw, dt)
+	local roll = Spring.step(kickRoll, dt)
+	local height = Spring.step(rise, dt)
+
+	-- The gun lags behind the turn of the view, less when aiming.
+	local look = camera.CFrame.LookVector
+	local lookYaw = math.deg(math.atan2(-look.X, -look.Z))
+	local lookPitch = math.deg(math.asin(math.clamp(look.Y, -1, 1)))
+	local swayScale = 1 + (settings.SwayAimScale - 1) * aimBlend
+	local function lag(rate: number): number
+		return math.clamp(-rate * settings.SwayPerDegree, -settings.SwayMax, settings.SwayMax) * swayScale
+	end
+	if lastYaw and lastPitch then
+		swayYaw.target = lag(((lookYaw - lastYaw + 180) % 360 - 180) / dt)
+		swayPitch.target = lag((lookPitch - lastPitch) / dt)
+	end
+	lastYaw, lastPitch = lookYaw, lookPitch
+	local swayTurn = Spring.step(swayYaw, dt)
+	local swayTip = Spring.step(swayPitch, dt)
 	local alive = humanoid ~= nil and root ~= nil and humanoid.Health > 0
 	local lowered = not alive
 		or not armed
@@ -424,10 +517,15 @@ local function update(dt: number)
 	end
 
 	local groundSpeed = 0
-	if humanoid and root and humanoid.FloorMaterial ~= Enum.Material.Air then
+	local airborne = humanoid ~= nil and humanoid.FloorMaterial == Enum.Material.Air
+	if humanoid and root and not airborne then
 		local velocity = root.AssemblyLinearVelocity
 		groundSpeed = Vector2.new(velocity.X, velocity.Z).Magnitude
 	end
+	if wasAirborne and not airborne and alive then
+		Spring.kick(rise, -settings.LandingDip)
+	end
+	wasAirborne = airborne
 	bobAmount = MovementLogic.smooth(
 		bobAmount,
 		MovementLogic.bobAmount(movementSettings, groundSpeed),
@@ -435,22 +533,35 @@ local function update(dt: number)
 		dt
 	)
 	phase = MovementLogic.advancePhase(movementSettings, phase, groundSpeed, dt)
-	local side, up, roll = MovementLogic.bobOffset(
+	local side, up, bobRoll = MovementLogic.bobOffset(
 		movementSettings,
 		phase,
 		bobAmount * settings.ViewmodelBobScale * (1 - aimBlend)
 	)
 
-	local kick = Viewmodel.recoil() * kickWeight
 	local reloadT = os.clock() - reloadStartedAt
-	local dip =
-		CombatReload.motion(reloadT, reloadDuration, settings.ReloadDipShare, settings.ReloadRiseShare)
+	local riseShare = if reloadEmpty and reloadStyle == "mag"
+		then settings.ReloadEmptyRiseShare
+		else settings.ReloadRiseShare
+	local dip = CombatReload.motion(reloadT, reloadDuration, settings.ReloadDipShare, riseShare)
+	if not magSeated and reloadDuration > 0 and reloadT >= reloadDuration * settings.ReloadMagIn[2] then
+		magSeated = true
+		if reloadStyle == "mag" then
+			Spring.kick(rise, settings.MagSeatPunch)
+		end
+	end
+	-- Below its rest the gun also tips down, the way the lowered pose does, so the raise reads.
+	local tip = math.clamp(-height / settings.ViewmodelLoweredDrop, 0, 1) * settings.ViewmodelLoweredPitch
 	local offset = settings.ViewmodelOffset:Lerp(settings.ViewmodelAimOffset, aimBlend)
 	local hold = camera.CFrame
-		* CFrame.new(offset + Vector3.new(side, up - settings.ViewmodelLoweredDrop * lowerBlend, 0))
-		* CFrame.Angles(math.rad(-settings.ViewmodelLoweredPitch * lowerBlend), 0, math.rad(roll))
-		* CFrame.new(0, 0, settings.RecoilKickBack * kick)
-		* CFrame.Angles(math.rad(settings.RecoilKickPitch * kick), 0, 0)
+		* CFrame.new(offset + Vector3.new(side, up - settings.ViewmodelLoweredDrop * lowerBlend + height, 0))
+		* CFrame.Angles(
+			math.rad(-settings.ViewmodelLoweredPitch * lowerBlend - tip + swayTip),
+			math.rad(swayTurn),
+			math.rad(bobRoll)
+		)
+		* CFrame.new(0, 0, back)
+		* CFrame.Angles(math.rad(pitch), math.rad(yaw), math.rad(roll))
 		* CFrame.new(0, -settings.ReloadDropSink * dip, 0)
 		* CFrame.Angles(math.rad(-settings.ReloadDropPitch * dip), 0, math.rad(settings.ReloadDropRoll * dip))
 	model:PivotTo(hold * alignment)
@@ -458,8 +569,36 @@ local function update(dt: number)
 	model.Parent = camera
 end
 
+local function buildCasingEmitter()
+	local holder = Instance.new("Part")
+	holder.Name = "ViewmodelCasings"
+	holder.Anchored = true
+	holder.CanCollide = false
+	holder.CanQuery = false
+	holder.CanTouch = false
+	holder.Transparency = 1
+	holder.Size = Vector3.one * 0.1
+	holder.Parent = workspace
+	casingAttachment = Instance.new("Attachment")
+	casingAttachment.Parent = holder
+	casingEmitter = Instance.new("ParticleEmitter")
+	casingEmitter.Enabled = false
+	casingEmitter.EmissionDirection = Enum.NormalId.Right
+	casingEmitter.Texture = ModelLibrary.imageId(settings.CasingImage) or casingEmitter.Texture
+	casingEmitter.Color = ColorSequence.new(settings.CasingColor)
+	casingEmitter.Size = NumberSequence.new(settings.CasingSize)
+	casingEmitter.Lifetime = NumberRange.new(settings.CasingLife)
+	casingEmitter.Speed = NumberRange.new(settings.CasingSpeed * 0.8, settings.CasingSpeed)
+	casingEmitter.SpreadAngle = Vector2.new(15, 15)
+	casingEmitter.Acceleration = Vector3.new(0, -settings.CasingGravity, 0)
+	casingEmitter.Rotation = NumberRange.new(0, 360)
+	casingEmitter.RotSpeed = NumberRange.new(-720, 720)
+	casingEmitter.Parent = casingAttachment
+end
+
 function Viewmodel.Init()
 	use(buildStandIn(), CFrame.identity, nil)
+	buildCasingEmitter()
 end
 
 function Viewmodel.Start()

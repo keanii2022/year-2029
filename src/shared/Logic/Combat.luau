@@ -21,6 +21,20 @@ export type Gun = {
 	cockTime: number?, -- seconds the hammer takes to come back before a single-action shot
 	flare: boolean?, -- leaves a light burning where it lands
 	robotWeapon: boolean?, -- also fires RobotGear's disruptor arc
+	-- Feel, see Config/Guns
+	hipSpread: number?,
+	adsSpread: number?,
+	bloomPerShot: number?,
+	bloomMax: number?,
+	sprintToFire: number?,
+	equipTime: number?,
+	emptyReloadTime: number?,
+	shellReloadTime: number?,
+	aimSpreadScale: number?,
+	aimFovScale: number?,
+	burstKick: { { number } }?,
+	noCasing: boolean?,
+	boltTravel: number?,
 }
 
 export type FireCheck = {

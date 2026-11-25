@@ -34,6 +34,7 @@ type PlayerState = {
 	guns: { [string]: GunState },
 	reloadGun: string?,
 	reloadStartedAt: number?,
+	reloadDuration: number, -- empty reloads and shell counts change it (CombatReload.timeFor)
 	reloadId: number,
 }
 local states: { [Player]: PlayerState } = {}
@@ -104,7 +105,7 @@ end
 local function stateOf(player: Player): PlayerState
 	local state = states[player]
 	if not state then
-		state = { guns = {}, reloadId = 0 }
+		state = { guns = {}, reloadId = 0, reloadDuration = 0 }
 		states[player] = state
 	end
 	return state
@@ -154,11 +155,10 @@ end
 -- A reload whose time is up counts as done right away, even if its timer hasn't fired yet.
 local function settleReload(player: Player, state: PlayerState, now: number)
 	local startedAt = state.reloadStartedAt
-	local gun = state.reloadGun and settings.Blasters[state.reloadGun]
 	if
 		startedAt
-		and gun
-		and CombatReload.isDone(startedAt, now, gun.reloadTime, settings.ReloadTimeSlack)
+		and state.reloadGun
+		and CombatReload.isDone(startedAt, now, state.reloadDuration, settings.ReloadTimeSlack)
 	then
 		finishReload(player, state)
 	end
@@ -190,10 +190,12 @@ local function onReload(player: Player, gunId: any)
 	end
 	state.reloadId += 1
 	local reloadId = state.reloadId
+	local bag = Inventory.count(player, gun.ammo)
 	state.reloadGun = id
 	state.reloadStartedAt = now
+	state.reloadDuration = CombatReload.timeFor(gun, CombatReload.loaded(gunState(state, id).mag, bag), bag)
 	publishMag(player, state, id)
-	task.delay(gun.reloadTime, function()
+	task.delay(state.reloadDuration, function()
 		if states[player] == state and state.reloadId == reloadId and state.reloadStartedAt then
 			finishReload(player, state)
 		end
@@ -301,7 +303,8 @@ local function countKill(shooter: Player, target: Player?, now: number): boolean
 	return true
 end
 
-local function onFire(player: Player, origin: any, direction: any, gunId: any)
+-- aiming: the shooter was aiming down sights, which tightens a shotgun's pellet pattern.
+local function onFire(player: Player, origin: any, direction: any, gunId: any, aiming: any)
 	if not isFiniteVector(origin) or not isFiniteVector(direction) then
 		return
 	end
@@ -370,7 +373,8 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	local robotDamage: { [any]: { damage: number, at: Vector3 } } = {}
 	local centreHit = origin + aim * gun.range
 	local centreTarget: Player? = nil
-	for index, offset in CombatModes.pelletOffsets(gun.pellets or 1, gun.spread or 0) do
+	local spread = (gun.spread or 0) * (if aiming == true then gun.aimSpreadScale or 1 else 1)
+	for index, offset in CombatModes.pelletOffsets(gun.pellets or 1, spread) do
 		local pelletAim = (look * CFrame.Angles(math.rad(offset.y), math.rad(-offset.x), 0)).LookVector
 		local hitPosition, hitPart, hitNormal = trace(origin, pelletAim, gun.range, head, params)
 		local hitPlayer = false

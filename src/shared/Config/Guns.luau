@@ -21,6 +21,12 @@ return {
 	-- or single-action (the hammer takes cockTime to come back, then it fires). pellets: shotgun,
 	-- damage is per pellet, spread in degrees. flare: leaves a light where it lands. robotWeapon:
 	-- also fires the robot-killing arc (RobotGear, on its own cooldown).
+	-- Feel (degrees, seconds): hipSpread / adsSpread are the shot cone from the hip and aimed,
+	-- bloomPerShot widens it per shot up to bloomMax (Logic/CombatSpread). sprintToFire: wait before
+	-- the first shot out of a sprint. equipTime: the raise after pulling it out, no firing until done.
+	-- emptyReloadTime: reload from empty (adds a rack), shellReloadTime: per shell for the shotgun.
+	-- aimSpreadScale shrinks the pellet pattern while aiming, aimFovScale overrides the aim zoom.
+	-- noCasing: no shell flies out. boltTravel caps how far its Slide or Bolt part may move back.
 	Blasters = {
 		StarterBlaster = {
 			rank = 1,
@@ -34,6 +40,13 @@ return {
 			fireInterval = 0.22,
 			magSize = 12,
 			reloadTime = 1.6,
+			hipSpread = 1.2,
+			adsSpread = 0.15,
+			bloomPerShot = 0.4,
+			bloomMax = 2.5,
+			sprintToFire = 0.1,
+			equipTime = 0.25,
+			emptyReloadTime = 2.0,
 		},
 		FlareGun = {
 			rank = 2,
@@ -48,6 +61,13 @@ return {
 			fireInterval = 1,
 			magSize = 1,
 			reloadTime = 1.8,
+			hipSpread = 1,
+			adsSpread = 0.3,
+			bloomPerShot = 0,
+			bloomMax = 1,
+			sprintToFire = 0.12,
+			equipTime = 0.3,
+			noCasing = true,
 		},
 		NailGun = {
 			rank = 3,
@@ -61,6 +81,14 @@ return {
 			fireInterval = 0.13,
 			magSize = 24,
 			reloadTime = 2.2,
+			hipSpread = 2.5,
+			adsSpread = 1.2,
+			bloomPerShot = 0.3,
+			bloomMax = 4,
+			sprintToFire = 0.12,
+			equipTime = 0.3,
+			emptyReloadTime = 2.6,
+			boltTravel = 0.06, -- its bolt slot is short
 		},
 		Smg = {
 			rank = 4,
@@ -74,6 +102,13 @@ return {
 			fireInterval = 0.09,
 			magSize = 30,
 			reloadTime = 1.9,
+			hipSpread = 2.0,
+			adsSpread = 0.6,
+			bloomPerShot = 0.25,
+			bloomMax = 3.5,
+			sprintToFire = 0.1,
+			equipTime = 0.3,
+			emptyReloadTime = 2.3,
 		},
 		Revolver = {
 			rank = 5,
@@ -88,6 +123,13 @@ return {
 			fireInterval = 0.5,
 			magSize = 6,
 			reloadTime = 2.4,
+			hipSpread = 1.5,
+			adsSpread = 0,
+			bloomPerShot = 1.5,
+			bloomMax = 3,
+			sprintToFire = 0.15,
+			equipTime = 0.35,
+			noCasing = true, -- the drum keeps its shells
 		},
 		Shotgun = {
 			rank = 6,
@@ -104,6 +146,10 @@ return {
 			fireInterval = 1.0,
 			magSize = 6,
 			reloadTime = 2.6,
+			aimSpreadScale = 0.75,
+			sprintToFire = 0.18,
+			equipTime = 0.4,
+			shellReloadTime = 0.4,
 		},
 		Rifle = {
 			rank = 7,
@@ -119,6 +165,15 @@ return {
 			fireInterval = 0.45,
 			magSize = 24,
 			reloadTime = 2.2,
+			hipSpread = 2.5,
+			adsSpread = 0.1,
+			bloomPerShot = 0.35,
+			bloomMax = 3,
+			sprintToFire = 0.18,
+			equipTime = 0.4,
+			emptyReloadTime = 2.7,
+			-- camera kick per burst shot, degrees: { up, sideways }
+			burstKick = { { 0.6, 0 }, { 0.7, 0.15 }, { 0.8, -0.1 } },
 		},
 		DartBlaster = {
 			rank = 8,
@@ -132,6 +187,14 @@ return {
 			fireInterval = 1.2,
 			magSize = 3,
 			reloadTime = 2,
+			hipSpread = 2,
+			adsSpread = 0,
+			bloomPerShot = 0,
+			bloomMax = 2,
+			sprintToFire = 0.15,
+			equipTime = 0.35,
+			emptyReloadTime = 2.4,
+			noCasing = true,
 		},
 		MarksmanRifle = {
 			rank = 9,
@@ -145,6 +208,14 @@ return {
 			fireInterval = 1.1,
 			magSize = 5,
 			reloadTime = 2.8,
+			hipSpread = 4,
+			adsSpread = 0,
+			bloomPerShot = 0,
+			bloomMax = 4,
+			sprintToFire = 0.25,
+			equipTime = 0.45,
+			emptyReloadTime = 3.3,
+			aimFovScale = 0.45,
 		},
 		Disruptor = {
 			rank = 10,
@@ -159,6 +230,14 @@ return {
 			fireInterval = 1.2,
 			magSize = 4,
 			reloadTime = 3,
+			hipSpread = 1.5,
+			adsSpread = 0.3,
+			bloomPerShot = 0,
+			bloomMax = 1.5,
+			sprintToFire = 0.2,
+			equipTime = 0.45,
+			emptyReloadTime = 3.4,
+			noCasing = true,
 		},
 	},
 	-- Under the ammo count on the HUD
@@ -180,8 +259,17 @@ return {
 
 	-- Reload look: the blaster dips over the first share of the reload and rises over the last;
 	-- the old mag drops out at the start and fades on the floor.
+	-- The fresh mag slides in over ReloadMagIn (shares of the reload) from MagInsertDepth below and
+	-- seats with a MagSeatPunch upward kick and a click. An empty reload racks the Slide or Bolt
+	-- RackTravel back and forward over ReloadRack, then rises over the shorter ReloadEmptyRiseShare.
 	ReloadDipShare = 0.25,
 	ReloadRiseShare = 0.2,
+	ReloadEmptyRiseShare = 0.1,
+	ReloadMagIn = { 0.45, 0.6 },
+	ReloadRack = { 0.75, 0.9 },
+	MagInsertDepth = 0.15,
+	MagSeatPunch = 0.05,
+	RackTravel = 0.08,
 	ReloadDropPitch = 35, -- degrees the blaster tips down mid-reload
 	ReloadDropRoll = 25,
 	ReloadDropSink = 0.25, -- studs
@@ -321,28 +409,73 @@ return {
 	FlareBurnSound = "flare_burn_loop",
 	FlareBurnoutSound = "flare_burnout",
 	DefaultShotFeel = "pistol", -- for a gun missing from GunFeel
-	CameraKickRise = 0.02, -- seconds the view snaps up over
-	CameraKickSettle = 0.16, -- seconds it springs back over
+	CameraKickRise = 0.02, -- seconds the FOV punch snaps in over
+	CameraKickSettle = 0.16, -- seconds it eases back over
+	CameraKickScale = 0.5, -- share of each feel's kick the view takes; the held gun carries the rest
+	-- Default for the "CameraShake" player attribute: false turns off the view kick, shake and FOV punch.
+	CameraShake = true,
 	ShakeTime = 0.18,
 
-	-- Held blaster, relative to the camera. Recoil snaps in over RecoilRise, settles over RecoilSettle.
+	-- Held blaster, relative to the camera. Recoil, sway, landing and the equip raise run on springs
+	-- (Logic/Spring); every shot adds weight times the RecoilKick numbers, so held fire climbs.
 	ViewmodelOffset = Vector3.new(0.75, -0.72, -1.45),
 	ViewmodelAimOffset = Vector3.new(0, -0.42, -1.2), -- centred under the crosshair while aiming
 	ViewmodelLoweredDrop = 1.1, -- studs it sinks when carrying a prop or holding no blaster
 	ViewmodelLoweredPitch = 40, -- degrees it tips down when lowered
 	ViewmodelLowerEase = 10,
 	ViewmodelBobScale = 0.6, -- share of the head bob the blaster follows
-	RecoilRise = 0.02,
-	RecoilSettle = 0.13,
+	SpringStiffness = 300,
+	SpringDamping = 0.7, -- share of critical damping: a little overshoot, then settled
 	RecoilKickBack = 0.32, -- studs toward you
 	RecoilKickPitch = 10, -- degrees muzzle up
+	RecoilKickYaw = 2, -- degrees either way
+	RecoilKickRoll = 3,
+	SwayPerDegree = 0.02, -- degrees the gun lags per degree a second the view turns
+	SwayMax = 3,
+	SwayAimScale = 0.3,
+	LandingDip = 0.12, -- studs the gun dips when you land
+	-- Slide or Bolt parts kick back SlideKick on each shot, over RecoilRise and back over RecoilSettle.
+	RecoilRise = 0.02,
+	RecoilSettle = 0.13,
+	SlideKick = 0.06,
+	-- Casings: one shared emitter puts out a casing per shot at the gun's Eject marker (or its Rear
+	-- moved CasingSideOffset right). Off on low Quality.
+	CasingImage = "shell_casing", -- manifest image; a plain brass fleck until one is uploaded
+	CasingColor = Color3.fromRGB(214, 168, 72),
+	CasingSize = 0.07,
+	CasingLife = 0.5,
+	CasingSpeed = 9,
+	CasingGravity = 45,
+	CasingSideOffset = 0.1,
 	SparkColor = Color3.fromRGB(255, 190, 110),
 	SparkCount = 10,
 	PlayerSparkCount = 18,
 	AimFieldOfViewScale = 0.72,
+	-- Spread (Logic/CombatSpread): degrees added while walking or in the air, crouch scale, and how
+	-- fast bloom shrinks back (degrees per second).
+	SpreadWalk = 0.8,
+	SpreadAirborne = 3,
+	SpreadCrouchScale = 0.7,
+	BloomRecovery = 6,
+	MovingSpeed = 2, -- studs per second of ground speed that count as walking
+	-- Pad and touch only: shots within this many degrees of a target's chest (hip, aimed) bend to
+	-- it, aiming slows to AimFriction inside the cone, and starting to aim turns up to AimSnapMax
+	-- degrees toward a target over AimSnapTime.
+	AimAssistCone = 2.5,
+	AimAssistAimedCone = 1.5,
+	AimFriction = 0.6,
+	AimSnapMax = 3,
+	AimSnapTime = 0.12,
+	GunUpHold = 0.6, -- seconds after a shot the gun stays up, so sprinting doesn't delay the next pull
 	AimEase = 14,
 	HitMarkerTime = 0.15,
 	HitMarkerPop = 1.7, -- the X starts this much bigger and shrinks back over HitMarkerTime
+	KillMarkerScale = 1.6, -- a kill's X is this much bigger, in spray red
+	KillFlashTime = 0.08, -- seconds the red screen-edge flash lasts on a kill
+	KillFlashWidth = 0.12, -- share of the screen the edge glow reaches in
+	HitPitchStep = 0.04, -- each hit within HitPitchWindow seconds of the last plays this much higher
+	HitPitchMax = 0.16,
+	HitPitchWindow = 0.6,
 	DownSound = "down_zap", -- the moment you go down
 	DownSoundVolume = 0.8,
 
@@ -372,6 +505,17 @@ return {
 		ImpactPitch = 1,
 		HitMarker = "hit_marker",
 		HitMarkerVolume = 0.8,
+		-- No kill sound recorded yet: the hit marker, deeper and louder
+		KillConfirm = "hit_marker",
+		KillConfirmVolume = 1,
+		KillConfirmPitch = 0.72,
+		-- Your own shots get a short mechanical click on top of the bang
+		ShotClick = "press_button_click",
+		ShotClickVolume = 0.35,
+		ShotClickPitch = 1.3,
+		Rack = "revolver_cock", -- the slide or bolt racking at the end of an empty reload
+		RackVolume = 0.7,
+		RackPitch = 1.15,
 		Whiz = "bullet_whiz",
 		WhizVolume = 0.7,
 		Empty = "flashlight_click",
@@ -382,5 +526,8 @@ return {
 		CockVolume = 0.8,
 	},
 	SoundRollOff = { 8, 120 },
+	-- Other players' shots past this many studs lose their top end (a low-pass), so far fights sound far
+	FarShotDistance = 60,
+	FarShotHighGain = -15,
 	SoundPitchJitter = 0.12,
 }
