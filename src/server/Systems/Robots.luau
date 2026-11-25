@@ -26,6 +26,7 @@ local Interact = require(script.Parent.Interact)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
 local Scores = require(script.Parent.Scores)
+local SimPlayers = require(script.Parent.SimPlayers)
 local Warehouse = require(script.Parent.Warehouse)
 
 local settings = Config.Robots
@@ -144,6 +145,10 @@ local function alivePlayers(): { Alive }
 				position = root.Position,
 			})
 		end
+	end
+	-- simulated players count as players; their "player" is a stand-in table, not a Player
+	for _, bot in SimPlayers.alive() do
+		table.insert(alive, bot)
 	end
 	return alive
 end
@@ -988,9 +993,12 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 	if not target or player:GetAttribute("God") == true then
 		return
 	end
+	local isPlayer = typeof(player) == "Instance" -- false for a simulated player's stand-in
 	if DayNight.isNight() then
 		-- caught at night counts as going down: Combat drops their bag when the Humanoid dies
-		Net.event("RobotCaught"):FireClient(player, "night", nil)
+		if isPlayer then
+			Net.event("RobotCaught"):FireClient(player, "night", nil)
+		end
 		target.humanoid.Health = 0
 		return
 	end
@@ -1003,7 +1011,9 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 	if taken > 0 then
 		placeStash(robot.room.id, itemId, taken, shelfSpot(robot.room))
 		local item = Inventory.Items[itemId]
-		Net.event("RobotCaught"):FireClient(player, "day", if item then item.name else itemId)
+		if isPlayer then
+			Net.event("RobotCaught"):FireClient(player, "day", if item then item.name else itemId)
+		end
 	end
 end
 
