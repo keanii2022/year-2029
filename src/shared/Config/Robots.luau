@@ -9,20 +9,20 @@ return {
 	ActivationRadius = 320,
 	DeactivationRadius = 400, -- a live room keeps its robot until every player is this far
 	ActivationInterval = 2,
-	MaxLiveChoreBots = 24, -- robots, across every live installation
+	MaxLiveChoreBots = 40, -- robots, across every live installation
 
 	-- How many robots live in an installation (min, max), and the giant 2x2 ones
 	-- The count scales with the hall's floor area (one per AreaPerBot square studs), kept in range.
-	InstallationBots = { 2, 3 },
-	GiantInstallationBots = { 3, 6 },
-	AreaPerBot = 3600,
+	InstallationBots = { 3, 5 },
+	GiantInstallationBots = { 5, 9 },
+	AreaPerBot = 2400,
 	BotSpacing = 9, -- robots in a room spawn, study and idle at least this far apart
 	-- One per installation stands in a corner facing the wall. Inside LookRange its head turns to
 	-- follow you; it wakes after staring StareSeconds, when you come inside WakeRange, or on a sound.
 	Watcher = { LookRange = 34, WakeRange = 9, StareSeconds = 4, MaxHeadTurn = 150, CornerPad = 3 },
 
 	-- Night hunters spawn out of sight near players and stall where they stand at lights on.
-	MaxHunters = 8,
+	MaxHunters = 16,
 	HunterNearRadius = 260, -- a player with no hunter this close gets one
 	HunterSpawnDistance = { 200, 260 }, -- far enough that you hear and see them coming
 	HunterGrace = 25, -- seconds of quiet after lights out before any hunter spawns
@@ -31,7 +31,7 @@ return {
 	-- Prowlers: a few hunters that never stall. They roam the aisles by day too, red-eyed, loud
 	-- enough to hear through the racks, dragging things about. Same hunt as at night, day eyes.
 	Prowl = {
-		Max = 3,
+		Max = 6,
 		NearRadius = 220, -- a player with no prowler this close gets one
 		SpawnDistance = { 140, 200 },
 		Grace = 40, -- seconds into the day before the first one turns up
