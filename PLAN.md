@@ -393,6 +393,12 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Scope:** new Admin system, AdminPanel controller, AdminAccess logic, Config/Admin, new SimPlayers system + SimBrain logic, small hooks in DayNight, DevTeleport, Robots, Combat
 - Keani and their son get an admin panel (F2 / hold L1+R1 / ADMIN button) in the live game: any gun, ammo, food and rare items, god mode, speed, fly, jump to players and installations, skip to day / siren / night, freeze robots, and a fake lobby of simulated players with a calm / normal / chaos mood to see how a full server feels. Only their two accounts (and Studio) can open it. Done when both can use it on PS5, phone and keyboard and nobody else sees it.
 
+### 30. Playtest fixes: spin, calls, night lights, shootable robots
+- **Status:** current
+- **Dependencies:** 29
+- **Scope:** Grab, Callouts, Input, TouchButtons, Hints, Robots, Combat, SimPlayers, Supplies/Loot, WarehouseGen night lights and set fill, Lighting, Locker, Scores
+- Carrying spins fast on all three axes on every device. Holding call opens a ring of 7 named calls. Night gets natural path lights, exit signs and lamps you can carry. Robot rooms are fuller, with more robots spread out and a guaranteed good find. Robots are loud at night, notice you up close, and can be shot: they stagger, get knocked down for a while, then come back angry. The locker and board stand straight. Done when Keani and their son play it and it feels right.
+
 ## After launch: talk about
 
 Two conversations to have once the game is live and real players are in.
