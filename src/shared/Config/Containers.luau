@@ -14,7 +14,24 @@ local HOUSEHOLD = { "Snack", "Chips", "JuiceBox", "Bandage", "FlashlightBattery"
 local OFFICE = { "Snack", "EnergyDrink", "FlashlightBattery", "BlasterCells", "Bandage" }
 local BATHROOM = { "Bandage", "FlashlightBattery" }
 local KIDS = { "Snack", "JuiceBox", "Chips", "Popcorn", "FlashlightBattery" }
-local GEAR = { "BlasterCells", "Bandage", "FlashlightBattery", "EnergyDrink", "RationPack", "EmpCharge" }
+local GEAR = {
+	"BlasterCells",
+	"Bandage",
+	"FlashlightBattery",
+	"EnergyDrink",
+	"RationPack",
+	"EmpCharge",
+	"NailGun",
+	"FlareGun",
+	"Smg",
+	"Revolver",
+	"Shotgun",
+	"Rifle",
+	"DartBlaster",
+	"Shells",
+	"Flares",
+	"Darts",
+}
 
 return {
 	-- By model name. slots: stacks it holds. lootChance: chance it starts with anything, then

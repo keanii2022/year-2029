@@ -22,6 +22,7 @@ local Hud = {}
 local gui: ScreenGui
 local healthFill: Frame
 local ammoLabel: TextLabel
+local ammoKindLabel: TextLabel
 local ammoPanel: Frame
 local hitMarker: Frame
 local downScreen: Frame
@@ -134,7 +135,7 @@ local function buildAmmo()
 		TextXAlignment = Enum.TextXAlignment.Right,
 		Text = "0",
 	}, ammoPanel)
-	label({
+	ammoKindLabel = label({
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, 0, 0, -2),
 		Size = UDim2.fromOffset(120, 14),
@@ -187,6 +188,7 @@ end
 local function refreshAmmo()
 	local mag, reserve, reloading = Gun.getMagazine()
 	ammoPanel.Visible = mag ~= nil
+	ammoKindLabel.Text = Gun.getAmmoLabel() or ""
 	if mag and reserve then
 		local empty = mag + reserve <= 0
 		ammoLabel.Text = if reloading then "RELOADING" elseif empty then "EMPTY" else `{mag} / {reserve}`

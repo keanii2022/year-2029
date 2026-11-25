@@ -1,27 +1,38 @@
 -- Server side of guns: checks every shot, does the hit raycast, deals damage, and handles
--- going down (everything drops as a loot pile) and the spawn kit. Tracks each player's mag and
--- reload, published as the "Mag" and "Reloading" attributes for the client's HUD.
+-- going down (everything drops as a loot pile) and the spawn kit. The client names the gun it has
+-- selected on the hotbar with each shot and reload; the server checks the player owns it and fires
+-- that gun by its Config.Guns rules (mode, interval, mag, pellets). Tracks each gun's mag and the
+-- reload, published as "Mag<GunId>" and "Reloading" (the gun's id) attributes for the client's HUD.
 -- Only players take damage; anything else a shot hits just throws sparks and stops the shot.
+local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local CombatFeel = require(ReplicatedStorage.Shared.Logic.CombatFeel)
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
+local CombatModes = require(ReplicatedStorage.Shared.Logic.CombatModes)
 local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Inventory = require(script.Parent.Inventory)
+local RobotGear = require(script.Parent.RobotGear)
 local Scores = require(script.Parent.Scores)
 
 local settings = Config.Guns
 
 local Combat = {}
 
-local lastShotAt: { [Player]: number } = {}
+type GunState = { mag: number, lastShotAt: number, burstShots: number }
 -- reloadId tells a finished reload's timer apart from a newer reload or a respawn.
-type MagState = { mag: number, reloadStartedAt: number?, reloadId: number }
-local mags: { [Player]: MagState } = {}
+type PlayerState = {
+	guns: { [string]: GunState },
+	reloadGun: string?,
+	reloadStartedAt: number?,
+	reloadId: number,
+}
+local states: { [Player]: PlayerState } = {}
 local hitRemote: RemoteEvent
 local fxRemote: UnreliableRemoteEvent
 local whizRemote: UnreliableRemoteEvent
@@ -54,11 +65,12 @@ local function excludeParams(character: Model): RaycastParams
 	return params
 end
 
-local function heldGun(player: Player): (CombatLogic.Gun?, string?)
-	local gunId = CombatLogic.pickGun(settings.Blasters, function(id)
+-- The gun the client says is selected, if the player really carries it.
+local function heldGun(player: Player, gunId: any): (CombatLogic.Gun?, string?)
+	local gun = CombatLogic.selectedGun(settings.Blasters, gunId, function(id)
 		return Inventory.has(player, id)
 	end)
-	return if gunId then settings.Blasters[gunId] else nil, gunId
+	return gun, if gun then gunId else nil
 end
 
 -- Tells every other player whose head the shot flew past, so they hear it whiz by.
@@ -83,118 +95,142 @@ local function sendWhizzes(shooter: Player, target: Player?, origin: Vector3, hi
 	end
 end
 
-local function magState(player: Player): MagState
-	local state = mags[player]
+local function stateOf(player: Player): PlayerState
+	local state = states[player]
 	if not state then
-		state = { mag = 0, reloadId = 0 }
-		mags[player] = state
+		state = { guns = {}, reloadId = 0 }
+		states[player] = state
 	end
 	return state
 end
 
-local function publishMag(player: Player, state: MagState)
-	player:SetAttribute("Mag", state.mag)
-	player:SetAttribute("Reloading", if state.reloadStartedAt then true else nil)
+local function gunState(state: PlayerState, gunId: string): GunState
+	local gun = state.guns[gunId]
+	if not gun then
+		gun = { mag = 0, lastShotAt = 0, burstShots = 0 }
+		state.guns[gunId] = gun
+	end
+	return gun
 end
 
-local function finishReload(player: Player, state: MagState, gun: CombatLogic.Gun?)
-	state.reloadStartedAt = nil
+local function publishMag(player: Player, state: PlayerState, gunId: string)
+	player:SetAttribute("Mag" .. gunId, gunState(state, gunId).mag)
+	player:SetAttribute("Reloading", state.reloadGun)
+end
+
+local function fillMag(player: Player, state: PlayerState, gunId: string)
+	local gun = settings.Blasters[gunId]
 	if gun then
-		state.mag = CombatReload.refill(gun.magSize, Inventory.count(player, gun.ammo))
+		gunState(state, gunId).mag = CombatReload.refill(gun.magSize, Inventory.count(player, gun.ammo))
+		publishMag(player, state, gunId)
 	end
-	publishMag(player, state)
+end
+
+local function finishReload(player: Player, state: PlayerState)
+	local gunId = state.reloadGun
+	state.reloadGun = nil
+	state.reloadStartedAt = nil
+	if gunId then
+		fillMag(player, state, gunId)
+	end
+	player:SetAttribute("Reloading", nil)
+end
+
+local function cancelReload(player: Player, state: PlayerState)
+	state.reloadId += 1
+	state.reloadGun = nil
+	state.reloadStartedAt = nil
+	player:SetAttribute("Reloading", nil)
 end
 
 -- A reload whose time is up counts as done right away, even if its timer hasn't fired yet.
-local function settleReload(player: Player, state: MagState, gun: CombatLogic.Gun?, now: number)
+local function settleReload(player: Player, state: PlayerState, now: number)
 	local startedAt = state.reloadStartedAt
+	local gun = state.reloadGun and settings.Blasters[state.reloadGun]
 	if
 		startedAt
 		and gun
 		and CombatReload.isDone(startedAt, now, gun.reloadTime, settings.ReloadTimeSlack)
 	then
-		finishReload(player, state, gun)
+		finishReload(player, state)
 	end
 end
 
-local function onReload(player: Player)
+local function onReload(player: Player, gunId: any)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local gun = heldGun(player)
-	local state = magState(player)
+	local gun, id = heldGun(player, gunId)
+	local state = stateOf(player)
 	local now = os.clock()
-	settleReload(player, state, gun, now)
+	settleReload(player, state, now)
+	-- Swapping guns mid-reload and reloading the new one drops the old reload.
+	if id and state.reloadGun and state.reloadGun ~= id then
+		cancelReload(player, state)
+	end
 	local ok = CombatReload.canReload({
 		alive = humanoid ~= nil and humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
 		cuffed = player:GetAttribute("Cuffed") == true,
 		hasGun = gun ~= nil,
 		reloading = state.reloadStartedAt ~= nil,
-		mag = state.mag,
+		mag = if id then gunState(state, id).mag else 0,
 		magSize = if gun then gun.magSize else 0,
 		bag = if gun then Inventory.count(player, gun.ammo) else 0,
 	})
-	if not ok or not gun then
+	if not ok or not gun or not id then
 		return
 	end
 	state.reloadId += 1
 	local reloadId = state.reloadId
+	state.reloadGun = id
 	state.reloadStartedAt = now
-	publishMag(player, state)
+	publishMag(player, state, id)
 	task.delay(gun.reloadTime, function()
-		if mags[player] == state and state.reloadId == reloadId and state.reloadStartedAt then
-			finishReload(player, state, heldGun(player))
+		if states[player] == state and state.reloadId == reloadId and state.reloadStartedAt then
+			finishReload(player, state)
 		end
 	end)
 end
 
-local function onFire(player: Player, origin: any, direction: any)
-	if not isFiniteVector(origin) or not isFiniteVector(direction) then
-		return
-	end
-	local character = player.Character
-	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local head = character and character:FindFirstChild("Head") :: BasePart?
-	if not character or not humanoid or not head then
-		return
-	end
+-- A flare burning where the shot landed: lights the area for a while, then fades out.
+local function dropFlare(position: Vector3, normal: Vector3?)
+	local flare = Instance.new("Part")
+	flare.Name = "Flare"
+	flare.Shape = Enum.PartType.Ball
+	flare.Size = Vector3.one * settings.FlareSize
+	flare.CFrame = CFrame.new(position + (normal or Vector3.yAxis) * settings.FlareSize)
+	flare.Anchored = true
+	flare.CanCollide = false
+	flare.CanQuery = false
+	flare.CanTouch = false
+	flare.CastShadow = false
+	flare.Material = Enum.Material.Neon
+	flare.Color = settings.FlareColor
+	local light = Instance.new("PointLight")
+	light.Color = settings.FlareColor
+	light.Brightness = settings.FlareBrightness
+	light.Range = settings.FlareRange
+	light.Shadows = true
+	light.Parent = flare
+	flare.Parent = workspace
+	task.delay(settings.FlareTime - settings.FlareFadeTime, function()
+		local fade = TweenInfo.new(settings.FlareFadeTime)
+		TweenService:Create(light, fade, { Brightness = 0 }):Play()
+		TweenService:Create(flare, fade, { Transparency = 1 }):Play()
+	end)
+	Debris:AddItem(flare, settings.FlareTime)
+end
 
-	local gun, gunId = heldGun(player)
-	local now = os.clock()
-	local state = magState(player)
-	settleReload(player, state, gun, now)
-	local mag = if gun then CombatReload.loaded(state.mag, Inventory.count(player, gun.ammo)) else 0
-	local ok = CombatLogic.canFire({
-		alive = humanoid.Health > 0,
-		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
-		cuffed = player:GetAttribute("Cuffed") == true,
-		hasGun = gun ~= nil,
-		reloading = state.reloadStartedAt ~= nil,
-		ammo = mag,
-		sinceLastShot = now - (lastShotAt[player] or 0),
-		minInterval = if gun then gun.fireInterval * settings.FireIntervalSlack else 0,
-	})
-	if not ok or not gun then
-		return
-	end
-	ok = CombatLogic.checkShot({
-		originOffset = (origin - head.Position).Magnitude,
-		maxOriginOffset = settings.MaxOriginOffset,
-		directionLength = direction.Magnitude,
-	})
-	if not ok then
-		return
-	end
-
-	lastShotAt[player] = now
-	Inventory.remove(player, gun.ammo, 1)
-	state.mag = mag - 1
-	publishMag(player, state)
-
-	local params = excludeParams(character)
-	local aim = direction.Unit
-	local result = workspace:Raycast(origin, aim * gun.range, params)
-	local hitPosition = if result then result.Position else origin + aim * gun.range
+-- One ray of a shot: what it hits from the camera, or whatever blocks the head's view of that.
+local function trace(
+	origin: Vector3,
+	aim: Vector3,
+	range: number,
+	head: BasePart,
+	params: RaycastParams
+): (Vector3, Instance?, Vector3?)
+	local result = workspace:Raycast(origin, aim * range, params)
+	local hitPosition = if result then result.Position else origin + aim * range
 	local hitPart = result and result.Instance
 	local hitNormal = result and result.Normal
 
@@ -211,24 +247,101 @@ local function onFire(player: Player, origin: any, direction: any)
 	then
 		hitPosition, hitPart, hitNormal = blocker.Position, blocker.Instance, blocker.Normal
 	end
+	return hitPosition, hitPart, hitNormal
+end
 
-	local hitPlayer = false
-	local hitTarget: Player? = nil
-	if hitPart then
-		local target, targetHumanoid = playerFromPart(hitPart)
-		if target and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
-			targetHumanoid:TakeDamage(CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude))
-			hitPlayer = true
-			hitTarget = target
-			local downed = targetHumanoid.Health <= 0
-			if downed then
-				Scores.add(player, "PlayerKills", 1)
-			end
-			hitRemote:FireClient(player, downed)
-		end
+local function onFire(player: Player, origin: any, direction: any, gunId: any)
+	if not isFiniteVector(origin) or not isFiniteVector(direction) then
+		return
 	end
-	fxRemote:FireAllClients(player, origin, hitPosition, hitNormal, hitPlayer, gunId)
-	sendWhizzes(player, hitTarget, origin, hitPosition)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local head = character and character:FindFirstChild("Head") :: BasePart?
+	local gun, id = heldGun(player, gunId)
+	if not character or not humanoid or not head or not gun or not id then
+		return
+	end
+
+	local now = os.clock()
+	local state = stateOf(player)
+	settleReload(player, state, now)
+	-- Firing another gun drops the reload that was under way.
+	if state.reloadGun and state.reloadGun ~= id then
+		cancelReload(player, state)
+	end
+	local held = gunState(state, id)
+	local mag = CombatReload.loaded(held.mag, Inventory.count(player, gun.ammo))
+	local sinceLastShot = now - held.lastShotAt
+	local ok = CombatLogic.canFire({
+		alive = humanoid.Health > 0,
+		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
+		cuffed = player:GetAttribute("Cuffed") == true,
+		hasGun = true,
+		reloading = state.reloadStartedAt ~= nil,
+		ammo = mag,
+		sinceLastShot = sinceLastShot,
+		minInterval = CombatModes.minGap(gun, held.burstShots) * settings.FireIntervalSlack,
+	})
+	if not ok then
+		return
+	end
+	ok = CombatLogic.checkShot({
+		originOffset = (origin - head.Position).Magnitude,
+		maxOriginOffset = settings.MaxOriginOffset,
+		directionLength = direction.Magnitude,
+	})
+	if not ok then
+		return
+	end
+
+	held.burstShots =
+		CombatModes.burstAfterShot(gun, held.burstShots, sinceLastShot, settings.FireIntervalSlack)
+	held.lastShotAt = now
+	Inventory.remove(player, gun.ammo, 1)
+	held.mag = mag - 1
+	publishMag(player, state, id)
+
+	-- Every pellet (one for most guns) is its own ray; a target hit by several takes the sum.
+	local params = excludeParams(character)
+	local aim = direction.Unit
+	local look = CFrame.lookAt(Vector3.zero, aim)
+	local damageTo: { [Humanoid]: number } = {}
+	local centreHit = origin + aim * gun.range
+	local centreTarget: Player? = nil
+	for index, offset in CombatModes.pelletOffsets(gun.pellets or 1, gun.spread or 0) do
+		local pelletAim = (look * CFrame.Angles(math.rad(offset.y), math.rad(-offset.x), 0)).LookVector
+		local hitPosition, hitPart, hitNormal = trace(origin, pelletAim, gun.range, head, params)
+		local hitPlayer = false
+		local target, targetHumanoid
+		if hitPart then
+			target, targetHumanoid = playerFromPart(hitPart)
+		end
+		if target and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
+			local damage = CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
+			damageTo[targetHumanoid] = (damageTo[targetHumanoid] or 0) + damage
+			hitPlayer = true
+		end
+		if index == 1 then
+			centreHit = hitPosition
+			centreTarget = if hitPlayer then target else nil
+			if gun.flare then
+				dropFlare(hitPosition, hitNormal)
+			end
+		end
+		fxRemote:FireAllClients(player, origin, hitPosition, hitNormal, hitPlayer, id, index)
+	end
+	for targetHumanoid, damage in damageTo do
+		targetHumanoid:TakeDamage(damage)
+		local downed = targetHumanoid.Health <= 0
+		if downed then
+			Scores.add(player, "PlayerKills", 1)
+		end
+		hitRemote:FireClient(player, downed)
+	end
+	sendWhizzes(player, centreTarget, origin, centreHit)
+	if gun.robotWeapon then
+		RobotGear.zap(player, aim)
+	end
 end
 
 local function onDown(player: Player, character: Model)
@@ -252,10 +365,12 @@ local function setUpCharacter(player: Player, character: Model)
 	for _, item in settings.StartingLoadout do
 		Inventory.add(player, item.id, item.count)
 	end
-	-- Every spawn starts with a full mag and no reload in progress.
-	local state = magState(player)
-	state.reloadId += 1
-	finishReload(player, state, heldGun(player))
+	-- Every spawn starts with full mags and no reload in progress.
+	local state = stateOf(player)
+	cancelReload(player, state)
+	for gunId in settings.Blasters do
+		fillMag(player, state, gunId)
+	end
 	if not settings.HealthRegen then
 		-- Roblox adds a "Health" regen script to every character; removing it turns regen off.
 		local regen = character:WaitForChild("Health", 5)
@@ -283,8 +398,7 @@ function Combat.Init()
 	Net.event("GunReload").OnServerEvent:Connect(onReload)
 	Players.PlayerAdded:Connect(setUpPlayer)
 	Players.PlayerRemoving:Connect(function(player)
-		lastShotAt[player] = nil
-		mags[player] = nil
+		states[player] = nil
 	end)
 	for _, player in Players:GetPlayers() do
 		setUpPlayer(player)
@@ -305,16 +419,14 @@ local function publishViewmodel(name: string)
 	end
 end
 
--- Uploaded models only load on the server, so put copies of the held blaster, the first-person
--- arms and the items they hold where clients can clone them. Loading yields, so it runs on its
--- own thread.
+-- Uploaded models only load on the server, so put copies of every gun, the first-person arms and
+-- the items they hold where clients can clone them. Loading yields, so it runs on its own thread.
 function Combat.Start()
 	task.spawn(function()
-		publishViewmodel("viewmodel_blaster")
 		for _, name in Config.Hands.Arms do
 			publishViewmodel(name)
 		end
-		for _, items in { Config.Hands.Items, Config.Hotbar.Held, Config.Hotbar.Guns } do
+		for _, items in { Config.Hotbar.Guns, Config.Hands.Items, Config.Hotbar.Held } do
 			for _, item in items do
 				if item.model then
 					publishViewmodel(item.model)

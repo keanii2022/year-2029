@@ -8,23 +8,163 @@ return {
 	HealthRegen = false, -- healing comes from supplies later, not from standing still
 	RespawnDelay = 6,
 
-	-- rank: when a player carries several guns, the highest rank is the one in hand.
+	-- rank orders the gun slots on the hotbar, best first. The server fires the gun selected there.
 	-- Damage is full up to falloffStart studs, sliding down to minDamage at falloffEnd.
+	-- mode (Logic/CombatModes): semi, auto (hold), burst (burstCount shots burstInterval apart per
+	-- pull, fireInterval between pulls), pump (pumpTime rack after each shot, inside fireInterval)
+	-- or single-action (the hammer takes cockTime to come back, then it fires). pellets: shotgun,
+	-- damage is per pellet, spread in degrees. flare: leaves a light where it lands. robotWeapon:
+	-- also fires the robot-killing arc (RobotGear, on its own cooldown).
 	Blasters = {
 		StarterBlaster = {
 			rank = 1,
 			ammo = "BlasterCells",
+			mode = "semi",
 			damage = 22,
 			minDamage = 11,
 			falloffStart = 40,
 			falloffEnd = 140,
 			range = 300,
 			fireInterval = 0.22,
-			automatic = false,
 			magSize = 12,
 			reloadTime = 1.6,
 		},
+		FlareGun = {
+			rank = 2,
+			ammo = "Flares",
+			mode = "semi",
+			flare = true,
+			damage = 20,
+			minDamage = 15,
+			falloffStart = 30,
+			falloffEnd = 120,
+			range = 160,
+			fireInterval = 1,
+			magSize = 1,
+			reloadTime = 1.8,
+		},
+		NailGun = {
+			rank = 3,
+			ammo = "BlasterCells",
+			mode = "auto",
+			damage = 16,
+			minDamage = 9,
+			falloffStart = 20,
+			falloffEnd = 70,
+			range = 160,
+			fireInterval = 0.13,
+			magSize = 24,
+			reloadTime = 2.2,
+		},
+		Smg = {
+			rank = 4,
+			ammo = "BlasterCells",
+			mode = "auto",
+			damage = 13,
+			minDamage = 7,
+			falloffStart = 25,
+			falloffEnd = 90,
+			range = 220,
+			fireInterval = 0.09,
+			magSize = 30,
+			reloadTime = 1.9,
+		},
+		Revolver = {
+			rank = 5,
+			ammo = "BlasterCells",
+			mode = "single-action",
+			cockTime = 0.18,
+			damage = 45,
+			minDamage = 25,
+			falloffStart = 40,
+			falloffEnd = 150,
+			range = 300,
+			fireInterval = 0.5,
+			magSize = 6,
+			reloadTime = 2.4,
+		},
+		Shotgun = {
+			rank = 6,
+			ammo = "Shells",
+			mode = "pump",
+			pellets = 8,
+			spread = 5,
+			pumpTime = 0.45,
+			damage = 12,
+			minDamage = 2,
+			falloffStart = 10,
+			falloffEnd = 40,
+			range = 120,
+			fireInterval = 0.95,
+			magSize = 6,
+			reloadTime = 2.6,
+		},
+		Rifle = {
+			rank = 7,
+			ammo = "BlasterCells",
+			mode = "burst",
+			burstCount = 3,
+			burstInterval = 0.08,
+			damage = 24,
+			minDamage = 14,
+			falloffStart = 60,
+			falloffEnd = 200,
+			range = 400,
+			fireInterval = 0.45,
+			magSize = 24,
+			reloadTime = 2.2,
+		},
+		DartBlaster = {
+			rank = 8,
+			ammo = "Darts",
+			mode = "semi",
+			damage = 75,
+			minDamage = 60,
+			falloffStart = 50,
+			falloffEnd = 200,
+			range = 300,
+			fireInterval = 1.2,
+			magSize = 3,
+			reloadTime = 2,
+		},
+		MarksmanRifle = {
+			rank = 9,
+			ammo = "BlasterCells",
+			mode = "semi",
+			damage = 65,
+			minDamage = 50,
+			falloffStart = 100,
+			falloffEnd = 400,
+			range = 600,
+			fireInterval = 1.1,
+			magSize = 5,
+			reloadTime = 2.8,
+		},
+		Disruptor = {
+			rank = 10,
+			ammo = "BlasterCells",
+			mode = "semi",
+			robotWeapon = true,
+			damage = 40,
+			minDamage = 30,
+			falloffStart = 40,
+			falloffEnd = 160,
+			range = 200,
+			fireInterval = 1.2,
+			magSize = 4,
+			reloadTime = 3,
+		},
 	},
+	-- Under the ammo count on the HUD
+	AmmoLabels = { BlasterCells = "CELLS", Shells = "SHELLS", Flares = "FLARES", Darts = "DARTS" },
+
+	-- A flare lights up where it lands for FlareTime seconds, fading out over the last FlareFadeTime.
+	FlareTime = 25,
+	FlareFadeTime = 3,
+	FlareSize = 0.35,
+	FlareColor = Color3.fromRGB(255, 90, 60),
+	FlareBrightness = 3,
+	FlareRange = 40,
 
 	-- Server shot checks.
 	FireIntervalSlack = 0.8, -- shots may arrive this fraction of the interval apart (network jitter)
@@ -43,6 +183,18 @@ return {
 	MagFadeTime = 0.6,
 	MagStandInSize = Vector3.new(0.1, 0.22, 0.16),
 	MagStandInColor = Color3.fromRGB(38, 40, 44),
+
+	-- Moving parts on the gun models (Config.Hotbar.Guns says which reload each gun does).
+	-- The shotgun's Pump slides PumpTravel studs back toward the grip and forward after each shot,
+	-- starting when its shotgun_pump sound plays. The revolver's Hammer tips back HammerCockAngle
+	-- degrees about its base and snaps forward over HammerSnapTime; its Mag drum turns one of
+	-- DrumChambers per shot, and on reload swings DrumSwingOut studs out and spins DrumReloadSpins times.
+	PumpTravel = 0.16,
+	HammerCockAngle = 40,
+	HammerSnapTime = 0.05,
+	DrumChambers = 6,
+	DrumSwingOut = 0.14,
+	DrumReloadSpins = 2,
 
 	-- Look and feel. The bullet is only a picture; the hit was already decided by the server's
 	-- instant raycast. Its flight time is clamped so it lands about when the server answers.
@@ -82,11 +234,20 @@ return {
 	-- which scales how hard the held gun snaps back. followUp plays followUpDelay seconds later.
 	GunFeel = {
 		StarterBlaster = "pistol",
+		Smg = "smg",
+		Rifle = "rifle",
+		Shotgun = "shotgun",
+		Revolver = "revolver",
+		MarksmanRifle = "marksman",
+		Disruptor = "disruptor",
+		NailGun = "nail",
+		FlareGun = "flare",
+		DartBlaster = "dart",
 	},
 	ShotFeel = {
 		pistol = { sound = "shot_pistol", kick = 2.4, twitch = 0.5, fovPunch = 1.2, shake = 0, weight = 1 },
 		smg = { sound = "shot_smg", kick = 2, twitch = 0.7, fovPunch = 1, shake = 0, weight = 0.8 },
-		rifle = { sound = "shot_rifle", kick = 2.6, twitch = 0.5, fovPunch = 1.3, shake = 0, weight = 1.1 },
+		rifle = { sound = "shot_rifle", kick = 2.8, twitch = 0.5, fovPunch = 1.4, shake = 0.3, weight = 1.3 },
 		marksman = {
 			sound = "shot_marksman",
 			kick = 3.2,
@@ -179,6 +340,9 @@ return {
 		Empty = "flashlight_click",
 		Reload = "cell_eject",
 		ReloadVolume = 0.8,
+		ShellReload = "shell_clink", -- the shotgun loads shells instead of ejecting a cell
+		Cock = "revolver_cock",
+		CockVolume = 0.8,
 	},
 	SoundRollOff = { 8, 120 },
 	SoundPitchJitter = 0.12,

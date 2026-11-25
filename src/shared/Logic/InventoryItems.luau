@@ -26,6 +26,19 @@ local items: { [string]: ItemDef } = {
 	EmpCharge = { id = "EmpCharge", name = "EMP Charge", value = 200, stackSize = 3 },
 	Disruptor = { id = "Disruptor", name = "Disruptor", value = 300, stackSize = 1 },
 	Medkit = { id = "Medkit", name = "Medkit", value = 40, stackSize = 2 },
+
+	-- Guns found in the warehouse (how each one fires lives in Config.Guns) and their own ammo.
+	Smg = { id = "Smg", name = "SMG", value = 60, stackSize = 1 },
+	Rifle = { id = "Rifle", name = "Rifle", value = 90, stackSize = 1 },
+	Shotgun = { id = "Shotgun", name = "Shotgun", value = 80, stackSize = 1 },
+	Revolver = { id = "Revolver", name = "Revolver", value = 70, stackSize = 1 },
+	MarksmanRifle = { id = "MarksmanRifle", name = "Marksman Rifle", value = 110, stackSize = 1 },
+	NailGun = { id = "NailGun", name = "Nail Gun", value = 50, stackSize = 1 },
+	FlareGun = { id = "FlareGun", name = "Flare Gun", value = 35, stackSize = 1 },
+	DartBlaster = { id = "DartBlaster", name = "Dart Blaster", value = 120, stackSize = 1 },
+	Shells = { id = "Shells", name = "Shotgun Shells", value = 2, stackSize = 24 },
+	Flares = { id = "Flares", name = "Flares", value = 4, stackSize = 6 },
+	Darts = { id = "Darts", name = "Darts", value = 5, stackSize = 12 },
 }
 
 return table.freeze(items)

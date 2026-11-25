@@ -2,13 +2,17 @@
 -- on each shot, and drops out of view while carrying a prop or when no gun is selected.
 -- Uses the gun's uploaded viewmodel once the server copies it into ReplicatedStorage.Viewmodels,
 -- otherwise a stand-in built from plain parts. Hands puts the gloves on its Grip and Foregrip.
--- On reload it dips and its Mag part (a small block on the stand-in) drops out and fades.
+-- On reload it dips and its Mag part (a small block on the stand-in) drops out and fades; the
+-- revolver swings its drum out instead and the shotgun racks its pump. Moving parts found by name:
+-- Pump slides back and forward after a shotgun shot, Hammer cocks back about its base and snaps
+-- forward, and the revolver's Mag drum turns a chamber per shot.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local CombatFeel = require(ReplicatedStorage.Shared.Logic.CombatFeel)
+local CombatModes = require(ReplicatedStorage.Shared.Logic.CombatModes)
 local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
@@ -28,8 +32,22 @@ local muzzle: BasePart? = nil
 local gripMarker: BasePart? = nil
 local foregripMarker: BasePart? = nil
 local magPart: BasePart? = nil
+local pumpPart: BasePart? = nil
+local hammerPart: BasePart? = nil
+-- Where each moving part sits in the gun's own space (barrel along -Z), and the hammer's hinge.
+local magRest = CFrame.identity
+local pumpRest = CFrame.identity
+local hammerRest = CFrame.identity
+local hammerHinge = Vector3.zero
 -- Turns the model's own pivot into "barrel along -Z, centred on the body".
 local alignment = CFrame.identity
+local reloadStyle = "mag"
+local pumpStartedAt = -math.huge
+local pumpDuration = 0
+local cockedAt = -math.huge
+local cockDuration = 0
+local rounds = 0
+local roundsMax = 0
 local armed = false
 local aimBlend = 0
 local lowerBlend = 1
@@ -115,7 +133,49 @@ local function use(newModel: Model, newAlignment: CFrame, name: string?)
 	muzzle = findPart(newModel, "Muzzle")
 	gripMarker = findPart(newModel, "Grip")
 	foregripMarker = findPart(newModel, "Foregrip")
-	magPart = findPart(newModel, "Mag")
+	-- The model is placed by its pivot each frame, so the part that pivot follows can't move on its own.
+	local function moving(partName: string): BasePart?
+		local part = findPart(newModel, partName)
+		return if part and part ~= newModel.PrimaryPart then part else nil
+	end
+	magPart = moving("Mag")
+	pumpPart = moving("Pump")
+	hammerPart = moving("Hammer")
+	pumpStartedAt = -math.huge
+	cockedAt = -math.huge
+	reloadStartedAt = -math.huge
+	local hold = newModel:GetPivot() * newAlignment:Inverse()
+	if magPart then
+		magRest = hold:ToObjectSpace(magPart.CFrame)
+	end
+	if pumpPart then
+		pumpRest = hold:ToObjectSpace(pumpPart.CFrame)
+	end
+	if hammerPart then
+		hammerRest = hold:ToObjectSpace(hammerPart.CFrame)
+		-- Hinge on the hammer's own pivot when the model sets one, otherwise its lowest point.
+		if hammerPart.PivotOffset ~= CFrame.identity then
+			hammerHinge = hold:PointToObjectSpace(hammerPart:GetPivot().Position)
+		else
+			local half = hammerPart.Size / 2
+			local lowest = math.huge
+			for _, corner in
+				{
+					Vector3.new(1, 1, 1),
+					Vector3.new(1, 1, -1),
+					Vector3.new(1, -1, 1),
+					Vector3.new(1, -1, -1),
+					Vector3.new(-1, 1, 1),
+					Vector3.new(-1, 1, -1),
+					Vector3.new(-1, -1, 1),
+					Vector3.new(-1, -1, -1),
+				}
+			do
+				lowest = math.min(lowest, (hammerRest * (half * corner)).Y)
+			end
+			hammerHinge = Vector3.new(hammerRest.X, lowest, hammerRest.Z)
+		end
+	end
 	-- The kit's marker cubes (bright magenta) only say where things attach. The stand-in's grip is
 	-- a real part, so only uploaded models hide theirs.
 	for _, markerName in MARKERS do
@@ -174,10 +234,13 @@ local function refreshModel()
 	end
 end
 
--- Gun calls this whenever the gun in hand changes: its viewmodel template name, or nil for none.
-function Viewmodel.setArmed(name: string?)
+-- Gun calls this whenever the gun in hand changes: its viewmodel template name, or nil for none,
+-- and its reload (Config.Hotbar.Guns): "mag" drops the old mag, "drum" swings the revolver's drum
+-- out and spins it, "shells" racks the pump as the gun comes back up.
+function Viewmodel.setArmed(name: string?, style: string?)
 	armed = name ~= nil
 	if name then
+		reloadStyle = style or "mag"
 		wantedName = name
 		refreshModel()
 	end
@@ -257,13 +320,74 @@ local function dropMag(camera: Camera)
 	end)
 end
 
--- Gun calls this when a reload starts: dip the blaster for duration seconds and drop the old mag.
+-- Gun calls this when a reload starts: dip the gun for duration seconds and do the gun's own
+-- reload (see setArmed).
 function Viewmodel.reload(duration: number)
 	reloadStartedAt = os.clock()
 	reloadDuration = duration
+	local style = reloadStyle
+	if style == "shells" then
+		pumpStartedAt = reloadStartedAt + duration * (1 - settings.ReloadRiseShare)
+		pumpDuration = duration * settings.ReloadRiseShare
+	end
 	local camera = workspace.CurrentCamera
-	if camera then
+	if camera and style == "mag" then
 		dropMag(camera)
+	end
+end
+
+-- Gun calls this after a pump-action shot: the pump slides back and forward over duration.
+function Viewmodel.pump(duration: number)
+	pumpStartedAt = os.clock()
+	pumpDuration = duration
+end
+
+-- Gun calls this before a single-action shot: the hammer comes back over duration.
+function Viewmodel.cock(duration: number)
+	cockedAt = os.clock()
+	cockDuration = duration
+end
+
+-- Rounds loaded and the mag size of the gun in hand; the revolver's drum turns by them.
+function Viewmodel.setRounds(loaded: number, magSize: number)
+	rounds = loaded
+	roundsMax = magSize
+end
+
+local function about(point: Vector3, rotation: CFrame): CFrame
+	return CFrame.new(point) * rotation * CFrame.new(-point)
+end
+
+-- Puts the moving parts where they belong this frame, on top of the gun's pose (hold).
+local function moveParts(hold: CFrame, now: number, reloadT: number, dip: number)
+	if pumpPart then
+		local travel = CombatModes.pumpTravel(now - pumpStartedAt, pumpDuration)
+		pumpPart.CFrame = hold * CFrame.new(0, 0, settings.PumpTravel * travel) * pumpRest
+	end
+	local lift = CombatModes.hammerLift(now, cockedAt, cockDuration, lastKickAt, settings.HammerSnapTime)
+	if hammerPart then
+		local angle = math.rad(settings.HammerCockAngle) * lift
+		hammerPart.CFrame = hold * about(hammerHinge, CFrame.Angles(angle, 0, 0)) * hammerRest
+	end
+	if magPart and reloadStyle == "drum" then
+		-- The drum only turns while the hammer is coming back, not while it snaps forward.
+		local cocking = cockedAt > lastKickAt
+		local turn =
+			CombatModes.drumTurn(rounds, roundsMax, settings.DrumChambers, if cocking then lift else 0)
+		local angle = turn / settings.DrumChambers * math.pi * 2
+		if reloadT >= 0 and reloadT < reloadDuration then
+			angle += reloadT / reloadDuration * settings.DrumReloadSpins * math.pi * 2
+		end
+		magPart.CFrame = hold
+			* CFrame.new(-settings.DrumSwingOut * dip, 0, 0)
+			* about(magRest.Position, CFrame.Angles(0, 0, angle))
+			* magRest
+	elseif magPart then
+		-- The gun's own mag is gone from the drop until the fresh one comes up with the rise.
+		local swapping = reloadStyle == "mag"
+			and reloadT >= 0
+			and reloadT < reloadDuration * (1 - settings.ReloadRiseShare)
+		magPart.LocalTransparencyModifier = if swapping then 1 else 0
 	end
 end
 
@@ -321,11 +445,6 @@ local function update(dt: number)
 	local reloadT = os.clock() - reloadStartedAt
 	local dip =
 		CombatReload.motion(reloadT, reloadDuration, settings.ReloadDipShare, settings.ReloadRiseShare)
-	-- The gun's own mag is gone from the drop until the fresh one comes up with the rise.
-	if magPart then
-		local swapping = reloadT >= 0 and reloadT < reloadDuration * (1 - settings.ReloadRiseShare)
-		magPart.LocalTransparencyModifier = if swapping then 1 else 0
-	end
 	local offset = settings.ViewmodelOffset:Lerp(settings.ViewmodelAimOffset, aimBlend)
 	local hold = camera.CFrame
 		* CFrame.new(offset + Vector3.new(side, up - settings.ViewmodelLoweredDrop * lowerBlend, 0))
@@ -335,6 +454,7 @@ local function update(dt: number)
 		* CFrame.new(0, -settings.ReloadDropSink * dip, 0)
 		* CFrame.Angles(math.rad(-settings.ReloadDropPitch * dip), 0, math.rad(settings.ReloadDropRoll * dip))
 	model:PivotTo(hold * alignment)
+	moveParts(hold, os.clock(), reloadT, dip)
 	model.Parent = camera
 end
 
