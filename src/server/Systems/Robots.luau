@@ -3,6 +3,8 @@
 -- Brains live in Logic/RobotBrain; this file senses the world for them, moves the models and carries
 -- out what they decide (steal, haul, take players down). Robots are anchored and moved with PivotTo,
 -- so nothing here touches physics. Limbs are procedural until the real clips are imported in Studio.
+-- Guns hurt them too (Robots.shot): each hit staggers one, enough knock it down for a while, and it
+-- wakes up hunting whoever shot it. Only the EMP, disruptor and Robots.destroy end one for good.
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local PathfindingService = game:GetService("PathfindingService")
@@ -79,6 +81,15 @@ export type Robot = {
 	watching: boolean,
 	stareSince: number?,
 	lookAt: Vector3?,
+	studyPose: string, -- what it does at the thing it walked up to: look it over or poke at it
+	-- getting shot
+	damage: number,
+	lastHitAt: number,
+	staggerUntil: number,
+	knockedUntil: number?,
+	shooter: any?,
+	grudge: any?,
+	grudgeUntil: number,
 }
 type Alive = { player: Player, character: Model, root: BasePart, humanoid: Humanoid, position: Vector3 }
 
@@ -104,6 +115,8 @@ local origin: Vector3
 local floorY = 0
 local random = Random.new()
 local watcher = settings.Watcher
+local shot = settings.Shot
+local fxRemote: RemoteEvent
 
 local function flat(v: Vector3): Vector3
 	return Vector3.new(v.X, 0, v.Z)
@@ -385,6 +398,11 @@ local function place(robot: Robot)
 	local facing = CFrame.Angles(0, bodyYaw(robot, now), 0):VectorToWorldSpace(robot.facing)
 	-- the art faces +z, lookAt points -z, so look away from the way we want to face
 	local cframe = CFrame.lookAt(pivot, pivot - facing)
+	if robot.knockedUntil then
+		-- powered off: tipped over backwards around its feet
+		local feet = CFrame.lookAt(robot.position, robot.position - facing)
+		cframe = feet * CFrame.Angles(math.rad(-shot.DownTilt), 0, 0) * CFrame.new(0, robot.pivotHeight, 0)
+	end
 	robot.model:PivotTo(cframe)
 	if robot.carrying then
 		holdInFront(robot, robot.carrying.instance)
@@ -612,6 +630,14 @@ local function spawnRobot(typeName: string, room: any?, position: Vector3, facin
 		watching = false,
 		stareSince = nil,
 		lookAt = nil,
+		studyPose = "study",
+		damage = 0,
+		lastHitAt = -math.huge,
+		staggerUntil = 0,
+		knockedUntil = nil,
+		shooter = nil,
+		grudge = nil,
+		grudgeUntil = 0,
 	}
 	model.Name = typeName
 	dress(robot)
@@ -827,6 +853,10 @@ local function turnToward(robot: Robot, direction: Vector3, dt: number)
 end
 
 local function moveStep(robot: Robot, dt: number)
+	if robot.knockedUntil or os.clock() < robot.staggerUntil then
+		robot.moving = false
+		return
+	end
 	local waypoint = robot.waypoints[robot.waypointIndex]
 	if not robot.goal or robot.speed <= 0 or not waypoint then
 		robot.moving = false
@@ -892,13 +922,20 @@ end
 
 -- Senses ------------------------------------------------------------------------------------------
 
+-- From its eyes or its chest: a hanging set piece or a crate it's sitting by can block one but not
+-- both, so a robot never stares straight through you.
 local function lineOfSight(robot: Robot, target: Alive): boolean
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { folder, stashFolder, target.character }
-	local eye = robot.position + Vector3.yAxis * sense.EyeHeight
 	local head = target.position + Vector3.yAxis * 1.5
-	return workspace:Raycast(eye, head - eye, params) == nil
+	for _, height in { sense.EyeHeight, sense.ChestHeight } do
+		local eye = robot.position + Vector3.yAxis * height
+		if workspace:Raycast(eye, head - eye, params) == nil then
+			return true
+		end
+	end
+	return false
 end
 
 local function sameRoomAs(robot: Robot, position: Vector3): boolean
@@ -970,10 +1007,14 @@ local function senseRobot(
 		end
 	end
 	local gunRange = Config.Interact.Loudness.Levels.loud.robots
-	for _, shot in gunshots do
-		local inRange = flatDistance(shot.position, robot.position) <= gunRange
-		if shot.time > robot.heardUpTo and inRange and (not roomOnly or sameRoomAs(robot, shot.position)) then
-			table.insert(heard, shot)
+	for _, gunshot in gunshots do
+		local inRange = flatDistance(gunshot.position, robot.position) <= gunRange
+		if
+			gunshot.time > robot.heardUpTo
+			and inRange
+			and (not roomOnly or sameRoomAs(robot, gunshot.position))
+		then
+			table.insert(heard, gunshot)
 		end
 	end
 	robot.heardUpTo = now
@@ -994,6 +1035,7 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 		return
 	end
 	local isPlayer = typeof(player) == "Instance" -- false for a simulated player's stand-in
+	fxRemote:FireAllClients(robot.model, "catch", target.position)
 	if DayNight.isNight() then
 		-- caught at night counts as going down: Combat drops their bag when the Humanoid dies
 		if isPlayer then
@@ -1064,11 +1106,31 @@ local function studyTarget(robot: Robot, now: number): (Vector3?, boolean)
 	local spot = robot.studySpot
 	local arrived = spot ~= nil and flatDistance(spot, robot.position) <= settings.ArriveRange
 	if not spot or (arrived and now >= robot.studyUntil) then
-		local item = room.items[random:NextInteger(1, #room.items)]
-		robot.studySpot =
-			Warehouse.toWorld(item.x + item.nx * settings.StudyReach, item.z + item.nz * settings.StudyReach)
-		robot.studyFace = Warehouse.toWorld(item.x, item.z)
+		-- the next thing to look at, away from where its roommates are working
+		local taken = {}
+		for _, other in roomRobots[room.id] or {} do
+			local at = if other ~= robot then other.studySpot or other.position else nil
+			if at then
+				table.insert(taken, { x = at.X, z = at.Z })
+			end
+		end
+		local candidates = {}
+		for _ = 1, 4 do
+			local item = room.items[random:NextInteger(1, #room.items)]
+			local at = Warehouse.toWorld(
+				item.x + item.nx * settings.StudyReach,
+				item.z + item.nz * settings.StudyReach
+			)
+			table.insert(candidates, { x = at.X, z = at.Z, item = item })
+		end
+		local pick = RobotRooms.spreadSpot(candidates, taken, settings.BotSpacing) :: any
+		robot.studySpot = Warehouse.toWorld(
+			pick.item.x + pick.item.nx * settings.StudyReach,
+			pick.item.z + pick.item.nz * settings.StudyReach
+		)
+		robot.studyFace = Warehouse.toWorld(pick.item.x, pick.item.z)
 		robot.studyUntil = math.huge
+		robot.studyPose = settings.StudyPoses[random:NextInteger(1, #settings.StudyPoses)]
 		return robot.studySpot, false
 	end
 	if arrived and robot.studyUntil == math.huge then
@@ -1098,12 +1160,14 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 	end
 
 	robot.pose = intent.pose
-	choreGear(robot)
 	robot.face = if intent.face then onFloor(Vector3.new(intent.face.x, 0, intent.face.z)) else nil
 	robot.speed = if intent.speed == "chase"
 		then info.chaseSpeed
 		elseif intent.speed == "walk" then info.walkSpeed
 		else 0
+	if robot.grudge and now < robot.grudgeUntil then
+		robot.speed *= shot.AngrySpeed
+	end
 
 	local goal: Vector3? = nil
 	if intent.goal == "home" then
@@ -1127,6 +1191,16 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 		if arrived then
 			robot.speed = 0
 			robot.face = robot.studyFace
+			robot.pose = robot.studyPose
+			local box = robot.choreBox
+			if box and not brain.errand then
+				-- sets the hauled box down by the thing it's sorting and leaves it there a while
+				robot.choreBox = nil
+				setDown(box, robot.position + robot.facing * 2.5)
+				Debris:AddItem(box, chores.BoxStays)
+			end
+		elseif robot.studyPose == "restock" and robot.typeName == "carrier" then
+			robot.pose = "carry" -- a carrier hauls a box over to the thing it's about to sort
 		end
 	end
 	if robot.speed <= 0 then
@@ -1140,6 +1214,7 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 		setGoal(robot, goal, now)
 	end
 
+	choreGear(robot)
 	local model = robot.model
 	if model:GetAttribute("State") ~= brain.state then
 		model:SetAttribute("State", brain.state)
@@ -1173,6 +1248,60 @@ local function keepWatching(robot: Robot, alive: { Alive }, noticed: boolean, no
 	return true
 end
 
+-- Back up after being knocked down: it gets up and goes for whoever shot it.
+local function reboot(robot: Robot, now: number)
+	robot.knockedUntil = nil
+	robot.damage = 0
+	robot.grudge = robot.shooter
+	robot.grudgeUntil = now + shot.GrudgeSeconds
+	place(robot)
+	fxRemote:FireAllClients(robot.model, "reboot", robot.position)
+end
+
+-- The shooter, as if seen, while the grudge lasts and they're in range and not hiding.
+local function grudgeTarget(robot: Robot, alive: { Alive }, now: number): RobotBrain.Seen?
+	if not robot.grudge or now >= robot.grudgeUntil then
+		robot.grudge = nil
+		return nil
+	end
+	for _, target in alive do
+		if target.player == robot.grudge then
+			local d = flatDistance(target.position, robot.position)
+			if d > shot.GrudgeRange or Interact.isHidden(target.player) then
+				return nil
+			end
+			local range = settings.Types[robot.typeName].sightRange
+			return {
+				id = target.player,
+				x = target.position.X,
+				z = target.position.Z,
+				distance = d,
+				range = range,
+			}
+		end
+	end
+	return nil
+end
+
+-- Robots that end up standing in each other (two spawns, two study spots) step apart.
+local function keepApart(robot: Robot)
+	if robot.moving or robot.knockedUntil or robot.watching then
+		return
+	end
+	local personal = settings.BotSpacing / 2
+	for _, other in robots do
+		local away = flat(robot.position - other.position)
+		if other ~= robot and away.Magnitude < personal then
+			local push = if away.Magnitude > 0.01
+				then away.Unit
+				else Vector3.new(random:NextNumber(-1, 1), 0, 1).Unit
+			robot.position = onFloor(robot.position + push * 0.6)
+			place(robot)
+			return
+		end
+	end
+end
+
 local function despawn(robot: Robot)
 	dropCarried(robot, robot.position)
 	holdChoreBox(robot, false)
@@ -1200,10 +1329,24 @@ local function tick(dt: number)
 	end
 
 	for _, robot in robots do
+		if robot.knockedUntil and now >= robot.knockedUntil then
+			reboot(robot, now)
+		end
 		local seen, heard = nil, nil
 		if robot.role == "chore" or phase == "Night" then -- stalled hunters sense nothing
 			seen, heard = senseRobot(robot, phase, alive, now)
 		end
+		local angryAt = grudgeTarget(robot, alive, now)
+		if angryAt then
+			seen = angryAt
+			-- by day it gives up at the leash like any chase; no flapping back and forth at the edge
+			local leashOk = phase == "Night"
+				or flatDistance(robot.home, robot.position) <= settings.DayLeash * 0.6
+			if robot.brain.state ~= "chase" and leashOk then
+				RobotBrain.provoke(robot.brain, angryAt, now)
+			end
+		end
+		keepApart(robot)
 		if robot.watching and keepWatching(robot, alive, seen ~= nil or heard ~= nil, now) then
 			continue
 		end
@@ -1249,9 +1392,26 @@ end
 
 -- Waking and sleeping -----------------------------------------------------------------------------
 
+-- A clear spot in the room, as far as it can get from the robots already living there.
+local function roomSpawnSpot(room: any): Vector3
+	local taken = {}
+	for _, other in roomRobots[room.id] or {} do
+		table.insert(taken, { x = other.position.X, z = other.position.Z })
+	end
+	local candidates = {}
+	for _ = 1, 10 do
+		local point = randomRoomPoint(room, 5)
+		if spotIsClear(point, Vector3.new(4, 6, 4)) then
+			table.insert(candidates, { x = point.X, z = point.Z })
+		end
+	end
+	local pick = RobotRooms.spreadSpot(candidates, taken, settings.BotSpacing)
+	return if pick then onFloor(Vector3.new(pick.x, 0, pick.z)) else randomRoomPoint(room, 5)
+end
+
 local function spawnChoreBot(room: any, corner: boolean)
 	local typeName = RobotRooms.botFor(room.kind, settings.RoomBots, "cleaner")
-	local position = randomRoomPoint(room, 5)
+	local position = roomSpawnSpot(room)
 	local facing = Vector3.new(random:NextNumber(-1, 1), 0, 1)
 	if corner then
 		local pad = watcher.CornerPad
@@ -1281,7 +1441,8 @@ end
 
 local function robotsFor(room: any): number
 	local range = if room.giant then settings.GiantInstallationBots else settings.InstallationBots
-	return random:NextInteger(range[1], range[2])
+	local area = (room.x1 - room.x0) * (room.z1 - room.z0)
+	return RobotRooms.botCount(area, range, settings.AreaPerBot, random:NextInteger(0, 1))
 end
 
 local nightStartedAt = 0
@@ -1492,6 +1653,46 @@ function Robots.disable(robot: Robot, seconds: number)
 	RobotBrain.disable(robot.brain, os.clock() + seconds)
 end
 
+-- A gun hit for damage from shooter (a Player or a simulated player's stand-in), fired from `from`.
+-- The server's raycast already decided it landed. Sparks, a clank and a stagger every time; enough
+-- damage inside Shot.HitMemory knocks it down. Hitting one that's already down only sparks.
+function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, at: Vector3)
+	if robot.dead then
+		return
+	end
+	local now = os.clock()
+	local down = robot.knockedUntil ~= nil
+	if not down then
+		if now - robot.lastHitAt > shot.HitMemory then
+			robot.damage = 0
+		end
+		robot.lastHitAt = now
+		robot.shooter = shooter
+		robot.grudge, robot.grudgeUntil = shooter, now + shot.GrudgeSeconds
+		robot.watching, robot.lookAt, robot.stareSince = false, nil, nil
+		robot.damage += damage
+		down = robot.damage >= settings.Types[robot.typeName].armor
+	end
+	if down and not robot.knockedUntil then
+		robot.knockedUntil = now + shot.DownSeconds
+		Robots.disable(robot, shot.DownSeconds)
+		dropCarried(robot, robot.position)
+		robot.waypoints, robot.goal = {}, nil
+		place(robot)
+		fxRemote:FireAllClients(robot.model, "down", at)
+		return
+	end
+	if not down then
+		robot.staggerUntil = now + shot.StaggerSeconds
+		local back = flat(robot.position - from)
+		if back.Magnitude > 0.01 then
+			robot.position = onFloor(robot.position + back.Unit * shot.Knockback)
+			place(robot)
+		end
+	end
+	fxRemote:FireAllClients(robot.model, "hit", at)
+end
+
 -- Puts items on a shelf in a robot room (for loot spawning). False if the room doesn't exist.
 function Robots.addToRoom(roomId: number, itemId: string, count: number): boolean
 	local room = roomsById[roomId]
@@ -1602,6 +1803,7 @@ function Robots.Init()
 	stashFolder = Instance.new("Folder")
 	stashFolder.Name = "RobotStash"
 	stashFolder.Parent = workspace
+	fxRemote = Net.event("RobotFx")
 end
 
 function Robots.Start()

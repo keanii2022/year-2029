@@ -12,6 +12,7 @@ local LINES = {
 	Error = "robot_error",
 	ErrorStates = { "stalled", "disabled" },
 	CalmStates = { "study", "errand", "return" },
+	ChatterStates = { "study", "errand", "return", "sweep", "investigate" },
 }
 
 return {
@@ -56,11 +57,17 @@ return {
 		expect(VoiceLines.robotStateLine("stalled", "disabled", LINES)).toBe(nil)
 		expect(VoiceLines.robotStateLine("chase", "return", LINES)).toBe(nil)
 		expect(VoiceLines.robotStateLine("suspicious", "chase", LINES)).toBe(nil)
+		expect(VoiceLines.robotStateLine("sweep", "chase", LINES)).toBe("robot_notice")
+		expect(VoiceLines.robotStateLine("investigate", "chase", LINES)).toBe("robot_notice")
+		expect(VoiceLines.robotStateLine("study", "chase", LINES)).toBe("robot_notice")
+		expect(VoiceLines.robotStateLine("chase", "chase", LINES)).toBe(nil)
 		expect(VoiceLines.robotStateLine(nil, "study", LINES)).toBe(nil)
 	end,
-	["only calm robots chatter"] = function()
-		expect(VoiceLines.isCalm("study", LINES)).toBe(true)
-		expect(VoiceLines.isCalm("chase", LINES)).toBe(false)
-		expect(VoiceLines.isCalm(nil, LINES)).toBe(false)
+	["calm and patrolling robots chatter, chasing ones don't"] = function()
+		expect(VoiceLines.chatters("study", LINES)).toBe(true)
+		expect(VoiceLines.chatters("sweep", LINES)).toBe(true)
+		expect(VoiceLines.chatters("chase", LINES)).toBe(false)
+		expect(VoiceLines.chatters("disabled", LINES)).toBe(false)
+		expect(VoiceLines.chatters(nil, LINES)).toBe(false)
 	end,
 }

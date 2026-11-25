@@ -167,13 +167,38 @@ return {
 	-- Every installation also gets InstallationLootCount guaranteed pickups by its furniture, rolled
 	-- from this better list (weights at full depth), plus the guarded stash crate (Config.Containers)
 	InstallationLootCount = { 2, 4 },
+	-- ...and the first of them (two in a giant hall) is always a real find worth the robots: a gun,
+	-- shells, a medkit or robot gear. Rolled at the hall's depth, so the deep, dangerous halls hold
+	-- the rifles and disruptors while the ones near the entrance lean to pistols and ammo.
+	InstallationGoodFinds = 1,
+	GiantInstallationGoodFinds = 2,
+	GoodFinds = {
+		{ item = "Smg", model = "smg", count = { 1, 1 }, near = 3, deep = 2 },
+		{ item = "Revolver", model = "revolver", count = { 1, 1 }, near = 3, deep = 2 },
+		{ item = "Shotgun", model = "shotgun", count = { 1, 1 }, near = 2, deep = 3 },
+		{ item = "NailGun", model = "nail_gun", count = { 1, 1 }, near = 2, deep = 0.5 },
+		{ item = "FlareGun", model = "flare_gun", count = { 1, 1 }, near = 1.5, deep = 1 },
+		{ item = "Rifle", model = "rifle", count = { 1, 1 }, near = 0.3, deep = 2.5 },
+		{
+			item = "MarksmanRifle",
+			model = "marksman_rifle",
+			count = { 1, 1 },
+			near = 0,
+			deep = 1.5,
+			minDepth = 0.3,
+		},
+		{ item = "DartBlaster", model = "dart_blaster", count = { 1, 1 }, near = 0.8, deep = 1 },
+		{ item = "Shells", model = "ammo_shells", count = { 8, 14 }, near = 2, deep = 2 },
+		{ item = "Medkit", model = "medkit", count = { 1, 1 }, near = 2, deep = 2.5 },
+		{ item = "EmpCharge", model = "emp_charge", count = { 1, 2 }, near = 0.8, deep = 2 },
+		{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 0, deep = 1, minDepth = 0.5 },
+	},
 	InstallationLootReach = 3.5, -- studs out from the furniture
 	InstallationLoot = {
 		{ item = "BlasterCells", model = "ammo_cell", count = { 15, 30 }, near = 10, deep = 10 },
 		{ item = "RationPack", model = "ration_pack", count = { 1, 1 }, near = 7, deep = 7 },
 		{ item = "Medkit", model = "medkit", count = { 1, 1 }, near = 5, deep = 5 },
 		{ item = "Bandage", model = "bandage", count = { 2, 3 }, near = 5, deep = 5 },
-		{ item = "EnergyDrink", model = "energy_drink", count = { 1, 2 }, near = 4, deep = 4 },
 		{ item = "FlashlightBattery", model = "battery", count = { 2, 3 }, near = 4, deep = 4 },
 		{ item = "EmpCharge", model = "emp_charge", count = { 1, 1 }, near = 1, deep = 1 },
 		{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 0.5, deep = 0.5 },

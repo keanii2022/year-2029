@@ -12,8 +12,11 @@ return {
 	MaxLiveChoreBots = 24, -- robots, across every live installation
 
 	-- How many robots live in an installation (min, max), and the giant 2x2 ones
+	-- The count scales with the hall's floor area (one per AreaPerBot square studs), kept in range.
 	InstallationBots = { 2, 3 },
-	GiantInstallationBots = { 3, 4 },
+	GiantInstallationBots = { 3, 6 },
+	AreaPerBot = 3600,
+	BotSpacing = 9, -- robots in a room spawn, study and idle at least this far apart
 	-- One per installation stands in a corner facing the wall. Inside LookRange its head turns to
 	-- follow you; it wakes after staring StareSeconds, when you come inside WakeRange, or on a sound.
 	Watcher = { LookRange = 34, WakeRange = 9, StareSeconds = 4, MaxHeadTurn = 150, CornerPad = 3 },
@@ -49,13 +52,74 @@ return {
 	NightSuffix = "_night", -- night model name = day name .. suffix
 
 	-- Per type. Speeds in studs per second (players walk 14, sprint 22, crouch 7).
+	-- armor: gun damage that knocks it down (starter pistol hits for 22, a close shotgun blast ~96).
 	Types = {
-		cleaner = { role = "chore", walkSpeed = 7, chaseSpeed = 13, sightRange = 34, agentHeight = 7 },
-		carrier = { role = "chore", walkSpeed = 7, chaseSpeed = 13, sightRange = 34, agentHeight = 7 },
-		cook = { role = "chore", walkSpeed = 7, chaseSpeed = 13, sightRange = 34, agentHeight = 7 },
-		scout = { role = "hunter", walkSpeed = 9, chaseSpeed = 16, sightRange = 70, agentHeight = 7 },
-		brute = { role = "hunter", walkSpeed = 8, chaseSpeed = 15, sightRange = 45, agentHeight = 8 },
-		crawler = { role = "hunter", walkSpeed = 9, chaseSpeed = 17, sightRange = 40, agentHeight = 3.5 },
+		cleaner = {
+			role = "chore",
+			walkSpeed = 7,
+			chaseSpeed = 13,
+			sightRange = 34,
+			agentHeight = 7,
+			armor = 130,
+		},
+		carrier = {
+			role = "chore",
+			walkSpeed = 7,
+			chaseSpeed = 13,
+			sightRange = 34,
+			agentHeight = 7,
+			armor = 130,
+		},
+		cook = {
+			role = "chore",
+			walkSpeed = 7,
+			chaseSpeed = 13,
+			sightRange = 34,
+			agentHeight = 7,
+			armor = 130,
+		},
+		scout = {
+			role = "hunter",
+			walkSpeed = 9,
+			chaseSpeed = 16,
+			sightRange = 70,
+			agentHeight = 7,
+			armor = 150,
+		},
+		brute = {
+			role = "hunter",
+			walkSpeed = 8,
+			chaseSpeed = 15,
+			sightRange = 45,
+			agentHeight = 8,
+			armor = 300,
+		},
+		crawler = {
+			role = "hunter",
+			walkSpeed = 9,
+			chaseSpeed = 17,
+			sightRange = 40,
+			agentHeight = 3.5,
+			armor = 110,
+		},
+	},
+
+	-- Getting shot: a desperate answer, never a kill. Each hit sparks, clanks and staggers it; enough
+	-- damage (Types.armor) inside HitMemory knocks it down. It lies still DownSeconds, reboots, and
+	-- hunts whoever shot it for GrudgeSeconds, a little faster than usual.
+	Shot = {
+		HitMemory = 12,
+		StaggerSeconds = 0.35,
+		Knockback = 0.8, -- studs it jerks back per hit
+		DownSeconds = 15,
+		DownTilt = 75, -- degrees it falls back while powered off
+		GrudgeSeconds = 45,
+		GrudgeRange = 160,
+		AngrySpeed = 1.15,
+		Clank = "impact_metal",
+		ClankVolume = 1,
+		Sputter = "emp_shutdown",
+		Reboot = "hydraulic_hiss",
 	},
 
 	-- Senses
@@ -65,6 +129,7 @@ return {
 		CrouchSightFactor = 0.5, -- crouching shrinks how far a robot can spot you
 		SprintSightFactor = 1.2,
 		FeelRadius = 9, -- this close, a robot notices you whatever way it faces (unless you're hidden or crouched)
+		FaceRadius = 16, -- standing in its cone this close, it sees you even crouched, busy or not
 		FootstepRadius = { Walk = 12, Sprint = 30, Crouch = 0 },
 		NoticeSeconds = 0.8, -- by day, how long you can stay in view before it charges (less up close)
 		NightNoticeSeconds = 0.35,
@@ -75,6 +140,7 @@ return {
 		BeamRange = 60, -- a flashlight pointed at a robot at night within this range gives you away
 		BeamAngle = 12, -- degrees off the beam's centre that still counts as pointing at it
 		EyeHeight = 6,
+		ChestHeight = 3, -- a second sight ray, so a hanging prop in front of its eyes doesn't blind it
 	},
 
 	-- Chasing and catching
@@ -84,6 +150,9 @@ return {
 	ArriveRange = 3,
 	StudySeconds = { 4, 9 },
 	StudyReach = 3.5, -- stands this far in front of the furniture it studies
+	-- what it does at each thing in its room: look it over, poke and sort at it (carriers haul a box
+	-- over first), or scan around
+	StudyPoses = { "study", "restock", "restock", "scan" },
 
 	-- Day errands: calm chore bots walk out of their rooms to work in the aisles near players, then
 	-- walk home. Life hands out the spots every few seconds; never by night.
@@ -173,9 +242,36 @@ return {
 	EmpKeys = { Enum.KeyCode.G, Enum.KeyCode.DPadDown },
 	DisruptorKeys = { Enum.KeyCode.V, Enum.KeyCode.DPadRight },
 
-	-- Sounds (names from the manifest), heard out to SoundRollOff[2] studs
-	Sounds = { Hum = "hum_loop", HumVolume = 0.35, CueVolume = 0.9, Grab = "grab_clank" },
+	-- Sounds (names from the manifest), heard out to SoundRollOff[2] studs (NightRollOff at night)
+	Sounds = {
+		Hum = "hum_loop",
+		HumVolume = 0.35,
+		NightHumVolume = 0.7,
+		CueVolume = 0.9,
+		Grab = "grab_clank",
+		Notice = "spot_alert", -- with Voice.Notice when it spots you
+		NoticeByType = { scout = "scout_eye_whine", brute = "brute_groan" },
+		-- while it hunts you: the distorted jingle and a servo whine that climbs the longer it runs
+		ChaseLoop = "jingle_distorted",
+		ChaseLoopVolume = 0.55,
+		ChaseWhine = "servo_whirr_1",
+		ChaseWhineVolume = 0.6,
+		ChaseWhinePitch = { 0.8, 1.5 },
+		ChaseWhineRiseSeconds = 8,
+		-- footsteps: one sound per Stride studs walked, so they speed up with the robot
+		Steps = {
+			cleaner = { sound = "heavy_step", stride = 4 },
+			carrier = { sound = "heavy_step", stride = 4 },
+			cook = { sound = "heavy_step", stride = 4 },
+			scout = { sound = "scout_step", stride = 2.5 },
+			brute = { sound = "brute_thud", stride = 5 },
+			crawler = { sound = "crawler_skitter_loop", stride = 0 }, -- 0: loops while it moves
+		},
+		StepVolume = 0.35,
+		NightStepVolume = 1,
+	},
 	SoundRollOff = { 6, 70 },
+	NightRollOff = { 10, 140 },
 	StateSounds = {
 		chase = "chase_servo_scream",
 		suspicious = { "curious_beep_1", "curious_beep_2", "curious_beep_3" },
@@ -186,7 +282,10 @@ return {
 	CaughtDayLine = "A ROBOT GRABBED YOU. It took your %s back to its room. Sneak in and steal it back.",
 	CaughtNightLine = "A ROBOT GOT YOU IN THE DARK.",
 	IdleSounds = { "oil_drip", "hydraulic_hiss" },
+	NightIdleSounds = { "scanner_ping", "servo_whirr_2", "hydraulic_hiss", "curious_beep_3" },
 	IdleSoundGap = { 8, 20 },
+	NightIdleSoundGap = { 4, 10 },
+	IdleStates = { "study", "stalled", "return", "sweep", "investigate" },
 
 	-- Keani's robot voice, layered over the mechanical sounds above. One line at a time per robot.
 	Voice = {
@@ -200,6 +299,7 @@ return {
 		Error = "robot_error",
 		ErrorStates = { "stalled", "disabled" },
 		CalmStates = { "study", "errand", "return" },
+		ChatterStates = { "study", "errand", "return", "sweep", "investigate" }, -- night patrols mutter too
 		Volume = 0.85,
 		RollOff = { 6, 55 },
 	},

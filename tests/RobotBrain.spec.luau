@@ -240,6 +240,16 @@ return {
 		RobotBrain.update(brain, input({ phase = "Night" }), SETTINGS, 8.2)
 		expect(brain.state).toBe("sweep")
 	end,
+	["getting shot sends it straight after the shooter"] = function()
+		local brain = RobotBrain.new("hunter", "Night", 0)
+		RobotBrain.provoke(brain, seenAt(30), 1)
+		expect(brain.state).toBe("chase")
+		expect(brain.targetId).toBe("p1")
+		local down = RobotBrain.new("hunter", "Night", 0)
+		RobotBrain.disable(down, 10)
+		RobotBrain.provoke(down, seenAt(30), 1)
+		expect(down.state == "chase").toBeFalsy()
+	end,
 	["by day only a chase sees outside the room"] = function()
 		local brain = RobotBrain.new("chore", "Day", 0)
 		expect(RobotBrain.seesOutsideRoom(brain, "Day")).toBeFalsy()

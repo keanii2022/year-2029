@@ -9,6 +9,7 @@ export type RobotLines = {
 	Error: string,
 	ErrorStates: { string },
 	CalmStates: { string },
+	ChatterStates: { string },
 }
 
 -- Callouts are numbered 0..count-1; stepping past either end wraps round.
@@ -49,14 +50,18 @@ function VoiceLines.robotStateLine(previous: string?, current: string, lines: Ro
 		return lines.Error
 	elseif current == "suspicious" and previous ~= "suspicious" then
 		return lines.Notice
+	elseif current == "chase" and previous ~= "chase" and previous ~= "suspicious" then
+		-- skipped straight to the chase (up close, or any night robot): it still calls you out
+		return lines.Notice
 	elseif previous == "suspicious" and table.find(lines.CalmStates, current) then
 		return lines.Resume
 	end
 	return nil
 end
 
-function VoiceLines.isCalm(state: string?, lines: RobotLines): boolean
-	return state ~= nil and table.find(lines.CalmStates, state) ~= nil
+-- Calm work by day and patrols by night; never mid-chase or switched off.
+function VoiceLines.chatters(state: string?, lines: RobotLines): boolean
+	return state ~= nil and table.find(lines.ChatterStates, state) ~= nil
 end
 
 return VoiceLines

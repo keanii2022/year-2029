@@ -148,6 +148,14 @@ local function startChase(brain: Brain, seen: Seen, now: number)
 	brain.alert = 1
 end
 
+-- Something made it angry (it got shot): it goes straight for seen, no slow notice first.
+function RobotBrain.provoke(brain: Brain, seen: Seen, now: number)
+	if now < brain.disabledUntil or brain.state == "disabled" or brain.state == "stalled" then
+		return
+	end
+	startChase(brain, seen, now)
+end
+
 -- Shared by day and night. Returns the intent, or nil when the chase ended this tick.
 local function chase(brain: Brain, input: Input, settings: any, now: number): (Intent?, boolean)
 	local seen = input.seen
