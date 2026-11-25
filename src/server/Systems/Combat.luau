@@ -4,6 +4,7 @@
 -- that gun by its Config.Guns rules (mode, interval, mag, pellets). Tracks each gun's mag and the
 -- reload, published as "Mag<GunId>" and "Reloading" (the gun's id) attributes for the client's HUD.
 -- Only players take damage; anything else a shot hits just throws sparks and stops the shot.
+local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -335,7 +336,10 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 		if hitPart then
 			target, targetHumanoid = playerFromPart(hitPart)
 		end
-		if target and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
+		-- simulated players have no Player but take hits like one
+		local simPlayer = targetHumanoid ~= nil
+			and CollectionService:HasTag(targetHumanoid.Parent :: Instance, Config.SimPlayers.Tag)
+		if (target or simPlayer) and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
 			local damage = CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
 			damageTo[targetHumanoid] = (damageTo[targetHumanoid] or 0) + damage
 			hitPlayer = true
