@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
@@ -121,6 +122,7 @@ local function playCall(speaker: Player, index: number, position: Vector3)
 		owner = holder
 	end
 	playing[speaker] = owner
+	Mix.route(sound, "Voice")
 	sound.Ended:Connect(function()
 		if playing[speaker] == owner then
 			stopCall(speaker)

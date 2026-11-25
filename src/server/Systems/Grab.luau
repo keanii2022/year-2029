@@ -15,6 +15,7 @@ local FortLink = require(ReplicatedStorage.Shared.Logic.FortLink)
 local GrabFit = require(ReplicatedStorage.Shared.GrabFit)
 local GrabPry = require(ReplicatedStorage.Shared.Logic.GrabPry)
 local GrabRules = require(ReplicatedStorage.Shared.Logic.GrabRules)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 
@@ -335,6 +336,7 @@ local function pryNoise(prop: PVInstance, source: Instance?, soundIndex: number)
 	sound.SoundId = id
 	sound.RollOffMinDistance, sound.RollOffMaxDistance = Loudness.rollOff("loud")
 	sound.Parent = holder
+	Mix.route(sound, "SFX")
 	sound:Play()
 	sound.Ended:Once(function()
 		sound:Destroy()

@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Music = require(script.Parent.Music)
@@ -31,6 +32,7 @@ local function playFlat(soundName: string)
 	sound.SoundId = id
 	sound.Volume = Settings.Volume
 	sound.Parent = SoundService
+	Mix.route(sound, "Voice")
 	sound.Ended:Once(function()
 		sound:Destroy()
 	end)

@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local InteractKinds = require(ReplicatedStorage.Shared.Logic.InteractKinds)
 local LifeSpots = require(ReplicatedStorage.Shared.Logic.LifeSpots)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Rules = require(ReplicatedStorage.Shared.Logic.Rearrange)
 local WarehouseGen = require(ReplicatedStorage.Shared.Logic.WarehouseGen)
@@ -307,6 +308,7 @@ local function playDrag()
 	sound.RollOffMinDistance = Settings.Drag.RollOffMin
 	sound.RollOffMaxDistance = Settings.Drag.RollOffMax
 	sound.Parent = part
+	Mix.route(sound, "Ambience")
 	part.Parent = soundHolder
 	sound:Play()
 	Debris:AddItem(part, 20)

@@ -17,6 +17,7 @@ local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local CombatModes = require(ReplicatedStorage.Shared.Logic.CombatModes)
 local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local MovementLogic = require(ReplicatedStorage.Shared.Logic.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -389,6 +390,7 @@ local function playSound(name: string, position: Vector3?, volume: number?, pitc
 	sound.SoundId = id
 	sound.Volume = volume or 1
 	sound.PlaybackSpeed = (pitch or 1) * (1 + (math.random() - 0.5) * settings.SoundPitchJitter)
+	Mix.route(sound, "SFX")
 	if not position then
 		-- A sound under SoundService plays flat, with no position
 		sound.Parent = SoundService
@@ -467,6 +469,7 @@ local function playShotSound(feel: CombatFeel.ShotFeel, position: Vector3?, key:
 		takeIndex[slot] = index
 		name = feel.takes[index]
 	end
+	Mix.duck("gunfight", Config.Mix.Duck.Gunfight)
 	playSound(name, position, sounds.FireVolume, sounds.FirePitch)
 	local followUp = feel.followUp
 	if followUp then

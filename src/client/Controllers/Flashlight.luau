@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Hands = require(script.Parent.Hands)
@@ -45,6 +46,7 @@ local function click()
 	local sound = Instance.new("Sound")
 	sound.SoundId = id
 	sound.Parent = SoundService
+	Mix.route(sound, "SFX")
 	sound.Ended:Once(function()
 		sound:Destroy()
 	end)

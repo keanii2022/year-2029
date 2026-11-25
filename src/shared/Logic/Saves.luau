@@ -5,7 +5,7 @@ local SavesBlueprint = if script then require(script.Parent.SavesBlueprint) else
 
 local Saves = {}
 
-Saves.VERSION = 3
+Saves.VERSION = 4
 
 type Stack = Inventory.Stack
 
@@ -14,6 +14,8 @@ export type LaidOut = { job: string, day: number, at: number }
 export type Streak = { days: number, lastDay: number }
 -- Best nights in one life during week number `week` (Logic/Scores.weekOf)
 export type Weekly = { week: number, nights: number }
+-- Player audio sliders (0 to 1) and the gentler-scares toggle (client Controllers/AudioSettings)
+export type Audio = { master: number, music: number, effects: number, voice: number, gentle: boolean }
 export type Data = {
 	version: number,
 	locker: { Stack },
@@ -29,6 +31,7 @@ export type Data = {
 	-- Ids of the 2029 Files found (Config.Files)
 	files: { string },
 	weekly: Weekly,
+	audio: Audio,
 }
 export type Rules = {
 	items: Inventory.Items,
@@ -66,6 +69,12 @@ local MIGRATIONS: { [number]: (any) -> any } = {
 		raw.version = 3
 		return raw
 	end,
+	-- Version 4 adds the audio settings; everyone starts at full volume with normal scares
+	[4] = function(raw)
+		raw.audio = Saves.defaultAudio()
+		raw.version = 4
+		return raw
+	end,
 }
 
 local function isFinite(value: any): boolean
@@ -77,6 +86,30 @@ local function wholeCount(value: any): number
 		return 0
 	end
 	return math.max(0, math.floor(value))
+end
+
+function Saves.defaultAudio(): Audio
+	return { master = 1, music = 1, effects = 1, voice = 1, gentle = false }
+end
+
+local function cleanLevel(value: any): number
+	if not isFinite(value) then
+		return 1
+	end
+	return math.clamp(value, 0, 1)
+end
+
+function Saves.cleanAudio(raw: any): Audio
+	if type(raw) ~= "table" then
+		return Saves.defaultAudio()
+	end
+	return {
+		master = cleanLevel(raw.master),
+		music = cleanLevel(raw.music),
+		effects = cleanLevel(raw.effects),
+		voice = cleanLevel(raw.voice),
+		gentle = raw.gentle == true,
+	}
 end
 
 function Saves.default(): Data
@@ -93,6 +126,7 @@ function Saves.default(): Data
 		streak = { days = 0, lastDay = 0 },
 		files = {},
 		weekly = { week = 0, nights = 0 },
+		audio = Saves.defaultAudio(),
 	}
 end
 
@@ -218,6 +252,7 @@ function Saves.sanitize(raw: { [any]: any }, rules: Rules): Data
 		streak = cleanStreak(raw.streak),
 		files = cleanFiles(raw.files),
 		weekly = cleanWeekly(raw.weekly),
+		audio = Saves.cleanAudio(raw.audio),
 	}
 end
 

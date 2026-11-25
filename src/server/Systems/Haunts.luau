@@ -15,6 +15,7 @@ local HauntDirector = require(ReplicatedStorage.Shared.Logic.HauntDirector)
 local HauntLife = require(ReplicatedStorage.Shared.Logic.HauntLife)
 local HauntPlacement = require(ReplicatedStorage.Shared.Logic.HauntPlacement)
 local HauntSight = require(ReplicatedStorage.Shared.Logic.HauntSight)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -104,7 +105,15 @@ local function place(name: string, x: number, z: number, turn: number, y: number
 	return model
 end
 
-local function playSound(model: Model, name: string, level: string, speed: number?, distortion: number?)
+local function playSound(
+	model: Model,
+	name: string,
+	level: string,
+	group: Mix.Group,
+	scare: Mix.ScareKind?,
+	speed: number?,
+	distortion: number?
+)
 	local id = ModelLibrary.soundId(name)
 	local part = model.PrimaryPart
 	if not id or not part then
@@ -122,6 +131,7 @@ local function playSound(model: Model, name: string, level: string, speed: numbe
 		effect.Parent = sound
 	end
 	sound.Parent = part
+	Mix.route(sound, group, scare)
 	sound.Ended:Once(function()
 		sound:Destroy()
 	end)
@@ -332,9 +342,9 @@ local function scatterGroup(group: Group, threat: Vector3)
 	if first then
 		if pigeons then
 			Loudness.emit(group.center, "loud", first)
-			playSound(first, Settings.Sounds.PigeonBurst, "loud")
+			playSound(first, Settings.Sounds.PigeonBurst, "loud", "Scare", "stinger")
 		else
-			playSound(first, Settings.Sounds.RatScatter, "quiet")
+			playSound(first, Settings.Sounds.RatScatter, "quiet", "Ambience")
 		end
 	end
 	task.delay(time, function()
@@ -419,7 +429,7 @@ local function sayWelcome(watchers: { Watcher })
 		return
 	end
 	local speed, distortion = HauntLife.greeterVoice(Settings.Greeter, DayNight.day())
-	playSound(model, Settings.Sounds.Greeter, "normal", speed, distortion)
+	playSound(model, Settings.Sounds.Greeter, "normal", "Scare", "sharp", speed, distortion)
 end
 
 local function placeCams(layout: WarehouseGen.Layout)

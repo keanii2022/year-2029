@@ -11,9 +11,9 @@ return {
 		WoodPlanks = "wood",
 	},
 	Walk = { Prefix = "walk_", Volume = 0.45, RollOff = { 6, 55 } },
-	Sprint = { Prefix = "run_", Volume = 0.85, RollOff = { 8, 95 } },
+	Sprint = { Prefix = "run_", Volume = 0.7, RollOff = { 8, 95 } },
 	Crouch = { Sound = "crouch_step", Volume = 0.08, RollOff = { 2, 14 } },
-	Land = { Sound = "land_thud", Volume = 0.75, RollOff = { 6, 70 } },
+	Land = { Sound = "land_thud", Volume = 0.6, RollOff = { 6, 70 } },
 	PitchJitter = 0.08,
 	Range = 120, -- other bodies farther than this from the camera make no steps at all
 	FloorProbe = 5, -- studs down from the root to find the floor under a step

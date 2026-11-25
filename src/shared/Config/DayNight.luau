@@ -48,7 +48,9 @@ return {
 	SirenColor = Color3.fromRGB(170, 18, 18),
 	SirenStrength = 0.6,
 	SirenFlashRate = 1.2, -- flashes per second
-	SirenBurst = { On = 4, Off = 6 }, -- seconds of wail, then seconds of quiet, until lights out
+	-- Seconds of wail, then seconds of quiet, until lights out. Each blast swells in over FadeIn and
+	-- dies away over FadeOut (inside Off), so it stays tense without becoming a wall.
+	SirenBurst = { On = 3.5, Off = 7, FadeIn = 0.8, FadeOut = 1.2 },
 	-- A Glyphs template: {Use} draws the right key
 	SirenHint = "NIGHT IS COMING.\n{Use} Hide in a wardrobe, or get behind your fort",
 	-- Lights out flicker: alternating off/on seconds, starting off. Ends dark.
@@ -73,11 +75,11 @@ return {
 		DayMusic = 0.35,
 		NightHum = 0.5,
 		NightAmbience = 0.4,
-		Siren = 0.65,
-		Stinger = 0.8,
+		Siren = 0.5,
+		Stinger = 0.6,
 		Announcer = 0.9,
 		ClockTick = 0.35,
-		AlarmBeep = 0.6,
+		AlarmBeep = 0.45,
 	},
 
 	-- Voice lines from art/sounds/VOICE_LINES.md, keyed by file name. Not recorded yet:

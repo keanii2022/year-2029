@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 
@@ -147,6 +148,7 @@ local function chime()
 	sound.SoundId = id
 	sound.Volume = settings.ChimeVolume
 	sound.Parent = SoundService
+	Mix.route(sound, "UI")
 	sound:Play()
 	sound.Ended:Once(function()
 		sound:Destroy()
@@ -185,6 +187,7 @@ local function show(report: any)
 	shownAt = os.clock()
 	card.Visible = true
 	TweenService:Create(card, FADE, { GroupTransparency = 0 }):Play()
+	Mix.duck("dawn", Config.Mix.Duck.Dawn)
 	chime()
 	task.delay(settings.CardSeconds, function()
 		if token == cardToken then

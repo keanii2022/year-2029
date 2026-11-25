@@ -12,6 +12,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local InteractKinds = require(ReplicatedStorage.Shared.Logic.InteractKinds)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Manifest = require(ReplicatedStorage.Shared.Logic.Manifest)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -90,7 +91,7 @@ end
 
 -- Sound
 
-local function playSound(model: Model, id: string?, level: string, looped: boolean): Sound?
+local function playSound(model: Model, id: string?, level: string, looped: boolean, group: Mix.Group): Sound?
 	local part = model.PrimaryPart
 	if not id or not part then
 		return nil
@@ -102,6 +103,7 @@ local function playSound(model: Model, id: string?, level: string, looped: boole
 	sound.RollOffMode = Enum.RollOffMode.InverseTapered
 	sound.RollOffMinDistance, sound.RollOffMaxDistance = Loudness.rollOff(level :: any)
 	sound.Parent = part
+	Mix.route(sound, group)
 	sound:Play()
 	if not looped then
 		sound.Ended:Once(function()
@@ -115,7 +117,7 @@ end
 -- Robots hear the event even while the sound itself has no uploaded id yet.
 local function makeNoise(model: Model, soundName: string?, level: string)
 	Loudness.emit(model:GetPivot().Position, level :: any, model)
-	playSound(model, soundName and ModelLibrary.soundId(soundName), level, false)
+	playSound(model, soundName and ModelLibrary.soundId(soundName), level, false, "SFX")
 end
 
 local function bubble(model: Model, text: string)
@@ -156,7 +158,7 @@ local function say(model: Model, linesKey: string?)
 	local line = if lines.text then lines else Rules.pick(lines, random:NextNumber())
 	if line then
 		bubble(model, line.text)
-		playSound(model, ModelLibrary.soundId(line.sound), "normal", false)
+		playSound(model, ModelLibrary.soundId(line.sound), "normal", false, "SFX")
 	end
 end
 
@@ -260,7 +262,7 @@ local function setRunning(model: Model, key: string, behaviour: Behaviour, state
 		local id = if behaviour.loopConfig
 			then Settings[behaviour.loopConfig]
 			else behaviour.loop and ModelLibrary.soundId(behaviour.loop)
-		state.loop = playSound(model, id, behaviour.loopLoudness or behaviour.loudness, true)
+		state.loop = playSound(model, id, behaviour.loopLoudness or behaviour.loudness, true, "SFX")
 	elseif not on and state.loop then
 		state.loop:Destroy()
 		state.loop = nil
@@ -458,7 +460,8 @@ function handlers.channel(_player, model, behaviour, key)
 		model,
 		behaviour.staticSound and ModelLibrary.soundId(behaviour.staticSound),
 		behaviour.loudness,
-		false
+		false,
+		"SFX"
 	)
 	task.delay(Settings.StaticBurst, function()
 		if state.channel == index then
@@ -617,9 +620,9 @@ local function nightCall(player: Player, model: Model): Sound?
 		return nil
 	end
 	Net.event("SupplyFeedback"):FireClient(player, line.text)
-	local loop = line.loop and playSound(model, ModelLibrary.soundId(line.loop), "quiet", true)
+	local loop = line.loop and playSound(model, ModelLibrary.soundId(line.loop), "quiet", true, "Scare")
 	task.delay(line.soundDelay or 0, function()
-		local sound = playSound(model, ModelLibrary.soundId(line.sound), "quiet", false)
+		local sound = playSound(model, ModelLibrary.soundId(line.sound), "quiet", false, "Scare")
 		if sound then
 			sound.PlaybackSpeed = line.speed or 1
 		end

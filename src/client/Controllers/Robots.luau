@@ -16,6 +16,7 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RobotHunt = require(ReplicatedStorage.Shared.Logic.RobotHunt)
@@ -213,6 +214,7 @@ local function say(talker: Talker, name: string)
 	sound.RollOffMaxDistance = voiceLines.RollOff[2]
 	sound.PlaybackSpeed = random:NextNumber(0.96, 1.04)
 	sound.Parent = talker.body
+	Mix.route(sound, "SFX")
 	talker.speaking = sound
 	sound:Play()
 	Debris:AddItem(sound, 10)
@@ -250,7 +252,8 @@ local function soundOn(
 	name: string,
 	volume: number,
 	looped: boolean,
-	night: boolean?
+	night: boolean?,
+	group: Mix.Group
 ): Sound?
 	local id = ModelLibrary.soundId(name)
 	if not id then
@@ -265,13 +268,24 @@ local function soundOn(
 	sound.RollOffMinDistance = rollOff[1]
 	sound.RollOffMaxDistance = rollOff[2]
 	sound.Parent = parent
+	Mix.route(sound, group)
 	return sound
 end
 
-local function playOnce(parent: Instance, name: string, volume: number, night: boolean?)
-	local sound = soundOn(parent, name, volume, false, night)
+local function playOnce(
+	parent: Instance,
+	name: string,
+	volume: number,
+	night: boolean?,
+	group: Mix.Group,
+	scare: Mix.ScareKind?
+)
+	local sound = soundOn(parent, name, volume, false, night, group)
 	if sound then
 		sound.PlaybackSpeed = random:NextNumber(0.94, 1.06)
+		if scare then
+			Mix.route(sound, group, scare)
+		end
 		sound:Play()
 		Debris:AddItem(sound, 8)
 	end
@@ -297,7 +311,7 @@ local function footsteps(model: Model, talker: Talker)
 	local walking = moved > 0.05 and moved < 20 -- a jump that big is a teleport, not a stride
 	if stepSound.stride <= 0 then
 		if walking and not talker.stepLoop then
-			talker.stepLoop = soundOn(talker.body, stepSound.sound, volume, true, night)
+			talker.stepLoop = soundOn(talker.body, stepSound.sound, volume, true, night, "SFX")
 			if talker.stepLoop then
 				talker.stepLoop:Play()
 			end
@@ -313,7 +327,7 @@ local function footsteps(model: Model, talker: Talker)
 	talker.walked += moved
 	if talker.walked >= stepSound.stride then
 		talker.walked = 0
-		playOnce(talker.body, stepSound.sound, volume, night)
+		playOnce(talker.body, stepSound.sound, volume, night, "SFX")
 	end
 end
 
@@ -342,13 +356,13 @@ local function startChase(model: Model, talker: Talker)
 	stopChase(talker)
 	local night = isLoud(model)
 	talker.chaseSince = os.clock()
-	playOnce(talker.body, sounds.Notice, sounds.CueVolume, night)
+	playOnce(talker.body, sounds.Notice, sounds.CueVolume, night, "Scare", "sharp")
 	local typeNotice = sounds.NoticeByType[model:GetAttribute("RobotType")]
 	if typeNotice then
-		playOnce(talker.body, typeNotice, sounds.CueVolume, night)
+		playOnce(talker.body, typeNotice, sounds.CueVolume, night, "Scare", "sharp")
 	end
-	local jingle = soundOn(talker.body, sounds.ChaseLoop, sounds.ChaseLoopVolume, true, night)
-	local whine = soundOn(talker.body, sounds.ChaseWhine, sounds.ChaseWhineVolume, true, night)
+	local jingle = soundOn(talker.body, sounds.ChaseLoop, sounds.ChaseLoopVolume, true, night, "Scare")
+	local whine = soundOn(talker.body, sounds.ChaseWhine, sounds.ChaseWhineVolume, true, night, "Scare")
 	if jingle then
 		jingle:Play()
 		table.insert(talker.chase, jingle)
@@ -361,7 +375,15 @@ local function startChase(model: Model, talker: Talker)
 end
 
 -- A sound heard a long way off, at a set pitch.
-local function playFar(parent: Instance, name: string, volume: number, pitch: number, rollOff: { number })
+local function playFar(
+	parent: Instance,
+	name: string,
+	volume: number,
+	pitch: number,
+	rollOff: { number },
+	group: Mix.Group,
+	scare: Mix.ScareKind?
+)
 	local id = ModelLibrary.soundId(name)
 	if not id then
 		return
@@ -374,6 +396,7 @@ local function playFar(parent: Instance, name: string, volume: number, pitch: nu
 	sound.RollOffMinDistance = rollOff[1]
 	sound.RollOffMaxDistance = rollOff[2]
 	sound.Parent = parent
+	Mix.route(sound, group, scare)
 	sound:Play()
 	Debris:AddItem(sound, 10)
 end
@@ -392,7 +415,7 @@ local function distantNoise(list: { string })
 	anchor.WorldPosition = at
 	anchor.Parent = workspace.Terrain
 	local pitch = random:NextNumber(table.unpack(ambience.Pitch))
-	playFar(anchor, list[random:NextInteger(1, #list)], ambience.Volume, pitch, ambience.RollOff)
+	playFar(anchor, list[random:NextInteger(1, #list)], ambience.Volume, pitch, ambience.RollOff, "Ambience")
 	Debris:AddItem(anchor, 10)
 end
 
@@ -419,6 +442,7 @@ local function feelDread(target: number, dt: number)
 			sound.Looped = true
 			sound.Volume = 0
 			sound.Parent = SoundService
+			Mix.route(sound, "Scare")
 			sound:Play()
 			heartbeat = sound
 		end
@@ -528,8 +552,14 @@ local function voice(model: Model)
 	}
 	talkers[model] = talker
 	local lastState = model:GetAttribute("State")
-	local hum =
-		soundOn(body, sounds.Hum, if night then sounds.NightHumVolume else sounds.HumVolume, true, night)
+	local hum = soundOn(
+		body,
+		sounds.Hum,
+		if night then sounds.NightHumVolume else sounds.HumVolume,
+		true,
+		night,
+		"SFX"
+	)
 	if hum then
 		hum:Play()
 	end
@@ -551,7 +581,7 @@ local function voice(model: Model)
 		while model.Parent do
 			task.wait(random:NextNumber(gap[1], gap[2]))
 			if model.Parent and table.find(settings.IdleStates, model:GetAttribute("State")) then
-				playOnce(body, idle[random:NextInteger(1, #idle)], sounds.CueVolume * 0.7, night)
+				playOnce(body, idle[random:NextInteger(1, #idle)], sounds.CueVolume * 0.7, night, "SFX")
 			end
 		end
 	end)
@@ -576,7 +606,7 @@ local function voice(model: Model)
 		local cue = settings.StateSounds[state]
 		if cue then
 			local name = if type(cue) == "table" then cue[random:NextInteger(1, #cue)] else cue
-			playOnce(body, name, sounds.CueVolume, night)
+			playOnce(body, name, sounds.CueVolume, night, "SFX")
 		end
 	end)
 end
@@ -590,22 +620,30 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 	local body = talker.body
 	local shot = settings.Shot
 	if kind == "catch" then
-		playOnce(body, sounds.Grab, 1, isLoud(model))
+		playOnce(body, sounds.Grab, 1, isLoud(model), "SFX")
 	elseif kind == "hit" then
-		playOnce(body, shot.Clank, shot.ClankVolume, true)
+		playOnce(body, shot.Clank, shot.ClankVolume, true, "SFX")
 		sparkBurst(at, 25)
 		twitch(model)
 	elseif kind == "down" then
 		stopChase(talker)
-		playOnce(body, shot.Clank, shot.ClankVolume, true)
-		playOnce(body, shot.Sputter, sounds.CueVolume, true)
+		playOnce(body, shot.Clank, shot.ClankVolume, true, "SFX")
+		playOnce(body, shot.Sputter, sounds.CueVolume, true, "SFX")
 		sparkBurst(at, 60)
 	elseif kind == "reboot" then
-		playOnce(body, shot.Reboot, sounds.CueVolume, true)
+		playOnce(body, shot.Reboot, sounds.CueVolume, true, "SFX")
 	elseif kind == "lunge" then
-		playFar(body, hunt.LungeSound, hunt.LungeVolume, hunt.LungePitch, settings.NightRollOff)
+		playFar(
+			body,
+			hunt.LungeSound,
+			hunt.LungeVolume,
+			hunt.LungePitch,
+			settings.NightRollOff,
+			"Scare",
+			"sharp"
+		)
 	elseif kind == "alert" then
-		playFar(body, hunt.AlertSound, hunt.AlertVolume, hunt.AlertPitch, hunt.RollOff)
+		playFar(body, hunt.AlertSound, hunt.AlertVolume, hunt.AlertPitch, hunt.RollOff, "Scare", "sharp")
 	elseif kind == "answer" then
 		task.delay(random:NextNumber(table.unpack(hunt.AnswerDelay)), function()
 			if body.Parent then
@@ -615,7 +653,9 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 					list[random:NextInteger(1, #list)],
 					hunt.AlertVolume,
 					hunt.AnswerPitch,
-					hunt.RollOff
+					hunt.RollOff,
+					"Scare",
+					"sharp"
 				)
 			end
 		end)
@@ -677,6 +717,7 @@ local function caught(kind: string, itemName: string?, from: Vector3?)
 			sound.SoundId = id
 			sound.Volume = catchFeel.Volume
 			sound.Parent = SoundService
+			Mix.route(sound, "SFX")
 			sound:Play()
 			Debris:AddItem(sound, 6)
 		end

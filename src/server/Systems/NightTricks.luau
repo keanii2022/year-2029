@@ -11,6 +11,7 @@ local Body = require(ReplicatedStorage.Shared.Logic.NightTricksBody)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Generator = require(ReplicatedStorage.Shared.Logic.NightTricksGenerator)
 local HauntPlacement = require(ReplicatedStorage.Shared.Logic.HauntPlacement)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -80,7 +81,13 @@ local function noisePosition(player: Player): Vector3?
 	return root and root.Position
 end
 
-local function playSound(parent: Instance, name: string, level: string, looped: boolean?): Sound?
+local function playSound(
+	parent: Instance,
+	name: string,
+	level: string,
+	group: Mix.Group,
+	looped: boolean?
+): Sound?
 	local id = ModelLibrary.soundId(name)
 	if not id then
 		return nil
@@ -91,6 +98,7 @@ local function playSound(parent: Instance, name: string, level: string, looped: 
 	sound.RollOffMode = Enum.RollOffMode.InverseTapered
 	sound.RollOffMinDistance, sound.RollOffMaxDistance = Loudness.rollOff(level :: any)
 	sound.Parent = parent
+	Mix.route(sound, group)
 	if not looped then
 		sound.Ended:Once(function()
 			sound:Destroy()
@@ -159,7 +167,12 @@ local function setHolding(player: Player, holding: boolean)
 	player:SetAttribute("HoldingBreath", holding or nil)
 	local character = player.Character
 	if character and character.PrimaryPart then
-		playSound(character.PrimaryPart, if holding then Sounds.HoldBreath else Sounds.Release, "quiet")
+		playSound(
+			character.PrimaryPart,
+			if holding then Sounds.HoldBreath else Sounds.Release,
+			"quiet",
+			"SFX"
+		)
 	end
 end
 
@@ -182,7 +195,7 @@ local function gasp(player: Player)
 		Loudness.emit(position, "loud", character)
 	end
 	if character and character.PrimaryPart then
-		playSound(character.PrimaryPart, Sounds.Gasp, "loud")
+		playSound(character.PrimaryPart, Sounds.Gasp, "loud", "SFX")
 	end
 end
 
@@ -294,7 +307,7 @@ local function setRunning(gen: Gen, running: boolean)
 	gen.sinceHum = 0
 	if running and not gen.runSound and gen.model.PrimaryPart then
 		gen.runSound =
-			playSound(gen.model.PrimaryPart, Sounds.GeneratorRun, Settings.Generators.HumLevel, true)
+			playSound(gen.model.PrimaryPart, Sounds.GeneratorRun, Settings.Generators.HumLevel, "SFX", true)
 	elseif not running and gen.runSound then
 		gen.runSound:Destroy()
 		gen.runSound = nil
@@ -314,7 +327,7 @@ local function pourFuel(gen: Gen, player: Player)
 	player:SetAttribute("FuelCans", if cans > 1 then cans - 1 else nil)
 	gen.state = Generator.refuel(gen.state, Settings.Generators.CanFuel, Settings.Generators)
 	if gen.model.PrimaryPart then
-		playSound(gen.model.PrimaryPart, Sounds.FuelPour, "normal")
+		playSound(gen.model.PrimaryPart, Sounds.FuelPour, "normal", "SFX")
 	end
 end
 
@@ -332,12 +345,12 @@ local function pullStart(gen: Gen, player: Player)
 	if result == "started" then
 		setRunning(gen, true)
 		if part then
-			playSound(part, Sounds.GeneratorStart, "loud")
+			playSound(part, Sounds.GeneratorStart, "loud", "SFX")
 			Loudness.emit(part.Position, "loud", gen.model)
 		end
 	elseif result == "failed" then
 		if part then
-			playSound(part, Sounds.GeneratorFail, "normal")
+			playSound(part, Sounds.GeneratorFail, "normal", "SFX")
 			Loudness.emit(part.Position, "normal", gen.model)
 		end
 		tell(player, "It coughs. Pull again.")
@@ -424,13 +437,13 @@ local function stepGenerator(gen: Gen, dt: number)
 	if event == "died" then
 		setRunning(gen, false)
 		if part then
-			playSound(part, Sounds.GeneratorDie, "normal")
+			playSound(part, Sounds.GeneratorDie, "normal", "SFX")
 		end
 		refreshGenerator(gen)
 		return
 	end
 	if event == "sputter" and part then
-		playSound(part, Sounds.GeneratorSputter, "normal")
+		playSound(part, Sounds.GeneratorSputter, "normal", "SFX")
 	end
 	if Generator.isSputtering(state, rules) then
 		setLights(gen, if roll() < 0.35 then rules.Light.SputterDim else 1)

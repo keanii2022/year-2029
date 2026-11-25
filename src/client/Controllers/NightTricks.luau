@@ -10,6 +10,7 @@ local SoundService = game:GetService("SoundService")
 
 local Body = require(ReplicatedStorage.Shared.Logic.NightTricksBody)
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local World = require(ReplicatedStorage.Shared.Logic.NightTricksWorld)
@@ -45,7 +46,7 @@ local lastFlickerSound = 0
 local refusedUntil = 0
 local REFUSED_SECONDS = 0.6 -- the battery bar flashes red this long when the light won't come on
 
-local function makeSound(name: string, volume: number, looped: boolean): Sound?
+local function makeSound(name: string, volume: number, looped: boolean, group: Mix.Group): Sound?
 	local id = ModelLibrary.soundId(name)
 	if not id then
 		return nil
@@ -55,11 +56,12 @@ local function makeSound(name: string, volume: number, looped: boolean): Sound?
 	sound.Volume = volume
 	sound.Looped = looped
 	sound.Parent = SoundService
+	Mix.route(sound, group)
 	return sound
 end
 
-local function playOnce(name: string, volume: number)
-	local sound = makeSound(name, volume, false)
+local function playOnce(name: string, volume: number, group: Mix.Group)
+	local sound = makeSound(name, volume, false, group)
 	if sound then
 		sound.Ended:Once(function()
 			sound:Destroy()
@@ -256,7 +258,7 @@ end
 -- dead click
 function NightTricks.lightRefused()
 	refusedUntil = os.clock() + REFUSED_SECONDS
-	playOnce(Sounds.DeadClick, 0.6)
+	playOnce(Sounds.DeadClick, 0.6, "SFX")
 end
 
 local function updateFlashlight()
@@ -276,7 +278,7 @@ local function updateFlashlight()
 	light.Brightness = Config.DayNight.Flashlight.Brightness * share
 	if share < 1 and os.clock() - lastFlickerSound > 3 then
 		lastFlickerSound = os.clock()
-		playOnce(Sounds.Flicker, 0.4)
+		playOnce(Sounds.Flicker, 0.4, "SFX")
 	end
 end
 
@@ -323,7 +325,7 @@ local function updateSound(dt: number)
 	local winded = Body.isWinded(effort, sprinting, Settings.Winded)
 		or player:GetAttribute("Exhausted") == true
 	if winded and not heavy then
-		heavy = makeSound(Sounds.Heavy, Settings.Winded.Volume, true)
+		heavy = makeSound(Sounds.Heavy, Settings.Winded.Volume, true, "SFX")
 		if heavy then
 			heavy:Play()
 		end
@@ -447,7 +449,8 @@ local function scheduleShelfNoise(token: number)
 		end
 		playOnce(
 			if random:NextNumber() < 0.5 then Sounds.ShelfScrape else Sounds.ShelfThud,
-			Settings.Storm.ShelfNoiseVolume
+			Settings.Storm.ShelfNoiseVolume,
+			"Ambience"
 		)
 		scheduleShelfNoise(token)
 	end)
@@ -457,7 +460,7 @@ local function onPhase()
 	nightToken += 1
 	local night = isNight()
 	if night and not rain then
-		rain = makeSound(Sounds.Rain, Settings.Storm.RainVolume, true)
+		rain = makeSound(Sounds.Rain, Settings.Storm.RainVolume, true, "Ambience")
 		if rain then
 			rain:Play()
 		end
@@ -475,14 +478,14 @@ local function onAnnouncement(text: unknown, voice: unknown, glitch: unknown)
 		return
 	end
 	local rules = Settings.PA
-	playOnce(Sounds.Chime, rules.Volume)
+	playOnce(Sounds.Chime, rules.Volume, "Voice")
 	task.delay(rules.ChimeToLine, function()
 		if type(voice) == "string" then
 			Music.playVoiceLine(voice)
 		end
 		Subtitles.show(text, rules.SubtitleTime)
 		if glitch == true then
-			task.delay(rules.SubtitleTime * 0.6, playOnce, Sounds.Glitch, rules.Volume)
+			task.delay(rules.SubtitleTime * 0.6, playOnce, Sounds.Glitch, rules.Volume, "Voice")
 		end
 	end)
 end

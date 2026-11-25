@@ -10,6 +10,7 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Glyphs = require(script.Parent.Glyphs)
@@ -271,6 +272,7 @@ local function playDone()
 	sound.SoundId = id
 	sound.Volume = DONE_VOLUME
 	sound.Parent = SoundService
+	Mix.route(sound, "UI")
 	sound.Ended:Once(function()
 		sound:Destroy()
 	end)

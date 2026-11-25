@@ -8,8 +8,8 @@ return {
 	Cooldown = 0.2, -- seconds between calls per player (server enforced); a new call cuts the last off
 	HoldTime = 0.4, -- holding the button this long opens the call wheel instead of calling
 
-	Volume = 2.5,
-	OwnVolume = 1.2, -- how loud your own call is to you
+	Volume = 1,
+	OwnVolume = 0.6, -- how loud your own call is to you
 	RollOff = { 20, 120 },
 
 	-- The call wheel: names in a ring round the screen centre

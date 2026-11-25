@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 
 local settings = Config.Soundtrack
@@ -87,6 +88,7 @@ function Soundtrack.Start()
 			sound.Looped = true
 			sound.Volume = 0
 			sound.Parent = SoundService
+			Mix.route(sound, "Music")
 			loops[name] = sound
 		end
 	end

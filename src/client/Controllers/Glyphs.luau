@@ -106,6 +106,7 @@ local touchLabels: { [string]: string } = {
 	Callout = "CALL",
 	Jump = "JUMP",
 	Record = "RECORD",
+	Audio = "SOUND",
 	Controls = "?",
 	Backpack = "BAG",
 	CarrySpin = "SPIN",

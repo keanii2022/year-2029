@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local FootstepsLogic = require(ReplicatedStorage.Shared.Logic.Footsteps)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Camera = require(script.Parent.Camera)
 local Movement = require(script.Parent.Movement)
@@ -28,7 +29,7 @@ local lastPhase = 0
 local floorParams = RaycastParams.new()
 floorParams.FilterType = Enum.RaycastFilterType.Exclude
 
-local function play(root: BasePart, name: string, volume: number, rollOff: { number })
+local function play(root: BasePart, name: string, volume: number, rollOff: { number }, group: Mix.Group)
 	local id = ModelLibrary.soundId(name)
 	if not id then
 		return
@@ -41,6 +42,7 @@ local function play(root: BasePart, name: string, volume: number, rollOff: { num
 	sound.RollOffMinDistance = rollOff[1]
 	sound.RollOffMaxDistance = rollOff[2]
 	sound.Parent = root
+	Mix.route(sound, group)
 	sound.Ended:Once(function()
 		sound:Destroy()
 	end)
@@ -63,7 +65,7 @@ local function stepOn(model: Model, body: Body)
 	end
 	local floor = FootstepsLogic.floor(hit.Material.Name, settings.Floors)
 	local step = FootstepsLogic.step(stanceOf(model), floor, settings)
-	play(body.root, step.sound, step.volume, step.rollOff)
+	play(body.root, step.sound, step.volume, step.rollOff, "SFX")
 end
 
 local function muteDefault(child: Instance)
@@ -89,7 +91,7 @@ local function track(model: Model)
 	root.ChildAdded:Connect(muteDefault)
 	humanoid.StateChanged:Connect(function(_, new)
 		if new == Enum.HumanoidStateType.Landed then
-			play(root, settings.Land.Sound, settings.Land.Volume, settings.Land.RollOff)
+			play(root, settings.Land.Sound, settings.Land.Volume, settings.Land.RollOff, "SFX")
 		end
 	end)
 end

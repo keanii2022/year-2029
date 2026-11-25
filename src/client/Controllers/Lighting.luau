@@ -11,6 +11,7 @@ local SoundService = game:GetService("SoundService")
 
 local ClockEffects = require(ReplicatedStorage.Shared.Logic.ClockEffects)
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 
@@ -117,6 +118,7 @@ local function buzz(strip: BasePart)
 	sound.PlaybackSpeed = 0.9 + math.random() * 0.3
 	sound.RollOffMaxDistance = 60
 	sound.Parent = strip
+	Mix.route(sound, "Ambience")
 	sound:Play()
 	sound.Ended:Once(function()
 		sound:Destroy()
@@ -211,6 +213,7 @@ local function clunk()
 	-- Pitched up a touch so the same clunk reads as switching on
 	sound.PlaybackSpeed = 1.05 + math.random() * 0.15
 	sound.Parent = SoundService
+	Mix.route(sound, "SFX")
 	sound:Play()
 	sound.Ended:Once(function()
 		sound:Destroy()

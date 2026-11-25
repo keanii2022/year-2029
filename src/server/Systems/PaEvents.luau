@@ -13,6 +13,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local DirectorLogic = require(ReplicatedStorage.Shared.Logic.Director)
 local Installations = require(ReplicatedStorage.Shared.Logic.WarehouseGenInstallations)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local PrizesLogic = require(ReplicatedStorage.Shared.Logic.Prizes)
@@ -89,6 +90,7 @@ local function sound(parent: Instance, name: string, loudness: string, looped: b
 	noise.Looped = looped
 	noise.RollOffMinDistance, noise.RollOffMaxDistance = Loudness.rollOff(loudness :: any)
 	noise.Parent = parent
+	Mix.route(noise, "SFX")
 	return noise
 end
 
