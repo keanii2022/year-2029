@@ -142,4 +142,27 @@ return {
 		local robot = input({ robot = { id = "bot", distance = 20, chasing = true } })
 		expect(SimBrain.decide(brain, robot, settings, 11, rolls(0.9))).toBe("flee")
 	end,
+	["a bot with an unfinished fort goes back to building by day"] = function()
+		local settings = table.clone(SETTINGS) :: any
+		settings.BuildFocus = 0.8
+		local brain = SimBrain.new()
+		expect(SimBrain.decide(brain, input({ building = true }), settings, 0, rolls(0.5))).toBe("drag")
+		local night = SimBrain.new()
+		expect(SimBrain.decide(night, input({ phase = "Night", building = true }), settings, 0, rolls(0.5))).toBe(
+			"hide"
+		)
+	end,
+	["it rolls once per raider to defend its fort"] = function()
+		local settings = table.clone(SETTINGS) :: any
+		settings.Moods = { normal = table.clone(SETTINGS.Moods.normal) }
+		settings.Moods.normal.defend = 0.5
+		local brain = SimBrain.new()
+		local raided = input({ phase = "Night", raider = { id = "raider", distance = 6 } })
+		expect(SimBrain.decide(brain, raided, settings, 0, rolls(0.9))).toBe("hide")
+		-- same raider, still hiding: no second roll even if it would land
+		expect(SimBrain.decide(brain, raided, settings, 1, rolls(0.1))).toBe("hide")
+		local other = SimBrain.new()
+		expect(SimBrain.decide(other, raided, settings, 0, rolls(0.1))).toBe("fight")
+		expect(other.target).toBe("raider")
+	end,
 }

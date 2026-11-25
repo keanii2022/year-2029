@@ -248,6 +248,7 @@ local function simSpecs(): { ButtonSpec }
 		table.insert(specs, { text = string.upper(mood), command = "sim_mood", arg = mood })
 	end
 	table.insert(specs, { text = "FILL LOBBY", command = "sim_fill" })
+	table.insert(specs, { text = "BUILD FORT HERE", command = "sim_fort" })
 	table.insert(specs, { text = "CLEAR", command = "sim_clear" })
 	return specs
 end

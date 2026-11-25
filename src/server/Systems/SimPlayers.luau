@@ -21,12 +21,14 @@ local SimBrain = require(ReplicatedStorage.Shared.Logic.SimBrain)
 local DayNight = require(script.Parent.DayNight)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
+local SimForts = require(script.Parent.SimForts)
 local Warehouse = require(script.Parent.Warehouse)
 
 local settings = Config.SimPlayers
 local lobby = settings.Lobby
 local guns = Config.Guns
 local movement = Config.Movement
+local forts = settings.Forts
 
 -- Inventory and Robots key everything by Player. A bot passes this stand-in instead: it has no
 -- Parent, so Inventory never tries to message it, and attributes read through to the bot's model.
@@ -55,6 +57,7 @@ type Bot = {
 	pathFor: Vector3?,
 	pathAt: number,
 	pathBusy: boolean,
+	arrive: number, -- how close to its goal counts as there
 	lastMovedAt: number,
 	lastPosition: Vector3,
 	action: string?,
@@ -62,9 +65,16 @@ type Bot = {
 	thing: Instance?,
 	workUntil: number?,
 	looted: { [Instance]: boolean },
-	dragging: PVInstance?,
 	fortSpot: Vector3?,
-	built: number, -- props it has hauled to its fort spot; the director counts that as a fort
+	crew: SimForts.Crew?, -- the fort it builds with up to two others; kept through respawns
+	job: SimForts.Job?, -- the piece it's hauling to its fort right now
+	task: string?, -- busy on the spot while building: "pry", "lift", "place" or "rest"
+	noiseAt: number, -- next pry creak
+	noiseIndex: number,
+	giveUpAt: number, -- a haul that hasn't got anywhere by then is dropped
+	siteAt: number, -- no room for a fort around here: try again after this
+	carrySpeed: number, -- walk speed multiplier while carrying, by the piece's weight
+	carryTrack: AnimationTrack?,
 	fightTarget: Model?,
 	strafeAt: number,
 	nextShotAt: number,
@@ -83,7 +93,6 @@ local SimPlayers = {}
 local bots: { [number]: Bot } = {}
 local byModel: { [Model]: Bot } = {}
 local freeHandles: { Handle } = {}
-local dragClaims: { [Instance]: Bot } = {}
 local hideClaims: { [Instance]: Bot } = {}
 local mood = settings.DefaultMood
 local nextId = 0
@@ -143,14 +152,6 @@ local function refreshSpots(now: number)
 			table.insert(installationSpots, Warehouse.toWorld(room.cx, room.cz))
 		end
 	end
-end
-
-local function sizeOf(instance: PVInstance): Vector3
-	if instance:IsA("Model") then
-		local _, size = instance:GetBoundingBox()
-		return size
-	end
-	return (instance :: BasePart).Size
 end
 
 -- Nearest instance with any of the tags, within range, that skip() doesn't rule out.
@@ -262,6 +263,14 @@ local function loadTracks(bot: Bot, model: Model, humanoid: Humanoid)
 			bot.tracks[kind] = track
 		end
 	end
+	local carry = Instance.new("Animation")
+	carry.AnimationId = settings.CarryAnimation
+	local ok, track = pcall(animator.LoadAnimation, animator, carry)
+	bot.carryTrack = if ok and track then track else nil
+	if bot.carryTrack then
+		bot.carryTrack.Looped = true
+		bot.carryTrack.Priority = Enum.AnimationPriority.Action
+	end
 end
 
 local function animate(bot: Bot, root: BasePart)
@@ -293,7 +302,7 @@ local function setStance(bot: Bot, stance: string)
 		then movement.SprintSpeed
 		elseif stance == "Crouch" then movement.CrouchSpeed
 		else movement.WalkSpeed
-	humanoid.WalkSpeed = if bot.dragging then math.min(speed, settings.DragSpeed) else speed
+	humanoid.WalkSpeed = if bot.job and bot.job.carrying then speed * bot.carrySpeed else speed
 end
 
 local function setFlashlight(bot: Bot, on: boolean)
@@ -369,12 +378,15 @@ end
 -- Straight line, no pathfinding: fleeing, strafing and backing off need to react now.
 local function walkStraight(bot: Bot, goal: Vector3)
 	bot.goal = goal
+	bot.arrive = settings.ArriveRange
 	bot.waypoints = {}
 	bot.pathFor = nil
 end
 
-local function setGoal(bot: Bot, goal: Vector3, now: number)
+-- arrive: how close counts as there (ArriveRange unless given).
+local function setGoal(bot: Bot, goal: Vector3, now: number, arrive: number?)
 	bot.goal = goal
+	bot.arrive = arrive or settings.ArriveRange
 	local reuse = bot.pathFor ~= nil
 		and flatDistance(bot.pathFor, goal) <= settings.PathReuseDistance
 		and now - bot.pathAt < settings.PathMaxAge
@@ -418,7 +430,7 @@ local function steer(bot: Bot, humanoid: Humanoid, root: BasePart, now: number)
 		bot.lastMovedAt = now
 		return
 	end
-	if flatDistance(position, goal) <= settings.ArriveRange then
+	if flatDistance(position, goal) <= bot.arrive then
 		stop(bot)
 		return
 	end
@@ -442,14 +454,6 @@ end
 
 -- Furniture and hiding ----------------------------------------------------------------------------
 
-local function releaseDrag(bot: Bot)
-	local prop = bot.dragging
-	if prop then
-		dragClaims[prop] = nil
-		bot.dragging = nil
-	end
-end
-
 local function releaseHide(bot: Bot)
 	local spot = bot.thing
 	if spot and hideClaims[spot] == bot then
@@ -457,31 +461,50 @@ local function releaseHide(bot: Bot)
 	end
 end
 
-local function startDrag(bot: Bot, prop: PVInstance)
-	for _, part in if prop:IsA("BasePart") then { prop } else prop:GetDescendants() do
-		if part:IsA("BasePart") then
-			part.Anchored = true -- Grab freezes dropped props too; the drag just moves the pivot
-		end
+local function stopCarrying(bot: Bot)
+	if bot.carryTrack and bot.carryTrack.IsPlaying then
+		bot.carryTrack:Stop(0.3)
 	end
-	dragClaims[prop] = bot
-	bot.dragging = prop
 end
 
--- Pulls the prop along behind the bot at its original height. Every frame, so watchers see it slide.
-local function dragStep()
+-- Gives up the piece it's after; one in its hands goes down on the floor.
+local function dropJob(bot: Bot)
+	local job = bot.job
+	if job then
+		SimForts.cancel(job)
+		bot.job = nil
+	end
+	bot.task = nil
+	stopCarrying(bot)
+end
+
+local function leaveCrew(bot: Bot)
+	dropJob(bot)
+	if bot.crew then
+		SimForts.leave(bot.crew, bot)
+		bot.crew = nil
+	end
+end
+
+local function joinCrew(bot: Bot, crew: SimForts.Crew)
+	if bot.crew ~= crew then
+		leaveCrew(bot)
+		SimForts.join(crew, bot)
+		bot.crew = crew
+	end
+end
+
+-- Holds every hauled piece in front of its bot. Every frame, so watchers see it carried.
+local function carryStep()
 	for _, bot in bots do
-		local prop, root = bot.dragging, bot.root
-		if not prop or not root then
-			continue
+		local job, root = bot.job, bot.root
+		if job and job.carrying and root then
+			if SimForts.valid(job) then
+				SimForts.carry(job, root)
+			else
+				dropJob(bot) -- a real player took it, or it's gone
+			end
 		end
-		if not prop:IsDescendantOf(workspace) or prop:GetAttribute("CarriedBy") ~= nil then
-			releaseDrag(bot) -- a real player grabbed it, or it's gone
-			continue
-		end
-		local pivot = prop:GetPivot()
-		local back = sizeOf(prop).Magnitude / 2 + settings.DragGap
-		local behind = root.Position - flat(root.CFrame.LookVector).Unit * back
-		prop:PivotTo(pivot.Rotation + Vector3.new(behind.X, pivot.Position.Y, behind.Z))
 	end
 end
 
@@ -776,45 +799,144 @@ local function sneak(bot: Bot, position: Vector3, now: number)
 	setGoal(bot, bot.spot :: Vector3, now)
 end
 
-local function drag(bot: Bot, position: Vector3, now: number)
-	local fort = bot.fortSpot or position
-	if bot.dragging then
-		if flatDistance(fort, position) <= settings.ArriveRange then
-			releaseDrag(bot)
-			stop(bot)
-			bot.thing = nil
-			bot.built += 1
-			return
-		end
-		setStance(bot, "Walk")
-		setGoal(bot, fort, now)
-		return
-	end
-	local prop = bot.thing
-	if not prop or not prop:IsDescendantOf(workspace) or dragClaims[prop] then
-		prop = nearestTagged({ Config.Grab.Tag }, position, settings.DragSearchRange, function(instance)
-			local size = sizeOf(instance :: PVInstance)
-			local tooBig = math.max(size.X, size.Y, size.Z) > settings.DragMaxSize
-			return tooBig
-				or dragClaims[instance] ~= nil
-				or bot.looted[instance] == true
-				or instance:GetAttribute("CarriedBy") ~= nil
-				or flatDistance((instance :: PVInstance):GetPivot().Position, fort)
-					<= settings.ArriveRange * 2
-		end)
-		bot.thing = prop
-	end
-	if not prop then
+-- Nothing left to haul for now: hang around inside the fort, looking it over.
+local function tend(bot: Bot, crew: SimForts.Crew, position: Vector3, now: number)
+	if SimForts.count(crew) == 0 then
 		wander(bot, position, now)
 		return
 	end
-	local at = (prop :: PVInstance):GetPivot().Position
-	if flatDistance(at, position) <= settings.ArriveRange + sizeOf(prop :: PVInstance).Magnitude / 2 then
-		startDrag(bot, prop :: PVInstance)
-		bot.looted[prop] = true -- don't keep hauling the same piece back and forth
+	if not bot.spot or flatDistance(bot.spot, position) <= 1.5 then
+		bot.spot = SimForts.insideSpot(crew)
+	end
+	setStance(bot, "Walk")
+	setGoal(bot, bot.spot :: Vector3, now, 1.5)
+end
+
+local function finishTask(bot: Bot, model: Model, root: BasePart, now: number)
+	local task, job = bot.task, bot.job
+	bot.task, bot.workUntil = nil, nil
+	if not job or task == "rest" then
+		return
+	end
+	if task == "pry" then
+		bot.task, bot.workUntil = "lift", now + randomIn(forts.PickupTime)
+	elseif task == "lift" then
+		local speed = SimForts.lift(job)
+		if not speed then
+			dropJob(bot)
+			return
+		end
+		bot.carrySpeed = speed
+		bot.giveUpAt = now + forts.CarryTimeout
+		setStance(bot, "Walk")
+		if bot.carryTrack then
+			bot.carryTrack:Play(0.3)
+		end
+	elseif task == "place" then
+		local head = model:FindFirstChild("Head")
+		local eye = if head and head:IsA("BasePart")
+			then head.Position
+			else root.Position + Vector3.yAxis * 1.5
+		-- from just in front of the face, so the sight check never starts inside the bot's own head
+		local ok, reason = SimForts.place(job, {
+			root = root,
+			humanoid = bot.humanoid :: Humanoid,
+			eye = eye + flat(root.CFrame.LookVector).Unit,
+		})
+		if ok then
+			bot.job = nil
+			stopCarrying(bot)
+			setStance(bot, "Walk")
+			bot.task, bot.workUntil = "rest", now + randomIn(forts.RestTime)
+		elseif reason ~= "player" and job.tries >= forts.PlaceTries and not SimForts.reslot(job) then
+			dropJob(bot)
+		end
+	end
+end
+
+-- Fort building: fetch one piece at a time for the crew plan's next slot, carry it over and set
+-- it down square against the last one.
+local function build(bot: Bot, model: Model, root: BasePart, now: number)
+	local position = root.Position
+	local crew = bot.crew
+	if not crew then
+		if now < bot.siteAt then
+			wander(bot, position, now)
+			return
+		end
+		crew = SimForts.nearestOpen(position)
+			or SimForts.found(bot.fortSpot or position, root.CFrame.LookVector)
+		if not crew then
+			bot.siteAt = now + forts.SiteRetry
+			wander(bot, position, now)
+			return
+		end
+		joinCrew(bot, crew)
+	end
+	local fort = crew :: SimForts.Crew
+	local job = bot.job
+	if job and (not SimForts.valid(job) or (not job.carrying and bot.looted[job.prop])) then
+		dropJob(bot)
+		job = nil
+	end
+	if bot.task then
+		if bot.task == "pry" and job and now >= bot.noiseAt then
+			bot.noiseAt = now + Config.Grab.PryNoiseInterval
+			bot.noiseIndex = SimForts.pryNoise(job, model, bot.noiseIndex)
+		end
+		if now >= (bot.workUntil or 0) then
+			finishTask(bot, model, root, now)
+		end
+		return
+	end
+	if not job then
+		if not SimForts.building(fort) or now < bot.siteAt then
+			tend(bot, fort, position, now)
+			return
+		end
+		local raid = random:NextNumber() < (settings.Moods[mood].raid or 0)
+		job = SimForts.pickPiece(fort, position, raid, bot.looted)
+		if not job then
+			bot.siteAt = now + forts.PickRetry
+			tend(bot, fort, position, now)
+			return
+		end
+		bot.job = job
+		bot.giveUpAt = now + forts.FetchTimeout
+	end
+	local haul = job :: SimForts.Job
+	if now > bot.giveUpAt then
+		bot.looted[haul.prop] = true
+		dropJob(bot)
+		return
+	end
+	if not haul.carrying then
+		local at = haul.prop:GetPivot().Position
+		if flatDistance(at, position) <= settings.ArriveRange + haul.size.Magnitude / 2 then
+			stop(bot)
+			face(root, at)
+			setStance(bot, "Crouch")
+			if haul.pry then
+				bot.task, bot.workUntil = "pry", now + SimForts.pryTime(haul)
+				bot.noiseAt = now
+			else
+				bot.task, bot.workUntil = "lift", now + randomIn(forts.PickupTime)
+			end
+		else
+			bot.thing = haul.prop -- an unreachable piece lands in looted (setGoal) and is skipped
+			setStance(bot, "Walk")
+			setGoal(bot, at, now)
+		end
+		return
+	end
+	local stand = SimForts.standSpot(haul)
+	if flatDistance(stand, position) <= forts.PlaceRange then
+		stop(bot)
+		face(root, SimForts.slotSpot(haul))
+		bot.task, bot.workUntil = "place", now + randomIn(forts.PlaceTime)
 	else
 		setStance(bot, "Walk")
-		setGoal(bot, at, now)
+		setGoal(bot, stand, now, forts.PlaceRange)
 	end
 end
 
@@ -865,6 +987,20 @@ local function chase(bot: Bot, position: Vector3, now: number)
 end
 
 local function hide(bot: Bot, position: Vector3, now: number)
+	local crew = bot.crew
+	if crew and SimForts.count(crew) >= forts.HideMinPieces then
+		-- crouched down inside its own fort, the same as a player crew would
+		bot.spot = bot.spot or SimForts.insideSpot(crew)
+		local inside = bot.spot :: Vector3
+		if flatDistance(inside, position) <= 1.5 then
+			stop(bot)
+			setStance(bot, "Crouch")
+		else
+			setStance(bot, if DayNight.phase() == "Siren" then "Sprint" else "Crouch")
+			setGoal(bot, inside, now, 1.5)
+		end
+		return
+	end
 	local spot = bot.thing
 	if not spot or not spot:IsDescendantOf(workspace) then
 		local best, bestDistance = nil, settings.HideSearchRange
@@ -881,7 +1017,7 @@ local function hide(bot: Bot, position: Vector3, now: number)
 			hideClaims[spot] = bot
 		end
 	end
-	local at = if spot then (spot :: Model):GetPivot().Position else bot.fortSpot or position
+	local at = if spot then (spot :: Model):GetPivot().Position else position
 	if flatDistance(at, position) <= settings.ArriveRange then
 		stop(bot)
 		setStance(bot, "Crouch")
@@ -918,7 +1054,7 @@ end
 
 local function resetAction(bot: Bot, action: string)
 	if action ~= "drag" then
-		releaseDrag(bot)
+		dropJob(bot)
 	end
 	releaseHide(bot)
 	bot.action = action
@@ -976,6 +1112,27 @@ local function think(
 		and now - bot.hitAt <= settings.HitMemory
 		and flatDistance(attacker.position, position) <= settings.SightRange
 
+	-- someone else in or right at its fort while it's close by
+	local crew = bot.crew
+	local raider: Person? = nil
+	local raiderDistance = math.huge
+	local fortUp = crew ~= nil and SimForts.count(crew) >= forts.HideMinPieces
+	if crew and fortUp and flatDistance(SimForts.center(crew), position) <= forts.DefendRange then
+		for _, person in people do
+			local other = byModel[person.model]
+			local d = flatDistance(person.position, position)
+			if
+				person.model ~= model
+				and not (other and other.crew == crew)
+				and d < raiderDistance
+				and SimForts.raided(crew, person.position)
+				and canSee(model, eye, person)
+			then
+				raider, raiderDistance = person, d
+			end
+		end
+	end
+
 	local _, ammo = bestGun(bot)
 	local action = SimBrain.decide(
 		brain,
@@ -995,6 +1152,8 @@ local function think(
 				}
 				else nil,
 			targetSeen = targetSeen,
+			building = crew ~= nil and SimForts.building(crew),
+			raider = if raider then { id = raider.model, distance = raiderDistance } else nil,
 		},
 		settings,
 		now,
@@ -1014,7 +1173,7 @@ local function think(
 	elseif action == "sneak" then
 		sneak(bot, position, now)
 	elseif action == "drag" then
-		drag(bot, position, now)
+		build(bot, model, root, now)
 	elseif action == "group" then
 		group(bot, position, now)
 	elseif action == "hide" then
@@ -1140,7 +1299,7 @@ function onDied(bot: Bot, generation: number)
 		return
 	end
 	bot.alive = false
-	releaseDrag(bot)
+	dropJob(bot)
 	releaseHide(bot)
 	setFlashlight(bot, false)
 	bot.goal = nil
@@ -1165,7 +1324,7 @@ end
 local function removeBot(bot: Bot)
 	bots[bot.id] = nil
 	bot.generation += 1
-	releaseDrag(bot)
+	leaveCrew(bot)
 	releaseHide(bot)
 	if bot.model then
 		byModel[bot.model] = nil
@@ -1230,7 +1389,7 @@ end
 
 -- Public ------------------------------------------------------------------------------------------
 
-local function addBot(home: Vector3?, opening: string?)
+local function addBot(home: Vector3?, opening: string?): Bot
 	nextId += 1
 	local name = uniqueName()
 	local bot: Bot = {
@@ -1245,10 +1404,15 @@ local function addBot(home: Vector3?, opening: string?)
 		waypointIndex = 1,
 		pathAt = 0,
 		pathBusy = false,
+		arrive = settings.ArriveRange,
 		lastMovedAt = 0,
 		lastPosition = Vector3.zero,
 		looted = {},
-		built = 0,
+		noiseAt = 0,
+		noiseIndex = 0,
+		giveUpAt = 0,
+		siteAt = 0,
+		carrySpeed = 1,
 		strafeAt = 0,
 		nextShotAt = 0,
 		burstLeft = 0,
@@ -1261,6 +1425,7 @@ local function addBot(home: Vector3?, opening: string?)
 	}
 	bots[bot.id] = bot
 	task.spawn(spawnBody, bot)
+	return bot
 end
 
 -- Adds up to count bots, never past Config.SimPlayers.Max. Bodies build on their own threads.
@@ -1327,15 +1492,45 @@ function SimPlayers.alive(): { any }
 	return list
 end
 
--- Fort spots of bots that have actually hauled something there
-function SimPlayers.forts(): { Vector3 }
-	local list = {}
+-- Admin: the nearest few bots drop what they're doing and build a fort around position, spawning
+-- fresh ones there when the lobby is short. Returns how many are on it; 0 when there's no room.
+function SimPlayers.buildFort(position: Vector3, facing: Vector3?): number
+	local crew = SimForts.found(position, facing)
+	if not crew then
+		return 0
+	end
+	local nearest = {}
 	for _, bot in bots do
-		if bot.fortSpot and bot.built > 0 then
-			table.insert(list, bot.fortSpot)
+		if bot.alive and bot.root then
+			table.insert(nearest, bot)
 		end
 	end
-	return list
+	table.sort(nearest, function(a, b)
+		return flatDistance((a.root :: BasePart).Position, position)
+			< flatDistance((b.root :: BasePart).Position, position)
+	end)
+	local now = os.clock()
+	local phase = DayNight.phase()
+	local sent = 0
+	for _, bot in nearest do
+		if sent >= forts.CrewSize then
+			break
+		end
+		joinCrew(bot, crew)
+		SimBrain.start(bot.brain, "drag", phase, settings, now, function()
+			return random:NextNumber()
+		end)
+		resetAction(bot, "drag")
+		sent += 1
+	end
+	for _ = 1, math.min(forts.CrewSize - sent, settings.Max - botCount()) do
+		joinCrew(addBot(position, "drag"), crew)
+		sent += 1
+	end
+	if sent == 0 then
+		SimForts.leave(crew, nil)
+	end
+	return sent
 end
 
 -- An event at position (pull 0..1, see Config.Director.BotPull): each bot decides by its mood and
@@ -1368,13 +1563,16 @@ end
 
 function SimPlayers.Start()
 	DayNight.onPhaseChanged(function(phase)
+		if phase == "Day" then
+			SimForts.dawn()
+		end
 		for _, bot in bots do
 			if bot.alive then
 				setFlashlight(bot, phase == "Night" and random:NextNumber() < settings.FlashlightChance)
 			end
 		end
 	end)
-	RunService.Heartbeat:Connect(dragStep)
+	RunService.Heartbeat:Connect(carryStep)
 	task.spawn(function()
 		local interval = 1 / settings.MoveRate
 		while true do

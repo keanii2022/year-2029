@@ -53,7 +53,7 @@ local function gatherPeople(): { DirectorLogic.Point }
 	return points
 end
 
--- Props a player dropped carry Grab's "PlacedBy"; a few of them close together make a fort
+-- Props a player or sim player placed carry Grab's "PlacedBy"; a few of them close together make a fort
 local function gatherForts(): { DirectorLogic.Point }
 	local placed = {}
 	for _, prop in CollectionService:GetTagged(Config.Grab.Tag) do
@@ -72,12 +72,6 @@ local function gatherForts(): { DirectorLogic.Point }
 	for _, pile in DirectorLogic.cluster(placed, Settings.FortRadius) do
 		if pile.count >= Settings.FortMinProps then
 			table.insert(found, { x = pile.x, z = pile.z })
-		end
-	end
-	for _, spot in SimPlayers.forts() do
-		local point = toLayout(spot)
-		if point then
-			table.insert(found, point)
 		end
 	end
 	return found

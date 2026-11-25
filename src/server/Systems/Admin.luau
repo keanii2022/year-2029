@@ -337,6 +337,17 @@ local function simFill(): string
 	end)
 end
 
+local function simBuildFort(player: Player): string
+	local root = rootOf(player)
+	if not root then
+		return "No body to build around"
+	end
+	return withSim(function(sim)
+		local sent = sim.buildFort(root.Position, root.CFrame.LookVector)
+		return if sent > 0 then `{sent} sim players building here` else "No room for a fort here"
+	end)
+end
+
 -- Warehouse size servers --------------------------------------------------------------------------
 
 local function openSizeServer(player: Player, sizeName: unknown): string
@@ -426,6 +437,7 @@ local commands: { [string]: (player: Player, arg: unknown) -> string? } = {
 	end,
 	sim_clear = simClear,
 	sim_fill = simFill,
+	sim_fort = simBuildFort,
 	size_server = openSizeServer,
 	size_lobby = togglePublicLobby,
 	sim_count = function(player)
