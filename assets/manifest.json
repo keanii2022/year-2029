@@ -21176,49 +21176,49 @@
    "name": "dart_pop_1",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_1.mp3",
-   "assetId": 74814350127676
+   "assetId": null
   },
   {
    "name": "dart_pop_2",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_2.mp3",
-   "assetId": 124819876060839
+   "assetId": null
   },
   {
    "name": "dart_pop_3",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_3.mp3",
-   "assetId": 133286160844295
+   "assetId": null
   },
   {
    "name": "dart_pop_4",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_4.mp3",
-   "assetId": 104109768297077
+   "assetId": null
   },
   {
    "name": "dart_pop_5",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_5.mp3",
-   "assetId": 75659767886836
+   "assetId": null
   },
   {
    "name": "dart_pop_6",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_6.mp3",
-   "assetId": 73809822273794
+   "assetId": null
   },
   {
    "name": "dart_pop_7",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_7.mp3",
-   "assetId": 76409659261201
+   "assetId": null
   },
   {
    "name": "dart_pop_8",
    "group": "gear",
    "file": "art/sounds/gear/dart_pop_8.mp3",
-   "assetId": 102574359559345
+   "assetId": null
   },
   {
    "name": "disruptor_charge",
@@ -21229,8 +21229,8 @@
   {
    "name": "disruptor_crack",
    "group": "gear",
-   "file": "art/sounds/gear/disruptor_crack.mp3",
-   "assetId": 88423742913011
+   "file": null,
+   "assetId": 9116225257
   },
   {
    "name": "emp_charge",
@@ -21260,13 +21260,13 @@
    "name": "flare_burnout",
    "group": "gear",
    "file": "art/sounds/gear/flare_burnout.mp3",
-   "assetId": 71975879639356
+   "assetId": null
   },
   {
    "name": "flare_pop",
    "group": "gear",
    "file": "art/sounds/gear/flare_pop.mp3",
-   "assetId": 94707550482747
+   "assetId": null
   },
   {
    "name": "flashlight_click",
@@ -21277,14 +21277,14 @@
   {
    "name": "hit_marker",
    "group": "gear",
-   "file": "art/sounds/gear/hit_marker.mp3",
-   "assetId": 117162795531037
+   "file": null,
+   "assetId": 15675059323
   },
   {
    "name": "impact_concrete",
    "group": "gear",
-   "file": "art/sounds/gear/impact_concrete.mp3",
-   "assetId": 136670849159058
+   "file": null,
+   "assetId": 7842386350
   },
   {
    "name": "impact_metal",
@@ -21308,7 +21308,7 @@
    "name": "nail_gun",
    "group": "gear",
    "file": "art/sounds/gear/nail_gun.mp3",
-   "assetId": 80046632357866
+   "assetId": null
   },
   {
    "name": "noise_maker_bell",
@@ -21338,31 +21338,31 @@
    "name": "shot_heavy",
    "group": "gear",
    "file": "art/sounds/gear/shot_heavy.mp3",
-   "assetId": 91860576558668
+   "assetId": null
   },
   {
    "name": "shot_marksman",
    "group": "gear",
-   "file": "art/sounds/gear/shot_marksman.mp3",
-   "assetId": 77934346648120
+   "file": null,
+   "assetId": 9118173739
   },
   {
    "name": "shot_pistol",
    "group": "gear",
    "file": "art/sounds/gear/shot_pistol.mp3",
-   "assetId": 118448183642866
+   "assetId": null
   },
   {
    "name": "shot_revolver",
    "group": "gear",
-   "file": "art/sounds/gear/shot_revolver.mp3",
-   "assetId": 121289902501207
+   "file": null,
+   "assetId": 9119295553
   },
   {
    "name": "shot_rifle",
    "group": "gear",
    "file": "art/sounds/gear/shot_rifle.mp3",
-   "assetId": 119351692333749
+   "assetId": null
   },
   {
    "name": "shot_shotgun",
@@ -21374,7 +21374,7 @@
    "name": "shot_smg",
    "group": "gear",
    "file": "art/sounds/gear/shot_smg.mp3",
-   "assetId": 122904597650261
+   "assetId": null
   },
   {
    "name": "shotgun_pump",

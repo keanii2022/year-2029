@@ -34,6 +34,14 @@ MANIFEST_LUAU = os.path.join(ROOT, "src", "shared", "Logic", "ManifestData.luau"
 
 ASSETS_URL = "https://apis.roblox.com/assets/v1/assets"
 OPERATIONS_URL = "https://apis.roblox.com/assets/v1/"
+# Sounds taken straight from Roblox's own licensed library, used by id: nothing to upload, and any mp3 of the same name is skipped.
+LIBRARY_SOUNDS = {
+    "shot_revolver": ("gear", 9119295553),  # Smith Wesson 357 Magnum 6
+    "shot_marksman": ("gear", 9118173739),  # Rifle Single Shots 1
+    "disruptor_crack": ("gear", 9116225257),  # Laser Blast 101
+    "impact_concrete": ("gear", 7842386350),  # Bullet Ricochet 2
+    "hit_marker": ("gear", 15675059323),  # Roblox_UI_Bright_Click
+}
 IMAGE_KINDS = {"posters": "poster", "posters/screens": "screen", "posters/scrawls": "scrawl", "effects": "effect"}
 
 
@@ -272,7 +280,7 @@ def build_manifest(old):
         if os.path.relpath(folder, sound_dir).split(os.sep)[0] == "voice_raw":
             continue
         for file in sorted(files):
-            if file.endswith(".mp3"):
+            if file.endswith(".mp3") and file[:-4] not in LIBRARY_SOUNDS:
                 name = file[:-4]
                 group = os.path.relpath(folder, sound_dir)
                 sounds.append(
@@ -283,6 +291,7 @@ def build_manifest(old):
                         "assetId": old_sounds.get(name, {}).get("assetId"),
                     }
                 )
+    sounds += [{"name": name, "group": group, "file": None, "assetId": asset_id} for name, (group, asset_id) in LIBRARY_SOUNDS.items()]
     sounds.sort(key=lambda s: (s["group"], s["name"]))
 
     images = []
