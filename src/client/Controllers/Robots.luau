@@ -20,6 +20,7 @@ local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RobotHunt = require(ReplicatedStorage.Shared.Logic.RobotHunt)
+local RobotSounds = require(ReplicatedStorage.Shared.Logic.RobotSounds)
 local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
 local Hints = require(script.Parent.Hints)
 local Hotbar = require(script.Parent.Hotbar)
@@ -35,6 +36,7 @@ local dread = settings.Dread
 local ambience = settings.Ambience
 local catchFeel = settings.Catch
 local player = Players.LocalPlayer
+local STEP_EVERY = 0.1 -- seconds between robot sound and dread updates
 
 type Talker = {
 	body: BasePart,
@@ -53,6 +55,9 @@ type Talker = {
 	humVolume: number,
 	pendingChase: boolean, -- spotted you but still staring: the chase sounds wait until it goes
 	staring: boolean,
+	breath: Sound?,
+	moveLoop: Sound?,
+	nextPerchTickAt: number,
 }
 
 local Robots = {}
@@ -260,13 +265,13 @@ end
 -- beeps when it's onto something, a fault noise when it stalls. You hear them before you see them.
 local function soundOn(
 	parent: Instance,
-	name: string,
+	name: RobotSounds.Names,
 	volume: number,
 	looped: boolean,
 	night: boolean?,
 	group: Mix.Group
 ): Sound?
-	local id = ModelLibrary.soundId(name)
+	local id = RobotSounds.id(name, ModelLibrary.soundId)
 	if not id then
 		return nil
 	end
@@ -285,7 +290,7 @@ end
 
 local function playOnce(
 	parent: Instance,
-	name: string,
+	name: RobotSounds.Names,
 	volume: number,
 	night: boolean?,
 	group: Mix.Group,
@@ -307,6 +312,33 @@ local function isLoud(model: Model): boolean
 	return model:GetAttribute("Night") == true or model:GetAttribute("Role") == "prowler"
 end
 
+-- A move loop (the brute's drag): on while it moves, louder and higher the faster it goes.
+local function moveLoop(model: Model, talker: Talker, speed: number, night: boolean)
+	local loop = sounds.MoveLoops[model:GetAttribute("RobotType")]
+	if not loop then
+		return
+	end
+	if speed <= 0 then
+		if talker.moveLoop then
+			talker.moveLoop:Destroy()
+			talker.moveLoop = nil
+		end
+		return
+	end
+	if not talker.moveLoop then
+		talker.moveLoop = soundOn(talker.body, loop.sound, 0, true, night, "SFX")
+		if talker.moveLoop then
+			talker.moveLoop:Play()
+		end
+	end
+	local sound = talker.moveLoop
+	if sound then
+		local pace = math.clamp(speed / loop.fullSpeed, 0, 1)
+		sound.Volume = loop.volume * (0.3 + 0.7 * pace)
+		sound.PlaybackSpeed = 0.8 + 0.4 * pace
+	end
+end
+
 -- One footstep per stride walked, so steps quicken as it speeds up; skitterers loop while moving.
 local function footsteps(model: Model, talker: Talker)
 	local position = model:GetPivot().Position
@@ -322,11 +354,13 @@ local function footsteps(model: Model, talker: Talker)
 			talker.stepLoop:Destroy()
 			talker.stepLoop = nil
 		end
+		moveLoop(model, talker, 0, false)
 		return
 	end
 	local night = isLoud(model)
 	local volume = if night then sounds.NightStepVolume else sounds.StepVolume
 	local walking = moved > 0.05 and moved < 20 -- a jump that big is a teleport, not a stride
+	moveLoop(model, talker, if walking then moved / STEP_EVERY else 0, night)
 	if stepSound.stride <= 0 then
 		if walking and not talker.stepLoop then
 			talker.stepLoop = soundOn(talker.body, stepSound.sound, volume, true, night, "SFX")
@@ -395,14 +429,14 @@ end
 -- A sound heard a long way off, at a set pitch.
 local function playFar(
 	parent: Instance,
-	name: string,
+	name: RobotSounds.Names,
 	volume: number,
 	pitch: number,
 	rollOff: { number },
 	group: Mix.Group,
 	scare: Mix.ScareKind?
 )
-	local id = ModelLibrary.soundId(name)
+	local id = RobotSounds.id(name, ModelLibrary.soundId)
 	if not id then
 		return
 	end
@@ -499,11 +533,45 @@ local function stare(model: Model, talker: Talker)
 	if eyes and staring then
 		eyes.Color = settings.ChaseEyeColor
 	end
+	if staring then
+		playOnce(talker.body, hunt.StareSound, hunt.StareVolume, isLoud(model), "Scare", "sharp")
+	end
 	if glow and glow:IsA("PointLight") then
 		local scale = if staring then hunt.StareGlow else 1 / hunt.StareGlow
 		glow.Brightness *= scale
 		glow.Range *= scale
 	end
+end
+
+-- A still robot watching at night (staring, stalled, or a Watcher in its corner) breathes, wet and slow.
+local function breathe(model: Model, talker: Talker)
+	local phase = ReplicatedStorage:GetAttribute("Phase")
+	local still = model:GetAttribute("Pose") == "stare"
+		or model:GetAttribute("State") == "stalled"
+		or model:GetAttribute("Watching") == true
+	local wanted = still and (phase == "Night" or phase == "Siren")
+	if wanted and not talker.breath then
+		local breath = soundOn(talker.body, sounds.Breath, 0, true, true, "Scare")
+		if breath then
+			breath:Play()
+			Mix.fade(breath, sounds.BreathVolume, 0.8)
+		end
+		talker.breath = breath
+	elseif not wanted and talker.breath then
+		talker.breath:Destroy()
+		talker.breath = nil
+	end
+end
+
+-- On top of a rack waiting to drop: ticks now and then, by type.
+local function perchTicks(model: Model, talker: Talker, now: number)
+	local racks = settings.Racks
+	local tick = racks.PerchSounds[model:GetAttribute("RobotType")]
+	if not tick or not model:GetAttribute("Perched") or now < talker.nextPerchTickAt then
+		return
+	end
+	talker.nextPerchTickAt = now + random:NextNumber(table.unpack(racks.PerchGap))
+	playOnce(talker.body, tick, racks.PerchVolume, true, "Scare", "sharp")
 end
 
 local function step(folder: Instance)
@@ -535,6 +603,8 @@ local function step(folder: Instance)
 			footsteps(model, talker)
 			updateChase(talker, now)
 			stare(model, talker)
+			breathe(model, talker)
+			perchTicks(model, talker, now)
 		end
 		local frozen = isFrozen(model)
 		local eyes = model:FindFirstChild(settings.EyePart, true)
@@ -560,7 +630,7 @@ local function step(folder: Instance)
 			end
 		end
 	end
-	feelDread(fear, 0.1)
+	feelDread(fear, STEP_EVERY)
 	LightingController.disturb(RobotDread.flickerAt() or fearAt)
 	if nearest and now >= nextLineAt then
 		nextLineAt = now + random:NextNumber(table.unpack(settings.StallLineEvery))
@@ -603,6 +673,9 @@ local function voice(model: Model)
 		humVolume = if night then sounds.NightHumVolume else sounds.HumVolume,
 		pendingChase = false,
 		staring = false,
+		breath = nil,
+		moveLoop = nil,
+		nextPerchTickAt = 0,
 	}
 	talkers[model] = talker
 	local lastState = model:GetAttribute("State")
@@ -623,10 +696,22 @@ local function voice(model: Model)
 			then settings.Prowl.IdleSoundGap
 			elseif night then settings.NightIdleSoundGap
 			else settings.IdleSoundGap
-		local idle = if prowler
-			then settings.Prowl.IdleSounds
-			elseif night then settings.NightIdleSounds
-			else settings.IdleSounds
+		local idle = table.clone(
+			if prowler
+				then settings.Prowl.IdleSounds
+				elseif night then settings.NightIdleSounds
+				else settings.IdleSounds
+		)
+		local typeSounds = settings.TypeSounds[model:GetAttribute("RobotType")]
+		local extra = if typeSounds and not prowler
+			then (if night then typeSounds.NightIdle else typeSounds.Idle)
+			else nil
+		-- only once uploaded, so a silent pick never takes an idle turn
+		for _, name in extra or {} do
+			if ModelLibrary.soundId(name) then
+				table.insert(idle, name)
+			end
+		end
 		while model.Parent do
 			task.wait(random:NextNumber(gap[1], gap[2]))
 			if model.Parent and table.find(settings.IdleStates, model:GetAttribute("State")) then
@@ -650,12 +735,23 @@ local function voice(model: Model)
 		end
 		if state == "suspicious" then
 			popMark(model, "?", settings.SuspiciousEyeColor)
+			if model:GetAttribute("Role") == "chore" then
+				playOnce(body, sounds.ChoreNotice, sounds.ChoreNoticeVolume, night, "SFX")
+			end
+		end
+		local phase = ReplicatedStorage:GetAttribute("Phase")
+		local turn = sounds.TurnByType[model:GetAttribute("RobotType")]
+		local nightNotice = state == "suspicious" and (phase == "Night" or phase == "Siren")
+		if turn and (nightNotice or (state == "chase" and not wasChasing)) then
+			playOnce(body, turn, sounds.TurnVolume, night, "Scare", "sharp")
 		end
 		tintEyes(talker, state)
 		local cue = settings.StateSounds[state]
+		local typeSounds = settings.TypeSounds[model:GetAttribute("RobotType")]
+		local typeCue = typeSounds and typeSounds.States and typeSounds.States[state]
 		if cue and state ~= "chase" then
 			local name = if type(cue) == "table" then cue[random:NextInteger(1, #cue)] else cue
-			playOnce(body, name, sounds.CueVolume, night, "SFX")
+			playOnce(body, if typeCue then { typeCue, name } else name, sounds.CueVolume, night, "SFX")
 		end
 	end)
 end
@@ -697,6 +793,7 @@ local function robotFx(model: Model, kind: string, at: Vector3)
 		)
 	elseif kind == "alert" then
 		playFar(body, hunt.AlertSound, hunt.AlertVolume, hunt.AlertPitch, hunt.RollOff, "Scare", "sharp")
+		playFar(body, hunt.PackSound, hunt.PackVolume, 1, hunt.RollOff, "Scare", "sharp")
 	elseif kind == "answer" then
 		task.delay(random:NextNumber(table.unpack(hunt.AnswerDelay)), function()
 			if body.Parent then
@@ -837,7 +934,7 @@ function Robots.Start()
 		local elapsed = 0
 		RunService.Heartbeat:Connect(function(dt)
 			elapsed += dt
-			if elapsed >= 0.1 then
+			if elapsed >= STEP_EVERY then
 				elapsed = 0
 				step(folder)
 			end

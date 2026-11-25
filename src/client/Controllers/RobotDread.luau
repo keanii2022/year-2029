@@ -3,7 +3,7 @@
 --   with a sideways tilt now and then while they hold on you
 -- - a hunting robot close by that you can't see makes the lights round you flicker and the PA hum
 -- - a hard night keeps the PA glitching, and the siren says how many nights they've been learning
--- - the mimic: a robot playing back someone's callout from where it stands, pitched slightly wrong
+-- - the mimic: a robot playing back someone's callout from where it stands, in its own copied voice
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,6 +17,7 @@ local Mix = require(ReplicatedStorage.Shared.Mix)
 local Net = require(ReplicatedStorage.Shared.Net)
 local RobotMotion = require(ReplicatedStorage.Shared.Logic.RobotMotion)
 local RobotNights = require(ReplicatedStorage.Shared.Logic.RobotNights)
+local RobotSounds = require(ReplicatedStorage.Shared.Logic.RobotSounds)
 local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
 local Hints = require(script.Parent.Hints)
 
@@ -36,6 +37,7 @@ type Head = {
 	seed: number,
 	writing: boolean,
 	nextTickAt: number,
+	turning: boolean, -- mid-turn, so the neck crank already played
 	connection: RBXScriptConnection,
 }
 
@@ -145,6 +147,7 @@ local function follow(model: Model)
 		seed = random:NextNumber(),
 		writing = false,
 		nextTickAt = 0,
+		turning = false,
 		-- the server holds the head straight while it looks; keep up with whatever it last set
 		connection = motor:GetPropertyChangedSignal("C0"):Connect(function()
 			if not new.writing then
@@ -163,6 +166,10 @@ local function watchModel(model: Model)
 	model:GetAttributeChangedSignal("LookAt"):Connect(function()
 		follow(model)
 	end)
+end
+
+local function cranksNeck(model: Model): boolean
+	return model:GetAttribute("Watching") == true or model:GetAttribute("RobotType") == "scout"
 end
 
 local function turnHeads(dt: number)
@@ -194,9 +201,20 @@ local function turnHeads(dt: number)
 			* CFrame.fromAxisAngle(Vector3.yAxis, math.rad(head.sign * head.yaw))
 			* CFrame.fromAxisAngle(Vector3.zAxis, math.rad(head.tilt))
 		head.writing = false
-		if left > motion.RatchetMinTurn and now >= head.nextTickAt then
+		local part = head.motor.Part1
+		local turning = left > motion.RatchetMinTurn
+		if turning and not head.turning and part and cranksNeck(model) then
+			playOn(
+				part,
+				motion.NeckCrank,
+				motion.NeckCrankVolume,
+				random:NextNumber(0.95, 1.05),
+				settings.SoundRollOff
+			)
+		end
+		head.turning = turning
+		if turning and now >= head.nextTickAt then
 			head.nextTickAt = now + motion.RatchetGap
-			local part = head.motor.Part1
 			if part then
 				playOn(part, motion.Ratchet, motion.RatchetVolume, motion.RatchetPitch, settings.SoundRollOff)
 			end
@@ -305,14 +323,26 @@ local function onMimic(model: Model, index: number)
 	if not body then
 		return
 	end
-	local sound = playOn(body, callouts.Sounds[index + 1], mimic.Volume, mimic.Pitch, callouts.RollOff)
-	if sound then
-		sound.Ended:Once(function()
-			if body.Parent then
-				playOn(body, mimic.Tail, mimic.TailVolume, 1, callouts.RollOff)
-			end
-		end)
+	local id, pitch = RobotSounds.mimic(index, callouts.Sounds, mimic, ModelLibrary.soundId)
+	if not id then
+		return
 	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = mimic.Volume
+	sound.PlaybackSpeed = pitch
+	sound.RollOffMode = Enum.RollOffMode.InverseTapered
+	sound.RollOffMinDistance = callouts.RollOff[1]
+	sound.RollOffMaxDistance = callouts.RollOff[2]
+	sound.Parent = body
+	Mix.route(sound, "SFX")
+	sound:Play()
+	Debris:AddItem(sound, 10)
+	sound.Ended:Once(function()
+		if body.Parent then
+			playOn(body, mimic.Tail, mimic.TailVolume, 1, callouts.RollOff)
+		end
+	end)
 end
 
 function RobotDread.Start()

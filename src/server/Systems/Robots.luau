@@ -1662,6 +1662,7 @@ local function keepWatching(robot: Robot, alive: { Alive }, noticed: boolean, no
 	local stared = now - robot.stareSince >= watcher.StareSeconds
 	if noticed or stared or nearestDistance <= watcher.WakeRange then
 		robot.watching, robot.lookAt, robot.stareSince = false, nil, nil
+		robot.model:SetAttribute("Watching", nil)
 		return false
 	end
 	return true
@@ -1812,6 +1813,7 @@ local function perchStep(robot: Robot, alive: { Alive }, now: number)
 		return
 	end
 	perch.dropping = true
+	robot.model:SetAttribute("Perched", nil)
 	task.spawn(function()
 		local top = robot.position
 		local started = os.clock()
@@ -2021,6 +2023,7 @@ local function spawnChoreBot(room: any, corner: boolean, guard: boolean)
 	local robot = spawnRobot(typeName, room, position, facing)
 	if robot then
 		robot.corner, robot.watching = corner, corner
+		robot.model:SetAttribute("Watching", corner or nil) -- clients crank its neck and let it breathe
 		robot.guard = post
 		roomRobots[room.id] = roomRobots[room.id] or {}
 		table.insert(roomRobots[room.id], robot)
@@ -2069,6 +2072,7 @@ local function spawnOnRack(target: Alive, typeName: string): Robot?
 		robot.position = perch + Vector3.yAxis * Config.Warehouse.RackHeight
 		robot.pose = "stall"
 		robot.perch = { dropAt = os.clock() + randomIn(racks.Perch), land = landing, dropping = false }
+		robot.model:SetAttribute("Perched", true) -- clients tick on the rack top until it drops
 		place(robot)
 	end
 	return robot
@@ -2444,6 +2448,7 @@ function Robots.shot(robot: Robot, shooter: any, damage: number, from: Vector3, 
 			robot.grudge, robot.grudgeUntil = shooter, now + shot.GrudgeSeconds
 		end
 		robot.watching, robot.lookAt, robot.stareSince = false, nil, nil
+		robot.model:SetAttribute("Watching", nil)
 		robot.damage += damage
 		down = robot.damage >= settings.Types[robot.typeName].armor
 	end
@@ -2640,6 +2645,7 @@ function Robots.befriend(robot: Robot)
 	RobotBrain.befriend(robot.brain, os.clock())
 	robot.grudge, robot.shooter = nil, nil
 	robot.watching, robot.stareSince = false, nil
+	robot.model:SetAttribute("Watching", nil)
 	robot.studySpot, robot.wander = nil, nil
 	robot.brain.errand = nil
 	dress(robot)

@@ -34,6 +34,9 @@ return {
 		RatchetVolume = 0.35,
 		RatchetGap = 0.8,
 		RatchetMinTurn = 6,
+		-- the Watcher and scouts also crank their neck once as each turn starts
+		NeckCrank = "robot_neck_crank",
+		NeckCrankVolume = 0.4,
 		-- a still head leans to one side now and then while it studies you
 		Tilt = { Every = 7, Hold = 1.8, Degrees = 20 },
 		StalledLookRange = 22, -- a hunter frozen by day follows you with its head this close
@@ -80,6 +83,8 @@ return {
 		AlertSound = "spot_alert",
 		AlertPitch = 0.75,
 		AlertVolume = 0.9,
+		PackSound = "robot_pack_chatter", -- under the alert, the pack talking to each other
+		PackVolume = 0.6,
 		AnswerSounds = { "scout_eye_whine", "servo_whirr_1", "brute_groan" },
 		AnswerPitch = 0.8,
 		AnswerDelay = { 0.3, 1.2 },
@@ -89,6 +94,8 @@ return {
 		-- Before a chase it freezes and stares this long (seconds), eyes brighter, hum cut, then goes
 		Stare = { 0.6, 1 },
 		StareGlow = 2.5, -- eye glow brightness and range, times normal, while it stares
+		StareSound = "robot_lens_focus", -- its eye locking on as the stare starts
+		StareVolume = 0.6,
 		LungeSound = "chase_servo_scream",
 		LungePitch = 1.35,
 		LungeVolume = 0.9,
@@ -162,6 +169,10 @@ return {
 		LandStill = 0.7,
 		Sounds = { "land_thud", "brute_thud" },
 		Volume = 1,
+		-- ticking up on top of the rack while it waits to drop, by type
+		PerchSounds = { crawler = "robot_ceiling_tick" },
+		PerchVolume = 0.45,
+		PerchGap = { 0.8, 1.8 },
 	},
 
 	-- The mimic: at night, now and then, a robot replays a callout someone made Delay seconds ago from
@@ -173,6 +184,7 @@ return {
 		Chance = 0.25,
 		CheckEvery = 5,
 		Cooldown = { 180, 300 },
+		Copy = "robot_copy_callout_", -- the robot's own copy of each call (.. index); else Pitch on the original
 		Pitch = 0.92,
 		Volume = 0.8, -- a touch quieter than a real callout, and further off
 		Tail = "walkie_static",
@@ -309,8 +321,9 @@ return {
 		AngrySpeed = 1.15,
 		Clank = "impact_metal",
 		ClankVolume = 1,
-		Sputter = "emp_shutdown",
-		Reboot = "hydraulic_hiss",
+		-- the first uploaded name wins (Logic/RobotSounds)
+		Sputter = { "robot_knockdown_sputter", "emp_shutdown" },
+		Reboot = { "robot_reboot_gasp", "hydraulic_hiss" },
 		-- Knocking one down spills salvage once per robot per day (so it can't be farmed): a few
 		-- rolls from Common, plus one Rare pick at RareChance (brutes always get the rare pick).
 		Salvage = {
@@ -468,6 +481,17 @@ return {
 		Grab = "grab_clank",
 		Notice = "spot_alert", -- with Voice.Notice when it spots you
 		NoticeByType = { scout = "scout_eye_whine", brute = "brute_groan" },
+		-- a chore bot noticing you, under Voice.Notice
+		ChoreNotice = "robot_broken_welcome",
+		ChoreNoticeVolume = 0.55,
+		-- its face flips to red: turning hostile, or noticing you at night
+		TurnByType = { cleaner = "robot_smile_glitch" },
+		TurnVolume = 0.6,
+		-- a still robot watching at night (staring, frozen, or a Watcher) breathes while the hum is cut
+		Breath = "robot_wet_servo_breath",
+		BreathVolume = 0.4,
+		-- a loop while it moves, louder and higher the faster it goes (fullSpeed studs per second)
+		MoveLoops = { brute = { sound = "robot_floor_scrape_drag", volume = 0.5, fullSpeed = 20 } },
 		-- while it hunts you: the distorted jingle and a servo whine that climbs the longer it runs
 		ChaseLoop = "jingle_distorted",
 		ChaseLoopVolume = 0.55,
@@ -482,7 +506,8 @@ return {
 			cook = { sound = "heavy_step", stride = 4 },
 			scout = { sound = "scout_step", stride = 2.5 },
 			brute = { sound = "brute_thud", stride = 5 },
-			crawler = { sound = "crawler_skitter_loop", stride = 0 }, -- 0: loops while it moves
+			-- 0: loops while it moves and cuts dead when it stops, so it follows the bursts
+			crawler = { sound = { "robot_skitter_burst", "crawler_skitter_loop" }, stride = 0 },
 		},
 		StepVolume = 0.35,
 		NightStepVolume = 1,
@@ -504,6 +529,11 @@ return {
 	IdleSoundGap = { 8, 20 },
 	NightIdleSoundGap = { 4, 10 },
 	IdleStates = { "study", "stalled", "return", "sweep", "investigate" },
+	-- Per type: added to its idle noises once uploaded, and state cues that take over from StateSounds
+	TypeSounds = {
+		cook = { Idle = { "robot_order_bell" }, NightIdle = { "robot_order_bell" } },
+		carrier = { NightIdle = { "robot_scanner_sweep" }, States = { investigate = "robot_scanner_sweep" } },
+	},
 
 	-- Keani's robot voice, layered over the mechanical sounds above. One line at a time per robot.
 	Voice = {
