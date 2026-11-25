@@ -9,7 +9,14 @@ return {
 	ActivationRadius = 320,
 	DeactivationRadius = 400, -- a live room keeps its robot until every player is this far
 	ActivationInterval = 2,
-	MaxLiveChoreBots = 16,
+	MaxLiveChoreBots = 24, -- robots, across every live installation
+
+	-- How many robots live in an installation (min, max), and the giant 2x2 ones
+	InstallationBots = { 2, 3 },
+	GiantInstallationBots = { 3, 4 },
+	-- One per installation stands in a corner facing the wall. Inside LookRange its head turns to
+	-- follow you; it wakes after staring StareSeconds, when you come inside WakeRange, or on a sound.
+	Watcher = { LookRange = 34, WakeRange = 9, StareSeconds = 4, MaxHeadTurn = 150, CornerPad = 3 },
 
 	-- Night hunters spawn out of sight near players and stall where they stand at lights on.
 	MaxHunters = 8,

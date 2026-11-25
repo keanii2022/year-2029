@@ -70,6 +70,11 @@ export type Robot = {
 	ignore: { [Player]: number },
 	lastPoses: { [string]: number },
 	dead: boolean,
+	-- the installation's corner robot: still and facing the wall until someone comes close
+	corner: boolean,
+	watching: boolean,
+	stareSince: number?,
+	lookAt: Vector3?,
 }
 type Alive = { player: Player, character: Model, root: BasePart, humanoid: Humanoid, position: Vector3 }
 
@@ -79,7 +84,8 @@ local folder: Folder
 local stashFolder: Folder
 local robots: { [number]: Robot } = {}
 local byModel: { [Model]: Robot } = {}
-local roomRobot: { [number]: Robot } = {}
+local roomRobots: { [number]: { Robot } } = {}
+local roomWant: { [number]: number } = {} -- robots a live room should have; one fewer per kill
 local roomsById: { [number]: any } = {}
 local roomPoints: { RobotRooms.Room } = {}
 local activeRooms: { [number]: boolean } = {}
@@ -93,6 +99,7 @@ local pathTokens = settings.PathsPerSecond
 local origin: Vector3
 local floorY = 0
 local random = Random.new()
+local watcher = settings.Watcher
 
 local function flat(v: Vector3): Vector3
 	return Vector3.new(v.X, 0, v.Z)
@@ -443,6 +450,10 @@ local function spawnRobot(typeName: string, room: any?, position: Vector3, facin
 		ignore = {},
 		lastPoses = {},
 		dead = false,
+		corner = false,
+		watching = false,
+		stareSince = nil,
+		lookAt = nil,
 	}
 	model.Name = typeName
 	dress(robot)
@@ -683,9 +694,20 @@ local function moveStep(robot: Robot, dt: number)
 	place(robot)
 end
 
+-- Head turn (in pose units) that points a still robot's face at target, as far as the neck goes
+local function headTurn(robot: Robot, target: Vector3): number
+	local away = robot.model:GetPivot():VectorToObjectSpace(flat(target - robot.position))
+	local degrees =
+		math.clamp(math.deg(math.atan2(away.X, away.Z)), -watcher.MaxHeadTurn, watcher.MaxHeadTurn)
+	return degrees / Config.Models.MoverDegrees
+end
+
 local function animate(now: number)
 	for _, robot in robots do
 		local limbs = RobotPoses.limbs(robot.pose, robot.stride, now, robot.moving)
+		if robot.lookAt then
+			limbs.Head = headTurn(robot, robot.lookAt)
+		end
 		for part, t in limbs do
 			local last = robot.lastPoses[part]
 			if last == nil or math.abs(last - t) > 0.02 then
@@ -950,14 +972,40 @@ local function act(robot: Robot, intent: RobotBrain.Intent, alive: { Alive }, no
 	end
 end
 
+-- A corner robot holds still, facing the wall; its head follows the nearest player in LookRange.
+-- True while it keeps watching, false once it wakes (stared long enough, too close, or noticed).
+local function keepWatching(robot: Robot, alive: { Alive }, noticed: boolean, now: number): boolean
+	local nearest, nearestDistance = nil, math.huge
+	for _, target in alive do
+		local d = flatDistance(target.position, robot.position)
+		if d < nearestDistance then
+			nearest, nearestDistance = target, d
+		end
+	end
+	if not nearest or nearestDistance > watcher.LookRange then
+		robot.lookAt, robot.stareSince = nil, nil
+		return not noticed
+	end
+	robot.lookAt = nearest.position
+	robot.stareSince = robot.stareSince or now
+	local stared = now - robot.stareSince >= watcher.StareSeconds
+	if noticed or stared or nearestDistance <= watcher.WakeRange then
+		robot.watching, robot.lookAt, robot.stareSince = false, nil, nil
+		return false
+	end
+	return true
+end
+
 local function despawn(robot: Robot)
 	dropCarried(robot, robot.position)
 	holdChoreBox(robot, false)
 	robot.dead = true
 	robots[robot.id] = nil
 	byModel[robot.model] = nil
-	if robot.room and roomRobot[robot.room.id] == robot then
-		roomRobot[robot.room.id] = nil
+	local list = robot.room and roomRobots[robot.room.id]
+	local index = list and table.find(list, robot)
+	if index then
+		table.remove(list, index)
 	end
 	robot.model:Destroy()
 end
@@ -977,6 +1025,9 @@ local function tick(dt: number)
 		local seen, heard = nil, nil
 		if robot.role == "chore" or phase == "Night" then -- stalled hunters sense nothing
 			seen, heard = senseRobot(robot, phase, alive, now)
+		end
+		if robot.watching and keepWatching(robot, alive, seen ~= nil or heard ~= nil, now) then
+			continue
 		end
 		local state = robot.brain.state
 		local hunting = phase == "Night" and (state == "sweep" or state == "investigate")
@@ -1020,13 +1071,39 @@ end
 
 -- Waking and sleeping -----------------------------------------------------------------------------
 
-local function spawnChoreBot(room: any)
+local function spawnChoreBot(room: any, corner: boolean)
 	local typeName = RobotRooms.botFor(room.kind, settings.RoomBots, "cleaner")
 	local position = randomRoomPoint(room, 5)
-	local robot = spawnRobot(typeName, room, position, Vector3.new(random:NextNumber(-1, 1), 0, 1))
-	if robot then
-		roomRobot[room.id] = robot
+	local facing = Vector3.new(random:NextNumber(-1, 1), 0, 1)
+	if corner then
+		local pad = watcher.CornerPad
+		local east, south = random:NextNumber() < 0.5, random:NextNumber() < 0.5
+		local x = if east then room.x1 - pad else room.x0 + pad
+		local z = if south then room.z1 - pad else room.z0 + pad
+		position = Warehouse.toWorld(x, z)
+		facing = if random:NextNumber() < 0.5
+			then Vector3.new(if east then 1 else -1, 0, 0)
+			else Vector3.new(0, 0, if south then 1 else -1)
 	end
+	local robot = spawnRobot(typeName, room, position, facing)
+	if robot then
+		robot.corner, robot.watching = corner, corner
+		roomRobots[room.id] = roomRobots[room.id] or {}
+		table.insert(roomRobots[room.id], robot)
+	end
+end
+
+local function liveChoreBots(): number
+	local count = 0
+	for _, list in roomRobots do
+		count += #list
+	end
+	return count
+end
+
+local function robotsFor(room: any): number
+	local range = if room.giant then settings.GiantInstallationBots else settings.InstallationBots
+	return random:NextInteger(range[1], range[2])
 end
 
 local nightStartedAt = 0
@@ -1060,20 +1137,53 @@ local function activate()
 	end
 
 	local wanted = RobotRooms.active(roomPoints, points, activeRooms, settings, destroyedRooms)
-	for id in wanted do
-		if not roomRobot[id] then
-			spawnChoreBot(roomsById[id])
+	for id, list in roomRobots do
+		if wanted[id] then
+			continue
 		end
-	end
-	for id, robot in roomRobot do
-		if not wanted[id] then
+		local busy = false
+		for _, robot in list do
 			local far = RobotRooms.distanceToNearest(robot.position.X, robot.position.Z, points)
 				> settings.ChoreDespawnRadius
-			if calmState(robot.brain.state) or far then
+			busy = busy or not (calmState(robot.brain.state) or far)
+		end
+		if busy then
+			wanted[id] = true -- one is out hunting near someone: keep the room until it calms down
+		else
+			for _, robot in table.clone(list) do
 				despawn(robot)
-			else
-				wanted[id] = true -- out hunting near someone: keep it until it calms down
 			end
+			roomRobots[id], roomWant[id] = nil, nil
+		end
+	end
+	-- Nearest rooms first, so the cap leaves the far ones short rather than the one you're in
+	local order = {}
+	for id in wanted do
+		table.insert(order, id)
+	end
+	local distance = {}
+	for _, point in roomPoints do
+		distance[point.id] = RobotRooms.distanceToNearest(point.cx, point.cz, points)
+	end
+	table.sort(order, function(a, b)
+		return distance[a] < distance[b]
+	end)
+	local live = liveChoreBots()
+	for _, id in order do
+		local room = roomsById[id]
+		roomWant[id] = roomWant[id] or robotsFor(room)
+		local list = roomRobots[id] or {}
+		local hasCorner = false
+		for _, robot in list do
+			hasCorner = hasCorner or robot.corner
+		end
+		for _ = #list + 1, roomWant[id] do
+			if live >= settings.MaxLiveChoreBots then
+				break
+			end
+			spawnChoreBot(room, not hasCorner)
+			hasCorner = true
+			live += 1
 		end
 	end
 	activeRooms = wanted
@@ -1109,6 +1219,7 @@ local function onPhaseChanged(phase: string)
 	end
 	if phase == "Day" then
 		table.clear(destroyedRooms)
+		table.clear(roomWant) -- rooms you thinned out overnight fill back up
 	end
 	for _, robot in robots do
 		RobotBrain.phaseChanged(robot.brain, phase, now)
@@ -1164,7 +1275,7 @@ end
 function Robots.choresNear(position: Vector3, radius: number): (number, { Robot })
 	local out, idle = 0, {}
 	for _, robot in Robots.inRadius(position, radius) do
-		if robot.role ~= "chore" or not robot.room then
+		if robot.role ~= "chore" or not robot.room or robot.watching then
 			continue
 		end
 		if robot.brain.errand then
@@ -1270,7 +1381,11 @@ function Robots.destroy(robot: Robot, byPlayer: Player?)
 	Loudness.emit(position, "loud", stashFolder)
 
 	local room = robot.room
-	if room and robot.role == "chore" then
+	if room and robot.role == "chore" and roomWant[room.id] then
+		roomWant[room.id] -= 1
+	end
+	-- the last one down: the room's loot spills out where it fell
+	if room and robot.role == "chore" and (roomWant[room.id] or 0) <= 0 then
 		destroyedRooms[room.id] = true
 		for _, pickup in table.clone(stash[room.id] or {}) do
 			local angle = random:NextNumber(0, math.pi * 2)

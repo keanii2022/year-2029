@@ -10,10 +10,12 @@ local Container = require(ReplicatedStorage.Shared.Logic.Container)
 local InteractRules = require(ReplicatedStorage.Shared.Logic.Interact)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local InventoryLogic = require(ReplicatedStorage.Shared.Logic.Inventory)
+local Loot = require(ReplicatedStorage.Shared.Logic.Loot)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Logic.WarehouseGenRng)
 local Interact = require(script.Parent.Interact)
 local Inventory = require(script.Parent.Inventory)
+local Loudness = require(script.Parent.Loudness)
 local Warehouse = require(script.Parent.Warehouse)
 
 local Settings = Config.Containers
@@ -26,6 +28,7 @@ type Box = {
 	openKeys: { [string]: boolean },
 	viewers: { [Player]: boolean },
 	destroying: RBXScriptConnection,
+	guarded: boolean,
 }
 
 local Containers = {}
@@ -89,6 +92,26 @@ local function unview(player: Player, tellClient: boolean)
 	end
 end
 
+-- The installation's stash crate, which the robots guard
+local function isGuarded(model: Model): boolean
+	local room = Warehouse.roomAt(model:GetPivot().Position)
+	return room ~= nil
+		and room.installation == true
+		and model:GetAttribute("ModelName") == Config.Warehouse.InstallationStash
+end
+
+local function guardedLoot(rule: Container.Rule, rng: Rng.Rng): { Stack }
+	local stacks = {}
+	local rolls = Settings.InstallationStash.rolls
+	for _ = 1, rng:int(rolls[1], rolls[2]) do
+		local roll = Loot.roll(Config.Supplies.InstallationLoot, 1, rng)
+		if roll then
+			InventoryLogic.add(stacks, InventoryItems, roll.item, roll.count, rule.slots)
+		end
+	end
+	return stacks
+end
+
 local function boxOf(model: Model, rule: Container.Rule): Box
 	local existing = boxes[model]
 	if existing then
@@ -96,11 +119,15 @@ local function boxOf(model: Model, rule: Container.Rule): Box
 	end
 	local depth = Warehouse.depth(model:GetPivot().Position)
 	local rng = Rng.new(random:NextInteger(1, 2 ^ 31 - 1))
+	local guarded = isGuarded(model)
 	local box: Box
 	box = {
 		rule = rule,
 		title = Settings.Titles[model:GetAttribute("ModelName")] or "STORAGE",
-		stacks = Container.startingLoot(rule, Config.Supplies.Loot, depth, rng, InventoryItems),
+		stacks = if guarded
+			then guardedLoot(rule, rng)
+			else Container.startingLoot(rule, Config.Supplies.Loot, depth, rng, InventoryItems),
+		guarded = guarded,
 		openKeys = {},
 		viewers = {},
 		destroying = model.Destroying:Connect(function()
@@ -186,6 +213,9 @@ local function onMove(player: Player, model: any, direction: any, itemId: any, c
 		local wanted = Container.moveCount(count, InventoryLogic.count(box.stacks, itemId))
 		local added = Inventory.add(player, itemId, wanted)
 		InventoryLogic.remove(box.stacks, itemId, added)
+		if added > 0 and box.guarded then
+			Loudness.emit(model:GetPivot().Position, Settings.InstallationStash.takeLoudness, model)
+		end
 	else
 		return
 	end

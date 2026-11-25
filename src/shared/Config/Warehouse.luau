@@ -1,4 +1,4 @@
-return {
+local settings = {
 	-- true keeps players spawning in the step 1 test room; false drops them into the warehouse
 	UseTestRoom = false,
 
@@ -174,6 +174,12 @@ return {
 	InstallationTallHeight = 50,
 	HallDoorWidth = 10,
 	WeirdDetails = { 3, 5 }, -- extra wrong things scattered through each set
+	-- The set's light leaking out of each hall doorway: a ceiling glow `reach` studs outside it
+	-- (lamp tone spill_<set tone>) and a faint frame round the opening, frameHeight tall
+	InstallationSpill = { reach = 5, height = 12, frame = 0.4, frameHeight = 12, fallback = "warm" },
+	InstallationSpillLight = { brightness = 0.9, range = 22, transparency = 0.45 },
+	InstallationStash = "loot_crate", -- the container robots guard in every set
+	InstallationStashReach = 3.5, -- studs out from the furniture it sits by
 	StoreNames = { "GLOMO", "SNAKZ", "TOYVA", "BEDLO", "HAPPI", "ZOOMR", "NUBBY", "SOFTO" },
 
 	-- Racks, junk and spawns keep this far from robot rooms (the installation sets)
@@ -564,3 +570,14 @@ return {
 	-- Build in square chunks so streaming can load and drop them; yield between chunks
 	ChunkSize = 320,
 }
+
+-- Every lamp tone gets a dim spill_ twin (the doorway pool) and a faint neon frame style
+local spill = settings.InstallationSpillLight
+for name, tone in table.clone(settings.LampTones) do
+	settings.LampTones[`spill_{name}`] =
+		{ color = tone.color, brightness = spill.brightness, range = spill.range }
+	settings.Styles[`spill_{name}`] =
+		{ color = tone.color, material = Enum.Material.Neon, transparency = spill.transparency }
+end
+
+return settings

@@ -1,6 +1,6 @@
 -- Installations: you step through a doorway into a pitch dark hall that reaches the roof, and in
--- the middle of the dark there's a lit set built after one of Keani's dreamcore references. A robot
--- lives in each one. Every set has its own look, its own wrongness and, often, something far too big.
+-- the middle of the dark there's a lit set built after one of Keani's dreamcore references. Robots
+-- live in each one, guarding a stash. Every set has its own look, its own wrongness and, often, something far too big.
 -- Each set is registered as a robot room (id, kind, rect, doors, walls, items) so Robots and the
 -- other systems find it like any room.
 local Pieces = if script then require(script.Parent.WarehouseGenPieces) else require("./WarehouseGenPieces")
@@ -2292,6 +2292,101 @@ local SHAPES = {
 }
 Installations.Kinds = SHAPES
 
+-- Small lights that don't set the mood of a set
+local MINOR_TONES = { exit = true, tv = true }
+
+-- The light a set is lit with: its most used lamp tone since piece number `from`
+local function mainTone(layout: any, from: number, fallback: string): string
+	local counts, best, bestCount = {}, fallback, 0
+	for index = from, #layout.pieces do
+		local tone = layout.pieces[index].lamp
+		if tone and not MINOR_TONES[tone] then
+			counts[tone] = (counts[tone] or 0) + 1
+			if counts[tone] > bestCount then
+				best, bestCount = tone, counts[tone]
+			end
+		end
+	end
+	return best
+end
+
+-- Where a doorway sits on its room's edge, and which way is out
+local function doorway(box: any, door: any): (number, number, number, number)
+	if door.side == "north" then
+		return box.x0 + door.at, box.z0, 0, -1
+	elseif door.side == "south" then
+		return box.x0 + door.at, box.z1, 0, 1
+	elseif door.side == "west" then
+		return box.x0, box.z0 + door.at, -1, 0
+	end
+	return box.x1, box.z0 + door.at, 1, 0
+end
+Installations.doorway = doorway
+
+-- The set's light spilling out of a hall doorway: a pool on the floor outside and a glowing frame
+local function doorSpill(layout: any, config: any, hall: any, door: any, tone: string)
+	local spill = config.InstallationSpill
+	local x, z, nx, nz = doorway(hall, door)
+	local half = config.HallDoorWidth / 2
+	local px, pz = math.abs(nz), math.abs(nx) -- along the wall
+	local glow = `spill_{tone}`
+	piece(layout, {
+		x = x + nx * spill.reach,
+		y = spill.height,
+		z = z + nz * spill.reach,
+		sx = 4,
+		sy = 0.3,
+		sz = 4,
+		style = "lamp_bulb",
+		collide = false,
+		lamp = glow,
+		spill = true,
+	})
+	local t = spill.frame
+	for _, side in { -1, 1 } do
+		piece(layout, {
+			x = x + px * side * (half + t / 2) + nx * t / 2,
+			y = spill.frameHeight / 2,
+			z = z + pz * side * (half + t / 2) + nz * t / 2,
+			sx = t,
+			sy = spill.frameHeight,
+			sz = t,
+			style = glow,
+			collide = false,
+			spill = true,
+		})
+	end
+	piece(layout, {
+		x = x + nx * t / 2,
+		y = spill.frameHeight + t / 2,
+		z = z + nz * t / 2,
+		sx = if px > 0 then config.HallDoorWidth + t * 2 else t,
+		sy = t,
+		sz = if pz > 0 then config.HallDoorWidth + t * 2 else t,
+		style = glow,
+		collide = false,
+		spill = true,
+	})
+end
+
+-- The stash crate: by the piece of furniture furthest from the way in, where the robots keep watch
+local function placeStash(layout: any, config: any, room: any, hall: any)
+	local ex, ez = doorway(hall, hall.doors[1])
+	local best, bestDistance = nil, -1
+	for _, thing in room.items do
+		local d = (thing.x - ex) ^ 2 + (thing.z - ez) ^ 2
+		if d > bestDistance then
+			best, bestDistance = thing, d
+		end
+	end
+	local reach = config.InstallationStashReach
+	local x = if best then best.x + best.nx * reach else room.cx
+	local z = if best then best.z + best.nz * reach else room.cz
+	local turn = math.deg(math.atan2(room.cx - x, room.cz - z))
+	Pieces.loose(layout, config.InstallationStash, x, z, turn)
+	room.stash = { x = x, z = z }
+end
+
 -- A dark hall filling the zone, roof to floor, with the lit set inside it
 function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Pieces.Rect, set: string?)
 	local kind = set or rng:weighted(config.InstallationKinds)
@@ -2352,10 +2447,17 @@ function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Piece
 			elseif shape[3] == "tall" then config.InstallationTallHeight
 			else 16,
 	}
+	local firstPiece = #layout.pieces + 1
 	Sets[kind](ctx)
 	local picks = rng:shuffle(WEIRD_NAMES)
 	for n = 1, rng:int(config.WeirdDetails[1], config.WeirdDetails[2]) do
 		Weird[picks[n]](ctx)
+	end
+	room.tone = mainTone(layout, firstPiece, config.InstallationSpill.fallback)
+	room.giant = hw > config.BlockSize
+	placeStash(layout, config, room, hall)
+	for _, door in hall.doors do
+		doorSpill(layout, config, hall, door, room.tone)
 	end
 	table.insert(layout.rooms, room)
 	layout.addSolid({ x0 = room.x0, x1 = room.x1, z0 = room.z0, z1 = room.z1, room = true })

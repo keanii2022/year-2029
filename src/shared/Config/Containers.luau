@@ -54,6 +54,10 @@ return {
 		locker = "LOCKER",
 	},
 
+	-- The crate in every installation (Config.Warehouse.InstallationStash): always full, rolled from
+	-- Config.Supplies.InstallationLoot. Taking from it makes a takeLoudness sound the robots hear.
+	InstallationStash = { rolls = { 3, 5 }, takeLoudness = "normal" },
+
 	-- The spawn kit comes back every life, so stashing it would be free loot
 	Blocked = { StarterBlaster = true },
 
