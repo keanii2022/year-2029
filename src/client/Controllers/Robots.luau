@@ -153,6 +153,21 @@ local function voice(model: Model)
 	if hum then
 		hum:Play()
 	end
+	-- Now and then an idle robot leaks oil or lets off hydraulic pressure
+	task.spawn(function()
+		while model.Parent do
+			task.wait(random:NextNumber(settings.IdleSoundGap[1], settings.IdleSoundGap[2]))
+			local state = model:GetAttribute("State")
+			if model.Parent and (state == "study" or state == "stalled" or state == "return") then
+				local name = settings.IdleSounds[random:NextInteger(1, #settings.IdleSounds)]
+				local sound = soundOn(body, name, settings.Sounds.CueVolume * 0.7, false)
+				if sound then
+					sound:Play()
+					Debris:AddItem(sound, 6)
+				end
+			end
+		end
+	end)
 	model:GetAttributeChangedSignal("State"):Connect(function()
 		local cue = settings.StateSounds[model:GetAttribute("State")]
 		if not cue then

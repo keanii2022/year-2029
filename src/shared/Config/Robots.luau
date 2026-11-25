@@ -171,4 +171,6 @@ return {
 	},
 	CaughtDayLine = "A ROBOT GRABBED YOU. It took your %s back to its room. Sneak in and steal it back.",
 	CaughtNightLine = "A ROBOT GOT YOU IN THE DARK.",
+	IdleSounds = { "oil_drip", "hydraulic_hiss" },
+	IdleSoundGap = { 8, 20 },
 }

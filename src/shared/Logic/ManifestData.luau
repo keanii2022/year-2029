@@ -9762,17 +9762,14 @@ return {
 		{
 			name = "brute_thud",
 			group = "robots",
-			assetId = 119263010523639,
 		},
 		{
 			name = "chase_servo_scream",
 			group = "robots",
-			assetId = 110349771813157,
 		},
 		{
 			name = "chase_steps",
 			group = "robots",
-			assetId = 132579789546999,
 		},
 		{
 			name = "crawler_skitter_loop",
@@ -9782,22 +9779,18 @@ return {
 		{
 			name = "curious_beep_1",
 			group = "robots",
-			assetId = 80640581588348,
 		},
 		{
 			name = "curious_beep_2",
 			group = "robots",
-			assetId = 113981036217790,
 		},
 		{
 			name = "curious_beep_3",
 			group = "robots",
-			assetId = 80152316730961,
 		},
 		{
 			name = "drag",
 			group = "robots",
-			assetId = 109214577972447,
 		},
 		{
 			name = "emp_shutdown",
@@ -9807,27 +9800,26 @@ return {
 		{
 			name = "error_stall",
 			group = "robots",
-			assetId = 140013043287739,
 		},
 		{
 			name = "fumble",
 			group = "robots",
-			assetId = 127226965760038,
 		},
 		{
 			name = "grab_clank",
 			group = "robots",
-			assetId = 126545407886948,
 		},
 		{
 			name = "heavy_step",
 			group = "robots",
-			assetId = 140278800213667,
 		},
 		{
 			name = "hum_loop",
 			group = "robots",
-			assetId = 134796717209411,
+		},
+		{
+			name = "hydraulic_hiss",
+			group = "robots",
 		},
 		{
 			name = "jingle_distorted",
@@ -9835,9 +9827,12 @@ return {
 			assetId = 97656652677433,
 		},
 		{
+			name = "oil_drip",
+			group = "robots",
+		},
+		{
 			name = "scanner_ping",
 			group = "robots",
-			assetId = 89116867981817,
 		},
 		{
 			name = "scout_eye_whine",
@@ -9852,22 +9847,18 @@ return {
 		{
 			name = "scrape",
 			group = "robots",
-			assetId = 140381889758100,
 		},
 		{
 			name = "servo_whirr_1",
 			group = "robots",
-			assetId = 96495886367795,
 		},
 		{
 			name = "servo_whirr_2",
 			group = "robots",
-			assetId = 118321188591677,
 		},
 		{
 			name = "spot_alert",
 			group = "robots",
-			assetId = 95338565831027,
 		},
 		{
 			name = "distant_hum_loop",
