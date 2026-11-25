@@ -48,22 +48,88 @@ return {
 	-- instant raycast. Its flight time is clamped so it lands about when the server answers.
 	MuzzleOffset = Vector3.new(0.7, -0.6, -1.5), -- from the camera, where your shot starts with no held blaster
 	OthersMuzzleForward = 1.8, -- studs ahead of another player's camera where their bullet starts
-	BulletSpeed = 650, -- studs per second
-	BulletMinTravel = 0.05,
+	BulletSpeed = 1400, -- studs per second
+	BulletMinTravel = 0.04,
 	BulletMaxTravel = 0.2,
-	BulletLength = 7,
-	BulletWidth = 0.16,
+	BulletLength = 4,
+	BulletWidth = 0.22,
 	BulletColor = Color3.fromRGB(255, 150, 80),
 	BulletImage = "bullet_tracer", -- manifest image, head at the right end; Neon streak until uploaded
+	BulletBrightness = 3, -- the texture has its own white core and orange glow, so it isn't tinted
+	BulletGlowBrightness = 2.5,
+	BulletGlowRange = 6,
 	MuzzleFlashTime = 0.05,
-	MuzzleFlashSize = 1.4,
+	MuzzleFlashSize = 2.2,
+	MuzzleFlashScaleJitter = 0.3, -- each flash is up to this share bigger or smaller
 	MuzzleFlashColor = Color3.fromRGB(255, 190, 120),
 	MuzzleFlashImage = "muzzle_flash_card",
+	MuzzleLightTime = 0.035, -- about two frames
+	MuzzleLightBrightness = 9,
+	MuzzleLightRange = 18,
 	ScorchSize = 0.55,
 	ScorchColor = Color3.fromRGB(28, 24, 22),
-	ScorchTime = 8, -- seconds before a scorch mark fades
+	ScorchTime = 3, -- seconds before a scorch mark fades
+	ScorchFadeTime = 1,
 	MaxScorches = 40,
-	CameraKick = 1.2, -- degrees the view tips up per shot
+	ChipCount = 5, -- concrete chips knocked off the wall per shot
+	ChipSize = 0.12,
+	ChipSpeed = 14,
+	ChipLife = 0.8,
+	ChipDarken = 0.6, -- chips take the wall's colour times this
+
+	-- Each gun shoots with a feel: its sound, camera kick (degrees up), a random sideways twitch up
+	-- to twitch degrees, an FOV punch in degrees, a screen shake in degrees (0 for none) and weight,
+	-- which scales how hard the held gun snaps back. followUp plays followUpDelay seconds later.
+	GunFeel = {
+		StarterBlaster = "pistol",
+	},
+	ShotFeel = {
+		pistol = { sound = "shot_pistol", kick = 2.4, twitch = 0.5, fovPunch = 1.2, shake = 0, weight = 1 },
+		smg = { sound = "shot_smg", kick = 2, twitch = 0.7, fovPunch = 1, shake = 0, weight = 0.8 },
+		rifle = { sound = "shot_rifle", kick = 2.6, twitch = 0.5, fovPunch = 1.3, shake = 0, weight = 1.1 },
+		marksman = {
+			sound = "shot_marksman",
+			kick = 3.2,
+			twitch = 0.4,
+			fovPunch = 1.6,
+			shake = 0,
+			weight = 1.3,
+		},
+		revolver = {
+			sound = "shot_revolver",
+			kick = 3.4,
+			twitch = 0.8,
+			fovPunch = 1.8,
+			shake = 0.5,
+			weight = 1.4,
+		},
+		heavy = { sound = "shot_heavy", kick = 3.6, twitch = 0.9, fovPunch = 2, shake = 0.7, weight = 1.5 },
+		shotgun = {
+			sound = "shot_shotgun",
+			kick = 4,
+			twitch = 1,
+			fovPunch = 2,
+			shake = 0.8,
+			weight = 1.6,
+			followUp = "shotgun_pump",
+			followUpDelay = 0.35,
+		},
+		nail = { sound = "nail_gun", kick = 1.6, twitch = 0.4, fovPunch = 0.8, shake = 0, weight = 0.7 },
+		flare = { sound = "flare_pop", kick = 2.2, twitch = 0.5, fovPunch = 1.2, shake = 0, weight = 1 },
+		dart = { sound = "dart_pop", kick = 1.4, twitch = 0.3, fovPunch = 0.8, shake = 0, weight = 0.6 },
+		disruptor = {
+			sound = "disruptor_crack",
+			kick = 3,
+			twitch = 0.6,
+			fovPunch = 1.6,
+			shake = 0.4,
+			weight = 1.2,
+		},
+	},
+	DefaultShotFeel = "pistol", -- for a gun missing from GunFeel
+	CameraKickRise = 0.02, -- seconds the view snaps up over
+	CameraKickSettle = 0.16, -- seconds it springs back over
+	ShakeTime = 0.18,
 
 	-- Held blaster, relative to the camera. Recoil snaps in over RecoilRise, settles over RecoilSettle.
 	ViewmodelOffset = Vector3.new(0.75, -0.72, -1.45),
@@ -72,16 +138,22 @@ return {
 	ViewmodelLoweredPitch = 40, -- degrees it tips down when lowered
 	ViewmodelLowerEase = 10,
 	ViewmodelBobScale = 0.6, -- share of the head bob the blaster follows
-	RecoilRise = 0.03,
-	RecoilSettle = 0.18,
-	RecoilKickBack = 0.22, -- studs toward you
-	RecoilKickPitch = 7, -- degrees muzzle up
+	RecoilRise = 0.02,
+	RecoilSettle = 0.13,
+	RecoilKickBack = 0.32, -- studs toward you
+	RecoilKickPitch = 10, -- degrees muzzle up
 	SparkColor = Color3.fromRGB(255, 190, 110),
 	SparkCount = 10,
 	PlayerSparkCount = 18,
 	AimFieldOfViewScale = 0.72,
 	AimEase = 14,
 	HitMarkerTime = 0.15,
+	HitMarkerPop = 1.7, -- the X starts this much bigger and shrinks back over HitMarkerTime
+
+	-- A shot passing this close to another player's head plays a whiz for them. Not within
+	-- WhizMinDistance studs of the shooter, so standing beside a teammate stays quiet.
+	WhizRadius = 4,
+	WhizMinDistance = 6,
 
 	-- Inventory and loot piles.
 	BaseSlots = 10,
@@ -89,15 +161,21 @@ return {
 	LootPickupRange = 8,
 	LootPickupHold = 0.6,
 
-	-- Sound names from the manifest. Fire is the zap, Impact lands where the shot hits, Empty is
-	-- the dry click with no cells. Others hear shots out to SoundRollOff[2] studs (guns are loud).
+	-- Sound names from the manifest. Each gun's shot is in ShotFeel; impacts land where the shot
+	-- hits, picked by the surface (Impact on players), Empty is the dry click with no cells.
+	-- Others hear shots out to SoundRollOff[2] studs (guns are loud).
 	Sounds = {
-		Fire = "blaster_thump",
 		FireVolume = 1,
-		FirePitch = 0.72, -- below 1 is deeper
+		FirePitch = 1, -- below 1 is deeper
 		Impact = "emp_thump",
-		ImpactVolume = 0.35,
-		ImpactPitch = 1.3,
+		ImpactConcrete = "impact_concrete",
+		ImpactMetal = "impact_metal",
+		ImpactVolume = 0.6,
+		ImpactPitch = 1,
+		HitMarker = "hit_marker",
+		HitMarkerVolume = 0.8,
+		Whiz = "bullet_whiz",
+		WhizVolume = 0.9,
 		Empty = "flashlight_click",
 		Reload = "cell_eject",
 		ReloadVolume = 0.8,

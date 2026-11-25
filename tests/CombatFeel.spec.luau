@@ -47,6 +47,52 @@ return {
 		expect(CombatFeel.recoil(5, 0.03, 0.2)).toBe(0)
 	end,
 
+	["shotFeel uses the gun's own feel, else the default"] = function()
+		local feels = {
+			pistol = { sound = "p", kick = 2, twitch = 0, fovPunch = 1, shake = 0, weight = 1 },
+			shotgun = { sound = "s", kick = 4, twitch = 1, fovPunch = 2, shake = 1, weight = 2 },
+		}
+		local gunFeel = { Boomer = "shotgun", Broken = "missing" }
+		expect(CombatFeel.shotFeel(gunFeel, feels, "pistol", "Boomer").sound).toBe("s")
+		expect(CombatFeel.shotFeel(gunFeel, feels, "pistol", "Unknown").sound).toBe("p")
+		expect(CombatFeel.shotFeel(gunFeel, feels, "pistol", "Broken").sound).toBe("p")
+		expect(CombatFeel.shotFeel(gunFeel, feels, "pistol", nil).sound).toBe("p")
+	end,
+
+	["kickAngles goes up by kick and twitches sideways inside the limit"] = function()
+		local pitch, yaw = CombatFeel.kickAngles(3, 0.5, 0)
+		expect(pitch).toBe(3)
+		expect(yaw).toBeNear(-0.5)
+		_, yaw = CombatFeel.kickAngles(3, 0.5, 1)
+		expect(yaw).toBeNear(0.5)
+		_, yaw = CombatFeel.kickAngles(3, 0.5, 0.5)
+		expect(yaw).toBeNear(0)
+	end,
+
+	["shakeFade starts full and dies out by the end"] = function()
+		expect(CombatFeel.shakeFade(0, 0.2)).toBe(1)
+		expect(CombatFeel.shakeFade(0.1, 0.2)).toBeNear(0.25)
+		expect(CombatFeel.shakeFade(0.2, 0.2)).toBe(0)
+		expect(CombatFeel.shakeFade(-1, 0.2)).toBe(0)
+		expect(CombatFeel.shakeFade(0.1, 0)).toBe(0)
+	end,
+
+	["impactKind rings metal and thuds everything else"] = function()
+		expect(CombatFeel.impactKind("Metal")).toBe("metal")
+		expect(CombatFeel.impactKind("DiamondPlate")).toBe("metal")
+		expect(CombatFeel.impactKind("CorrodedMetal")).toBe("metal")
+		expect(CombatFeel.impactKind("Concrete")).toBe("concrete")
+		expect(CombatFeel.impactKind("Plastic")).toBe("concrete")
+	end,
+
+	["whizzes only for a head near the shot, past the shooter and before the hit"] = function()
+		expect(CombatFeel.whizzes(30, 100, 2, 4, 6)).toBe(true)
+		expect(CombatFeel.whizzes(30, 100, 5, 4, 6)).toBe(false)
+		expect(CombatFeel.whizzes(3, 100, 1, 4, 6)).toBe(false)
+		expect(CombatFeel.whizzes(102, 100, 3, 4, 6)).toBe(true)
+		expect(CombatFeel.whizzes(150, 100, 3, 4, 6)).toBe(false)
+	end,
+
 	["recoil falls steadily after the peak"] = function()
 		local previous = CombatFeel.recoil(0.03, 0.03, 0.2)
 		for step = 1, 10 do

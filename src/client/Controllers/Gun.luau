@@ -38,6 +38,12 @@ local reloadId = 0
 local firing = false
 local aimBlend = 0
 local baseFieldOfView: number? = nil
+-- The last shot's camera kick, played back each frame by applyAim.
+local kickAt = -math.huge
+local kickPitch = 0
+local kickYaw = 0
+local kickFovPunch = 0
+local kickShake = 0
 local fireRemote: RemoteEvent
 local reloadRemote: RemoteEvent
 local fxFolder: Folder
@@ -154,8 +160,8 @@ local function launchBullet(from: Vector3, to: Vector3, onArrive: () -> ())
 		beam.Width1 = settings.BulletWidth * 2
 		beam.FaceCamera = true
 		beam.LightEmission = 1
+		beam.Brightness = settings.BulletBrightness
 		beam.Segments = 1
-		beam.Color = ColorSequence.new(settings.BulletColor)
 		beam.Parent = part
 		bullet.tail, bullet.head = tail, head
 	else
@@ -164,8 +170,8 @@ local function launchBullet(from: Vector3, to: Vector3, onArrive: () -> ())
 	end
 	local glow = Instance.new("PointLight")
 	glow.Color = settings.BulletColor
-	glow.Brightness = 1.5
-	glow.Range = 5
+	glow.Brightness = settings.BulletGlowBrightness
+	glow.Range = settings.BulletGlowRange
 	glow.Parent = part
 	table.insert(bullets, bullet)
 end
@@ -201,10 +207,11 @@ end
 
 local function muzzleFlash(position: Vector3)
 	local holder = effectPart(position)
+	local size = settings.MuzzleFlashSize * (1 + (math.random() * 2 - 1) * settings.MuzzleFlashScaleJitter)
 	local image = ModelLibrary.imageId(settings.MuzzleFlashImage)
 	if image then
 		local billboard = Instance.new("BillboardGui")
-		billboard.Size = UDim2.fromScale(settings.MuzzleFlashSize, settings.MuzzleFlashSize)
+		billboard.Size = UDim2.fromScale(size, size)
 		billboard.LightInfluence = 0
 		billboard.Adornee = holder
 		local card = Instance.new("ImageLabel")
@@ -217,7 +224,7 @@ local function muzzleFlash(position: Vector3)
 		billboard.Parent = holder
 	else
 		holder.Shape = Enum.PartType.Ball
-		holder.Size = Vector3.one * settings.MuzzleFlashSize * 0.35
+		holder.Size = Vector3.one * size * 0.35
 		holder.Material = Enum.Material.Neon
 		holder.Color = settings.MuzzleFlashColor
 		holder.Transparency = 0.15
@@ -225,14 +232,18 @@ local function muzzleFlash(position: Vector3)
 	end
 	local light = Instance.new("PointLight")
 	light.Color = settings.MuzzleFlashColor
-	light.Brightness = 4
-	light.Range = 10
+	light.Brightness = settings.MuzzleLightBrightness
+	light.Range = settings.MuzzleLightRange
+	light.Shadows = false
 	light.Parent = holder
+	task.delay(settings.MuzzleLightTime, function()
+		light.Enabled = false
+	end)
 	Debris:AddItem(holder, settings.MuzzleFlashTime)
 end
 
--- A dark burn on whatever the shot hit. Sticks to loose props so it moves with them.
-local function scorch(position: Vector3, normal: Vector3)
+-- The surface a shot landed on, or nil when it hit a character or nothing solid.
+local function surfaceAt(position: Vector3, normal: Vector3): RaycastResult?
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { fxFolder }
@@ -240,8 +251,38 @@ local function scorch(position: Vector3, normal: Vector3)
 	local surface = result and result.Instance
 	local owner = surface and surface:FindFirstAncestorOfClass("Model")
 	if not result or not surface or (owner and owner:FindFirstChildOfClass("Humanoid")) then
-		return
+		return nil
 	end
+	return result
+end
+
+-- A few small chips knocked off the wall, in its colour, that bounce and vanish.
+local function chips(position: Vector3, normal: Vector3, color: Color3)
+	for _ = 1, settings.ChipCount do
+		local chip = Instance.new("Part")
+		chip.Size = Vector3.one * settings.ChipSize * (0.6 + math.random() * 0.8)
+		chip.CFrame = CFrame.new(position + normal * settings.ChipSize)
+			* CFrame.Angles(math.random() * 6.28, math.random() * 6.28, 0)
+		chip.Color = Color3.new(
+			color.R * settings.ChipDarken,
+			color.G * settings.ChipDarken,
+			color.B * settings.ChipDarken
+		)
+		chip.Material = Enum.Material.Concrete
+		chip.CanQuery = false
+		chip.CanTouch = false
+		chip.CastShadow = false
+		chip.Massless = true
+		chip.Parent = fxFolder
+		local spray = (normal + Vector3.new(math.random() - 0.5, math.random() - 0.2, math.random() - 0.5)).Unit
+		chip.AssemblyLinearVelocity = spray * settings.ChipSpeed * (0.5 + math.random() * 0.5)
+		Debris:AddItem(chip, settings.ChipLife)
+	end
+end
+
+-- A dark burn on whatever the shot hit. Sticks to loose props so it moves with them.
+local function scorch(result: RaycastResult, normal: Vector3)
+	local surface = result.Instance
 	local mark = Instance.new("Part")
 	mark.Shape = Enum.PartType.Cylinder
 	mark.Size = Vector3.new(0.03, settings.ScorchSize, settings.ScorchSize)
@@ -271,7 +312,8 @@ local function scorch(position: Vector3, normal: Vector3)
 	end
 	task.delay(settings.ScorchTime, function()
 		if mark.Parent then
-			local fade = TweenService:Create(mark, TweenInfo.new(1), { Transparency = 1 })
+			local fade =
+				TweenService:Create(mark, TweenInfo.new(settings.ScorchFadeTime), { Transparency = 1 })
 			fade:Play()
 			fade.Completed:Wait()
 			local index = table.find(scorches, mark)
@@ -341,14 +383,47 @@ end
 local function drawShot(from: Vector3, to: Vector3, normal: Vector3?, hitPlayer: boolean)
 	muzzleFlash(from)
 	launchBullet(from, to, function()
-		if normal then
-			sparks(to, normal, if hitPlayer then settings.PlayerSparkCount else settings.SparkCount)
-			if not hitPlayer then
-				scorch(to, normal)
-			end
+		local sounds = settings.Sounds
+		if not normal then
+			return
 		end
-		playSound(settings.Sounds.Impact, to, settings.Sounds.ImpactVolume, settings.Sounds.ImpactPitch)
+		if hitPlayer then
+			sparks(to, normal, settings.PlayerSparkCount)
+			playSound(sounds.Impact, to, sounds.ImpactVolume, sounds.ImpactPitch)
+			return
+		end
+		sparks(to, normal, settings.SparkCount)
+		local result = surfaceAt(to, normal)
+		if not result then
+			return
+		end
+		scorch(result, normal)
+		local kind = CombatFeel.impactKind(result.Material.Name)
+		if kind == "concrete" then
+			local surface = result.Instance
+			chips(to, normal, if surface:IsA("BasePart") then surface.Color else settings.ScorchColor)
+		end
+		playSound(
+			if kind == "metal" then sounds.ImpactMetal else sounds.ImpactConcrete,
+			to,
+			sounds.ImpactVolume,
+			sounds.ImpactPitch
+		)
 	end)
+end
+
+local function feelOf(gunId: string?): CombatFeel.ShotFeel
+	return CombatFeel.shotFeel(settings.GunFeel, settings.ShotFeel, settings.DefaultShotFeel, gunId)
+end
+
+-- The shot's bang, plus its follow-up (the shotgun's pump) a moment later.
+local function playShotSound(feel: CombatFeel.ShotFeel, position: Vector3?)
+	local sounds = settings.Sounds
+	playSound(feel.sound, position, sounds.FireVolume, sounds.FirePitch)
+	local followUp = feel.followUp
+	if followUp then
+		task.delay(feel.followUpDelay or 0, playSound, followUp, position, sounds.FireVolume)
+	end
 end
 
 local function startReload()
@@ -397,7 +472,7 @@ local function fireOnce(): boolean
 	local camera = workspace.CurrentCamera
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local _, gun = currentGun()
+	local gunId, gun = currentGun()
 	if not camera or not character or not humanoid or not gun then
 		return false
 	end
@@ -422,7 +497,8 @@ local function fireOnce(): boolean
 		return false
 	end
 	lastShotAt = os.clock()
-	playSound(settings.Sounds.Fire, nil, settings.Sounds.FireVolume, settings.Sounds.FirePitch)
+	local feel = feelOf(gunId)
+	playShotSound(feel, nil)
 	-- Spend the cell now so the HUD and the next shot don't wait on the server's reply.
 	carried[gun.ammo] -= 1
 	mag = CombatReload.loaded(mag, bag) - 1
@@ -440,7 +516,11 @@ local function fireOnce(): boolean
 		local model = result.Instance:FindFirstAncestorOfClass("Model")
 		hitPlayer = model ~= nil and Players:GetPlayerFromCharacter(model) ~= nil
 	end
-	Viewmodel.kick()
+	Viewmodel.kick(feel.weight)
+	kickAt = os.clock()
+	kickPitch, kickYaw = CombatFeel.kickAngles(feel.kick, feel.twitch, math.random())
+	kickFovPunch = feel.fovPunch
+	kickShake = feel.shake
 	drawShot(
 		Viewmodel.muzzlePosition() or (camera.CFrame * CFrame.new(settings.MuzzleOffset)).Position,
 		hitPosition,
@@ -525,7 +605,19 @@ local function applyAim(dt: number)
 	baseFieldOfView = camera.FieldOfView
 	camera.FieldOfView = camera.FieldOfView * (1 + (settings.AimFieldOfViewScale - 1) * aimBlend)
 	Viewmodel.setAim(aimBlend)
-	camera.CFrame *= CFrame.Angles(math.rad(settings.CameraKick * Viewmodel.recoil()), 0, 0)
+
+	-- The kick and punch ride on top of this frame's camera, so they spring back on their own.
+	local sinceShot = os.clock() - kickAt
+	local kick = CombatFeel.recoil(sinceShot, settings.CameraKickRise, settings.CameraKickSettle)
+	camera.FieldOfView += kickFovPunch * kick
+	local shake = kickShake * CombatFeel.shakeFade(sinceShot, settings.ShakeTime)
+	local shakePitch = (math.random() * 2 - 1) * shake
+	local shakeYaw = (math.random() * 2 - 1) * shake
+	camera.CFrame *= CFrame.Angles(
+		math.rad(kickPitch * kick + shakePitch),
+		math.rad(kickYaw * kick + shakeYaw),
+		0
+	)
 end
 
 function Gun.Init()
@@ -562,21 +654,33 @@ function Gun.Start()
 		notifyChanged()
 	end)
 	Net.event("GunHit").OnClientEvent:Connect(function(down: boolean)
+		playSound(settings.Sounds.HitMarker, nil, settings.Sounds.HitMarkerVolume)
 		for _, listener in hitListeners do
 			task.spawn(listener, down)
 		end
 	end)
 	Net.unreliable("GunFx").OnClientEvent:Connect(
-		function(shooter: Player, origin: Vector3, hitPosition: Vector3, normal: Vector3?, hitPlayer: boolean)
+		function(
+			shooter: Player,
+			origin: Vector3,
+			hitPosition: Vector3,
+			normal: Vector3?,
+			hitPlayer: boolean,
+			gunId: string?
+		)
 			if shooter ~= player then
 				local offset = hitPosition - origin
 				local forward = math.min(settings.OthersMuzzleForward, offset.Magnitude)
 				local muzzle = if offset.Magnitude > 0 then origin + offset.Unit * forward else origin
 				drawShot(muzzle, hitPosition, normal, hitPlayer)
-				playSound(settings.Sounds.Fire, origin, settings.Sounds.FireVolume, settings.Sounds.FirePitch)
+				playShotSound(feelOf(gunId), origin)
 			end
 		end
 	)
+	-- The server sends this when someone's shot flies past your head.
+	Net.unreliable("GunWhiz").OnClientEvent:Connect(function(passedAt: Vector3)
+		playSound(settings.Sounds.Whiz, passedAt, settings.Sounds.WhizVolume)
+	end)
 
 	Hotbar.onUse("Fire", onFire)
 	Hotbar.onChanged(notifyChanged)

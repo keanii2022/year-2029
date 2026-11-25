@@ -5,6 +5,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local CombatFeel = require(ReplicatedStorage.Shared.Logic.CombatFeel)
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -23,6 +24,7 @@ type MagState = { mag: number, reloadStartedAt: number?, reloadId: number }
 local mags: { [Player]: MagState } = {}
 local hitRemote: RemoteEvent
 local fxRemote: UnreliableRemoteEvent
+local whizRemote: UnreliableRemoteEvent
 local viewmodels: Folder
 
 local function isFiniteVector(value: any): boolean
@@ -52,11 +54,33 @@ local function excludeParams(character: Model): RaycastParams
 	return params
 end
 
-local function heldGun(player: Player): CombatLogic.Gun?
+local function heldGun(player: Player): (CombatLogic.Gun?, string?)
 	local gunId = CombatLogic.pickGun(settings.Blasters, function(id)
 		return Inventory.has(player, id)
 	end)
-	return if gunId then settings.Blasters[gunId] else nil
+	return if gunId then settings.Blasters[gunId] else nil, gunId
+end
+
+-- Tells every other player whose head the shot flew past, so they hear it whiz by.
+local function sendWhizzes(shooter: Player, target: Player?, origin: Vector3, hitPosition: Vector3)
+	local shot = hitPosition - origin
+	local shotLength = shot.Magnitude
+	if shotLength <= 0 then
+		return
+	end
+	local aim = shot / shotLength
+	for _, other in Players:GetPlayers() do
+		local character = if other ~= shooter and other ~= target then other.Character else nil
+		local head = character and character:FindFirstChild("Head") :: BasePart?
+		if head then
+			local along = (head.Position - origin):Dot(aim)
+			local closest = origin + aim * math.clamp(along, 0, shotLength)
+			local miss = (head.Position - closest).Magnitude
+			if CombatFeel.whizzes(along, shotLength, miss, settings.WhizRadius, settings.WhizMinDistance) then
+				whizRemote:FireClient(other, closest)
+			end
+		end
+	end
 end
 
 local function magState(player: Player): MagState
@@ -135,7 +159,7 @@ local function onFire(player: Player, origin: any, direction: any)
 		return
 	end
 
-	local gun = heldGun(player)
+	local gun, gunId = heldGun(player)
 	local now = os.clock()
 	local state = magState(player)
 	settleReload(player, state, gun, now)
@@ -189,11 +213,13 @@ local function onFire(player: Player, origin: any, direction: any)
 	end
 
 	local hitPlayer = false
+	local hitTarget: Player? = nil
 	if hitPart then
 		local target, targetHumanoid = playerFromPart(hitPart)
 		if target and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
 			targetHumanoid:TakeDamage(CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude))
 			hitPlayer = true
+			hitTarget = target
 			local downed = targetHumanoid.Health <= 0
 			if downed then
 				Scores.add(player, "PlayerKills", 1)
@@ -201,7 +227,8 @@ local function onFire(player: Player, origin: any, direction: any)
 			hitRemote:FireClient(player, downed)
 		end
 	end
-	fxRemote:FireAllClients(player, origin, hitPosition, hitNormal, hitPlayer)
+	fxRemote:FireAllClients(player, origin, hitPosition, hitNormal, hitPlayer, gunId)
+	sendWhizzes(player, hitTarget, origin, hitPosition)
 end
 
 local function onDown(player: Player, character: Model)
@@ -251,6 +278,7 @@ function Combat.Init()
 	Players.RespawnTime = settings.RespawnDelay
 	hitRemote = Net.event("GunHit")
 	fxRemote = Net.unreliable("GunFx")
+	whizRemote = Net.unreliable("GunWhiz")
 	Net.event("GunFire").OnServerEvent:Connect(onFire)
 	Net.event("GunReload").OnServerEvent:Connect(onReload)
 	Players.PlayerAdded:Connect(setUpPlayer)
