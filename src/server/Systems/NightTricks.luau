@@ -119,6 +119,21 @@ local function onFlashlightChanged(player: Player)
 	end
 end
 
+-- The battery slot: swap a fresh one in now, unless the current one is still nearly full
+local function onBatterySwap(player: Player)
+	local battery = Settings.Battery
+	local level = player:GetAttribute("Battery") or battery.Max
+	if not Inventory.has(player, battery.ItemId) then
+		tell(player, "No spare batteries.")
+	elseif level >= battery.Max * 0.9 then
+		tell(player, "Battery's still good.")
+	else
+		Inventory.remove(player, battery.ItemId, 1)
+		player:SetAttribute("Battery", battery.Max)
+		tell(player, "New battery in.")
+	end
+end
+
 local function stepBattery(player: Player, dt: number)
 	local on = player:GetAttribute("FlashlightOn") == true
 	if not on then
@@ -551,6 +566,7 @@ function NightTricks.Init()
 	loreRemote = Net.event("LoreNote")
 	stormRemote = Net.event("NightStorm")
 	paRemote = Net.event("NightPA")
+	Net.event("BatterySwap").OnServerEvent:Connect(onBatterySwap)
 end
 
 function NightTricks.Start()

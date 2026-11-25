@@ -317,6 +317,13 @@ function Hotbar.Start()
 			supplyRemote:FireServer("Medkit")
 		end
 	end)
+	-- The battery slot swaps a fresh battery into the flashlight
+	local batteryRemote = Net.event("BatterySwap")
+	Hotbar.onUse("Battery", function(began)
+		if began then
+			batteryRemote:FireServer()
+		end
+	end)
 	UserInputService.InputChanged:Connect(onWheel)
 	Glyphs.onChanged(redraw)
 	rebuild()
