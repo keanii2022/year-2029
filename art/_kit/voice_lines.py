@@ -52,7 +52,7 @@ STYLES = {
     "kid": ("Whisper", 80, "aresample=44100,asetrate=44100*1.06,aresample=44100,atempo=0.85,lowpass=f=3800,aecho=0.8:0.75:500|1100|1900:0.35|0.25|0.15,volume=1.6"),
     "robot": ("Ralph", 150, None),  # None: run through _kit/robotize.sh instead
     # The robots copy the voice of the ghost kid's dad, so their lines sound like a tired man, a little off
-    "dad": ("Eddy (English (US))", 148, "aresample=44100,asetrate=44100*0.94,aresample=44100,highpass=f=90,aecho=0.8:0.4:60:0.2,loudnorm=I=-14:TP=-1.5,volume=1.15"),
+    "dad": ("Eddy (English (US))", 150, "aresample=44100,asetrate=44100*0.88,aresample=44100,highpass=f=90,aecho=0.8:0.4:60:0.2,loudnorm=I=-14:TP=-1.5,volume=1.15"),
 }
 
 
