@@ -8,6 +8,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local GrabMath = require(ReplicatedStorage.Shared.Logic.GrabMath)
+local GrabPlace = require(ReplicatedStorage.Shared.Logic.GrabPlace)
 local GrabPry = require(ReplicatedStorage.Shared.Logic.GrabPry)
 local GrabRules = require(ReplicatedStorage.Shared.Logic.GrabRules)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
@@ -21,6 +22,10 @@ local Settings = Config.Grab
 local CAST_SHRINK = 0.98
 -- A finished pry the client never claims (lost remote, lag spike) stops making noise after this.
 local PRY_ABANDON_AFTER = 2
+-- A landing cast that meets an invisible volume tries again past it, this many times
+local LOOK_THROUGH = 3
+-- A let-go prop counts as still below this speed, in studs (or radians) per second
+local SETTLED_SPEED = 0.5
 
 type Carry = {
 	prop: PVInstance,
@@ -49,6 +54,8 @@ local Grab = {}
 local carriers: { [Player]: Carry } = {}
 local carriedBy: { [PVInstance]: Player } = {}
 local pries: { [Player]: Pry } = {}
+-- Let-go props still falling: the parts to freeze again and the welds holding them together meanwhile
+local settling: { [PVInstance]: { frozen: { BasePart }, welds: { WeldConstraint } } } = {}
 local ownerWarnedAt: { [number]: number } = {}
 
 local requestRemote: RemoteEvent
@@ -100,39 +107,100 @@ local function rotationOf(angles: Vector3): CFrame
 	return CFrame.fromEulerAnglesYXZ(math.rad(angles.X), math.rad(angles.Y), math.rad(angles.Z))
 end
 
-local function findLanding(carry: Carry, root: BasePart, humanoid: Humanoid): (CFrame?, boolean, string?)
+-- Placement probe for GetPartsInPart, which tests real part shapes. GetPartBoundsInBox only sees
+-- bounding boxes, and big kit meshes (grass floor tiles, rack bays, hanging signs) have boxes that
+-- reach well past their surfaces, so every spot near one looked blocked.
+local probe: Part
+
+local function charactersByModel(): { [Instance]: Player }
+	local characters = {}
+	for _, player in Players:GetPlayers() do
+		if player.Character then
+			characters[player.Character] = player
+		end
+	end
+	return characters
+end
+
+local function ownerOf(part: BasePart, characters: { [Instance]: Player }): Player?
+	for character, player in characters do
+		if part:IsDescendantOf(character) then
+			return player
+		end
+	end
+	return nil
+end
+
+-- Casts straight down, passing invisible volumes. Characters and the carried prop are ignored.
+local function castDown(start: CFrame, size: Vector3, ignore: { Instance }): RaycastResult?
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.RespectCanCollide = true
+	local skip = table.clone(ignore)
+	for _ = 1, LOOK_THROUGH do
+		params.FilterDescendantsInstances = skip
+		local hit = workspace:Blockcast(start, size, Vector3.new(0, -Settings.MaxDropFall, 0), params)
+		if not hit or not hit.Instance:IsA("BasePart") then
+			return hit
+		end
+		local part = hit.Instance :: BasePart
+		if GrabPlace.landsOn(part.CanCollide, part.Transparency) then
+			return hit
+		end
+		table.insert(skip, part)
+	end
+	return nil
+end
+
+-- Whether a box fits at boxCFrame. Returns fits plus whether another player is what's in the way.
+local function fitsAt(
+	carry: Carry,
+	player: Player,
+	boxCFrame: CFrame,
+	characters: { [Instance]: Player },
+	carrierBlocks: boolean
+): (boolean, boolean)
+	local size = carry.size
+	local sx, sy, sz = GrabPlace.overlapSize(size.X, size.Y, size.Z, Settings.PlaceTolerance)
+	probe.Size = Vector3.new(sx, sy, sz)
+	probe.CFrame = boxCFrame
+	local params = OverlapParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { carry.prop, probe }
+	params.RespectCanCollide = false
+	for _, part in workspace:GetPartsInPart(probe, params) do
+		local owner = ownerOf(part, characters)
+		local who: GrabPlace.Who = if not owner then nil elseif owner == player then "carrier" else "other"
+		local partSize = part.Size
+		if
+			GrabPlace.blocks({
+				ownProp = false,
+				character = who,
+				canCollide = part.CanCollide,
+				transparency = part.Transparency,
+				thinnest = math.min(partSize.X, partSize.Y, partSize.Z),
+			}, carrierBlocks)
+		then
+			return false, who == "other"
+		end
+	end
+	return true, false
+end
+
+-- Where the carried prop would land: the aimed spot snapped onto whatever is under it, or the
+-- nearest nudge around it that fits, first keeping clear of the carrier, then not minding them.
+-- Returns the landing box (or the aimed one when nothing fits), ok, and the reason when not ok.
+local function findLanding(
+	carry: Carry,
+	player: Player,
+	root: BasePart,
+	humanoid: Humanoid
+): (CFrame?, boolean, string?)
 	local rotation = rotationOf(carry.angles)
 	local position = carry.boxCFrame.Position
 	local x = GrabMath.snapToGrid(position.X, Settings.GridSize)
 	local z = GrabMath.snapToGrid(position.Z, Settings.GridSize)
 	local size = carry.size
-
-	local ignore: { Instance } = { carry.prop }
-	for _, player in Players:GetPlayers() do
-		if player.Character then
-			table.insert(ignore, player.Character)
-		end
-	end
-	local castParams = RaycastParams.new()
-	castParams.FilterType = Enum.RaycastFilterType.Exclude
-	castParams.FilterDescendantsInstances = ignore
-	castParams.RespectCanCollide = true
-
-	local start = CFrame.new(x, position.Y, z) * rotation
-	local hit =
-		workspace:Blockcast(start, size * CAST_SHRINK, Vector3.new(0, -Settings.MaxDropFall, 0), castParams)
-	if not hit then
-		local ok, reason = GrabRules.canPlace({
-			groundFound = false,
-			distance = 0,
-			reach = Settings.PlaceReach,
-			heightAboveFeet = 0,
-			maxHeightAboveFeet = Settings.MaxPlaceAboveFeet,
-			blocked = false,
-		})
-		return nil, ok, reason
-	end
-
 	local halfHeight = GrabMath.verticalHalfExtent(
 		size.X,
 		size.Y,
@@ -141,25 +209,62 @@ local function findLanding(carry: Carry, root: BasePart, humanoid: Humanoid): (C
 		rotation.UpVector.Y,
 		rotation.LookVector.Y
 	)
-	local y = GrabMath.landingY(position.Y, hit.Distance, halfHeight, CAST_SHRINK)
-	local landed = CFrame.new(x, y, z) * rotation
-
-	local overlapParams = OverlapParams.new()
-	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
-	overlapParams.FilterDescendantsInstances = { carry.prop }
-	overlapParams.RespectCanCollide = true
-	local overlapping = workspace:GetPartBoundsInBox(landed, size * CAST_SHRINK, overlapParams)
-
+	local characters = charactersByModel()
+	local ignore: { Instance } = { carry.prop, probe }
+	for character in characters do
+		table.insert(ignore, character)
+	end
 	local feetY = root.Position.Y - root.Size.Y / 2 - humanoid.HipHeight
-	local ok, reason = GrabRules.canPlace({
-		groundFound = true,
-		distance = (landed.Position - root.Position).Magnitude,
-		reach = Settings.PlaceReach,
-		heightAboveFeet = (y - halfHeight) - feetY,
-		maxHeightAboveFeet = Settings.MaxPlaceAboveFeet,
-		blocked = #overlapping > 0,
-	})
-	return landed, ok, reason
+	-- Held partly inside a stack, a cast from the held height starts inside the top box and
+	-- misses it, so each spot is also tried from just above the prop's own height.
+	local startHeights = { position.Y, position.Y + 2 * halfHeight + 0.5 }
+
+	local firstLanded: CFrame?
+	local firstReason: string? = "no ground"
+	for _, carrierBlocks in { true, false } do
+		for _, offset in GrabPlace.offsets(Settings.PlaceNudges) do
+			for _, startY in startHeights do
+				local start = CFrame.new(x + offset.x, startY, z + offset.z) * rotation
+				local hit = castDown(start, size * CAST_SHRINK, ignore)
+				if not hit then
+					continue
+				end
+				local y = GrabMath.landingY(startY, hit.Distance, halfHeight, CAST_SHRINK)
+				local landed = CFrame.new(x + offset.x, y, z + offset.z) * rotation
+				local fits, playerInWay = fitsAt(carry, player, landed, characters, carrierBlocks)
+				local ok, reason = GrabRules.canPlace({
+					groundFound = true,
+					distance = (landed.Position - root.Position).Magnitude,
+					reach = Settings.PlaceReach,
+					heightAboveFeet = (y - halfHeight) - feetY,
+					maxHeightAboveFeet = Settings.MaxPlaceAboveFeet,
+					blocked = not fits,
+					playerInWay = playerInWay,
+				})
+				if ok then
+					return landed, true, nil
+				end
+				if not firstLanded then
+					firstLanded, firstReason = landed, reason
+				end
+			end
+		end
+	end
+	return firstLanded, false, firstReason
+end
+
+-- Where a let-go prop starts falling from: where it's held if it fits there or a little to the
+-- side, otherwise straight above the carrier's head.
+local function letGoFrom(carry: Carry, player: Player, root: BasePart): CFrame
+	local characters = charactersByModel()
+	local held = carry.boxCFrame
+	for _, offset in GrabPlace.offsets(Settings.PlaceNudges) do
+		local spot = held + Vector3.new(offset.x, 0, offset.z)
+		if fitsAt(carry, player, spot, characters, true) then
+			return spot
+		end
+	end
+	return CFrame.new(root.Position + Vector3.new(0, 3 + carry.size.Magnitude / 2, 0)) * held.Rotation
 end
 
 local function placedByOf(prop: Instance): number?
@@ -167,8 +272,63 @@ local function placedByOf(prop: Instance): number?
 	return if type(placedBy) == "number" then placedBy else nil
 end
 
--- placed: the carrier set it down somewhere new, so it becomes theirs.
-local function release(player: Player, carry: Carry, pivot: CFrame?, placed: boolean)
+-- Freezes a let-go prop where it came to rest.
+local function settle(prop: PVInstance)
+	local state = settling[prop]
+	if not state then
+		return
+	end
+	settling[prop] = nil
+	for _, part in state.frozen do
+		part.Anchored = true
+	end
+	for _, weld in state.welds do
+		weld:Destroy()
+	end
+end
+
+-- Lets the prop fall with physics, welded to one piece so a multi-part prop doesn't come apart,
+-- then freezes it once it's still.
+local function fall(prop: PVInstance, frozen: { BasePart })
+	local root = if prop:IsA("Model") and prop.PrimaryPart then prop.PrimaryPart else frozen[1]
+	if not root then
+		return
+	end
+	local state = { frozen = frozen, welds = {} }
+	for _, part in frozen do
+		if part ~= root then
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0 = root
+			weld.Part1 = part
+			weld.Parent = root
+			table.insert(state.welds, weld)
+		end
+	end
+	for _, part in frozen do
+		part.Anchored = false
+	end
+	pcall(root.SetNetworkOwner, root, nil)
+	settling[prop] = state
+	task.spawn(function()
+		local started = os.clock()
+		task.wait(0.5)
+		while settling[prop] == state and os.clock() - started < Settings.SettleSeconds do
+			local still = root.AssemblyLinearVelocity.Magnitude < SETTLED_SPEED
+				and root.AssemblyAngularVelocity.Magnitude < SETTLED_SPEED
+			if not root:IsDescendantOf(workspace) or still then
+				break
+			end
+			task.wait(0.2)
+		end
+		if settling[prop] == state then
+			settle(prop)
+		end
+	end)
+end
+
+-- placed: the carrier set it down somewhere new, so it becomes theirs. falls: let go with physics
+-- from pivot instead of frozen there.
+local function release(player: Player, carry: Carry, pivot: CFrame?, placed: boolean, falls: boolean?)
 	if pivot and carry.prop:IsDescendantOf(workspace) then
 		carry.prop:PivotTo(pivot)
 	end
@@ -178,9 +338,16 @@ local function release(player: Player, carry: Carry, pivot: CFrame?, placed: boo
 	-- Back to how it was, so hinged parts (ModelRig) swing again. Nothing anchored before means
 	-- nothing holds it up, so the whole prop freezes where it lands until the server resets.
 	local anyAnchored = next(carry.anchored) ~= nil
+	local frozen = {}
 	for _, part in carry.parts do
 		part.Anchored = carry.anchored[part] == true or not anyAnchored
 		part.CanCollide = carry.collide[part]
+		if part.Anchored then
+			table.insert(frozen, part)
+		end
+	end
+	if falls and carry.prop:IsDescendantOf(workspace) then
+		fall(carry.prop, frozen)
 	end
 	player:SetAttribute("CarrySpeedMultiplier", nil)
 	carriers[player] = nil
@@ -195,7 +362,7 @@ end
 local function forceDrop(player: Player, carry: Carry)
 	local root, humanoid = bodyOf(player)
 	if root and humanoid then
-		local landed, ok = findLanding(carry, root, humanoid)
+		local landed, ok = findLanding(carry, player, root, humanoid)
 		if landed and ok then
 			release(player, carry, landed * carry.pivotOffset, true)
 			return
@@ -217,7 +384,9 @@ local function distanceTo(root: BasePart?, prop: PVInstance): number
 		return math.huge
 	end
 	local boxCFrame, size = boxOf(prop)
-	return math.max((boxCFrame.Position - root.Position).Magnitude - size.Magnitude / 2, 0)
+	local offset = boxCFrame.Position - root.Position
+	local gap = GrabMath.reachGap(offset.X, offset.Y, offset.Z, Settings.GrabReachUp)
+	return math.max(gap - size.Magnitude / 2, 0)
 end
 
 local function canGrabNow(player: Player, prop: PVInstance): (boolean, BasePart?, Humanoid?, string?)
@@ -337,6 +506,7 @@ local function onGrabRequest(player: Player, prop: any)
 		end
 	end
 	pries[player] = nil
+	settle(prop)
 	local boxCFrame, size = boxOf(prop)
 
 	local collide = {}
@@ -384,17 +554,22 @@ local function onGrabRequest(player: Player, prop: any)
 	stateRemote:FireClient(player, prop)
 end
 
-local function onDrop(player: Player)
+-- letGo: the hold-to-drop escape, which always lets the prop fall right where it's held.
+local function onDrop(player: Player, letGo: any)
 	local carry = carriers[player]
 	local root, humanoid = bodyOf(player)
 	if not carry or not root or not humanoid then
 		return
 	end
-	local landed, ok, reason = findLanding(carry, root, humanoid)
+	if letGo == true then
+		release(player, carry, letGoFrom(carry, player, root) * carry.pivotOffset, true, true)
+		return
+	end
+	local landed, ok, reason = findLanding(carry, player, root, humanoid)
 	if landed and ok then
 		release(player, carry, landed * carry.pivotOffset, true)
 	else
-		ghostRemote:FireClient(player, landed, carry.size, false)
+		ghostRemote:FireClient(player, landed, carry.size, false, reason and Settings.Refused[reason])
 		refuse(player, reason)
 	end
 end
@@ -460,8 +635,8 @@ local function step(dt: number)
 
 		if now - carry.lastGhost >= 1 / Settings.GhostRate then
 			carry.lastGhost = now
-			local landed, ok = findLanding(carry, root, humanoid)
-			ghostRemote:FireClient(player, landed, carry.size, ok)
+			local landed, ok, reason = findLanding(carry, player, root, humanoid)
+			ghostRemote:FireClient(player, landed, carry.size, ok, reason and Settings.Refused[reason])
 		end
 	end
 end
@@ -503,6 +678,15 @@ function Grab:Init()
 	ghostRemote = Net.unreliable("GrabGhost")
 	pryRemote = Net.event("GrabPry")
 	feedbackRemote = Net.event("SupplyFeedback")
+
+	probe = Instance.new("Part")
+	probe.Name = "GrabPlaceProbe"
+	probe.Anchored = true
+	probe.CanCollide = false
+	probe.CanQuery = false
+	probe.CanTouch = false
+	probe.Transparency = 1
+	probe.Parent = workspace
 end
 
 function Grab:Start()

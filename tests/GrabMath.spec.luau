@@ -67,4 +67,10 @@ return {
 		expect(GrabMath.carrySpeedMultiplier(100, 15, 80, 0.55)).toBe(0.55)
 		expect(GrabMath.carrySpeedMultiplier(47.5, 15, 80, 0.55)).toBeNear(0.775)
 	end,
+	["reachGap lets the first studs straight up go free"] = function()
+		expect(GrabMath.reachGap(3, 4, 0, 0)).toBeNear(5)
+		expect(GrabMath.reachGap(3, 18, 0, 14)).toBeNear(5)
+		expect(GrabMath.reachGap(3, 10, 0, 14)).toBeNear(3)
+		expect(GrabMath.reachGap(3, -4, 0, 14)).toBeNear(5)
+	end,
 }

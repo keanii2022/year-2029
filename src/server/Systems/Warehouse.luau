@@ -24,6 +24,7 @@ local root: Folder
 local chunks: { [string]: Folder } = {}
 local built = 0
 local cosmetic: Random
+local shelfStocked = 0
 
 local function toWorld(x: number, z: number, y: number?): Vector3
 	return settings.Origin + Vector3.new(x, y or 0, z)
@@ -514,6 +515,66 @@ local RACK_BAYS =
 	{ "rack_bay_full", "rack_bay_full", "rack_bay_bulk", "rack_bay_sparse", "rack_bay_furniture" }
 local RACK_WRECKS = { "rack_collapsed", "rack_toppled_beam" }
 
+-- Loose props across one rack slot. base: the slot's centre at its load bottom, x along the rack.
+-- deck lays a wire deck across the beams first, for slots that only have beams under them.
+local function stockSlot(base: CFrame, slot: Vector3, deck: boolean, parent: Instance)
+	if shelfStocked >= settings.ShelfStockMax or cosmetic:NextNumber() >= settings.ShelfStockChance then
+		return
+	end
+	if deck then
+		block(
+			parent,
+			"WireDeck",
+			Vector3.new(slot.X, 0.2, slot.Z),
+			base * CFrame.new(0, -0.1, 0),
+			settings.RackDeck,
+			Enum.Material.DiamondPlate
+		)
+	end
+	local left = -slot.X / 2 + 0.2
+	for _ = 1, cosmetic:NextInteger(settings.ShelfStockPerSlot[1], settings.ShelfStockPerSlot[2]) do
+		local model = ModelLibrary.get(settings.ShelfStock[cosmetic:NextInteger(1, #settings.ShelfStock)])
+		if not model then
+			continue
+		end
+		local _, size = model:GetBoundingBox()
+		if left + size.X > slot.X / 2 - 0.2 or size.Y > slot.Y or size.Z > slot.Z then
+			model:Destroy()
+			continue
+		end
+		local depthRoom = (slot.Z - size.Z) / 2
+		local turn = CFrame.Angles(0, math.rad(cosmetic:NextNumber(-12, 12)), 0)
+		model:PivotTo(
+			base * CFrame.new(left + size.X / 2, 0, cosmetic:NextNumber(-depthRoom, depthRoom)) * turn
+		)
+		local box, turnedSize = model:GetBoundingBox()
+		local bottom = box.Position.Y - turnedSize.Y / 2
+		model:PivotTo(model:GetPivot() + Vector3.new(0, base.Position.Y - bottom, 0))
+		CollectionService:AddTag(model, Config.Grab.Tag)
+		model.Parent = parent
+		noteBuilt()
+		shelfStocked += 1
+		left += size.X + cosmetic:NextNumber(0.1, 0.5)
+	end
+end
+
+local function stockKitBay(bay: Model, name: string)
+	local gaps = settings.KitShelfGaps[name]
+	if not gaps then
+		return
+	end
+	local box, size = bay:GetBoundingBox()
+	local floor = box * CFrame.new(0, -size.Y / 2, 0)
+	for _, gap in gaps do
+		stockSlot(
+			floor * CFrame.new(gap.x, gap.y, 0),
+			settings.KitShelfSlot,
+			gap.y > 0,
+			bay.Parent :: Instance
+		)
+	end
+end
+
 local function buildKitRack(shelf: WarehouseGen.Shelf): boolean
 	if not hasKit("rack_bay_full") then
 		return false
@@ -530,7 +591,10 @@ local function buildKitRack(shelf: WarehouseGen.Shelf): boolean
 			name = "rack_bay_full"
 		end
 		local facing = if cosmetic:NextNumber() < 0.5 then Vector3.new(0, 0, 1) else Vector3.new(0, 0, -1)
-		placeKit(name, shelf.x0 + (n + 0.5) * step, shelf.z, facing)
+		local bay = placeKit(name, shelf.x0 + (n + 0.5) * step, shelf.z, facing)
+		if bay then
+			stockKitBay(bay, name)
+		end
 	end
 	if hasKit("rack_end") then
 		placeKit("rack_end", shelf.x0 - 1.2, shelf.z, Vector3.new(-1, 0, 0))
@@ -574,7 +638,10 @@ local function buildRack(shelf: WarehouseGen.Shelf)
 		local runs = cosmetic:NextInteger(settings.RackStock[1], settings.RackStock[2])
 		local slot = length / runs
 		for r = 0, runs - 1 do
-			if cosmetic:NextNumber() < 0.85 then
+			if cosmetic:NextNumber() >= 0.85 then
+				local base = CFrame.new(toWorld(shelf.x0 + r * slot + slot / 2, shelf.z, y + 0.5))
+				stockSlot(base, Vector3.new(slot * 0.9, 5.5, shelf.depth - 0.4), false, model)
+			else
 				local runLength = slot * cosmetic:NextNumber(0.6, 0.95)
 				local runHeight = cosmetic:NextNumber(3, 5.5)
 				local x = shelf.x0 + r * slot + slot / 2

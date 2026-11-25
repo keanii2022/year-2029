@@ -37,9 +37,9 @@ return {
 		Touch = "Pick HANDS to pry",
 	},
 	CarryHint = {
-		Keyboard = "{Fire} Drop   {=Arrows} Spin / tip   {=Z} {=X} Roll   {=Scroll} Closer / farther   Hold to spin faster",
-		Gamepad = "{Fire} Drop   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther   Hold to spin faster",
-		Touch = "{Fire} Drop   {=SPIN} {=TIP} {=ROLL} Turn it, hold to go faster   {CarryCloser} {CarryFarther} Distance",
+		Keyboard = "{Fire} Place   Hold {Fire} Let go   {=Arrows} Spin / tip   {=Z} {=X} Roll   {=Scroll} Closer / farther   Hold to spin faster",
+		Gamepad = "{Fire} Place   Hold {Fire} Let go   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther   Hold to spin faster",
+		Touch = "{Fire} Place   Hold {Fire} Let go   {=SPIN} {=TIP} {=ROLL} Turn it, hold to go faster   {CarryCloser} {CarryFarther} Distance",
 	},
 
 	ItemNudge = {
@@ -138,7 +138,7 @@ return {
 				{ "{=RS}", "Look. Click: crouch" },
 			},
 			footer = "{=Touchpad} Tap: this card. Hold: your record   {=Options} Menu",
-			carry = "Carrying:   {=R2} Drop   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther",
+			carry = "Carrying:   {=R2} Place, hold to let go   {=DPad} Spin / tip   {=L2} + {=DPad} Roll   {=L1} {=R1} Closer / farther",
 		},
 		Touch = {
 			left = {

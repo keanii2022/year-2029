@@ -3,7 +3,9 @@ return {
 
 	-- Reach, in studs from the player's root part.
 	GrabReach = 12,
-	PlaceReach = 18,
+	GrabReachUp = 14, -- this much straight up is free, so high shelves can be reached from the floor
+	AimConeRadius = 1.5, -- studs around the crosshair ray a prop may sit and still be picked
+	PlaceReach = 24,
 	MinHoldDistance = 4,
 	MaxHoldDistance = 12,
 	DefaultHoldDistance = 7,
@@ -17,8 +19,12 @@ return {
 	RotateMaxSpeed = 540,
 	RotateRampSeconds = 0.8,
 	HoldDistanceSpeed = 6, -- studs per second while closer / farther is held
-	MaxPlaceAboveFeet = 12, -- tallest a stack can get: prop bottom above the placer's feet
+	MaxPlaceAboveFeet = 20, -- tallest a stack can get: prop bottom above the placer's feet
 	MaxDropFall = 60,
+	PlaceTolerance = 0.3, -- studs a placed prop may sink into its neighbours or a bumpy floor
+	PlaceNudges = { 0.75, 1.5, 2.5 }, -- rings of nearby spots tried when the aimed one doesn't fit
+	HoldToLetGo = 0.6, -- seconds holding the grab button to let go in place, whatever's in the way
+	SettleSeconds = 6, -- a let-go prop falls with physics, then freezes once still or after this
 
 	AimRate = 20, -- client aim updates per second
 	GhostRate = 10, -- server ghost previews per second
@@ -44,7 +50,8 @@ return {
 		["hands full"] = "Your hands are full",
 		["no ground"] = "Nothing under it to land on",
 		["too high"] = "Too high to stack",
-		blocked = "Something's in the way",
+		blocked = "No room here",
+		player = "Someone's standing there",
 	},
 
 	SpawnTestProps = true,

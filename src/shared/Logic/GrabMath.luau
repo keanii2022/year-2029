@@ -52,6 +52,13 @@ function GrabMath.clampHoldDistance(distance: number, min: number, max: number):
 	return math.clamp(distance, min, max)
 end
 
+-- The distance that counts against reach for an offset from the player. The first upAllowance
+-- studs straight up are free, so stock on high shelves is reachable from the floor.
+function GrabMath.reachGap(dx: number, dy: number, dz: number, upAllowance: number): number
+	local up = if dy > 0 then math.max(dy - upAllowance, 0) else dy
+	return math.sqrt(dx * dx + up * up + dz * dz)
+end
+
 -- Pulls a requested carry point back inside [minDistance, maxDistance] of the origin.
 function GrabMath.clampToReach(
 	ox: number,
