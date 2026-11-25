@@ -8187,6 +8187,21 @@ return {
 			textureId = 91445745953734,
 		},
 		{
+			name = "rack_bay_empty",
+			group = "warehouse",
+			size = { 12.079, 26.0, 4.8 },
+			parts = {
+				{
+					name = "Body",
+					center = { 0.0, 13.0, -0.0 },
+					size = { 12.079, 26.0, 4.8 },
+					pivot = { 0, 0.0, 0.0 },
+				},
+			},
+			clips = {},
+			moves = {},
+		},
+		{
 			name = "rack_bay_full",
 			group = "warehouse",
 			size = { 12.077, 26.0, 5.092 },

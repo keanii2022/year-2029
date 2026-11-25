@@ -550,6 +550,18 @@ def rack_bay_bulk(P):
     P.add("Body", oil_marks(R, prints=1, streaks=4))
 
 
+@item("rack_bay_empty", "warehouse", size=1024)
+def rack_bay_empty(P):
+    """rack_bay_full's frame, beams and footprint with no stock: the game stocks each level with real grabbable props.
+    A galvanized deck sits on every beam pair (top at level + 0.06) so props have a floor to rest on."""
+    R = random.Random(11)
+    P.add("Body", bay(R))
+    deck = galv()
+    for z in LEVELS:
+        P.add("Body", box((BAY_W - 2 * POST, BAY_D - 0.4, 0.06), deck, loc=(0, 0, z + 0.03), r=0.0, n=1))
+    P.add("Body", oil_marks(R))
+
+
 @item("rack_bay_furniture", "warehouse", size=1024)
 def rack_bay_furniture(P):
     R = random.Random(41)

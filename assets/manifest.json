@@ -18714,6 +18714,43 @@
    "screenId": null
   },
   {
+   "name": "rack_bay_empty",
+   "group": "warehouse",
+   "fbx": "art/warehouse/rack_bay_empty/rack_bay_empty.fbx",
+   "texture": "art/warehouse/rack_bay_empty/rack_bay_empty_color.png",
+   "screen": null,
+   "clips": [],
+   "size": [
+    12.079,
+    26.0,
+    4.8
+   ],
+   "parts": [
+    {
+     "name": "Body",
+     "center": [
+      0.0,
+      13.0,
+      -0.0
+     ],
+     "size": [
+      12.079,
+      26.0,
+      4.8
+     ],
+     "pivot": [
+      0,
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "moves": [],
+   "assetId": null,
+   "textureId": null,
+   "screenId": null
+  },
+  {
    "name": "rack_bay_full",
    "group": "warehouse",
    "fbx": "art/warehouse/rack_bay_full/rack_bay_full.fbx",
