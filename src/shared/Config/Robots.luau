@@ -27,6 +27,93 @@ return {
 	HunterSpawnDistance = { 200, 260 }, -- far enough that you hear and see them coming
 	HunterGrace = 25, -- seconds of quiet after lights out before any hunter spawns
 	HunterDespawnRadius = 450,
+
+	-- Prowlers: a few hunters that never stall. They roam the aisles by day too, red-eyed, loud
+	-- enough to hear through the racks, dragging things about. Same hunt as at night, day eyes.
+	Prowl = {
+		Max = 3,
+		NearRadius = 220, -- a player with no prowler this close gets one
+		SpawnDistance = { 140, 200 },
+		Grace = 40, -- seconds into the day before the first one turns up
+		SightFactor = 0.7, -- by day they see less far than at night
+		Types = { "scout", "brute", "crawler" },
+		IdleSounds = { "drag", "scrape", "servo_whirr_2", "hydraulic_hiss" },
+		IdleSoundGap = { 5, 12 },
+	},
+
+	-- Hunting as a pack (night, and prowlers by day). One that spots you lets out an alert; the
+	-- nearest awake robots answer and run in from the sides. Lose them and they check where they
+	-- saw you, then a few spots round it (a nearby hiding spot first, some of the time).
+	Hunt = {
+		CallRadius = 110,
+		MaxResponders = 3,
+		CallCooldown = 10,
+		ShareEvery = 2, -- while it still sees you, it keeps telling the others where you are
+		FlankOffset = 14,
+		NightLoseSeconds = 7, -- a night chase holds on this long without seeing you (day: Sense.LoseSeconds)
+		Searches = 2,
+		SearchRadius = 22,
+		SearchFindChance = 0.45,
+		AlertSound = "spot_alert",
+		AlertPitch = 0.75,
+		AlertVolume = 1.4,
+		AnswerSounds = { "scout_eye_whine", "servo_whirr_1", "brute_groan" },
+		AnswerPitch = 0.8,
+		AnswerDelay = { 0.3, 1.2 },
+		RollOff = { 20, 220 },
+	},
+
+	-- Getting caught. By day it hurts and throws you down, then takes your best item home; by night it
+	-- takes you down. The screen flashes, the camera jolts and you hear it land.
+	Catch = {
+		DayDamage = 35,
+		Shove = 38, -- studs per second, away from the robot
+		Lift = 16,
+		DownSeconds = 1.6, -- flat on the floor before you get up
+		ShakeSeconds = 0.7,
+		ShakeAngle = 4, -- degrees
+		Sounds = { "impact_metal", "land_thud" },
+		Volume = 0.9,
+	},
+
+	-- One robot per installation stands just inside a doorway facing out. Anyone walking (not
+	-- crouched) inside the room within HearRange makes it turn and look.
+	Guard = { Inset = 5, HearRange = 32 },
+
+	-- At night a red glow round the eyes, so you see them hunting from far off in the dark
+	EyeGlow = { Range = 7, Brightness = 2.5 },
+
+	-- Client side dread: a heartbeat and a drained, reddened screen as hunting robots close in, and
+	-- strip lights near a hunting robot stutter and buzz.
+	Dread = {
+		ChaseRange = 90,
+		HuntRange = 60,
+		HuntWeight = 0.45,
+		Heartbeat = "heartbeat_loop",
+		HeartbeatVolume = 0.9,
+		HeartbeatPitch = { 0.85, 1.35 },
+		Rise = 1.5, -- per second, how fast dread climbs toward its target
+		Fall = 0.35, -- and fades after
+		Saturation = -0.45,
+		Contrast = 0.12,
+		Tint = Color3.fromRGB(255, 205, 200),
+		FlickerRadius = 28,
+		Buzz = "neon_crackle",
+		BuzzChance = 0.02, -- per stuttering strip, each time it cuts out
+	},
+
+	-- Far off in the dark, robots at work: crashes, scrapes and groans from a random direction. At
+	-- the siren, the warehouse waking up all round you.
+	Ambience = {
+		NightGap = { 16, 38 },
+		SirenGap = { 3, 7 },
+		Distance = { 70, 130 },
+		Night = { "stack_crash", "prop_metal_clang", "scrape", "drag", "brute_groan", "chase_servo_scream" },
+		Siren = { "hydraulic_hiss", "servo_whirr_1", "servo_whirr_2", "brute_groan", "scanner_ping" },
+		Pitch = { 0.6, 0.85 },
+		Volume = 1,
+		RollOff = { 20, 200 },
+	},
 	ChoreDespawnRadius = 400, -- a chore bot out sweeping this far from everyone goes back to sleep
 
 	-- Which chore bot lives in which kind of room
@@ -51,13 +138,14 @@ return {
 	HunterTypes = { "scout", "brute", "crawler" },
 	NightSuffix = "_night", -- night model name = day name .. suffix
 
-	-- Per type. Speeds in studs per second (players walk 14, sprint 22, crouch 7).
+	-- Per type. Speeds in studs per second (players walk 14, sprint 22, crouch 7). Every chase
+	-- beats a walk, none beats a sprint.
 	-- armor: gun damage that knocks it down (starter pistol hits for 22, a close shotgun blast ~96).
 	Types = {
 		cleaner = {
 			role = "chore",
 			walkSpeed = 7,
-			chaseSpeed = 13,
+			chaseSpeed = 15,
 			sightRange = 34,
 			agentHeight = 7,
 			armor = 130,
@@ -65,7 +153,7 @@ return {
 		carrier = {
 			role = "chore",
 			walkSpeed = 7,
-			chaseSpeed = 13,
+			chaseSpeed = 15,
 			sightRange = 34,
 			agentHeight = 7,
 			armor = 130,
@@ -73,7 +161,7 @@ return {
 		cook = {
 			role = "chore",
 			walkSpeed = 7,
-			chaseSpeed = 13,
+			chaseSpeed = 15,
 			sightRange = 34,
 			agentHeight = 7,
 			armor = 130,
@@ -81,7 +169,7 @@ return {
 		scout = {
 			role = "hunter",
 			walkSpeed = 9,
-			chaseSpeed = 16,
+			chaseSpeed = 17,
 			sightRange = 70,
 			agentHeight = 7,
 			armor = 150,
@@ -97,7 +185,7 @@ return {
 		crawler = {
 			role = "hunter",
 			walkSpeed = 9,
-			chaseSpeed = 17,
+			chaseSpeed = 18,
 			sightRange = 40,
 			agentHeight = 3.5,
 			armor = 110,
@@ -281,6 +369,7 @@ return {
 	},
 	CaughtDayLine = "A ROBOT GRABBED YOU. It took your %s back to its room. Sneak in and steal it back.",
 	CaughtNightLine = "A ROBOT GOT YOU IN THE DARK.",
+	CaughtDayHurtLine = "A ROBOT THREW YOU DOWN. Stay out of reach.",
 	IdleSounds = { "oil_drip", "hydraulic_hiss" },
 	NightIdleSounds = { "scanner_ping", "servo_whirr_2", "hydraulic_hiss", "curious_beep_3" },
 	IdleSoundGap = { 8, 20 },

@@ -4,13 +4,16 @@
 -- Chore bots by day: study -> suspicious -> chase -> return. Caught = catch, then return.
 -- A calm chore bot can be sent on an errand by day: walk out, do the chore, walk home.
 -- Everyone by night: sweep -> investigate / chase / carry. Caught at night = catch (the player goes down).
--- Hunters by day: stalled, harmless. Any robot hit by an EMP: disabled until it wears off.
+-- Hunters by day: stalled, harmless. Prowlers run the night machine by day too, with day eyes.
+-- A hunter that loses you searches where it saw you last and a few spots round it; one that spots
+-- you calls the others, who rush to cut you off (answerCall).
+-- Any robot hit by an EMP: disabled until it wears off.
 local RobotChores = if script then require(script.Parent.RobotChores) else require("./RobotChores")
 local RobotSenses = if script then require(script.Parent.RobotSenses) else require("./RobotSenses")
 
 local RobotBrain = {}
 
-export type Role = "chore" | "hunter"
+export type Role = "chore" | "hunter" | "prowler"
 export type State =
 	"study"
 	| "suspicious"
@@ -35,6 +38,8 @@ export type Brain = {
 	arrivedAt: number?,
 	disabledUntil: number,
 	errand: Errand?, -- set from leaving on an errand until back home
+	rushing: boolean, -- investigating at a run: answering a call or chasing down where you vanished
+	searchesLeft: number, -- more spots to check near the last sighting before it gives up
 }
 export type Seen = { id: any, x: number, z: number, distance: number, range: number }
 export type Loose = { id: any, distance: number }
@@ -60,10 +65,14 @@ export type Intent = {
 	pickup: any?,
 	drop: boolean?,
 	reveal: boolean?,
+	search: boolean?, -- wants the server to point its focus at the next spot to check
 }
 
 function RobotBrain.new(role: Role, phase: string, now: number): Brain
-	local state: State = if phase == "Night" then "sweep" elseif role == "hunter" then "stalled" else "study"
+	local state: State = if phase == "Night" or role == "prowler"
+		then "sweep"
+		elseif role == "hunter" then "stalled"
+		else "study"
 	return {
 		role = role,
 		state = state,
@@ -75,6 +84,8 @@ function RobotBrain.new(role: Role, phase: string, now: number): Brain
 		arrivedAt = nil,
 		disabledUntil = -math.huge,
 		errand = nil,
+		rushing = false,
+		searchesLeft = 0,
 	}
 end
 
@@ -84,6 +95,8 @@ local function enter(brain: Brain, state: State, now: number)
 	brain.arrivedAt = nil
 	if state == "study" or state == "sweep" then
 		brain.errand = nil
+		brain.rushing = false
+		brain.searchesLeft = 0
 	end
 end
 
@@ -95,7 +108,7 @@ end
 -- By day a calm robot only sees inside its room; once chasing, out on an errand, or at night, it
 -- sees anywhere.
 function RobotBrain.seesOutsideRoom(brain: Brain, phase: string): boolean
-	return phase == "Night" or brain.state == "chase" or brain.errand ~= nil
+	return phase == "Night" or brain.role == "prowler" or brain.state == "chase" or brain.errand ~= nil
 end
 
 -- Only a chore bot studying quietly at home, by day, takes an errand.
@@ -128,6 +141,24 @@ function RobotBrain.phaseChanged(brain: Brain, phase: string, now: number)
 	end
 end
 
+-- Another robot spotted someone and called it in: run to point and search round it. Only a robot
+-- already on the hunt answers (sweeping or checking something), never one hauling or out cold.
+function RobotBrain.answerCall(brain: Brain, point: Point, searches: number, now: number): boolean
+	if now < brain.disabledUntil or (brain.state ~= "sweep" and brain.state ~= "investigate") then
+		return false
+	end
+	enter(brain, "investigate", now)
+	brain.focus = { x = point.x, z = point.z }
+	brain.rushing = true
+	brain.searchesLeft = searches
+	return true
+end
+
+local function loseSeconds(settings: any, night: boolean): number
+	local hunt = settings.Hunt
+	return if night and hunt then hunt.NightLoseSeconds else settings.Sense.LoseSeconds
+end
+
 local function watch(brain: Brain, input: Input, settings: any, night: boolean)
 	local sense = settings.Sense
 	local seen = input.seen
@@ -157,7 +188,13 @@ function RobotBrain.provoke(brain: Brain, seen: Seen, now: number)
 end
 
 -- Shared by day and night. Returns the intent, or nil when the chase ended this tick.
-local function chase(brain: Brain, input: Input, settings: any, now: number): (Intent?, boolean)
+local function chase(
+	brain: Brain,
+	input: Input,
+	settings: any,
+	now: number,
+	night: boolean
+): (Intent?, boolean)
 	local seen = input.seen
 	if seen then
 		brain.targetId = seen.id
@@ -167,7 +204,7 @@ local function chase(brain: Brain, input: Input, settings: any, now: number): (I
 			return { pose = "grab", face = brain.focus, catch = seen.id }, true
 		end
 	end
-	if now - brain.lastSeenAt > settings.Sense.LoseSeconds then
+	if now - brain.lastSeenAt > loseSeconds(settings, night) then
 		return nil, false
 	end
 	return { goal = "focus", speed = "chase", pose = "chase" }, false
@@ -203,7 +240,7 @@ local function day(brain: Brain, input: Input, settings: any, now: number): Inte
 	end
 
 	if state == "chase" then
-		local intent, caught = chase(brain, input, settings, now)
+		local intent, caught = chase(brain, input, settings, now, false)
 		if intent and not caught and input.homeDistance <= settings.DayLeash then
 			return intent
 		end
@@ -253,7 +290,9 @@ local function day(brain: Brain, input: Input, settings: any, now: number): Inte
 	return { goal = "study", speed = "walk", pose = "study" }
 end
 
-local function night(brain: Brain, input: Input, settings: any, now: number): Intent
+-- The hunt: night for everyone, all day for prowlers. isNight picks the eyes (faster notice, longer
+-- chase); a prowler by day hunts the same way, just slower to be sure it saw you.
+local function hunt(brain: Brain, input: Input, settings: any, now: number, isNight: boolean): Intent
 	local state = brain.state
 	if state ~= "sweep" and state ~= "investigate" and state ~= "carry" and state ~= "chase" then
 		enter(brain, "sweep", now)
@@ -261,11 +300,11 @@ local function night(brain: Brain, input: Input, settings: any, now: number): In
 	end
 
 	if state ~= "chase" then
-		watch(brain, input, settings, true)
+		watch(brain, input, settings, isNight)
 		if input.seen and brain.alert >= 1 then
 			local carrying = input.carrying
 			startChase(brain, input.seen, now)
-			local intent = chase(brain, input, settings, now)
+			local intent = chase(brain, input, settings, now, isNight)
 			if intent then
 				intent.drop = carrying
 				return intent
@@ -274,7 +313,7 @@ local function night(brain: Brain, input: Input, settings: any, now: number): In
 	end
 
 	if state == "chase" then
-		local intent, caught = chase(brain, input, settings, now)
+		local intent, caught = chase(brain, input, settings, now, isNight)
 		if caught then
 			calm(brain)
 			enter(brain, "sweep", now)
@@ -282,9 +321,11 @@ local function night(brain: Brain, input: Input, settings: any, now: number): In
 		elseif intent then
 			return intent
 		end
-		-- lost them: go and look where they were last seen
+		-- lost them: run to where they were last seen and check round it
 		calm(brain)
 		enter(brain, "investigate", now)
+		brain.rushing = true
+		brain.searchesLeft = if settings.Hunt then settings.Hunt.Searches else 0
 		state = "investigate"
 	end
 
@@ -314,6 +355,12 @@ local function night(brain: Brain, input: Input, settings: any, now: number): In
 		end
 		if brain.arrivedAt then
 			if now - brain.arrivedAt >= settings.Sense.InvestigateSeconds then
+				if brain.searchesLeft > 0 then
+					brain.searchesLeft -= 1
+					brain.arrivedAt = nil
+					brain.since = now
+					return { pose = "scan", face = brain.focus, search = true }
+				end
 				enter(brain, "sweep", now)
 				state = "sweep"
 			else
@@ -323,6 +370,9 @@ local function night(brain: Brain, input: Input, settings: any, now: number): In
 			enter(brain, "sweep", now) -- couldn't get there
 			state = "sweep"
 		else
+			if brain.rushing then
+				return { goal = "focus", speed = "chase", pose = "chase" }
+			end
 			return { goal = "focus", speed = "walk", pose = "walk" }
 		end
 	end
@@ -348,7 +398,8 @@ function RobotBrain.update(brain: Brain, input: Input, settings: any, now: numbe
 		return { pose = "stall", drop = input.carrying }
 	end
 	if brain.state == "disabled" then
-		enter(brain, if isNight then "sweep" elseif brain.role == "hunter" then "stalled" else "return", now)
+		local awake = isNight or brain.role == "prowler"
+		enter(brain, if awake then "sweep" elseif brain.role == "hunter" then "stalled" else "return", now)
 	end
 
 	if brain.role == "hunter" and not isNight then
@@ -359,8 +410,8 @@ function RobotBrain.update(brain: Brain, input: Input, settings: any, now: numbe
 		return { pose = if input.phase == "Siren" then "wake" else "stall", drop = input.carrying }
 	end
 
-	if isNight then
-		return night(brain, input, settings, now)
+	if isNight or brain.role == "prowler" then
+		return hunt(brain, input, settings, now, isNight)
 	end
 	return day(brain, input, settings, now)
 end

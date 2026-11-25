@@ -2,6 +2,7 @@
 -- a flicker into near black at lights out, and lights snapping back on in the morning.
 -- Also drives the warehouse strip lights: on by day, dark at night except the red emergency ones,
 -- and the broken ones near you flicker (so do the always-on work lamps tagged to flicker).
+-- Strips near a hunting robot stutter and buzz while it's there (Robots calls disturb).
 local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,9 +10,11 @@ local RunService = game:GetService("RunService")
 
 local ClockEffects = require(ReplicatedStorage.Shared.Logic.ClockEffects)
 local Config = require(ReplicatedStorage.Shared.Config)
+local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 
 local Settings = Config.DayNight
+local dread = Config.Robots.Dread
 
 local LightingController = {}
 
@@ -19,6 +22,8 @@ local effect: RBXScriptConnection?
 local stripsOn = true
 local LIGHT_TAG = "WarehouseLight"
 local FLICKER_TAG = "FlickerLight"
+local disturbAt: Vector3? = nil
+local disturbed: { BasePart } = {}
 
 local function setStrip(strip: BasePart, on: boolean)
 	local glow = strip:FindFirstChildOfClass("SurfaceLight")
@@ -78,6 +83,54 @@ local function flickerNearby()
 			if glow then
 				glow.Enabled = lit
 			end
+		end
+	end
+end
+
+-- Strips with power near the disturbing robot, re-gathered as it moves; the ones it left get reset.
+local function gatherDisturbed()
+	for _, strip in disturbed do
+		setStrip(strip, stripsOn)
+	end
+	table.clear(disturbed)
+	local at = disturbAt
+	if not at then
+		return
+	end
+	for _, strip in CollectionService:GetTagged(LIGHT_TAG) do
+		local powered = stripsOn or strip:GetAttribute("Emergency") == true
+		if strip:IsA("BasePart") and powered and (strip.Position - at).Magnitude < dread.FlickerRadius then
+			table.insert(disturbed, strip)
+		end
+	end
+end
+
+local function buzz(strip: BasePart)
+	local id = ModelLibrary.soundId(dread.Buzz)
+	if not id then
+		return
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.PlaybackSpeed = 0.9 + math.random() * 0.3
+	sound.RollOffMaxDistance = 60
+	sound.Parent = strip
+	sound:Play()
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+end
+
+local function flickerDisturbed()
+	for _, strip in disturbed do
+		local lit = math.random() > 0.3
+		strip.Material = if lit then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		local glow = strip:FindFirstChildWhichIsA("Light")
+		if glow then
+			glow.Enabled = lit
+		end
+		if not lit and math.random() < dread.BuzzChance then
+			buzz(strip)
 		end
 	end
 end
@@ -156,6 +209,11 @@ local function show(phase: string, animate: boolean)
 	end
 end
 
+-- A hunting robot at `at` makes the strips round it stutter; nil when none is close.
+function LightingController.disturb(at: Vector3?)
+	disturbAt = at
+end
+
 function LightingController.Start()
 	-- Streaming brings strips in and out as you walk: set each one as it arrives
 	CollectionService:GetInstanceAddedSignal(LIGHT_TAG):Connect(function(strip)
@@ -163,12 +221,18 @@ function LightingController.Start()
 			setStrip(strip, stripsOn)
 		end
 	end)
-	local sinceFlicker = 0
+	local sinceFlicker, sinceGather = 0, 0
 	RunService.Heartbeat:Connect(function(dt)
 		sinceFlicker += dt
+		sinceGather += dt
+		if sinceGather >= 0.5 and (disturbAt or #disturbed > 0) then
+			sinceGather = 0
+			gatherDisturbed()
+		end
 		if sinceFlicker >= 0.09 then
 			sinceFlicker = 0
 			flickerNearby()
+			flickerDisturbed()
 		end
 	end)
 	Net.event("PhaseChanged").OnClientEvent:Connect(function(phase: string)

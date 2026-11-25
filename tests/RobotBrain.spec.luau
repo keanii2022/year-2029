@@ -15,6 +15,7 @@ local SETTINGS = {
 	ArriveRange = 3,
 	PickupRange = 5,
 	Chores = { GiveUpSeconds = 30 },
+	Hunt = { NightLoseSeconds = 7, Searches = 2 },
 }
 
 local function input(overrides: { [string]: any }?)
@@ -175,8 +176,54 @@ return {
 		brain.lastSeenAt = 0
 		brain.focus = { x = 9, z = 9 }
 		RobotBrain.update(brain, input({ phase = "Night", focusDistance = 30 }), SETTINGS, 5)
+		expect(brain.state).toBe("chase") -- a night chase holds on longer than a day one
+		local intent = RobotBrain.update(brain, input({ phase = "Night", focusDistance = 30 }), SETTINGS, 8)
 		expect(brain.state).toBe("investigate")
 		expect(brain.focus.x).toBe(9)
+		expect(intent.speed).toBe("chase")
+		expect(brain.searchesLeft).toBe(2)
+	end,
+	["after scanning the last sighting it asks for more spots, then gives up"] = function()
+		local brain = RobotBrain.new("hunter", "Night", 0)
+		brain.state = "investigate"
+		brain.focus = { x = 0, z = 0 }
+		brain.searchesLeft = 1
+		RobotBrain.update(brain, input({ phase = "Night", focusDistance = 1 }), SETTINGS, 1)
+		local intent = RobotBrain.update(brain, input({ phase = "Night", focusDistance = 1 }), SETTINGS, 6.5)
+		expect(intent.search).toBe(true)
+		expect(brain.state).toBe("investigate")
+		expect(brain.searchesLeft).toBe(0)
+		RobotBrain.update(brain, input({ phase = "Night", focusDistance = 1 }), SETTINGS, 7)
+		RobotBrain.update(brain, input({ phase = "Night", focusDistance = 1 }), SETTINGS, 12.5)
+		expect(brain.state).toBe("sweep")
+		expect(brain.rushing).toBe(false)
+	end,
+	["a sweeping robot answers a call at a run; a hauling one doesn't"] = function()
+		local brain = RobotBrain.new("hunter", "Night", 0)
+		expect(RobotBrain.answerCall(brain, { x = 30, z = 4 }, 2, 1)).toBe(true)
+		expect(brain.state).toBe("investigate")
+		local intent = RobotBrain.update(brain, input({ phase = "Night", focusDistance = 30 }), SETTINGS, 1.2)
+		expect(intent.speed).toBe("chase")
+		expect(intent.goal).toBe("focus")
+		local hauling = RobotBrain.new("chore", "Night", 0)
+		hauling.state = "carry"
+		expect(RobotBrain.answerCall(hauling, { x = 30, z = 4 }, 2, 1)).toBe(false)
+	end,
+	["a prowler hunts by day with day eyes"] = function()
+		local brain = RobotBrain.new("prowler", "Day", 0)
+		expect(brain.state).toBe("sweep")
+		expect(RobotBrain.seesOutsideRoom(brain, "Day")).toBe(true)
+		local intent = RobotBrain.update(brain, input(), SETTINGS, 0.2)
+		expect(intent.goal).toBe("wander")
+		local _, now = runWhile(brain, "sweep", function()
+			return input({ seen = seenAt(20) })
+		end, 0, 20)
+		expect(brain.state).toBe("chase")
+		expect(now > 0.6).toBeTruthy() -- slower to notice than at night
+		RobotBrain.disable(brain, now + 1)
+		RobotBrain.update(brain, input(), SETTINGS, now + 0.5)
+		RobotBrain.update(brain, input(), SETTINGS, now + 1.5)
+		expect(brain.state).toBe("sweep")
 	end,
 	["it picks up loose stuff and hauls it home"] = function()
 		local brain = RobotBrain.new("chore", "Night", 0)
