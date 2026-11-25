@@ -617,6 +617,7 @@ local function shoot(bot: Bot, model: Model, root: BasePart, target: Person, now
 	params.FilterDescendantsInstances = { model }
 
 	local damageTo: { [Humanoid]: number } = {}
+	local robotDamage: { [any]: { damage: number, at: Vector3 } } = {}
 	local centreHit = origin + look.LookVector * gun.range
 	for index, offset in CombatModes.pelletOffsets(gun.pellets or 1, gun.spread or 0) do
 		local pelletAim = (look * CFrame.Angles(math.rad(offset.y), math.rad(-offset.x), 0)).LookVector
@@ -626,6 +627,15 @@ local function shoot(bot: Bot, model: Model, root: BasePart, target: Person, now
 		if victim then
 			damageTo[victim] = (damageTo[victim] or 0)
 				+ CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
+		elseif result then
+			-- Required here, not at the top: Robots requires SimPlayers, so a top-level require loops.
+			local Robots = require(script.Parent.Robots) :: any
+			local robot = Robots.fromPart(result.Instance)
+			if robot then
+				local hit = robotDamage[robot] or { damage = 0, at = hitPosition }
+				hit.damage += CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
+				robotDamage[robot] = hit
+			end
 		end
 		if index == 1 then
 			centreHit = hitPosition
@@ -647,6 +657,12 @@ local function shoot(bot: Bot, model: Model, root: BasePart, target: Person, now
 			victimBot.hitAt = now
 		end
 		victim:TakeDamage(damage)
+	end
+	if next(robotDamage) then
+		local Robots = require(script.Parent.Robots) :: any
+		for robot, hit in robotDamage do
+			Robots.shot(robot, bot.handle, hit.damage, origin, hit.at)
+		end
 	end
 	sendWhizzes(target.model, origin, centreHit)
 	Loudness.emit(origin, "loud", model)

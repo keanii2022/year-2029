@@ -54,6 +54,32 @@ function RobotRooms.botFor(kind: string, roomBots: { [string]: string }, fallbac
 end
 
 -- Players with no hunter close by, in the order given, while there is room under the cap.
+-- How many robots live in an installation of this floor area: one per areaPerBot, kept inside range.
+-- extra (0 or 1, rolled by the caller) adds a little variety between halls of the same size.
+function RobotRooms.botCount(area: number, range: { number }, areaPerBot: number, extra: number): number
+	local wanted = math.floor(area / math.max(areaPerBot, 1)) + extra
+	return math.clamp(wanted, range[1], range[2])
+end
+
+-- Picks a spot at least spacing from every taken spot, trying the candidates in order. Falls back to
+-- the candidate farthest from its nearest neighbour when none is far enough. Spots are { x, z }.
+function RobotRooms.spreadSpot(candidates: { Point }, taken: { Point }, spacing: number): Point?
+	local best, bestGap = nil, -1
+	for _, candidate in candidates do
+		local gap = math.huge
+		for _, other in taken do
+			gap = math.min(gap, math.sqrt((candidate.x - other.x) ^ 2 + (candidate.z - other.z) ^ 2))
+		end
+		if gap >= spacing then
+			return candidate
+		end
+		if gap > bestGap then
+			best, bestGap = candidate, gap
+		end
+	end
+	return best
+end
+
 function RobotRooms.needHunters(
 	players: { Point & { id: any } },
 	hunters: { Point },

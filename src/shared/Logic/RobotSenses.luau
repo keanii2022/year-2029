@@ -16,6 +16,7 @@ export type Sense = {
 	CrouchSightFactor: number,
 	SprintSightFactor: number,
 	FeelRadius: number,
+	FaceRadius: number?,
 	FootstepRadius: { [string]: number },
 	BeamRange: number,
 	BeamAngle: number,
@@ -38,7 +39,17 @@ function RobotSenses.sightRange(base: number, stance: string?, night: boolean, s
 	return range
 end
 
+local function inCone(eye: Eye, target: Target, d: number, sense: Sense): boolean
+	local length = math.sqrt(eye.fx ^ 2 + eye.fz ^ 2)
+	if length < 1e-6 or d < 1e-6 then
+		return length >= 1e-6
+	end
+	local dot = ((target.x - eye.x) * eye.fx + (target.z - eye.z) * eye.fz) / (d * length)
+	return dot >= math.cos(math.rad(sense.SightAngle / 2))
+end
+
 -- roomOnly: by day a calm robot only sees inside its own room.
+-- Standing in front of one inside FaceRadius is never safe: crouching or a busy robot doesn't help.
 function RobotSenses.canSee(
 	eye: Eye,
 	target: Target,
@@ -53,18 +64,16 @@ function RobotSenses.canSee(
 	if d <= sense.FeelRadius and target.stance ~= "Crouch" then
 		return true
 	end
+	if d <= (sense.FaceRadius or 0) and inCone(eye, target, d, sense) then
+		return true
+	end
 	if roomOnly and not target.sameRoom then
 		return false
 	end
 	if d > RobotSenses.sightRange(eye.range, target.stance, night, sense) then
 		return false
 	end
-	local length = math.sqrt(eye.fx ^ 2 + eye.fz ^ 2)
-	if length < 1e-6 then
-		return false
-	end
-	local dot = ((target.x - eye.x) * eye.fx + (target.z - eye.z) * eye.fz) / (d * length)
-	return dot >= math.cos(math.rad(sense.SightAngle / 2))
+	return inCone(eye, target, d, sense)
 end
 
 -- How far a player's footsteps carry to a robot.

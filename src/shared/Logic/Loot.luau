@@ -14,7 +14,7 @@ export type Entry = {
 	minDepth: number?,
 }
 export type Roll = { item: string, model: string, count: number }
-export type Spot = { x: number, z: number, depth: number }
+export type Spot = { x: number, z: number, depth: number, good: boolean? } -- good: a guaranteed real find
 
 -- Weight of an entry at depth 0..1: slides from near to deep, zero below minDepth.
 function Loot.weightAt(entry: Entry, depth: number): number

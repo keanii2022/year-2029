@@ -7,6 +7,7 @@ local SENSE = {
 	CrouchSightFactor = 0.5,
 	SprintSightFactor = 1.2,
 	FeelRadius = 4,
+	FaceRadius = 10,
 	FootstepRadius = { Walk = 12, Sprint = 30, Crouch = 0 },
 	BeamRange = 60,
 	BeamAngle = 12,
@@ -27,6 +28,14 @@ return {
 	["can't see behind it, but feels you right next to it"] = function()
 		expect(RobotSenses.canSee(EYE, { x = 0, z = -10, sameRoom = true }, SENSE, false, true)).toBeFalsy()
 		expect(RobotSenses.canSee(EYE, { x = 0, z = -3, sameRoom = true }, SENSE, false, true)).toBeTruthy()
+	end,
+	["standing in front of one up close is never safe"] = function()
+		local crouched = { x = 0, z = 8, sameRoom = false, stance = "Crouch" }
+		expect(RobotSenses.canSee(EYE, crouched, SENSE, false, true)).toBeTruthy()
+		local behind = { x = 0, z = -8, sameRoom = true, stance = "Walk" }
+		expect(RobotSenses.canSee(EYE, behind, SENSE, false, true)).toBeFalsy()
+		local hidden = { x = 0, z = 8, sameRoom = true, hidden = true }
+		expect(RobotSenses.canSee(EYE, hidden, SENSE, false, true)).toBeFalsy()
 	end,
 	["the cone edge is half the sight angle"] = function()
 		local inside = { x = math.sin(math.rad(50)) * 20, z = math.cos(math.rad(50)) * 20, sameRoom = true }

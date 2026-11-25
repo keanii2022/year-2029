@@ -63,4 +63,21 @@ return {
 		expect(#RobotRooms.needHunters(players, { { x = 50, z = 0 } }, 100, 8)).toBe(1)
 		expect(#RobotRooms.needHunters(players, { { x = 50, z = 0 } }, 100, 1)).toBe(0)
 	end,
+	["bigger halls get more robots, inside the range"] = function()
+		expect(RobotRooms.botCount(100 * 100, { 2, 3 }, 3600, 0)).toBe(2)
+		expect(RobotRooms.botCount(40 * 40, { 2, 3 }, 3600, 0)).toBe(2)
+		expect(RobotRooms.botCount(130 * 130, { 3, 6 }, 3600, 0)).toBe(4)
+		expect(RobotRooms.botCount(130 * 130, { 3, 6 }, 3600, 1)).toBe(5)
+		expect(RobotRooms.botCount(300 * 300, { 3, 6 }, 3600, 1)).toBe(6)
+	end,
+	["robots spawn spread out, never on top of each other"] = function()
+		local taken = { { x = 0, z = 0 } }
+		local spot = RobotRooms.spreadSpot({ { x = 1, z = 0 }, { x = 20, z = 0 } }, taken, 9)
+		expect(spot and spot.x).toBe(20)
+		-- nothing far enough: the roomiest candidate
+		spot = RobotRooms.spreadSpot({ { x = 1, z = 0 }, { x = 5, z = 0 } }, taken, 9)
+		expect(spot and spot.x).toBe(5)
+		spot = RobotRooms.spreadSpot({ { x = 1, z = 0 } }, {}, 9)
+		expect(spot and spot.x).toBe(1)
+	end,
 }

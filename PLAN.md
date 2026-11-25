@@ -5,7 +5,7 @@ Research: RESEARCH.md.
 
 ## The pitch
 
-PvPvE survival. Up to 30 players drop into a humongous abandoned warehouse with a gun, and every one of them is a threat. Anyone can rob anyone, any time. The robots are the third side: they can't be shot, and they take whatever is left lying around.
+PvPvE survival. Up to 30 players drop into a humongous abandoned warehouse with a gun, and every one of them is a threat. Anyone can rob anyone, any time. The robots are the third side: bullets only knock them down for a while, and they take whatever is left lying around.
 
 The warehouse is from the world before AI and robots took over. It's full of the old world's stuff: furniture, toys, food, junk. Robots live here now, trying to understand human things. The place is so big it's scary.
 
@@ -14,7 +14,7 @@ The warehouse is from the world before AI and robots took over. It's full of the
 - Lights out: robots leave their rooms and sweep the aisles, gathering more stuff. Anything loose is theirs: loot piles, fort pieces, and you. Players fight too. Whoever goes down drops their stuff.
 - Lights on again: robots are back in their rooms with new stuff they hauled in overnight. Loot, repair, rebuild. The day counter goes up.
 
-Guns work all day, but only on players. Anyone can rob anyone, any time. Forts have no locks. Robots raid forts at night, and players raid them whenever. If you see someone dragging your wall away, you blast them.
+Guns work all day. On players they kill; on robots they only buy time. Anyone can rob anyone, any time. Forts have no locks. Robots raid forts at night, and players raid them whenever. If you see someone dragging your wall away, you blast them.
 
 Why it works: the old warehouse's power and music still run on their old schedule. Lights on is the robots' study shift. Lights out is their gathering shift. The music is an old store loop nobody ever turned off.
 
@@ -29,7 +29,7 @@ Why it works: the old warehouse's power and music still run on their old schedul
 7. Rare finds. A dog or a pair of handcuffs changes your whole day.
 8. Feels real. Forced first person with head bob, sway, footsteps and momentum.
 9. Creepily joyful elevator music by day, dead quiet at night.
-10. Sneak in. Robot rooms hold the best stuff, and your gun is useless against robots.
+10. Sneak in. Robot rooms hold the best stuff, and your gun only buys you a few seconds against robots.
 
 ## The day and night loop
 
@@ -97,7 +97,7 @@ This is the core of the game. The robots set the clock, but most fights are play
 - You never know if you're alone. No player list, no kill feed, no map dots. You find out other players exist by hearing footsteps, gunshots or a fort that wasn't there yesterday.
 
 ### Guns and fighting
-- Guns only hurt players. Against robots they do nothing except make noise, and gunfire pulls robots from nearby rooms.
+- Guns hurt players. A robot hit sparks, clanks and staggers; enough hits knock it down for a while, then it reboots and hunts whoever shot it. Gunfire is loud and pulls robots from nearby rooms.
 - Basic guns are common. Better guns are rare loot, deeper in the warehouse.
 - The guns: starter pistol, revolver, SMG, shotgun, rifle, marksman rifle (long range, the warehouse is huge), nail gun (built from junk), dart blaster (quiet), flare gun (lights up an area and pulls robots to it), one rare heavy gun.
 - Helmets block some damage: bike helmet, hard hat with a lamp, riot helmet with a flip visor.
@@ -124,7 +124,7 @@ This is the core of the game. The robots set the clock, but most fights are play
 - Caught by day: it takes your best item and puts it on a shelf in its room. Sneak back in to steal it back.
 - Night: robots leave their rooms and sweep the aisles with scanner lights, gathering anything loose: loot piles, fort pieces, players. Caught at night counts as going down.
 - Morning: they're back in their rooms, and what they hauled in is the new loot.
-- Normal guns can't hurt robots. Only rare robot-killer gear works: an EMP charge (throw it, robots nearby shut down for a while) and the disruptor (a rare robot-only weapon that can destroy one).
+- Normal guns only knock robots down for a while. Only rare robot-killer gear ends one: an EMP charge (throw it, robots nearby shut down for a while) and the disruptor (a rare robot-only weapon that can destroy one).
 - Destroying a robot drops its whole room's loot and gives rewards you can't get from players, so teaming up is worth it.
 - Only rooms near players get a live robot. The rest sleep, so a giant map stays fast.
 - Day robots are chore bots: cleaner, carrier, cook. Night hunters: scout (scanner eye), brute (pulls forts apart), crawler (fits under things).
@@ -188,7 +188,7 @@ The warehouse should feel alive and wrong. Small things react to you.
 - Survivor writing is red spray paint: warnings like RUN, GO BACK, LIGHTS LIE, a ? after EXIT, sprayed-over posters. Anything printed is from before; anything sprayed came after.
 - Dark, never kiddy: robots leak black oil, so the walls have oily handprints, drag marks and splats, plus claw gouges. A 12 year old should think it's a scary game, not a baby game. Scary without gore, so anyone can still play.
 - World: an abandoned warehouse from before AI. Robots study human stuff in random rooms by day and gather in the aisles by night.
-- Guns can't kill robots. Only rare robot-killer gear can.
+- Guns can't kill robots, only knock them down. Only rare robot-killer gear can.
 - Music: Keani picks it. Elevator music that's creepily joyful, dreamcore and liminal.
 
 ## First playable (the test that matters)

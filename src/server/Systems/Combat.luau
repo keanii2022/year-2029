@@ -3,7 +3,8 @@
 -- selected on the hotbar with each shot and reload; the server checks the player owns it and fires
 -- that gun by its Config.Guns rules (mode, interval, mag, pellets). Tracks each gun's mag and the
 -- reload, published as "Mag<GunId>" and "Reloading" (the gun's id) attributes for the client's HUD.
--- Only players take damage; anything else a shot hits just throws sparks and stops the shot.
+-- Players take damage; a robot hit goes to Robots.shot (stagger, knockdown, grudge). Anything else a
+-- shot hits just throws sparks and stops the shot.
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
@@ -19,6 +20,7 @@ local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Inventory = require(script.Parent.Inventory)
 local RobotGear = require(script.Parent.RobotGear)
+local Robots = require(script.Parent.Robots)
 local Scores = require(script.Parent.Scores)
 
 local settings = Config.Guns
@@ -326,6 +328,7 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 	local aim = direction.Unit
 	local look = CFrame.lookAt(Vector3.zero, aim)
 	local damageTo: { [Humanoid]: number } = {}
+	local robotDamage: { [any]: { damage: number, at: Vector3 } } = {}
 	local centreHit = origin + aim * gun.range
 	local centreTarget: Player? = nil
 	for index, offset in CombatModes.pelletOffsets(gun.pellets or 1, gun.spread or 0) do
@@ -344,6 +347,12 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 			damageTo[targetHumanoid] = (damageTo[targetHumanoid] or 0) + damage
 			hitPlayer = true
 		end
+		local robot = hitPart and not targetHumanoid and Robots.fromPart(hitPart)
+		if robot then
+			local hit = robotDamage[robot] or { damage = 0, at = hitPosition }
+			hit.damage += CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
+			robotDamage[robot] = hit
+		end
 		if index == 1 then
 			centreHit = hitPosition
 			centreTarget = if hitPlayer then target else nil
@@ -360,6 +369,9 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any)
 			Scores.add(player, "PlayerKills", 1)
 		end
 		hitRemote:FireClient(player, downed)
+	end
+	for robot, hit in robotDamage do
+		Robots.shot(robot, player, hit.damage, origin, hit.at)
 	end
 	sendWhizzes(player, centreTarget, origin, centreHit)
 	if gun.robotWeapon then

@@ -13,6 +13,7 @@ local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Needs = require(ReplicatedStorage.Shared.Logic.Needs)
 local Rng = require(ReplicatedStorage.Shared.Logic.WarehouseGenRng)
+local WarehouseGen = require(ReplicatedStorage.Shared.Logic.WarehouseGen)
 local DayNight = require(script.Parent.DayNight)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
@@ -276,11 +277,21 @@ local function installationSpots(layout: any, rng: Rng.Rng): { Loot.Spot }
 			continue
 		end
 		local items = rng:shuffle(room.items)
-		for n = 1, rng:int(Settings.InstallationLootCount[1], Settings.InstallationLootCount[2]) do
+		local good = if room.giant
+			then Settings.GiantInstallationGoodFinds
+			else Settings.InstallationGoodFinds
+		local depth = WarehouseGen.depth(layout, room.cx, room.cz)
+		local count =
+			math.max(good, rng:int(Settings.InstallationLootCount[1], Settings.InstallationLootCount[2]))
+		for n = 1, count do
 			local thing = items[n]
 			local x = if thing then thing.x + thing.nx * reach else room.cx + rng:range(-1, 1) * 4
 			local z = if thing then thing.z + thing.nz * reach else room.cz + rng:range(-1, 1) * 4
-			table.insert(spots, { x = x, z = z, depth = 1 })
+			if n <= good then
+				table.insert(spots, { x = x, z = z, depth = depth, good = true })
+			else
+				table.insert(spots, { x = x, z = z, depth = 1 })
+			end
 		end
 	end
 	return spots
@@ -310,7 +321,10 @@ local function restock(seed: number)
 		table.insert(spots, spot)
 	end
 	for index, spot in spots do
-		local entries = if index >= guaranteed then Settings.InstallationLoot else Settings.Loot
+		local entries = if spot.good
+			then Settings.GoodFinds
+			elseif index >= guaranteed then Settings.InstallationLoot
+			else Settings.Loot
 		local roll = Loot.roll(entries, spot.depth, rng)
 		if roll then
 			buildPickup(roll, spot, rng:range(0, math.pi * 2))
