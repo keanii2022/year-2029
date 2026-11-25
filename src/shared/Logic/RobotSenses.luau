@@ -48,13 +48,13 @@ function RobotSenses.canSee(
 ): boolean
 	if target.hidden then
 		return false
+	end -- Right up close a robot always notices you, whatever way it faces and whatever room you're in
+	local d = distance(eye.x, eye.z, target.x, target.z)
+	if d <= sense.FeelRadius and target.stance ~= "Crouch" then
+		return true
 	end
 	if roomOnly and not target.sameRoom then
 		return false
-	end
-	local d = distance(eye.x, eye.z, target.x, target.z)
-	if d <= sense.FeelRadius then
-		return true
 	end
 	if d > RobotSenses.sightRange(eye.range, target.stance, night, sense) then
 		return false

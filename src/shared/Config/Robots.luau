@@ -53,13 +53,13 @@ return {
 
 	-- Senses
 	Sense = {
-		SightAngle = 110, -- full cone width, degrees
+		SightAngle = 140, -- full cone width, degrees
 		NightSightFactor = 1.2,
 		CrouchSightFactor = 0.5, -- crouching shrinks how far a robot can spot you
 		SprintSightFactor = 1.2,
-		FeelRadius = 4, -- this close, a robot notices you whatever way it faces (unless you're hidden)
+		FeelRadius = 9, -- this close, a robot notices you whatever way it faces (unless you're hidden or crouched)
 		FootstepRadius = { Walk = 12, Sprint = 30, Crouch = 0 },
-		NoticeSeconds = 1.2, -- by day, how long you can stay in view before it charges (less up close)
+		NoticeSeconds = 0.8, -- by day, how long you can stay in view before it charges (less up close)
 		NightNoticeSeconds = 0.35,
 		AlertDecay = 0.6, -- alert lost per second out of view
 		SuspiciousSeconds = 4,

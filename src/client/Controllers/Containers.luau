@@ -219,6 +219,10 @@ local function onPad(_action: string, inputState: Enum.UserInputState, input: In
 	end
 	if input.KeyCode == Enum.KeyCode.ButtonB then
 		Containers.close()
+		-- Hiding inside (wardrobe, toy chest): Circle backs all the way out, so nobody gets stuck
+		if Players.LocalPlayer:GetAttribute("Hidden") == true then
+			Net.event("InteractUse"):FireServer(nil, nil)
+		end
 	else
 		local selected = GuiService.SelectedObject
 		local tile = selected and tiles[selected]
