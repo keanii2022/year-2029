@@ -169,7 +169,7 @@ local function tick(dt: number)
 	for _, player in Players:GetPlayers() do
 		local state = states[player]
 		local character, humanoid = bodyOf(player)
-		if state and character and humanoid then
+		if state and character and humanoid and player:GetAttribute("God") ~= true then
 			local sprinting = character:GetAttribute("Stance") == "Sprint"
 				and humanoid.MoveDirection.Magnitude > 0.1
 			local nextState, damage = Needs.step(state, dt, { sprinting = sprinting }, NeedSettings)

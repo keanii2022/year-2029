@@ -985,7 +985,7 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 			target = entry
 		end
 	end
-	if not target then
+	if not target or player:GetAttribute("God") == true then
 		return
 	end
 	if DayNight.isNight() then

@@ -1,5 +1,6 @@
--- Studio playtest only: T jumps you to the next installation (nearest first, then round the map),
--- Shift+T back one. Lands just outside the hall's doorway, facing in. Never exists in a live game.
+-- Studio playtests and admins only: T jumps you to the next installation (nearest first, then round
+-- the map), Shift+T back one. Lands just outside the hall's doorway, facing in. The admin panel's
+-- next / previous installation buttons use DevTeleport.step too.
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -43,7 +44,8 @@ local function tourFor(player: Player, from: Vector3)
 	return tour
 end
 
-local function onRequest(player: Player, step: unknown)
+-- Moves player one installation along their tour (step 1 or -1). The caller checks who may.
+function DevTeleport.step(player: Player, step: unknown)
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	if not root or (step ~= 1 and step ~= -1) then
@@ -61,10 +63,14 @@ local function onRequest(player: Player, step: unknown)
 	Net.event("DevTeleported"):FireClient(player, hall.kind, tour.index, count)
 end
 
-function DevTeleport.Start()
-	if not RunService:IsStudio() then
-		return
+local function onRequest(player: Player, step: unknown)
+	-- Admin is a server-set attribute; a client can't set it for the server
+	if RunService:IsStudio() or player:GetAttribute("Admin") == true then
+		DevTeleport.step(player, step)
 	end
+end
+
+function DevTeleport.Start()
 	Net.event("DevTeleported")
 	Net.event("DevTeleport").OnServerEvent:Connect(onRequest)
 	game:GetService("Players").PlayerRemoving:Connect(function(player)

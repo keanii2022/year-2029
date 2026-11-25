@@ -395,6 +395,9 @@ local function fillCard()
 		keyColumn(body, 1, layout.left, 340)
 		keyColumn(body, 2, layout.right, 340)
 	end
+	if player:GetAttribute("Admin") == true then
+		centredLine(card, 6, Config.Admin.CardLine, device)
+	end
 end
 
 -- Shrinks the card to fit small screens (a phone held sideways is only ~390 points tall)
