@@ -149,7 +149,7 @@ return {
 			locker = { { id = "Gun", count = 1 } },
 		}, rules)
 		expect(problem).toBe(nil)
-		expect(data.version).toBe(3)
+		expect(data.version).toBe(Saves.VERSION)
 		expect(data.firstDay).toBe(false)
 		expect(data.tokens).toBe(55)
 		expect(data.stats.NightsSurvived).toBe(9)
@@ -178,5 +178,41 @@ return {
 		expect(data.weekly.week).toBe(2900)
 		expect(data.weekly.nights).toBe(0)
 		expect(Saves.load({ version = 3, firstDay = true }, rules).firstDay).toBe(true)
+	end,
+	["a version 3 save migrates to 4 with full volume and normal scares, keeping everything else"] = function()
+		local data, problem = Saves.load({
+			version = 3,
+			tokens = 12,
+			files = { "tape_1" },
+			locker = { { id = "Gun", count = 1 } },
+		}, rules)
+		expect(problem).toBe(nil)
+		expect(data.version).toBe(4)
+		expect(data.tokens).toBe(12)
+		expect(#data.files).toBe(1)
+		expect(#data.locker).toBe(1)
+		expect(data.audio.master).toBe(1)
+		expect(data.audio.music).toBe(1)
+		expect(data.audio.effects).toBe(1)
+		expect(data.audio.voice).toBe(1)
+		expect(data.audio.gentle).toBe(false)
+	end,
+	["new saves start with default audio"] = function()
+		local data = Saves.load(nil, rules)
+		expect(data.audio.master).toBe(1)
+		expect(data.audio.gentle).toBe(false)
+	end,
+	["audio settings are clamped and cleaned"] = function()
+		local data = Saves.load({
+			version = 4,
+			audio = { master = 3, music = -1, effects = 0 / 0, voice = 0.25, gentle = "yes" },
+		}, rules)
+		expect(data.audio.master).toBe(1)
+		expect(data.audio.music).toBe(0)
+		expect(data.audio.effects).toBe(1)
+		expect(data.audio.voice).toBe(0.25)
+		expect(data.audio.gentle).toBe(false)
+		expect(Saves.load({ version = 4, audio = "loud" }, rules).audio.voice).toBe(1)
+		expect(Saves.cleanAudio({ gentle = true }).gentle).toBe(true)
 	end,
 }

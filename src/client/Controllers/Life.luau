@@ -19,6 +19,7 @@ local LifeMoments = require(ReplicatedStorage.Shared.Logic.LifeMoments)
 local LifeSchedule = require(ReplicatedStorage.Shared.Logic.LifeSchedule)
 local LifeSpots = require(ReplicatedStorage.Shared.Logic.LifeSpots)
 local Manifest = require(ReplicatedStorage.Shared.Logic.Manifest)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Music = require(script.Parent.Music)
@@ -73,7 +74,13 @@ end
 
 -- Sounds ------------------------------------------------------------------------------------------
 
-local function makeSound(parent: Instance, name: string, volume: number, looped: boolean): Sound?
+local function makeSound(
+	parent: Instance,
+	name: string,
+	volume: number,
+	looped: boolean,
+	group: Mix.Group
+): Sound?
 	local id = ModelLibrary.soundId(name)
 	if not id then
 		return nil
@@ -85,6 +92,7 @@ local function makeSound(parent: Instance, name: string, volume: number, looped:
 	sound.RollOffMinDistance = Settings.RollOff.Min
 	sound.RollOffMaxDistance = Settings.RollOff.Max
 	sound.Parent = parent
+	Mix.route(sound, group)
 	return sound
 end
 
@@ -112,7 +120,7 @@ end
 
 local function playAt(position: Vector3, name: string, volume: number)
 	local holder = holderAt(position)
-	playOnce(makeSound(holder, name, volume, false))
+	playOnce(makeSound(holder, name, volume, false, "Ambience"))
 	task.delay(15, function()
 		holder:Destroy()
 	end)
@@ -121,7 +129,7 @@ end
 -- A sound at a different speed, cut off after `seconds`.
 local function playClipAt(position: Vector3, name: string, volume: number, speed: number, seconds: number)
 	local holder = holderAt(position)
-	local sound = makeSound(holder, name, volume, false)
+	local sound = makeSound(holder, name, volume, false, "Ambience")
 	if sound then
 		sound.PlaybackSpeed = speed
 		sound:Play()
@@ -131,8 +139,8 @@ local function playClipAt(position: Vector3, name: string, volume: number, speed
 	end)
 end
 
-local function playFlat(name: string, volume: number)
-	playOnce(makeSound(SoundService, name, volume, false))
+local function playFlat(name: string, volume: number, group: Mix.Group)
+	playOnce(makeSound(SoundService, name, volume, false, group))
 end
 
 -- Props -------------------------------------------------------------------------------------------
@@ -282,7 +290,8 @@ local function rollCart(spot: LifeSpots.Spot): PVInstance?
 		cart.PrimaryPart or cart:FindFirstChildWhichIsA("BasePart", true) or fx,
 		Sounds.CartRoll,
 		Volume.Event * 0.7,
-		true
+		true,
+		"Ambience"
 	)
 	if rolling then
 		rolling:Play()
@@ -312,7 +321,8 @@ local function footsteps(spot: LifeSpots.Spot): PVInstance?
 	local holder = holderAt(floorAt(spot) + Vector3.yAxis * 0.5)
 	local steps = random:NextInteger(Settings.Footsteps.Count[1], Settings.Footsteps.Count[2])
 	for _ = 1, steps do
-		local step = makeSound(holder, Sounds.Step, Volume.Step * random:NextNumber(0.8, 1), false)
+		local step =
+			makeSound(holder, Sounds.Step, Volume.Step * random:NextNumber(0.8, 1), false, "Ambience")
 		if not step then
 			break
 		end
@@ -360,7 +370,7 @@ local function phone(spot: LifeSpots.Spot): PVInstance?
 	end
 	local holder = holderAt(position)
 	for _ = 1, random:NextInteger(settings.Rings[1], settings.Rings[2]) do
-		local ring = makeSound(holder, Sounds.Phone, Volume.Event, false)
+		local ring = makeSound(holder, Sounds.Phone, Volume.Event, false, "Ambience")
 		if not ring then
 			break
 		end
@@ -386,7 +396,7 @@ local function shelfDrag(spot: LifeSpots.Spot, event: any): PVInstance?
 	local settings = Settings.ShelfDrag
 	local along = Vector3.new(-spot.dz, 0, spot.dx) * (if roll() < 0.5 then 1 else -1)
 	local holder = holderAt(floorAt(spot) + Vector3.yAxis * 2)
-	local sound = makeSound(holder, pick(event.sounds), Volume.Event, false)
+	local sound = makeSound(holder, pick(event.sounds), Volume.Event, false, "Ambience")
 	if not sound then
 		holder:Destroy()
 		return nil
@@ -1171,13 +1181,13 @@ local function paLoop()
 		task.wait(random:NextNumber(Settings.PaGap.Min, Settings.PaGap.Max))
 		if phase() == "Day" then
 			local line = Settings.PaLines[LifeSchedule.draw(bag, #Settings.PaLines, roll)]
-			playFlat(Sounds.Chime, Volume.Chime)
+			playFlat(Sounds.Chime, Volume.Chime, "Voice")
 			task.wait(CHIME_LEAD)
 			Music.playVoiceLine(line.voice)
 			Subtitles.show(Settings.PaPrefix .. line.text, Settings.PaSubtitleSeconds)
 			if roll() < Settings.PaGlitchChance then
 				task.wait(Settings.PaSubtitleSeconds * 0.6)
-				playFlat(Sounds.Glitch, Volume.Chime)
+				playFlat(Sounds.Glitch, Volume.Chime, "Voice")
 			end
 		end
 	end
@@ -1187,7 +1197,7 @@ end
 
 local function roomToneLoop()
 	local settings = Settings.RoomTone
-	local tone = makeSound(SoundService, Sounds.RoomTone, 0, true)
+	local tone = makeSound(SoundService, Sounds.RoomTone, 0, true, "Ambience")
 	if not tone then
 		return
 	end

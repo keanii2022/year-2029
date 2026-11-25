@@ -65,6 +65,8 @@ local actions: { [string]: Binding } = {
 	-- Touchpad: tap opens the controls card, hold opens the record (Hints times it)
 	Controls = { keyboard = Enum.KeyCode.H, gamepad = Enum.KeyCode.ButtonSelect },
 	Record = { keyboard = Enum.KeyCode.M },
+	-- The sound panel; controllers and phones open it from the record panel
+	Audio = { keyboard = Enum.KeyCode.K },
 	-- Phone-only carry buttons; keyboard and gamepad move props through Grab's own keys
 	CarrySpin = {},
 	CarryTip = {},

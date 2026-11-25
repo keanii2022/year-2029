@@ -131,6 +131,7 @@ return {
 				{ "{Flashlight}", "Flashlight" },
 				{ "{Callout}", "Call out. Hold: pick a call" },
 				{ "{Record}", "Your record, looks, blueprint" },
+				{ "{Audio}", "Sound: volume, gentler scares" },
 			},
 			right = {
 				{ "HANDS" },
@@ -171,7 +172,7 @@ return {
 				{ "{Use}", "Use. Gun out: tap reload, hold use" },
 				{ "{=RS}", "Look. Click: crouch" },
 			},
-			footer = "{=Touchpad} Tap: this card. Hold: your record   {=Options} Menu",
+			footer = "{=Touchpad} Tap: this card. Hold: your record and sound   {=Options} Menu",
 			carry = "Carrying:   {=R2} Place, hold to let go   {=DPad} Spin / tip   Hold {=L2} Fine, no snap   {=L1} {=R1} Closer / farther",
 		},
 		Touch = {
@@ -184,7 +185,7 @@ return {
 				{ "{Sprint}", "Sprint, uses energy" },
 				{ "OTHER" },
 				{ "{Callout}", "Call out. Hold: pick a call" },
-				{ "{Record}", "Your record, looks, blueprint" },
+				{ "{Record}", "Your record, looks, blueprint, sound" },
 			},
 			right = {
 				{ "DO" },

@@ -363,7 +363,7 @@ return {
 	-- hits, picked by the surface (Impact on players), Empty is the dry click with no cells.
 	-- Others hear shots out to SoundRollOff[2] studs (guns are loud).
 	Sounds = {
-		FireVolume = 1,
+		FireVolume = 0.85,
 		FirePitch = 1, -- below 1 is deeper
 		Impact = "emp_thump",
 		ImpactConcrete = "impact_concrete",
@@ -373,7 +373,7 @@ return {
 		HitMarker = "hit_marker",
 		HitMarkerVolume = 0.8,
 		Whiz = "bullet_whiz",
-		WhizVolume = 0.9,
+		WhizVolume = 0.7,
 		Empty = "flashlight_click",
 		Reload = "cell_eject",
 		ReloadVolume = 0.8,

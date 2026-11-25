@@ -16,6 +16,7 @@ local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local CombatModes = require(ReplicatedStorage.Shared.Logic.CombatModes)
 local CombatReload = require(ReplicatedStorage.Shared.Logic.CombatReload)
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Inventory = require(script.Parent.Inventory)
@@ -231,6 +232,7 @@ local function dropFlare(position: Vector3, normal: Vector3?)
 		sound.Looped = looped
 		sound.RollOffMaxDistance = 60
 		sound.Parent = flare
+		Mix.route(sound, "SFX")
 		sound:Play()
 		return sound
 	end

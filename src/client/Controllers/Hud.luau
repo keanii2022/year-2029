@@ -11,6 +11,7 @@ local StarterGui = game:GetService("StarterGui")
 local Clock = require(ReplicatedStorage.Shared.Logic.Clock)
 local CombatLogic = require(ReplicatedStorage.Shared.Logic.Combat)
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Glyphs = require(script.Parent.Glyphs)
 local Gun = require(script.Parent.Gun)
@@ -429,6 +430,7 @@ local function playDownZap()
 	sound.SoundId = id
 	sound.Volume = settings.DownSoundVolume
 	sound.Parent = SoundService
+	Mix.route(sound, "SFX")
 	sound.Ended:Once(function()
 		sound:Destroy()
 	end)

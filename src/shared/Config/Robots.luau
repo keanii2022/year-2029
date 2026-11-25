@@ -56,7 +56,7 @@ return {
 		SearchFindChance = 0.45,
 		AlertSound = "spot_alert",
 		AlertPitch = 0.75,
-		AlertVolume = 1.4,
+		AlertVolume = 0.9,
 		AnswerSounds = { "scout_eye_whine", "servo_whirr_1", "brute_groan" },
 		AnswerPitch = 0.8,
 		AnswerDelay = { 0.3, 1.2 },
@@ -65,7 +65,7 @@ return {
 		Lunge = { Range = 15, Speed = 26, Seconds = 1.5, Cooldown = 4 },
 		LungeSound = "chase_servo_scream",
 		LungePitch = 1.35,
-		LungeVolume = 1.3,
+		LungeVolume = 0.9,
 		RollOff = { 20, 220 },
 	},
 
@@ -117,7 +117,7 @@ return {
 		Night = { "stack_crash", "prop_metal_clang", "scrape", "drag", "brute_groan", "chase_servo_scream" },
 		Siren = { "hydraulic_hiss", "servo_whirr_1", "servo_whirr_2", "brute_groan", "scanner_ping" },
 		Pitch = { 0.6, 0.85 },
-		Volume = 1,
+		Volume = 0.7,
 		RollOff = { 20, 200 },
 	},
 	ChoreDespawnRadius = 400, -- a chore bot out sweeping this far from everyone goes back to sleep

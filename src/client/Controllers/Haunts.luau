@@ -14,6 +14,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local HauntSight = require(ReplicatedStorage.Shared.Logic.HauntSight)
 local VoiceLines = require(ReplicatedStorage.Shared.Logic.VoiceLines)
 local Manifest = require(ReplicatedStorage.Shared.Logic.Manifest)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Net = require(ReplicatedStorage.Shared.Net)
 
@@ -138,7 +139,13 @@ local function fadeOut(model: Model, time: number)
 	end)
 end
 
-local function playAt(position: Vector3, soundName: string, volume: number?)
+local function playAt(
+	position: Vector3,
+	soundName: string,
+	volume: number?,
+	group: Mix.Group,
+	scare: Mix.ScareKind?
+)
 	local id = ModelLibrary.soundId(soundName)
 	if not id then
 		return
@@ -158,6 +165,7 @@ local function playAt(position: Vector3, soundName: string, volume: number?)
 	sound.RollOffMinDistance = 4
 	sound.RollOffMaxDistance = 60
 	sound.Parent = holder
+	Mix.route(sound, group, scare)
 	sound:Play()
 	task.delay(15, function()
 		holder:Destroy()
@@ -204,7 +212,7 @@ function scares.kid_peek(done)
 		return done()
 	end
 	stand(kid, spot, camera().CFrame.Position)
-	playAt(spot, Settings.Sounds.KidAppear, cfg.VoiceVolume)
+	playAt(spot, Settings.Sounds.KidAppear, cfg.VoiceVolume, "Scare", "stinger")
 	local _, motors = poserFor(kid)
 	local head = motors.Head
 	local played = 0
@@ -217,7 +225,7 @@ function scares.kid_peek(done)
 		local due = VoiceLines.kidCue(cfg.Voice, (camera().CFrame.Position - spot).Magnitude, played)
 		if due then
 			played = due
-			playAt(spot, cfg.Voice[due].sound, cfg.VoiceVolume)
+			playAt(spot, cfg.Voice[due].sound, cfg.VoiceVolume, "Voice")
 			if due == #cfg.Voice then
 				closeAt = elapsed
 			end
@@ -354,7 +362,7 @@ end
 function scares.giggle(done)
 	local behind = camera().CFrame.Position - flat(camera().CFrame.LookVector) * Settings.GiggleBehind
 	local names = Settings.Sounds.Giggle
-	playAt(behind, names[random:NextInteger(1, #names)], Settings.Volume * 0.5)
+	playAt(behind, names[random:NextInteger(1, #names)], Settings.Volume * 0.5, "Scare", "stinger")
 	done()
 end
 

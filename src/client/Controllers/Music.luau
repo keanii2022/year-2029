@@ -7,6 +7,7 @@ local SoundService = game:GetService("SoundService")
 
 local ClockEffects = require(ReplicatedStorage.Shared.Logic.ClockEffects)
 local Config = require(ReplicatedStorage.Shared.Config)
+local Mix = require(ReplicatedStorage.Shared.Mix)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local Hints = require(script.Parent.Hints)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -33,7 +34,13 @@ local nightAmbience: Sound?
 local clockTick: Sound?
 local clockTickFast: Sound?
 
-local function makeSound(id: string?, volume: number, looped: boolean): Sound?
+local function makeSound(
+	id: string?,
+	volume: number,
+	looped: boolean,
+	group: Mix.Group,
+	scare: Mix.ScareKind?
+): Sound?
 	if not id then
 		return nil
 	end
@@ -42,11 +49,12 @@ local function makeSound(id: string?, volume: number, looped: boolean): Sound?
 	sound.Volume = volume
 	sound.Looped = looped
 	sound.Parent = SoundService
+	Mix.route(sound, group, scare)
 	return sound
 end
 
-local function playOnce(id: string?, volume: number): boolean
-	local sound = makeSound(id, volume, false)
+local function playOnce(id: string?, volume: number, group: Mix.Group, scare: Mix.ScareKind?): boolean
+	local sound = makeSound(id, volume, false, group, scare)
 	if not sound then
 		return false
 	end
@@ -84,7 +92,7 @@ end
 
 -- Plays a voice line by its VOICE_LINES.md file name. Returns false while it isn't uploaded yet.
 function Music.playVoiceLine(name: string): boolean
-	return playOnce(Settings.VoiceLineIds[name] or ModelLibrary.soundId(name), Volume.Announcer)
+	return playOnce(Settings.VoiceLineIds[name] or ModelLibrary.soundId(name), Volume.Announcer, "Voice")
 end
 
 -- The recorded clip plays once it has an id; the subtitle shows either way, for anyone muted or deaf.
@@ -106,17 +114,27 @@ local function countdown()
 	end
 end
 
--- The siren comes in blasts with quiet between, not one endless wail
+-- The siren comes in blasts with quiet between, not one endless wail. Each blast swells in and
+-- dies away instead of starting and cutting hard.
 local function sirenBursts(token: number)
+	local burst = Settings.SirenBurst
 	task.spawn(function()
 		while phaseToken == token do
-			setPlaying(sirenLoop, true)
-			task.wait(Settings.SirenBurst.On)
+			if sirenLoop then
+				sirenLoop.Volume = 0
+				setPlaying(sirenLoop, true)
+				Mix.fade(sirenLoop, Volume.Siren, burst.FadeIn)
+			end
+			task.wait(burst.On)
+			if sirenLoop then
+				Mix.fade(sirenLoop, 0, burst.FadeOut)
+			end
+			task.wait(burst.FadeOut)
 			setPlaying(sirenLoop, false)
 			if phaseToken ~= token then
 				break
 			end
-			task.wait(Settings.SirenBurst.Off)
+			task.wait(math.max(0, burst.Off - burst.FadeOut))
 		end
 		setPlaying(sirenLoop, false)
 	end)
@@ -135,7 +153,7 @@ local function show(phase: string, endsAt: number, animate: boolean)
 		if animate then
 			-- After the lights finish clunking on (Lighting)
 			later(Config.Dawn.JingleDelay, function()
-				playOnce(ModelLibrary.soundId(Sounds.Jingle), Volume.Stinger)
+				playOnce(ModelLibrary.soundId(Sounds.Jingle), Volume.Stinger, "Music")
 				later(AFTER_JINGLE, function()
 					announce(pick(Settings.MorningLines))
 				end)
@@ -153,19 +171,20 @@ local function show(phase: string, endsAt: number, animate: boolean)
 			setPlaying(clockTickFast, true)
 		end
 	elseif phase == "Night" and animate then
-		playOnce(ModelLibrary.soundId(Sounds.LightsOut), Volume.Stinger)
-		playOnce(ModelLibrary.soundId(Sounds.AlarmBeep), Volume.AlarmBeep)
+		playOnce(ModelLibrary.soundId(Sounds.LightsOut), Volume.Stinger, "SFX")
+		playOnce(ModelLibrary.soundId(Sounds.AlarmBeep), Volume.AlarmBeep, "Scare", "sharp")
 		announce(pick(Settings.LightsOutLines))
 	end
 end
 
 function Music.Start()
-	dayMusic = makeSound(Settings.DayMusicId, Volume.DayMusic, true)
-	sirenLoop = makeSound(ModelLibrary.soundId(Sounds.Siren), Volume.Siren, true)
-	nightHum = makeSound(ModelLibrary.soundId(Sounds.NightHum), Volume.NightHum, true)
-	nightAmbience = makeSound(ModelLibrary.soundId(Sounds.NightAmbience), Volume.NightAmbience, true)
-	clockTick = makeSound(ModelLibrary.soundId(Sounds.ClockTick), Volume.ClockTick, true)
-	clockTickFast = makeSound(ModelLibrary.soundId(Sounds.ClockTickFast), Volume.ClockTick, true)
+	dayMusic = makeSound(Settings.DayMusicId, Volume.DayMusic, true, "Music")
+	sirenLoop = makeSound(ModelLibrary.soundId(Sounds.Siren), Volume.Siren, true, "Scare")
+	nightHum = makeSound(ModelLibrary.soundId(Sounds.NightHum), Volume.NightHum, true, "Ambience")
+	nightAmbience =
+		makeSound(ModelLibrary.soundId(Sounds.NightAmbience), Volume.NightAmbience, true, "Ambience")
+	clockTick = makeSound(ModelLibrary.soundId(Sounds.ClockTick), Volume.ClockTick, true, "SFX")
+	clockTickFast = makeSound(ModelLibrary.soundId(Sounds.ClockTickFast), Volume.ClockTick, true, "SFX")
 
 	Net.event("PhaseChanged").OnClientEvent:Connect(function(phase: string, endsAt: number)
 		show(phase, endsAt, true)

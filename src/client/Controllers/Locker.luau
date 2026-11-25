@@ -14,6 +14,7 @@ local FilesLogic = require(ReplicatedStorage.Shared.Logic.Files)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ScoresLogic = require(ReplicatedStorage.Shared.Logic.Scores)
+local AudioSettings = require(script.Parent.AudioSettings)
 local Glyphs = require(script.Parent.Glyphs)
 local Input = require(script.Parent.Input)
 
@@ -655,6 +656,19 @@ local function buildRecord()
 		recordView,
 		function()
 			layOutRemote:FireServer()
+		end
+	)
+	button(
+		{
+			AnchorPoint = Vector2.new(1, 1),
+			Position = UDim2.fromScale(1, 1),
+			Size = UDim2.fromOffset(140, 32),
+			Text = "SOUND",
+		},
+		recordView,
+		function()
+			show(nil)
+			AudioSettings.open()
 		end
 	)
 end
