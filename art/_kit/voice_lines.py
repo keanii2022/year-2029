@@ -20,10 +20,10 @@ CONFIG = os.path.join(ROOT, "src", "shared", "Config")
 
 # Lines the code plays by name that aren't written as { voice, text } in a config file
 EXTRA = {
-    "voice_error_training": ("robot", "ERROR. NEEDS MORE TRAINING."),
-    "voice_error_task": ("robot", "ERROR. TASK NOT FOUND."),
-    "voice_error_data": ("robot", "ERROR. NOT ENOUGH DATA."),
-    "voice_error_retry": ("robot", "ERROR. PLEASE TRY AGAIN TOMORROW."),
+    "voice_error_training": ("dad", "ERROR. NEEDS MORE TRAINING."),
+    "voice_error_task": ("dad", "ERROR. TASK NOT FOUND."),
+    "voice_error_data": ("dad", "ERROR. NOT ENOUGH DATA."),
+    "voice_error_retry": ("dad", "ERROR. PLEASE TRY AGAIN TOMORROW."),
     "button_good_job": ("bright", "Good job!"),
     "button_task_complete": ("bright", "Task complete!"),
     "button_you_did_it": ("bright", "You did it!"),
@@ -51,6 +51,8 @@ STYLES = {
     "walkie": ("Daniel", 170, "highpass=f=600,lowpass=f=2600,acrusher=bits=10:mix=0.4,volume=1.8"),
     "kid": ("Junior", 120, "asetrate=44100*1.12,aresample=44100,lowpass=f=4000,aecho=0.8:0.7:400|900:0.3|0.2,volume=1.2"),
     "robot": ("Ralph", 150, None),  # None: run through _kit/robotize.sh instead
+    # The robots copy the voice of the ghost kid's dad, so their lines sound like a tired man, a little off
+    "dad": ("Eddy (English (US))", 148, "asetrate=44100*0.94,aresample=44100,highpass=f=90,aecho=0.8:0.4:60:0.2,loudnorm=I=-14:TP=-1.5,volume=1.15"),
 }
 
 

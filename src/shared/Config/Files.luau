@@ -90,6 +90,24 @@ return {
 			text = "Everything must go! Every shelf, every aisle, every shopper... [the picture rolls] ...thank you for your loyalty. You may not leave.",
 		},
 		{
+			id = "tape_6",
+			kind = "tape",
+			title = "Tape: night manager, voice memo",
+			text = "Hey bud. Late shift again. Stay by the front desk, the helpers know you. If the lights go out, you stay put and I'll come find you. I always find you. ...Okay. Love you. Go to sleep.",
+		},
+		{
+			id = "tape_7",
+			kind = "tape",
+			title = "Tape: helper unit, playback test",
+			text = "[a man's voice, the same words over and over, each one a little more wrong] Hey bud. Hey bud. Hey. Bud. I'll come find you. I'll come. Find. You.",
+		},
+		{
+			id = "tv_6",
+			kind = "tv",
+			title = "TV: missing staff notice",
+			text = "The night manager has not clocked out. If you see him, do not follow him into the back aisles. The helpers will bring him to the front desk. The helpers are very good at finding people.",
+		},
+		{
 			id = "kid_1",
 			kind = "sighting",
 			title = "Sighting: a kid by the racks",
@@ -112,6 +130,12 @@ return {
 			kind = "sighting",
 			title = "Sighting: the sticker",
 			text = "Close enough to read the sticker on its coat. The kind the store gave lost children so staff knew to bring them to the desk. The date on it says 2026.",
+		},
+		{
+			id = "kid_5",
+			kind = "sighting",
+			title = "Sighting: it was listening",
+			text = "A robot down the aisle said \"hey bud\" in a tired man's voice. The kid stepped out of the dark toward it, then stopped, and shook its head, like it knew that wasn't really him.",
 		},
 	},
 

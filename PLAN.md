@@ -18,6 +18,8 @@ Guns work all day. On players they kill; on robots they only buy time. Anyone ca
 
 Why it works: the old warehouse's power and music still run on their old schedule. Lights on is the robots' study shift. Lights out is their gathering shift. The music is an old store loop nobody ever turned off.
 
+Story thread (Keani, 2026-11-25): the lost ghost kid's dad was the store's night manager and never came back from the back aisles. The robots learned his voice from the old tapes and copy it, which is why they talk like a tired man. The kid still waits for him and knows that voice isn't really him.
+
 ## What makes it fun
 
 1. Other players are the real danger. Every stranger has a gun and wants your stuff.
