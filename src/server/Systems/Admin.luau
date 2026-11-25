@@ -15,6 +15,7 @@ local WarehouseSizes = require(ReplicatedStorage.Shared.Logic.WarehouseSizes)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Combat = require(script.Parent.Combat)
 local DayNight = require(script.Parent.DayNight)
+local PaEvents = require(script.Parent.PaEvents)
 local DevTeleport = require(script.Parent.DevTeleport)
 local Inventory = require(script.Parent.Inventory)
 local Robots = require(script.Parent.Robots)
@@ -384,6 +385,10 @@ local commands: { [string]: (player: Player, arg: unknown) -> string? } = {
 	give_item = giveItem,
 	give_food_kit = giveFoodKit,
 	god = toggleGod,
+	pa_event = function()
+		local name = PaEvents.trigger()
+		return if name then `PA event: {name}` else "No spot free for an event"
+	end,
 	infinite_ammo = toggleInfiniteAmmo,
 	speed = cycleSpeed,
 	fly = toggleFly,

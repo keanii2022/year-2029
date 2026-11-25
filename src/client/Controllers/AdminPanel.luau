@@ -208,6 +208,7 @@ local function timeSpecs(): { ButtonSpec }
 		{ text = "LIGHTS ON", command = "time_skip", arg = "Day" },
 		{ text = "SIREN", command = "time_skip", arg = "Siren" },
 		{ text = "LIGHTS OUT", command = "time_skip", arg = "Night" },
+		{ text = "PA EVENT NOW", command = "pa_event" },
 		{
 			text = function()
 				return if ReplicatedStorage:GetAttribute("ClockFrozen") == true
