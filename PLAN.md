@@ -397,7 +397,7 @@ First playtest, 2026-11-24: running feels good. Everything else felt wrong: open
 - **Status:** current
 - **Dependencies:** 29
 - **Scope:** Grab, Callouts, Input, TouchButtons, Hints, Robots, Combat, SimPlayers, Supplies/Loot, WarehouseGen night lights and set fill, Lighting, Locker, Scores
-- Carrying spins fast on all three axes on every device. Holding call opens a ring of 7 named calls. Night gets natural path lights, exit signs and lamps you can carry. Robot rooms are fuller, with more robots spread out and a guaranteed good find. Robots are loud at night, notice you up close, and can be shot: they stagger, get knocked down for a while, then come back angry. The locker and board stand straight. Done when Keani and their son play it and it feels right.
+- Carrying spins fast on all three axes on every device. Holding call opens a ring of 7 named calls. Night gets natural path lights, exit signs and lamps you can carry. Robot rooms are fuller, with more robots spread out and a guaranteed good find. Robots are loud at night, notice you up close, and can be shot: they stagger, get knocked down for a while, then come back angry. The locker and board stand straight. Then: grab off shelves and place almost anywhere, battery swap slot, robots hunt in packs with day prowlers, glowing prize chests in every hall, PA events with light beams, warehouse size servers (Small/Medium/Large) with a public-lobby bot fill, and a rebuilt light grid hall. Done when Keani and their son play it and it feels right.
 
 ## After launch: talk about
 
