@@ -54,6 +54,8 @@ return {
 		expect(reason).toBe("blocked")
 		_, reason = place({ distance = 19 })
 		expect(reason).toBe("too far")
+		_, reason = place({ playerInWay = true, blocked = true })
+		expect(reason).toBe("player")
 		_, reason = place({ groundFound = false })
 		expect(reason).toBe("no ground")
 	end,

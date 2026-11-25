@@ -7,6 +7,8 @@
 -- faster the longer it's held, and snaps to the step when let go.
 -- Asks the server to grab or drop, streams aim and rotation, and draws the placement ghost.
 -- Someone else's placed piece needs the button held while a pry bar fills; the server times it too.
+-- While carrying, a tap places the prop at the ghost; holding the button lets go right there with
+-- physics, so nothing can leave you stuck holding it. The same bar fills for that hold.
 local CollectionService = game:GetService("CollectionService")
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
@@ -82,6 +84,8 @@ type Held = { axis: GrabMath.Axis?, direction: number, since: number, turned: nu
 local held: { [string]: Held } = {}
 local lastAim = 0
 local prying: { prop: PVInstance, startedAt: number }? = nil
+-- When the grab button went down while carrying, until it's let up or the hold lets go
+local dropPressedAt: number? = nil
 local lastTarget: "grab" | "pry" | nil = nil
 
 local ghost: BoxHandleAdornment
@@ -109,22 +113,32 @@ local function solid(part: BasePart): boolean
 	return part.CanCollide and part.Transparency < 0.9
 end
 
--- The grabbable along a ray from the camera. Range counts from the camera, so it adds the camera's
--- distance to the root on top of the server's reach (measured from the root).
-local function grabbableAlong(origin: Vector3, direction: Vector3): PVInstance?
-	local camera = workspace.CurrentCamera
+local function rootPart(): BasePart?
 	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if not camera or not root then
-		return nil
-	end
-	local ignore: { Instance } = { character :: Instance, camera }
+	return character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+end
+
+-- Same reach the server checks: gap from the root to the prop's edge, free straight up a bit.
+local function inReach(root: BasePart, prop: PVInstance): boolean
+	local boxCFrame, size = boxOf(prop)
+	local offset = boxCFrame.Position - root.Position
+	local gap = GrabMath.reachGap(offset.X, offset.Y, offset.Z, Settings.GrabReachUp)
+	return gap - size.Magnitude / 2 <= Settings.GrabReach
+end
+
+-- The grabbable the ray hits first, looking through see-through and non-solid parts.
+local function grabbableHit(
+	origin: Vector3,
+	direction: Vector3,
+	range: number,
+	ignore: { Instance }
+): PVInstance?
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	local range = Settings.GrabReach + (origin - root.Position).Magnitude
+	local skip = table.clone(ignore)
 	for _ = 1, LOOK_THROUGH do
-		params.FilterDescendantsInstances = ignore
-		local hit = workspace:Raycast(origin, direction.Unit * range, params)
+		params.FilterDescendantsInstances = skip
+		local hit = workspace:Raycast(origin, direction * range, params)
 		if not hit then
 			return nil
 		end
@@ -136,9 +150,74 @@ local function grabbableAlong(origin: Vector3, direction: Vector3): PVInstance?
 		if not part:IsA("BasePart") or solid(part) then
 			return nil
 		end
-		table.insert(ignore, part)
+		table.insert(skip, part)
 	end
 	return nil
+end
+
+-- Nothing hit dead on: the grabbable nearest the ray inside the aim cone. Rack bays and other big
+-- meshes have collision hulls that wrap the stock sitting on them, so the straight ray stops on
+-- the rack; a prop still counts as seen when whatever's in front of it is right up against it.
+local function grabbableNear(
+	origin: Vector3,
+	direction: Vector3,
+	range: number,
+	ignore: { Instance }
+): PVInstance?
+	local width = (Settings.AimConeRadius + 2) * 2
+	local params = OverlapParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = ignore
+	params.MaxParts = 200
+	local along = CFrame.lookAt(origin + direction * range / 2, origin + direction * range)
+	local best, bestScore = nil, math.huge
+	local seen = {}
+	for _, part in workspace:GetPartBoundsInBox(along, Vector3.new(width, width, range), params) do
+		local prop = grabbableFrom(part)
+		if not prop or seen[prop] then
+			continue
+		end
+		seen[prop] = true
+		local boxCFrame, size = boxOf(prop)
+		local toCenter = boxCFrame.Position - origin
+		local ahead = toCenter:Dot(direction)
+		if ahead <= 0 then
+			continue
+		end
+		local score = (toCenter - direction * ahead).Magnitude - math.min(size.X, size.Y, size.Z) / 2
+		if score > Settings.AimConeRadius or score >= bestScore then
+			continue
+		end
+		local rayParams = RaycastParams.new()
+		rayParams.FilterType = Enum.RaycastFilterType.Exclude
+		rayParams.FilterDescendantsInstances = { prop, table.unpack(ignore) }
+		local blocker = workspace:Raycast(origin, toCenter, rayParams)
+		local slack = size.Magnitude / 2 + 1.5
+		if blocker and blocker.Distance < toCenter.Magnitude - slack then
+			continue
+		end
+		best, bestScore = prop, score
+	end
+	return best
+end
+
+-- The grabbable under the crosshair and in reach. Range counts from the camera, so it adds the
+-- camera's distance to the root on top of the server's reach (measured from the root).
+local function grabbableAlong(origin: Vector3, direction: Vector3): PVInstance?
+	local camera = workspace.CurrentCamera
+	local root = rootPart()
+	if not camera or not root then
+		return nil
+	end
+	local ignore: { Instance } = { player.Character :: Instance, camera }
+	local range = Settings.GrabReach + Settings.GrabReachUp + (origin - root.Position).Magnitude
+	local unit = direction.Unit
+	local prop = grabbableHit(origin, unit, range, ignore)
+	if prop and inReach(root, prop) then
+		return prop
+	end
+	prop = grabbableNear(origin, unit, range, ignore)
+	return if prop and inReach(root, prop) then prop else nil
 end
 
 local function needsPry(prop: PVInstance): boolean
@@ -184,12 +263,25 @@ local function tryGrab(device: Input.Device)
 	end
 end
 
--- Fire with empty hands: grab, drop, or hold to pry
+local function stopDropHold()
+	dropPressedAt = nil
+	if not prying then
+		pryBar.Visible = false
+	end
+end
+
+-- Fire with empty hands: grab, hold to pry; while carrying, tap to place or hold to let go
 local function onToggle(began: boolean, device: Input.Device)
-	if not began then
+	if holding then
+		if began then
+			dropPressedAt = os.clock()
+			pryFill.Size = UDim2.fromScale(0, 1)
+		elseif dropPressedAt then
+			stopDropHold()
+			dropRemote:FireServer(false)
+		end
+	elseif not began then
 		stopPry(true)
-	elseif holding then
-		dropRemote:FireServer()
 	else
 		tryGrab(device)
 	end
@@ -323,6 +415,7 @@ end
 local function onState(prop: PVInstance?)
 	holding = prop
 	stopPry(false)
+	stopDropHold()
 	if prop then
 		rotation = boxOf(prop).Rotation
 		holdDistance = Settings.DefaultHoldDistance
@@ -333,10 +426,14 @@ local function onState(prop: PVInstance?)
 		unbindCarryControls()
 		ghost.Visible = false
 		Hints.set("carry", nil)
+		Hints.set("placeRefused", nil)
 	end
 end
 
-local function onGhost(landed: CFrame?, size: Vector3, ok: boolean)
+-- reason: short words for why it can't go down here, only sent with a red ghost
+local function onGhost(landed: CFrame?, size: Vector3, ok: boolean, reason: string?)
+	local refused = if holding and not ok and reason then `{reason}   Hold \{Fire\} Let go` else nil
+	Hints.set("placeRefused", refused, 2, "warn")
 	if not holding or not landed then
 		ghost.Visible = false
 		return
@@ -414,6 +511,15 @@ local function onRender(dt: number)
 	end
 
 	local now = os.clock()
+	if dropPressedAt then
+		local progress = math.clamp((now - dropPressedAt) / Settings.HoldToLetGo, 0, 1)
+		pryFill.Size = UDim2.fromScale(progress, 1)
+		pryBar.Visible = progress > 0.15
+		if progress >= 1 then
+			stopDropHold()
+			dropRemote:FireServer(true)
+		end
+	end
 	for _, hold in held do
 		local heldFor = now - hold.since
 		if heldFor < Settings.RepeatDelay then

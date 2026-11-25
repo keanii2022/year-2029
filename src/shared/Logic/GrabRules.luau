@@ -16,6 +16,7 @@ export type PlaceCheck = {
 	heightAboveFeet: number,
 	maxHeightAboveFeet: number,
 	blocked: boolean,
+	playerInWay: boolean?,
 }
 
 function GrabRules.canGrab(check: GrabCheck): (boolean, string?)
@@ -43,6 +44,9 @@ function GrabRules.canPlace(check: PlaceCheck): (boolean, string?)
 	end
 	if check.heightAboveFeet > check.maxHeightAboveFeet then
 		return false, "too high"
+	end
+	if check.playerInWay then
+		return false, "player"
 	end
 	if check.blocked then
 		return false, "blocked"

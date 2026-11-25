@@ -88,6 +88,36 @@ local settings = {
 	TapeChance = 0.12,
 	AisleSignGap = 3, -- aisle number signs hang with their top this far above the racks
 	RackWreckChance = 0.03, -- kit only: a collapsed or toppled bay now and then
+	-- Loose stock on the racks: real props you can pick up, in the bays' empty pallet slots
+	ShelfStock = {
+		"box_loose",
+		"box_loose",
+		"box_loose",
+		"canned_food",
+		"cereal_box",
+		"rubber_duck",
+		"jack_in_the_box",
+		"music_box",
+		"toaster",
+		"boombox",
+	},
+	ShelfStockPerSlot = { 1, 3 },
+	ShelfStockChance = 0.7, -- each empty slot gets stock this often
+	ShelfStockMax = 400, -- props across the whole warehouse, so big maps stay light
+	-- Empty slots in each kit bay (art/warehouse/racking.py): load bottom height and slot centre x,
+	-- in the bay's own space. Ground slots sit on the floor; the rest get a wire deck across the beams.
+	KitShelfGaps = {
+		rack_bay_full = { { y = 11, x = 2.8 } },
+		rack_bay_sparse = {
+			{ y = 0, x = 2.8 },
+			{ y = 5.5, x = -2.8 },
+			{ y = 16.5, x = -2.8 },
+			{ y = 22, x = -2.8 },
+			{ y = 22, x = 2.8 },
+		},
+		rack_bay_bulk = { { y = 11, x = 2.8 } },
+	},
+	KitShelfSlot = Vector3.new(5.4, 4.6, 4.1), -- width, clear height, depth of one pallet slot
 
 	-- Strip lights on cables, cold over racking, warm over the store departments
 	LightLength = 10,
