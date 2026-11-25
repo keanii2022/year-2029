@@ -11,6 +11,7 @@ local AdminAccess = require(ReplicatedStorage.Shared.Logic.AdminAccess)
 local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Combat = require(script.Parent.Combat)
 local DayNight = require(script.Parent.DayNight)
 local DevTeleport = require(script.Parent.DevTeleport)
 local Inventory = require(script.Parent.Inventory)
@@ -87,6 +88,7 @@ local function giveGun(player: Player, gunId: unknown): string
 		return "Bag full"
 	end
 	giveStack(player, gun.ammo)
+	Combat.fillMag(player, id)
 	return `Gave {itemName(id)}`
 end
 
@@ -115,6 +117,11 @@ local function giveAllGuns(player: Player): string
 			giveStack(player, blasters[id].ammo)
 		end
 	end
+	for _, id in gunIdsByRank() do
+		if Inventory.has(player, id) then
+			Combat.fillMag(player, id)
+		end
+	end
 	local total = #gunIdsByRank()
 	return if given == total then "Gave every gun" else `Gave {given} of {total} guns, bag full`
 end
@@ -126,6 +133,9 @@ local function giveAmmo(player: Player): string
 		if Inventory.has(player, id) and not given[gun.ammo] then
 			given[gun.ammo] = true
 			giveStack(player, gun.ammo)
+		end
+		if Inventory.has(player, id) then
+			Combat.fillMag(player, id)
 		end
 	end
 	return if next(given) then "Ammo topped up" else "No guns to load"

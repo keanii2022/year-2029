@@ -408,6 +408,11 @@ local function setUpPlayer(player: Player)
 	end
 end
 
+-- Admin gear arrives loaded so testers can fire right away
+function Combat.fillMag(player: Player, gunId: string)
+	fillMag(player, stateOf(player), gunId)
+end
+
 function Combat.Init()
 	Players.RespawnTime = settings.RespawnDelay
 	hitRemote = Net.event("GunHit")
