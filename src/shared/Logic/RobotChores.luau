@@ -9,7 +9,7 @@ export type SpotSettings = { MinDistance: number, MaxDistance: number, Reach: nu
 
 -- out: pose walking to the spot. work: pose while doing the chore there. Home is always "walk".
 local POSES: { [string]: { out: string, work: string } } = {
-	carry = { out = "carry", work = "restock" }, -- brings a box out and shelves it
+	carry = { out = "carry", work = "shelve" }, -- brings a box out, shelves it, tidies the shelf
 	sweep = { out = "walk", work = "sweep" },
 	restock = { out = "walk", work = "restock" },
 }
@@ -55,6 +55,13 @@ function RobotChores.pickSpot(
 	-- aisle spots point away from the rack face; end spots point across the cross aisle
 	local sign = if spot.kind == "aisle" then -1 else 1
 	return { x = spot.x, z = spot.z }, { x = spot.x + sign * spot.dx * 3, z = spot.z + sign * spot.dz * 3 }
+end
+
+-- How far a carrier is through shelving its box, elapsed seconds after arriving: holds it for lift
+-- seconds, slides it onto the shelf over slide seconds (progress 0..1), then placed is true.
+function RobotChores.shelve(elapsed: number, lift: number, slide: number): (number, boolean)
+	local progress = math.clamp((elapsed - lift) / slide, 0, 1)
+	return progress, elapsed >= lift + slide
 end
 
 -- How many more robots to send out near one player.

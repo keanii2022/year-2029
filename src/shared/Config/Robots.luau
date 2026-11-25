@@ -101,6 +101,20 @@ return {
 		BoxModel = "box_loose",
 		BoxSize = Vector3.new(2.4, 1.8, 2.4), -- stand-in until the model is uploaded
 		BoxColor = Color3.fromRGB(170, 130, 85),
+		TapeColor = Color3.fromRGB(196, 170, 120),
+		-- Carriers: lift the box, slide it onto the shelf in front, then tidy the shelf
+		ShelveLift = 0.8,
+		ShelveSlide = 1.6,
+		ShelfReach = 3.5, -- studs in front of the robot
+		ShelfHeight = 4.5, -- studs off the floor
+		BoxStays = 45, -- seconds a shelved box stays before it's tidied away
+		-- Cleaners: a broom of plain blocks, swept side to side with the body, kicking up dust
+		BroomColor = Color3.fromRGB(120, 86, 52),
+		BristleColor = Color3.fromRGB(196, 168, 96),
+		SweepYaw = 0.3, -- radians the body turns each way while sweeping
+		RestockYaw = 0.12, -- the cook shifts its weight between reaches
+		DustColor = Color3.fromRGB(180, 172, 160),
+		DustPuff = 5, -- particles at each end of a sweep
 	},
 
 	-- Night sweeping and hauling
@@ -173,4 +187,20 @@ return {
 	CaughtNightLine = "A ROBOT GOT YOU IN THE DARK.",
 	IdleSounds = { "oil_drip", "hydraulic_hiss" },
 	IdleSoundGap = { 8, 20 },
+
+	-- Keani's robot voice, layered over the mechanical sounds above. One line at a time per robot.
+	Voice = {
+		Chatter = "robot_chatter",
+		ChatterEvery = { 10, 25 }, -- seconds, per robot, while calm and a player is in range
+		ChatterRange = 45,
+		Task = "robot_task", -- once per errand, when you walk up on one at work
+		TaskRange = 15,
+		Notice = "robot_notice", -- it looks at you (turns suspicious)
+		Resume = "robot_resume", -- back to work after being suspicious
+		Error = "robot_error",
+		ErrorStates = { "stalled", "disabled" },
+		CalmStates = { "study", "errand", "return" },
+		Volume = 0.85,
+		RollOff = { 6, 55 },
+	},
 }

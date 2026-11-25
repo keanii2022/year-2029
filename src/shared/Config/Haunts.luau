@@ -26,11 +26,18 @@ return {
 
 	-- Client side of the private scares
 	Kid = {
-		Distance = { Min = 24, Max = 40 },
+		Distance = { Min = 32, Max = 42 }, -- past the first voice line, so each one is earned
 		BeamEdge = 4, -- degrees past the flashlight cone edge, so it stands just outside the light
 		ViewEdge = 30, -- degrees off centre when the flashlight is off
-		Hold = 4, -- seconds it stands there if you don't come closer
-		VanishDistance = 14,
+		Hold = 25, -- seconds it stands there if you don't come closer
+		-- Keani's lines as you walk up, farthest first, each once per sighting
+		Voice = {
+			{ distance = 28, sound = "ghost_kid_near_1" },
+			{ distance = 18, sound = "ghost_kid_near_2" },
+			{ distance = 7, sound = "ghost_kid_close" },
+		},
+		VoiceVolume = 0.8,
+		VanishAfterClose = 1.5, -- seconds after the close line before it's gone
 		TiltAfter = 0.8,
 		TiltDegrees = 55,
 		FadeTime = 0.35,
@@ -43,7 +50,7 @@ return {
 
 	Sounds = {
 		Giggle = { "kid_giggle", "kid_humming", "kid_come_find_me" },
-		KidAppear = "kid_giggle",
+		KidAppear = "ghost_kid_cry",
 		Greeter = "announcer_welcome",
 		PigeonBurst = "pigeon_flutter", -- not in the sound pack yet: silent until one is uploaded
 		RatScatter = "rat_squeak", -- same

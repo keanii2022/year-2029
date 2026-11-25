@@ -14,7 +14,7 @@ return {
 	["a carrier brings the box out and shelves it"] = function()
 		local out, work = RobotChores.poses("carry")
 		expect(out).toBe("carry")
-		expect(work).toBe("restock")
+		expect(work).toBe("shelve")
 		out, work = RobotChores.poses("sweep")
 		expect(out).toBe("walk")
 		expect(work).toBe("sweep")
@@ -40,6 +40,17 @@ return {
 		local spots = { { x = 300, z = 0, kind = "end", dx = 0, dz = 1 } }
 		expect(RobotChores.pickSpot(spots, HOME, { x = 290, z = 0 }, SETTINGS, 0.3)).toBe(nil)
 		expect(RobotChores.pickSpot({}, HOME, HOME, SETTINGS, 0.3)).toBe(nil)
+	end,
+	["a carrier holds the box, slides it onto the shelf, then lets go"] = function()
+		local progress, placed = RobotChores.shelve(0.5, 0.8, 1.6)
+		expect(progress).toBe(0)
+		expect(placed).toBe(false)
+		progress, placed = RobotChores.shelve(1.6, 0.8, 1.6)
+		expect(progress).toBeNear(0.5)
+		expect(placed).toBe(false)
+		progress, placed = RobotChores.shelve(3, 0.8, 1.6)
+		expect(progress).toBe(1)
+		expect(placed).toBe(true)
 	end,
 	["only as many go out as a player is missing"] = function()
 		expect(RobotChores.needed(0, 2)).toBe(2)

@@ -88,7 +88,7 @@ return {
 				{ "DO" },
 				{ "{Use}", "Open, sit, hide, switch on" },
 				{ "{Flashlight}", "Flashlight" },
-				{ "{Psst}", "Psst at players close by" },
+				{ "{Callout}", "Call out. Hold: switch call" },
 				{ "{Record}", "Your record, looks, blueprint" },
 			},
 			right = {
@@ -125,7 +125,7 @@ return {
 				{ "{Fire}", "Use it. Empty hands: grab" },
 				{ "{HotbarNext}", "Next item" },
 				{ "{Backpack}", "Backpack" },
-				{ "{Psst}", "Psst" },
+				{ "{Callout}", "Call out. Hold: switch" },
 				{ "{Jump}", "Jump. Hidden: hold breath" },
 				{ "{Use}", "Use. Nothing there: reload" },
 				{ "{=RS}", "Look. Click: crouch" },
@@ -142,7 +142,7 @@ return {
 				{ "{Crouch}", "Crouch: slow, quiet, hard to spot" },
 				{ "{Sprint}", "Sprint, uses energy" },
 				{ "OTHER" },
-				{ "{Psst}", "Psst at players close by" },
+				{ "{Callout} {CalloutNext}", "Call out, switch call" },
 				{ "{Record}", "Your record, looks, blueprint" },
 			},
 			right = {
