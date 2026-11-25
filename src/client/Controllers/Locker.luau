@@ -1,6 +1,7 @@
 -- The locker and your record. Opening a locker shows STASH: your bag and your saved locker side
 -- by side, click a stack to move it. M (or Select on gamepad) opens RECORD anywhere: stats,
 -- earned looks and laying out your blueprint. Same dark look as Hud; warnings in red spray paint.
+local ContextActionService = game:GetService("ContextActionService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,6 +23,7 @@ local ROW = Color3.fromRGB(30, 30, 33)
 local TEXT = Color3.fromRGB(225, 222, 215)
 local SPRAY_RED = Color3.fromRGB(200, 28, 22)
 local FEEDBACK_TIME = 2.5
+local PAD_ACTION = "LockerPad"
 local ROW_HEIGHT = 30
 local SLOTS = { "Hat", "Colour", "Trail" }
 -- Hats and trails can be taken off; everyone always wears a colour
@@ -262,7 +264,18 @@ local function refreshRecord()
 	end
 end
 
-local function show(target: "stash" | "record" | nil)
+local show: (target: "stash" | "record" | nil) -> ()
+
+-- Circle shuts the panel. Input drops the pad's buttons while the panel holds the selection, so
+-- without this the only way out on a controller was finding the close button.
+local function onPad(_action: string, inputState: Enum.UserInputState): Enum.ContextActionResult
+	if inputState == Enum.UserInputState.Begin then
+		show(nil)
+	end
+	return Enum.ContextActionResult.Sink
+end
+
+function show(target: "stash" | "record" | nil)
 	if target == nil and lockerOpen then
 		lockerOpen = false
 		closeRemote:FireServer()
@@ -271,6 +284,17 @@ local function show(target: "stash" | "record" | nil)
 	panel.Visible = target ~= nil
 	-- A visible modal button frees the mouse while the panel is up
 	closeButton.Modal = target ~= nil
+	if target then
+		ContextActionService:BindActionAtPriority(
+			PAD_ACTION,
+			onPad,
+			false,
+			Enum.ContextActionPriority.High.Value,
+			Enum.KeyCode.ButtonB
+		)
+	else
+		ContextActionService:UnbindAction(PAD_ACTION)
+	end
 	stashView.Visible = target == "stash"
 	recordView.Visible = target == "record"
 	stashTab.Visible = lockerOpen
@@ -535,6 +559,7 @@ end
 function Locker.Init()
 	gui = Instance.new("ScreenGui")
 	gui.Name = "Locker"
+	Input.markMenu(gui)
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 5
@@ -586,11 +611,21 @@ function Locker.Start()
 	Net.event("RecordSync"):FireServer()
 	Net.event("SavesSync"):FireServer()
 
-	player.CharacterRemoving:Connect(function()
+	local function closeStash()
 		if view == "stash" then
 			show(nil)
 		end
+	end
+	player.CharacterRemoving:Connect(closeStash)
+	player.CharacterAdded:Connect(function(character)
+		character:WaitForChild("Humanoid").Died:Connect(closeStash)
 	end)
+	if player.Character then
+		local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.Died:Connect(closeStash)
+		end
+	end
 	Input.bind("Record", onRecord)
 	RunService.RenderStepped:Connect(update)
 end

@@ -15,6 +15,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Glyphs = require(script.Parent.Glyphs)
+local Input = require(script.Parent.Input)
 
 local settings = Config.Admin
 local blasters = Config.Guns.Blasters
@@ -658,6 +659,7 @@ local function enable()
 	commandRemote = Net.event("AdminCommand")
 	gui = Instance.new("ScreenGui")
 	gui.Name = "AdminPanel"
+	Input.markMenu(gui)
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 7

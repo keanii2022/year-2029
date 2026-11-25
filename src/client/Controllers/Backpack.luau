@@ -325,6 +325,7 @@ end
 function Backpack.Init()
 	gui = Instance.new("ScreenGui")
 	gui.Name = "Backpack"
+	Input.markMenu(gui)
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 6

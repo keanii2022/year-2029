@@ -17,10 +17,23 @@ local function vector(v: { number }): Vector3
 	return Vector3.new(v[1], v[2], v[3])
 end
 
-local function addScreen(part: BasePart, imageId: string?)
+-- front: the model's front (+z in model space) in world axes.
+local function addScreen(part: BasePart, imageId: string?, front: Vector3)
+	if part:IsA("MeshPart") then
+		-- The uploaded mesh brings its screen.png baked in as its own texture, which can't be swapped.
+		-- The image below carries the picture from here on, so the glass goes dark underneath it.
+		part.TextureID = ""
+		part.Color = Config.Models.ScreenGlassColor
+		for _, child in part:GetChildren() do
+			if child:IsA("SurfaceAppearance") then
+				child:Destroy()
+			end
+		end
+	end
+	local facing = part.CFrame:VectorToObjectSpace(front)
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "Screen"
-	gui.Face = Enum.NormalId.Back -- screens face the model's front, which is +z
+	gui.Face = (Enum.NormalId :: any)[Manifest.screenFace(facing.X, facing.Y, facing.Z)]
 	gui.LightInfluence = 0
 	gui.CanvasSize = Vector2.new(800, 600)
 	local image = Instance.new("ImageLabel")
@@ -62,6 +75,7 @@ function ModelRig.rig(model: Model): { [string]: Joint }
 	end
 	root.Anchored = true
 	model.PrimaryPart = root
+	local front = model:GetPivot().ZVector
 
 	for _, info in entry.parts do
 		local part = parts[info.name]
@@ -71,7 +85,7 @@ function ModelRig.rig(model: Model): { [string]: Joint }
 		if Manifest.isGlow(info.name) then
 			part.Material = Enum.Material.Neon
 		elseif Manifest.isScreen(info.name) then
-			addScreen(part, Manifest.contentId(entry.screenId))
+			addScreen(part, Manifest.contentId(entry.screenId), front)
 		end
 		if part == root then
 			continue

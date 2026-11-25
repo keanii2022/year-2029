@@ -12,6 +12,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local InventoryItems = require(ReplicatedStorage.Shared.Logic.InventoryItems)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Glyphs = require(script.Parent.Glyphs)
+local Input = require(script.Parent.Input)
 
 local Settings = Config.Containers
 local player = Players.LocalPlayer
@@ -347,6 +348,7 @@ end
 function Containers.Init()
 	gui = Instance.new("ScreenGui")
 	gui.Name = "Containers"
+	Input.markMenu(gui)
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 5
