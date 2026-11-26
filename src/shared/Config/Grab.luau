@@ -23,6 +23,11 @@ return {
 	PlaceSlack = 0.1, -- extra sink the server allows on top, so a green ghost always places
 	PushMax = 1.5, -- a blocked spot is nudged out along the blocking face up to this far
 	PushStep = 0.25,
+	-- Still blocked: try stepping the spot back toward you up to SearchBack and sideways up to
+	-- SearchSide, SearchStep at a time, so a cluttered corner still finds the nearest free spot
+	SearchBack = 3,
+	SearchSide = 1,
+	SearchStep = 1, -- 11 tries at most, so a red ghost never costs a frame
 	CameraSlack = 6, -- studs the reported camera may sit from the head before the head is used instead
 	HoldToLetGo = 0.6, -- seconds holding the grab button to let go in place, whatever's in the way
 	SettleSeconds = 6, -- a let-go prop falls with physics, then freezes once still or after this

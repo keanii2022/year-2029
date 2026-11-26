@@ -111,4 +111,16 @@ return {
 		expect(GrabPlace.snapFlush(3.2, 3, 1, 1, 2, 1, 0.75)).toBe(nil)
 		expect(GrabPlace.snapFlush(0, 0, 1, 1, 2, 1, 0.75)).toBe(nil)
 	end,
+	["a blocked spot searches back toward the placer first, nearest first"] = function()
+		local offsets = GrabPlace.searchOffsets(2, 1, 1)
+		expect(#offsets).toBe(8)
+		expect(offsets[1][1]).toBe(1)
+		expect(offsets[1][2]).toBe(0)
+		local last = offsets[#offsets]
+		expect(last[1]).toBe(2)
+		expect(math.abs(last[2])).toBe(1)
+		for _, offset in offsets do
+			expect(offset[1] == 0 and offset[2] == 0).toBe(false)
+		end
+	end,
 }

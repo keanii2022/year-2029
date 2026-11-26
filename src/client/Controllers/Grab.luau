@@ -683,6 +683,10 @@ local function solve(camera: Camera, head: BasePart, root: BasePart, humanoid: H
 	local screen = camera.ViewportSize / 2
 	local ray = camera:ViewportPointToRay(screen.X, screen.Y)
 	local hit = aimHit(ray.Origin, ray.Direction, ignore)
+	-- aimed past arm's reach: hold it out in front instead of showing a red ghost far away
+	if hit and (hit.Position - root.Position).Magnitude > Settings.PlaceReach - 1 then
+		hit = nil
+	end
 	local kind = if hit then GrabPlace.faceKind(hit.Normal.Y) else nil
 	local box
 	local wallNormal: Vector3? = nil
@@ -711,7 +715,8 @@ local function solve(camera: Camera, head: BasePart, root: BasePart, humanoid: H
 		if not edge then
 			snapped = toGrid(box, wallNormal)
 		end
-		box = settle(snapped) or box
+		-- always land again: a grid step off the edge of a top would otherwise leave it floating
+		box = land(snapped, ignore) or box
 	end
 
 	local eye = eyeOf(camera, head)
@@ -738,6 +743,20 @@ local function solve(camera: Camera, head: BasePart, root: BasePart, humanoid: H
 		for _, distance in GrabPlace.pushSteps(Settings.PushMax, Settings.PushStep) do
 			local moved = box + out * distance
 			if check(moved, true) then
+				return { box = moved, ok = true }, nil
+			end
+		end
+	end
+	-- Still blocked: the nearest free spot a little back toward you or to the side, landed again
+	local toward = Vector3.new(root.Position.X - box.X, 0, root.Position.Z - box.Z)
+	if toward.Magnitude > 0.1 then
+		toward = toward.Unit
+		local side = Vector3.new(-toward.Z, 0, toward.X)
+		for _, offset in
+			GrabPlace.searchOffsets(Settings.SearchBack, Settings.SearchSide, Settings.SearchStep)
+		do
+			local moved = land(box + toward * offset[1] + side * offset[2], ignore)
+			if moved and check(moved, true) then
 				return { box = moved, ok = true }, nil
 			end
 		end

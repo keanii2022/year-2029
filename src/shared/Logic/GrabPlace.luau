@@ -109,6 +109,29 @@ function GrabPlace.pushSteps(maxPush: number, step: number): { number }
 	return steps
 end
 
+-- Where to try next when a spot is blocked and pushing off the blocker didn't free it: back
+-- toward the placer and a little to either side, nearest first. Each is { back, side } in studs.
+function GrabPlace.searchOffsets(maxBack: number, maxSide: number, step: number): { { number } }
+	local offsets = {}
+	local backSteps = math.floor(maxBack / step + 1e-6)
+	local sideSteps = math.floor(maxSide / step + 1e-6)
+	for b = 0, backSteps do
+		for s = -sideSteps, sideSteps do
+			if b ~= 0 or s ~= 0 then
+				table.insert(offsets, { b * step, s * step })
+			end
+		end
+	end
+	table.sort(offsets, function(a, c)
+		local da, dc = a[1] * a[1] + a[2] * a[2], c[1] * c[1] + c[2] * c[2]
+		if da ~= dc then
+			return da < dc
+		end
+		return a[1] > c[1] -- at equal distance, stepping back beats stepping sideways
+	end)
+	return offsets
+end
+
 -- The face of a box a point sits furthest outside of, as a unit normal in the box's own space.
 -- x / y / z is the point and hx / hy / hz the half sides, both in the box's space.
 function GrabPlace.faceNormal(
