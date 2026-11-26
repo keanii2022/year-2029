@@ -298,8 +298,10 @@ function scares.ball_roll(done)
 	end
 	stand(ball, from, to)
 	local start = ball:GetPivot()
-	local _, size = ball:GetBoundingBox()
+	local box, size = ball:GetBoundingBox()
 	local radius = math.max(size.Y / 2, 0.1)
+	-- Spin about the ball's middle: the uploaded mesh pivots at its bottom, which swung it into the floor
+	local centerOffset = start:PointToObjectSpace(box.Position)
 	local path = to - from
 	local axis = path:Cross(Vector3.yAxis)
 	axis = if axis.Magnitude > 1e-3 then axis.Unit else Vector3.xAxis
@@ -308,8 +310,10 @@ function scares.ball_roll(done)
 		local eased = 1 - (1 - alpha) ^ 2
 		local spin = -path.Magnitude * eased / radius
 		ball:PivotTo(
-			CFrame.new(path * eased) * CFrame.fromAxisAngle(axis, spin) * (start - start.Position)
-				+ start.Position
+			CFrame.new(box.Position + path * eased)
+				* CFrame.fromAxisAngle(axis, spin)
+				* start.Rotation
+				* CFrame.new(-centerOffset)
 		)
 		if alpha < 1 then
 			return false
