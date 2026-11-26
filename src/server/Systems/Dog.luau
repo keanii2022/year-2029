@@ -28,6 +28,7 @@ local ModelRig = require(ReplicatedStorage.Shared.ModelRig)
 local Net = require(ReplicatedStorage.Shared.Net)
 local WarehouseGen = require(ReplicatedStorage.Shared.Logic.WarehouseGen)
 local DayNight = require(script.Parent.DayNight)
+local Interact = require(script.Parent.Interact)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
 local Robots = require(script.Parent.Robots)
@@ -386,6 +387,30 @@ local function turnToward(current: Dog, direction: Vector3, dt: number): boolean
 	return true
 end
 
+local wallParams = RaycastParams.new()
+wallParams.FilterType = Enum.RaycastFilterType.Exclude
+wallParams.RespectCanCollide = true
+
+-- Something fixed and solid right in front: a wall, a shelf, a room's shell. Loose props and
+-- people don't count.
+local function wallAhead(current: Dog, direction: Vector3, step: number): boolean
+	local ignore: { Instance } = { current.model }
+	for _, player in Players:GetPlayers() do
+		if player.Character then
+			table.insert(ignore, player.Character)
+		end
+	end
+	wallParams.FilterDescendantsInstances = ignore
+	local hit = workspace:Raycast(current.position + Vector3.yAxis * 1.2, direction * (step + 1), wallParams)
+	local part = hit and hit.Instance
+	return part ~= nil
+		and part:IsA("BasePart")
+		and part.Anchored
+		and part.Transparency < 1
+		and not CollectionService:HasTag(part, Config.Grab.Tag)
+		and not (part.Parent and CollectionService:HasTag(part.Parent, Config.Grab.Tag))
+end
+
 -- Returns whether the dog moved or turned this frame.
 local function moveStep(current: Dog, dt: number): boolean
 	local waypoint = current.waypoints[current.waypointIndex]
@@ -402,6 +427,14 @@ local function moveStep(current: Dog, dt: number): boolean
 		return false
 	end
 	local step = math.min(offset.Magnitude, current.speed * dt)
+	-- it doesn't collide, so a straight walk (no path) would take it through a room's walls and
+	-- out of reach: stop at the wall and let it pick somewhere else
+	if current.pathFor and #current.waypoints == 1 and wallAhead(current, offset.Unit, step) then
+		current.moving = false
+		current.waypoints = {}
+		current.wanderGoal = nil
+		return false
+	end
 	current.position = onFloor(current.position + offset.Unit * step)
 	current.stride += step * 1.4
 	current.moving = true
@@ -639,7 +672,12 @@ local function onCarried(prop: PVInstance)
 	local spot = point(current.guardSpot)
 	if DogGuard.isOffence(by, ownerId, spot, point(prop:GetPivot().Position), settings.GuardRadius) then
 		local player = Players:GetPlayerByUserId(by)
-		if player then
+		-- a builder robot carries in its owner's name; only the player's own hands count
+		local character = player and player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		local inHands = root ~= nil
+			and (root.Position - prop:GetPivot().Position).Magnitude <= Config.Grab.MaxHoldDistance + 6
+		if player and inHands then
 			raise(player)
 		end
 	end
@@ -717,6 +755,7 @@ local function findThreat(current: Dog, owner: Alive?, alive: { Alive }, now: nu
 		local position = entry.root.Position
 		if
 			entry.player ~= current.owner
+			and not Interact.isHidden(entry.player) -- a hiding spot is safe from the dog too
 			and DogGuard.remembers(raiders, entry.player.UserId, now)
 			and DogGuard.inRadius(protect, point(position), settings.ChaseRadius)
 		then
@@ -777,6 +816,13 @@ local function onFeed(player: Player)
 	local record = recordFor(player)
 	local now = os.clock()
 	local day = DayNight.day()
+	-- its old owner came back, or someone it already trusts: no feeding limits, it just goes to them
+	if not current.owner and DogTrust.stage(record.trust, trustSettings) == "follows" then
+		current.owner = player
+		setCommand(current, "follow")
+		tell(player, "It remembers you. It's yours.")
+		return
+	end
 	local _, refusal = DogTrust.room(record, now, day, trustSettings)
 	if refusal then
 		tell(player, REFUSALS[refusal])

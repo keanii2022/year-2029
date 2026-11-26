@@ -1365,13 +1365,14 @@ local function onBuild(pal: Pal, player: Player)
 		Saves.tell(player, "It's built all it can today. It'll still fix what it built.")
 		return
 	end
-	foundAt[player.UserId] = now
-	leaveCrew(pal)
+	-- find the new spot first: a bad spot keeps the fort it's on and doesn't spend the cooldown
 	local crew = SimForts.found(alive.position, alive.look, player.UserId)
 	if not crew then
 		Saves.tell(player, "No room for a fort here. Try somewhere with a wall to build against.")
 		return
 	end
+	foundAt[player.UserId] = now
+	leaveCrew(pal)
 	SimForts.join(crew, pal)
 	pal.crew = crew
 	pal.crewPeak = 0
@@ -1480,6 +1481,7 @@ local function makePal(robot: Robot): Pal
 	end
 	pals[robot] = pal
 	Robots.befriend(robot)
+	Robots.keep(robot, true)
 	return pal
 end
 
@@ -1488,6 +1490,7 @@ local function removePal(pal: Pal)
 	setOwner(pal, nil, false, os.clock())
 	pals[robot] = nil
 	pal.anchor:Destroy()
+	Robots.keep(robot, false)
 	if not robot.dead then
 		robot.model:SetAttribute("HeadTilt", nil)
 		robot.model:SetAttribute("Flicker", nil)

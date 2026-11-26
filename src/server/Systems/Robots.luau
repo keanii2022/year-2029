@@ -112,7 +112,8 @@ export type Robot = {
 	callAt: number, -- no new alert before this
 	shareAt: number, -- next time it tells the others where its target is
 	lastTarget: any?, -- who it last chased, for searching hiding spots after losing them
-	sawHide: Model?, -- the hiding spot it watched its target climb into: it goes straight there
+	sawHide: Model?,
+	kept: boolean?, -- someone's robot friend: never despawned with its room, even off duty at night -- the hiding spot it watched its target climb into: it goes straight there
 	searchFrom: Vector3?, -- where it lost them; its searches circle this spot
 	lungeUntil: number, -- bursting forward at Hunt.Lunge.Speed until then
 	lungeReadyAt: number,
@@ -2540,14 +2541,14 @@ local function activate()
 		for _, robot in list do
 			local far = RobotRooms.distanceToNearest(robot.position.X, robot.position.Z, points)
 				> settings.ChoreDespawnRadius
-			busy = busy or not (calmState(robot.brain.state) or far or robot.brain.companion)
+			busy = busy or not (calmState(robot.brain.state) or far or robot.brain.companion or robot.kept)
 		end
 		if busy then
 			wanted[id] = true -- one is out hunting near someone: keep the room until it calms down
 		else
 			local kept = 0
 			for _, robot in table.clone(list) do
-				if robot.brain.companion then
+				if robot.brain.companion or robot.kept then
 					kept += 1 -- still counts toward the room, but stays with its player
 				else
 					despawn(robot)
@@ -3069,6 +3070,11 @@ function Robots.befriend(robot: Robot)
 end
 
 -- Let go: its own mind again (hunting, at night), red eyes, nothing on its head.
+-- Marks a robot as someone's friend (Companion), so it outlasts its room even while let go at night
+function Robots.keep(robot: Robot, kept: boolean)
+	robot.kept = kept or nil
+end
+
 function Robots.release(robot: Robot)
 	if robot.dead or not robot.brain.companion then
 		return
