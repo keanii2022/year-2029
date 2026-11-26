@@ -126,6 +126,39 @@ function RobotRooms.doorPost(room: any, door: { side: string, at: number }, inse
 	return { x = room.x1 - inset, z = room.z0 + door.at }, { x = 1, z = 0 }
 end
 
+-- Where a room's keeper stands: `reach` studs in front of the stash on the room's side, facing the
+-- stash, so its back is mostly to the way in. Falls back to the room's middle facing +z.
+function RobotRooms.keeperPost(room: any, reach: number): (Point, Point)
+	local stash = room.stash
+	if not stash then
+		return { x = room.cx, z = room.cz }, { x = 0, z = 1 }
+	end
+	local dx, dz = room.cx - stash.x, room.cz - stash.z
+	local length = math.sqrt(dx * dx + dz * dz)
+	if length < 1e-3 then
+		dx, dz, length = 0, -1, 1
+	end
+	dx, dz = dx / length, dz / length
+	return { x = stash.x + dx * reach, z = stash.z + dz * reach }, { x = -dx, z = -dz }
+end
+
+-- The keeper works with its back turned for `work` seconds, then looks round for `glance`, over and
+-- over. offset staggers keepers so they don't all turn at once.
+function RobotRooms.keeperGlancing(now: number, offset: number, work: number, glance: number): boolean
+	return (now + offset) % (work + glance) >= work
+end
+
+-- True when (x, z) is within radius of any of the room's doorways (warehouse-local studs)
+function RobotRooms.nearDoor(room: any, x: number, z: number, radius: number): boolean
+	for _, door in room.doors or {} do
+		local at = RobotRooms.doorPost(room, door, 0)
+		if (at.x - x) ^ 2 + (at.z - z) ^ 2 < radius * radius then
+			return true
+		end
+	end
+	return false
+end
+
 function RobotRooms.distanceToNearest(x: number, z: number, players: { Point }): number
 	return nearestPlayer(x, z, players)
 end

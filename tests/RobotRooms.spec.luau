@@ -98,4 +98,26 @@ return {
 		expect(post.z).toBe(10)
 		expect(out.x).toBe(1)
 	end,
+	["the keeper stands in front of the stash with its back to the room"] = function()
+		local room = { cx = 0, cz = 0, stash = { x = 0, z = 20 } }
+		local post, face = RobotRooms.keeperPost(room, 4)
+		expect(post.x).toBeNear(0, 1e-6)
+		expect(post.z).toBeNear(16, 1e-6)
+		expect(face.z).toBeNear(1, 1e-6)
+		local bare, bareFace = RobotRooms.keeperPost({ cx = 5, cz = 7 }, 4)
+		expect(bare.x).toBe(5)
+		expect(bareFace.z).toBe(1)
+	end,
+	["the keeper glances round for a moment, then gets back to work"] = function()
+		expect(RobotRooms.keeperGlancing(3, 0, 7, 2.5)).toBe(false)
+		expect(RobotRooms.keeperGlancing(8, 0, 7, 2.5)).toBe(true)
+		expect(RobotRooms.keeperGlancing(10, 0, 7, 2.5)).toBe(false)
+		expect(RobotRooms.keeperGlancing(3, 5, 7, 2.5)).toBe(true)
+	end,
+	["spots by a doorway count as near the door"] = function()
+		local room = { x0 = 0, z0 = 0, x1 = 40, z1 = 40, doors = { { side = "north", at = 20 } } }
+		expect(RobotRooms.nearDoor(room, 20, 5, 14)).toBe(true)
+		expect(RobotRooms.nearDoor(room, 20, 30, 14)).toBe(false)
+		expect(RobotRooms.nearDoor({ x0 = 0, z0 = 0, x1 = 9, z1 = 9 }, 1, 1, 14)).toBe(false)
+	end,
 }

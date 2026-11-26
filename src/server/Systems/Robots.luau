@@ -105,8 +105,8 @@ export type Robot = {
 	shooter: any?,
 	grudge: any?,
 	grudgeUntil: number,
-	-- the installation's doorway robot: stands just inside a door, facing out
-	guard: { spot: Vector3, face: Vector3 }?,
+	-- the installation's stash keeper: back to the room, glancing toward the door now and then
+	guard: { spot: Vector3, face: Vector3, glance: Vector3?, offset: number }?,
 	-- hunting as a pack
 	callAt: number, -- no new alert before this
 	shareAt: number, -- next time it tells the others where its target is
@@ -1249,7 +1249,7 @@ local function senseRobot(
 	elseif night then
 		sightRange *= threat.sight
 	end
-	-- the doorway robot hears anyone walking about its room by day
+	-- the stash keeper hears anyone walking near it by day
 	local guardEars = robot.guard ~= nil and not night and calmGuard(robot)
 	local eye = {
 		x = robot.position.X,
@@ -1425,7 +1425,11 @@ end
 local function studyTarget(robot: Robot, now: number): (Vector3?, boolean)
 	local guard = robot.guard
 	if guard then
-		robot.studySpot, robot.studyFace, robot.studyPose = guard.spot, guard.face, "scan"
+		local glancing = guard.glance ~= nil
+			and RobotRooms.keeperGlancing(now, guard.offset, settings.Guard.Work, settings.Guard.Glance)
+		robot.studySpot = guard.spot
+		robot.studyFace = if glancing then guard.glance else guard.face
+		robot.studyPose = if glancing then "scan" else "study"
 		robot.studyUntil = math.huge
 		return guard.spot, flatDistance(guard.spot, robot.position) <= settings.ArriveRange
 	end
@@ -2271,7 +2275,11 @@ local function roomSpawnSpot(room: any): Vector3
 	local candidates = {}
 	for _ = 1, 10 do
 		local point = randomRoomPoint(room, 5)
-		if spotIsClear(point, Vector3.new(4, 6, 4)) then
+		local here = point - origin
+		if
+			not RobotRooms.nearDoor(room, here.X, here.Z, settings.Guard.DoorClear)
+			and spotIsClear(point, Vector3.new(4, 6, 4))
+		then
 			table.insert(candidates, { x = point.X, z = point.Z })
 		end
 	end
@@ -2293,13 +2301,19 @@ local function spawnChoreBot(room: any, corner: boolean, guard: boolean)
 			then Vector3.new(if east then 1 else -1, 0, 0)
 			else Vector3.new(0, 0, if south then 1 else -1)
 	end
-	local door = room.doors and room.doors[1]
 	local post = nil
-	if guard and door then
-		local at, out = RobotRooms.doorPost(room, door, settings.Guard.Inset)
+	if guard then
+		local at, face = RobotRooms.keeperPost(room, settings.Guard.Reach)
+		local door = room.doors and room.doors[1]
+		local doorAt = if door then RobotRooms.doorPost(room, door, 0) else nil
 		position = Warehouse.toWorld(at.x, at.z)
-		facing = Vector3.new(out.x, 0, out.z)
-		post = { spot = onFloor(position), face = onFloor(position + facing * 10) }
+		facing = Vector3.new(face.x, 0, face.z)
+		post = {
+			spot = onFloor(position),
+			face = onFloor(position + facing * 10),
+			glance = if doorAt then onFloor(Warehouse.toWorld(doorAt.x, doorAt.z)) else nil,
+			offset = random:NextNumber(0, settings.Guard.Work),
+		}
 	end
 	local robot = spawnRobot(typeName, room, position, facing)
 	if robot then
@@ -2469,11 +2483,12 @@ local function activate()
 			if live >= settings.MaxLiveChoreBots then
 				break
 			end
-			-- the first watches from a corner, the next minds the door
-			local guard = hasCorner and not hasGuard
-			spawnChoreBot(room, not hasCorner, guard)
-			hasCorner = true
-			hasGuard = hasGuard or guard
+			-- the first keeps the stash, the next watches from a corner, the rest wander and study
+			local guard = not hasGuard
+			local corner = hasGuard and not hasCorner
+			spawnChoreBot(room, corner, guard)
+			hasGuard = true
+			hasCorner = hasCorner or corner
 			live += 1
 		end
 	end

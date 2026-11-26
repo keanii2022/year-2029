@@ -13,9 +13,9 @@ return {
 
 	-- How many robots live in an installation (min, max), and the giant 2x2 ones
 	-- The count scales with the hall's floor area (one per AreaPerBot square studs), kept in range.
-	InstallationBots = { 3, 5 },
-	GiantInstallationBots = { 5, 9 },
-	AreaPerBot = 2400,
+	InstallationBots = { 1, 3 },
+	GiantInstallationBots = { 4, 7 },
+	AreaPerBot = 1400,
 	BotSpacing = 9, -- robots in a room spawn, study and idle at least this far apart
 	-- One per installation stands in a corner facing the wall. Inside LookRange its head turns to
 	-- follow you; it wakes after staring StareSeconds, when you come inside WakeRange, or on a sound.
@@ -115,9 +115,11 @@ return {
 		Volume = 0.9,
 	},
 
-	-- One robot per installation stands just inside a doorway facing out. Anyone walking (not
-	-- crouched) inside the room within HearRange makes it turn and look.
-	Guard = { Inset = 5, HearRange = 32 },
+	-- One robot per installation keeps the stash: it stands at the back facing the crate, working with
+	-- its back to the room for Work seconds, then glancing round for Glance. Anyone walking (not
+	-- crouched) within HearRange of it makes it turn and look. No robot starts within DoorClear of a
+	-- doorway, so stepping in is never an instant chase.
+	Guard = { Reach = 3.5, Work = 7, Glance = 2.5, HearRange = 14, DoorClear = 14 },
 
 	-- Nights that learn: each night a server survives adds a little, capped (night 1 is the base).
 	-- Every HardEvery-th night is a hard night: HardHunters more per player and the PA glitching all
@@ -388,10 +390,10 @@ return {
 		NightSightFactor = 1.2,
 		CrouchSightFactor = 0.5, -- crouching shrinks how far a robot can spot you
 		SprintSightFactor = 1.2,
-		FeelRadius = 9, -- this close, a robot notices you whatever way it faces (unless you're hidden or crouched)
+		FeelRadius = 6, -- this close, a robot notices you whatever way it faces (unless you're hidden or crouched)
 		FaceRadius = 16, -- standing in its cone this close, it sees you even crouched, busy or not
 		FootstepRadius = { Walk = 12, Sprint = 30, Crouch = 0 },
-		NoticeSeconds = 0.8, -- by day, how long you can stay in view before it charges (less up close)
+		NoticeSeconds = 1.4, -- by day, how long you can stay in view before it charges (less up close)
 		NightNoticeSeconds = 0.35,
 		AlertDecay = 0.6, -- alert lost per second out of view
 		SuspiciousSeconds = 4,
@@ -405,7 +407,7 @@ return {
 
 	-- Chasing and catching
 	CatchRange = 4,
-	DayLeash = 120, -- a day chase gives up this far from home
+	DayLeash = 70, -- a day chase gives up this far from home, so running out of the room works
 	CaughtGraceSeconds = 8, -- after a day catch the robot ignores that player for a bit
 	ArriveRange = 3,
 	StudySeconds = { 4, 9 },
@@ -422,7 +424,7 @@ return {
 		CallRadius = 160, -- only live robots this close to a player get sent
 		MinDistance = 20, -- the spot is this far from the player, so you see it working
 		MaxDistance = 75,
-		Reach = 85, -- and this close to the robot's room (under DayLeash, so a chase still holds)
+		Reach = 60, -- and this close to the robot's room (under DayLeash, so a chase still holds)
 		WorkSeconds = { 12, 22 },
 		GiveUpSeconds = 30, -- couldn't reach the spot: head home
 		SightRange = 24, -- a short cone while out, so walking past one isn't instant trouble
