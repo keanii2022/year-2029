@@ -136,22 +136,23 @@ return {
 		{ item = "Disruptor", model = "disruptor", count = { 1, 1 }, near = 0, deep = 0.3, minDepth = 0.85 },
 		{ item = "Medkit", model = "medkit", count = { 1, 1 }, near = 0, deep = 1.2, minDepth = 0.6 },
 		-- Guns: the weak ones turn up anywhere, the strong ones only deeper in. The dart blaster is
-		-- rare but can be anywhere. Ammo for the non-cell guns spawns on its own.
-		{ item = "NailGun", model = "nail_gun", count = { 1, 1 }, near = 0.8, deep = 1 },
-		{ item = "FlareGun", model = "flare_gun", count = { 1, 1 }, near = 0.8, deep = 0.8 },
-		{ item = "Smg", model = "smg", count = { 1, 1 }, near = 0.4, deep = 1.2, minDepth = 0.1 },
-		{ item = "Revolver", model = "revolver", count = { 1, 1 }, near = 0.3, deep = 1, minDepth = 0.15 },
-		{ item = "Shotgun", model = "shotgun", count = { 1, 1 }, near = 0.2, deep = 1, minDepth = 0.25 },
-		{ item = "Rifle", model = "rifle", count = { 1, 1 }, near = 0, deep = 0.8, minDepth = 0.35 },
+		-- rare but can be anywhere. Ammo for the non-cell guns spawns on its own. About one pickup
+		-- in twelve is a gun, so a new gun turns up within a few minutes of looting.
+		{ item = "NailGun", model = "nail_gun", count = { 1, 1 }, near = 2.5, deep = 2.5 },
+		{ item = "FlareGun", model = "flare_gun", count = { 1, 1 }, near = 2.2, deep = 2 },
+		{ item = "Smg", model = "smg", count = { 1, 1 }, near = 1.5, deep = 3 },
+		{ item = "Revolver", model = "revolver", count = { 1, 1 }, near = 1.2, deep = 2.5, minDepth = 0.1 },
+		{ item = "Shotgun", model = "shotgun", count = { 1, 1 }, near = 0.8, deep = 2.5, minDepth = 0.15 },
+		{ item = "Rifle", model = "rifle", count = { 1, 1 }, near = 0, deep = 2, minDepth = 0.3 },
 		{
 			item = "MarksmanRifle",
 			model = "marksman_rifle",
 			count = { 1, 1 },
 			near = 0,
-			deep = 0.5,
-			minDepth = 0.5,
+			deep = 1.2,
+			minDepth = 0.45,
 		},
-		{ item = "DartBlaster", model = "dart_blaster", count = { 1, 1 }, near = 0.3, deep = 0.4 },
+		{ item = "DartBlaster", model = "dart_blaster", count = { 1, 1 }, near = 0.8, deep = 1 },
 		{ item = "Shells", model = "ammo_shells", count = { 4, 8 }, near = 1, deep = 3, minDepth = 0.15 },
 		{ item = "Flares", model = "ammo_flares", count = { 1, 3 }, near = 1.5, deep = 1.5 },
 		{ item = "Darts", model = "ammo_darts", count = { 2, 4 }, near = 0.8, deep = 1.2 },

@@ -379,6 +379,11 @@ return {
 				{ id = "Medkit", count = 1, weight = 3 },
 				{ id = "Disruptor", count = 1, weight = 1 },
 				{ id = "Handcuffs", count = 1, weight = 1 },
+				-- knocking robots down is also a way to find a gun
+				{ id = "Smg", count = 1, weight = 2 },
+				{ id = "Revolver", count = 1, weight = 2 },
+				{ id = "Shotgun", count = 1, weight = 2 },
+				{ id = "NailGun", count = 1, weight = 2 },
 			},
 			AlwaysRare = { brute = true },
 		},
