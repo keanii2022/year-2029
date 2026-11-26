@@ -71,6 +71,7 @@ export type Robot = {
 	waypoints: { Vector3 },
 	waypointIndex: number,
 	pathFor: Vector3?,
+	straight: boolean, -- walking straight at its goal with no computed path round walls
 	pathAt: number,
 	pathBusy: boolean,
 	studySpot: Vector3?,
@@ -301,6 +302,15 @@ local function spotIsClear(position: Vector3, size: Vector3): boolean
 	params.RespectCanCollide = true
 	local box = CFrame.new(onFloor(position) + Vector3.new(0, size.Y / 2 + 0.5, 0))
 	return #workspace:GetPartBoundsInBox(box, size, params) == 0
+end
+
+-- Inside the warehouse's outer walls with room to stand. A spot past the wall still finds "floor"
+-- out there, and a robot spawned in it walked in through the wall.
+local function insideWarehouse(position: Vector3, pad: number): boolean
+	local layout = Warehouse.layout()
+	local reach = layout.half - Config.Warehouse.WallThickness - pad
+	local here = position - origin
+	return math.abs(here.X) < reach and math.abs(here.Z) < reach
 end
 
 local function randomRoomPoint(room: any, pad: number): Vector3
@@ -775,6 +785,7 @@ local function spawnRobot(
 		waypoints = {},
 		waypointIndex = 1,
 		pathFor = nil,
+		straight = false,
 		pathAt = -math.huge,
 		pathBusy = false,
 		studySpot = nil,
@@ -1005,6 +1016,7 @@ local function walkStraight(robot: Robot, goal: Vector3)
 	robot.waypoints = { goal }
 	robot.waypointIndex = 1
 	robot.pathFor = goal
+	robot.straight = true
 end
 
 local function setGoal(robot: Robot, goal: Vector3?, now: number)
@@ -1017,7 +1029,9 @@ local function setGoal(robot: Robot, goal: Vector3?, now: number)
 	local sameRoom = robot.room
 		and insideRoom(robot.room, goal, 0)
 		and insideRoom(robot.room, robot.position, 0)
-	if distance < 6 or (sameRoom and distance < settings.StraightLineRange) then
+	-- just hit a wall walking straight: get a real path round it instead of walking into it again
+	local blockedLately = now - (robot.blockedAt or -math.huge) < 2
+	if not blockedLately and (distance < 6 or (sameRoom and distance < settings.StraightLineRange)) then
 		walkStraight(robot, goal)
 		return
 	end
@@ -1050,6 +1064,7 @@ local function setGoal(robot: Robot, goal: Vector3?, now: number)
 			robot.waypoints = points
 			robot.waypointIndex = math.min(2, #points)
 			robot.pathFor = goal
+			robot.straight = false
 		else
 			-- no path (blocked or off the navmesh): walk straight rather than stand frozen
 			walkStraight(robot, goal)
@@ -1086,8 +1101,8 @@ local function fortInTheWay(robot: Robot, direction: Vector3, step: number): boo
 	return prop ~= nil and prop:GetAttribute("PlacedBy") ~= nil and prop:GetAttribute("CarriedBy") == nil
 end
 
--- A befriended robot keeps to the walkways: a straight walk (no path, or a close goal) would carry
--- it, and whatever it's hauling, through walls. Two low rays ahead stop it at anything fixed and solid.
+-- A straight walk (no path, or a close goal) would carry a robot, and whatever it's hauling, through
+-- walls. Two low rays ahead stop it at anything fixed and solid. Befriended robots check always.
 local wallParams = RaycastParams.new()
 wallParams.FilterType = Enum.RaycastFilterType.Exclude
 wallParams.RespectCanCollide = true
@@ -1153,7 +1168,9 @@ local function moveStep(robot: Robot, dt: number)
 		return
 	end
 	local step = math.min(offset.Magnitude, robot.speed * dt)
-	if robot.brain.companion and wallInTheWay(robot, offset.Unit, step) then
+	-- a straight walk has no path round walls, and PivotTo moves through anything: stop at the wall
+	-- and ask for a real path instead (this is how robots walked out of walls)
+	if (robot.brain.companion or robot.straight) and wallInTheWay(robot, offset.Unit, step) then
 		robot.moving = false
 		robot.blockedAt = os.clock()
 		robot.pathFor = nil -- the next goal update asks for a fresh path round it
@@ -1415,7 +1432,12 @@ local function pickWander(robot: Robot, alive: { Alive }): Vector3
 				* random:NextNumber(10, settings.SweepRadius)
 		candidate = onFloor(point)
 		local farEnough = flatDistance(candidate, robot.position) >= settings.SweepMinStep
-		if farEnough and not inAnyRoom(candidate) and spotIsClear(candidate, Vector3.new(4, 6, 4)) then
+		if
+			farEnough
+			and insideWarehouse(candidate, 4)
+			and not inAnyRoom(candidate)
+			and spotIsClear(candidate, Vector3.new(4, 6, 4))
+		then
 			break
 		end
 	end
@@ -2359,7 +2381,11 @@ local function spawnOnRack(target: Alive, typeName: string): Robot?
 	end
 	local landing = onFloor(Warehouse.toWorld(land.x, land.z))
 	local perch = onFloor(Warehouse.toWorld(top.x, top.z))
-	if inAnyRoom(landing) or not spotIsClear(landing, Vector3.new(4, 7, 4)) then
+	if
+		not insideWarehouse(landing, 4)
+		or inAnyRoom(landing)
+		or not spotIsClear(landing, Vector3.new(4, 7, 4))
+	then
 		return nil
 	end
 	local robot = spawnRobot(typeName, nearestRoom(landing), perch, landing - perch, "hunter")
@@ -2386,7 +2412,7 @@ local function spawnHunter(target: Alive, role: RobotBrain.Role, types: { string
 		local angle = random:NextNumber(0, math.pi * 2)
 		local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
 		local spot = onFloor(target.position + direction * randomIn(distance))
-		if not inAnyRoom(spot) and spotIsClear(spot, Vector3.new(4, 7, 4)) then
+		if insideWarehouse(spot, 4) and not inAnyRoom(spot) and spotIsClear(spot, Vector3.new(4, 7, 4)) then
 			robot = spawnRobot(typeName, nearestRoom(spot), spot, -direction, role)
 		end
 	end
