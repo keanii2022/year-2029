@@ -859,6 +859,11 @@ local function swapModel(robot: Robot, night: boolean)
 	if not model then
 		return
 	end
+	-- the load can wait on InsertService; a robot despawned meanwhile must not leave a statue behind
+	if robot.dead then
+		model:Destroy()
+		return
+	end
 	byModel[robot.model] = nil
 	robot.model:Destroy()
 	robot.model = model
@@ -1041,7 +1046,7 @@ local function setGoal(robot: Robot, goal: Vector3?, now: number)
 		return
 	end
 	if robot.pathBusy or now - robot.pathAt < settings.PathRecompute or pathTokens < 1 then
-		if not robot.pathFor then
+		if not robot.pathFor and not blockedLately then
 			walkStraight(robot, goal)
 		end
 		return
@@ -1066,8 +1071,9 @@ local function setGoal(robot: Robot, goal: Vector3?, now: number)
 			robot.waypointIndex = math.min(2, #points)
 			robot.pathFor = goal
 			robot.straight = false
-		else
-			-- no path (blocked or off the navmesh): walk straight rather than stand frozen
+		elseif os.clock() - robot.blockedAt >= 2 then
+			-- no path (blocked or off the navmesh): walk straight rather than stand frozen, unless
+			-- it just walked into a wall that way
 			walkStraight(robot, goal)
 		end
 	end)
@@ -1359,7 +1365,11 @@ local function catch(robot: Robot, player: Player, alive: { Alive }, now: number
 			target = entry
 		end
 	end
-	if not target or player:GetAttribute("God") == true then
+	if not target then
+		return
+	end
+	if player:GetAttribute("God") == true then
+		robot.ignore[player] = now + settings.CaughtGraceSeconds
 		return
 	end
 	local isPlayer = typeof(player) == "Instance" -- false for a simulated player's stand-in
@@ -1770,6 +1780,10 @@ local function grudgeTarget(robot: Robot, alive: { Alive }, now: number): RobotB
 				return nil
 			end
 			local range = settings.Types[robot.typeName].sightRange
+			-- it knows where you are, but a wall between you means it can chase, never grab
+			if not lineOfSight(robot, target) then
+				d = math.max(d, settings.CatchRange + 1)
+			end
 			return {
 				id = target.player,
 				x = target.position.X,
@@ -2399,7 +2413,18 @@ local dayStartedAt = 0
 
 -- A night hunter perched on top of a rack bay near the player, behind them if it can, about to drop
 -- into the aisle. Nil when no rack is in range or the landing isn't clear.
-local function spawnOnRack(target: Alive, typeName: string): Robot?
+-- No other player within `radius` of a spawn spot, so a hunter meant for one player never pops up
+-- in front of another
+local function clearOfPlayers(spot: Vector3, alive: { Alive }, except: Alive?, radius: number): boolean
+	for _, other in alive do
+		if other ~= except and flatDistance(other.position, spot) < radius then
+			return false
+		end
+	end
+	return true
+end
+
+local function spawnOnRack(target: Alive, typeName: string, alive: { Alive }): Robot?
 	local look = target.root.CFrame.LookVector
 	local here = target.position - origin
 	local top, land = RobotRacks.dropSpot(
@@ -2416,6 +2441,7 @@ local function spawnOnRack(target: Alive, typeName: string): Robot?
 	local perch = onFloor(Warehouse.toWorld(top.x, top.z))
 	if
 		not insideWarehouse(landing, 4)
+		or not clearOfPlayers(landing, alive, target, racks.OthersClear)
 		or inAnyRoom(landing)
 		or not spotIsClear(landing, Vector3.new(4, 7, 4))
 	then
@@ -2432,11 +2458,17 @@ local function spawnOnRack(target: Alive, typeName: string): Robot?
 	return robot
 end
 
-local function spawnHunter(target: Alive, role: RobotBrain.Role, types: { string }, distance: { number })
+local function spawnHunter(
+	target: Alive,
+	role: RobotBrain.Role,
+	types: { string },
+	distance: { number },
+	alive: { Alive }
+)
 	local typeName = types[random:NextInteger(1, #types)]
 	local robot: Robot? = nil
 	if role == "hunter" and random:NextNumber() < racks.DropChance then
-		robot = spawnOnRack(target, typeName)
+		robot = spawnOnRack(target, typeName, alive)
 	end
 	for _ = 1, 8 do
 		if robot then
@@ -2445,7 +2477,12 @@ local function spawnHunter(target: Alive, role: RobotBrain.Role, types: { string
 		local angle = random:NextNumber(0, math.pi * 2)
 		local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
 		local spot = onFloor(target.position + direction * randomIn(distance))
-		if insideWarehouse(spot, 4) and not inAnyRoom(spot) and spotIsClear(spot, Vector3.new(4, 7, 4)) then
+		if
+			insideWarehouse(spot, 4)
+			and clearOfPlayers(spot, alive, nil, distance[1] * 0.6)
+			and not inAnyRoom(spot)
+			and spotIsClear(spot, Vector3.new(4, 7, 4))
+		then
 			robot = spawnRobot(typeName, nearestRoom(spot), spot, -direction, role)
 		end
 	end
@@ -2468,7 +2505,7 @@ local function spawnNear(
 	for _, player in need do
 		for _, target in alive do
 			if target.player == player then
-				spawnHunter(target, role, types, distance)
+				spawnHunter(target, role, types, distance, alive)
 			end
 		end
 	end
@@ -3247,6 +3284,10 @@ function Robots.Start()
 	DayNight.onPhaseChanged(function(phase)
 		task.spawn(onPhaseChanged, phase)
 	end)
+	-- started mid-night (no phase change will come): set the night up now, grace and all
+	if DayNight.phase() == "Night" then
+		task.spawn(onPhaseChanged, "Night")
+	end
 	-- Made up front so clients waiting on it don't hang until the first catch
 	Net.event("RobotCaught")
 	Players.PlayerRemoving:Connect(function(player)
@@ -3276,7 +3317,10 @@ function Robots.Start()
 	task.spawn(function()
 		local interval = 1 / settings.TickRate
 		while true do
-			tick(task.wait(interval))
+			local ok, err = pcall(tick, task.wait(interval))
+			if not ok then
+				warn("[Robots] tick:", err)
+			end
 		end
 	end)
 	task.spawn(function()
@@ -3288,7 +3332,10 @@ function Robots.Start()
 	end)
 	task.spawn(function()
 		while true do
-			activate()
+			local ok, err = pcall(activate)
+			if not ok then
+				warn("[Robots] activate:", err)
+			end
 			task.wait(settings.ActivationInterval)
 		end
 	end)

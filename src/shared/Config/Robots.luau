@@ -49,7 +49,7 @@ return {
 
 	-- Night hunters spawn out of sight near players and stall where they stand at lights on.
 	MaxHunters = 16,
-	HunterNearRadius = 260, -- a player with no hunter this close gets one
+	HunterNearRadius = 320, -- a player with no hunter this close gets one (past the spawn ring, so fresh ones count)
 	HunterSpawnDistance = { 200, 260 }, -- far enough that you hear and see them coming
 	HunterGrace = 25, -- seconds of quiet after lights out before any hunter spawns
 	HunterDespawnRadius = 450,
@@ -166,6 +166,7 @@ return {
 		Distance = { 16, 34 },
 		Along = { -28, -16, 0, 16, 28 }, -- spots along a rack, from level with the player
 		Inset = 3, -- lands this far out from the rack face
+		OthersClear = 30, -- never drops this close to anyone but the player it's meant for
 		Perch = { 1.5, 4 },
 		DropSeconds = 0.45,
 		LandStill = 0.7,
