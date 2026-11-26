@@ -89,36 +89,43 @@ function Prizes.place(
 		end
 	end
 
-	local candidates = {}
-	local pad, step = settings.WallPad, settings.GridStep
-	local x = room.x0 + pad
-	while x <= room.x1 - pad do
-		local z = room.z0 + pad
-		while z <= room.z1 - pad do
-			local jx, jz = x + rng:range(-1, 1) * step * 0.3, z + rng:range(-1, 1) * step * 0.3
-			if Fill.free(list, jx, jz, settings.Radius) then
-				table.insert(candidates, { x = jx, z = jz, score = nearest(entrances, jx, jz) })
+	local function search(radius: number, pad: number, gap: number)
+		local candidates = {}
+		local step = settings.GridStep
+		local x = room.x0 + pad
+		while x <= room.x1 - pad do
+			local z = room.z0 + pad
+			while z <= room.z1 - pad do
+				local jx, jz = x + rng:range(-1, 1) * step * 0.3, z + rng:range(-1, 1) * step * 0.3
+				if Fill.free(list, jx, jz, radius) then
+					table.insert(candidates, { x = jx, z = jz, score = nearest(entrances, jx, jz) })
+				end
+				z += step
 			end
-			z += step
+			x += step
 		end
-		x += step
+		table.sort(candidates, function(a, b)
+			return a.score > b.score
+		end)
+		for _, candidate in candidates do
+			if #spots >= want then
+				break
+			end
+			if farFromAll(spots, candidate.x, candidate.z, gap) then
+				table.insert(spots, {
+					x = candidate.x,
+					z = candidate.z,
+					y = 0,
+					turn = facing(candidate.x, candidate.z, room.cx, room.cz),
+					plinth = true,
+				})
+			end
+		end
 	end
-	table.sort(candidates, function(a, b)
-		return a.score > b.score
-	end)
-	for _, candidate in candidates do
-		if #spots >= want then
-			break
-		end
-		if farFromAll(spots, candidate.x, candidate.z, settings.MinGap) then
-			table.insert(spots, {
-				x = candidate.x,
-				z = candidate.z,
-				y = 0,
-				turn = facing(candidate.x, candidate.z, room.cx, room.cz),
-				plinth = true,
-			})
-		end
+	search(settings.Radius, settings.WallPad, settings.MinGap)
+	-- A small, crowded set still gets its chest: try right up against the walls too
+	if #spots < settings.Count[1] then
+		search(settings.Radius, 2, settings.MinGap)
 	end
 	room.prizes = spots
 	return spots

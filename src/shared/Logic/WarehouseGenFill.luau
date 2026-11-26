@@ -210,6 +210,9 @@ function Fill.room(
 	for _, door in doorways do
 		table.insert(list, { x = door[1], z = door[2], r = settings.DoorClearance, hx = 0, hz = 0 })
 	end
+	for _, spot in room.prizes or {} do
+		table.insert(list, { x = spot.x, z = spot.z, r = config.PrizeSpots.Radius + 3, hx = 0, hz = 0 })
+	end
 	local area = (room.x1 - room.x0) * (room.z1 - room.z0)
 	local want = math.clamp(math.floor(area / settings.AreaPerGroup), settings.Groups[1], settings.Groups[2])
 	local radius = settings.GroupRadius

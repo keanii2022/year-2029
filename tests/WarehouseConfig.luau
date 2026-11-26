@@ -30,7 +30,7 @@ return {
 		empty = true,
 	},
 	RackRunChance = 0.4, -- racking with racking both left and above only stays this often
-	MegaChance = 0.18, -- an installation that swallows 2 by 2 zones
+	MegaChance = 0.06, -- a rare giant set that swallows 2 by 2 zones; the rest are people sized
 	MegaInstallationKinds = {
 		cloud_hill = 3,
 		light_grid = 3,
@@ -58,7 +58,6 @@ return {
 	ClutterSkipZones = {
 		racking = true,
 		showroom = true,
-		installation = true,
 		neighborhood = true,
 		hall = true,
 	},
@@ -150,8 +149,10 @@ return {
 		grass_store = 3,
 		window_court = 2,
 	},
-	InstallationTallHeight = 50,
-	HallDoorWidth = 10,
+	InstallationTallHeight = 28,
+	-- Sets are this fraction of their zone times their shape, never smaller than InstallationMinSize
+	InstallationRoomScale = 0.5,
+	InstallationMinSize = 28,
 	WeirdDetails = { 3, 5 },
 	InstallationSpill = { reach = 5, height = 12, frame = 0.4, frameHeight = 12, fallback = "warm" },
 	NightLights = {
@@ -178,10 +179,10 @@ return {
 		KitClearance = 3,
 	},
 	InstallationFill = {
-		AreaPerGroup = 1800,
+		AreaPerGroup = 700,
 		Groups = { 3, 22 },
-		GroupRadius = 8,
-		GroupGap = 4,
+		GroupRadius = 5,
+		GroupGap = 3,
 		DoorClearance = 8,
 		TriesPerGroup = 25,
 		BulbHeight = 10,

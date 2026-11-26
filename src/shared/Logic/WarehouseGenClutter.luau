@@ -232,9 +232,16 @@ function Islands.checkout(layout: any, _config: any, rng: Rng.Rng, x: number, z:
 	end
 end
 
--- Should this spot get a clutter island? Not inside racking, store displays, installations, homes
+-- Should this spot get a clutter island? Not inside racking, store displays, installation sets, homes
 -- or pillar halls, and only where the floor is actually clear
 local function openFloor(layout: any, config: any, x: number, z: number, zoneAt: any): boolean
+	-- the floor round an installation set is open warehouse, but keep its doors and walls clear
+	local pad = config.RoomClearance + config.ClutterClearance
+	for _, pocket in layout.pockets do
+		if x > pocket.x0 - pad and x < pocket.x1 + pad and z > pocket.z0 - pad and z < pocket.z1 + pad then
+			return false
+		end
+	end
 	local zone = zoneAt(layout, x, z)
 	if zone then
 		local inside = x > zone.x0 and x < zone.x1 and z > zone.z0 and z < zone.z1

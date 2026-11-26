@@ -1,5 +1,5 @@
--- Installations: you step through a doorway into a pitch dark hall that reaches the roof, and in
--- the middle of the dark there's a lit set built after one of Keani's dreamcore references. Robots
+-- Installations: a plain door off the aisle opens straight into a lit set built after one of
+-- Keani's dreamcore references. Robots
 -- live in each one, guarding a stash. Every set has its own look, its own wrongness and, often, something far too big.
 -- Each set is registered as a robot room (id, kind, rect, doors, walls, items) so Robots and the
 -- other systems find it like any room.
@@ -45,6 +45,7 @@ local function walls(
 	doorWidth: number?
 )
 	local box = ctx.room
+	box.doorWidth = doorWidth or 7
 	box.doors = Rooms.doors(box, ctx.rng, doorWidth or 7, 1, doors)
 	box.walls = Rooms.walls(box, 1, doorWidth or 7)
 	for _, wall in box.walls do
@@ -2553,10 +2554,10 @@ end
 Installations.doorway = doorway
 
 -- The set's light spilling out of a hall doorway: a pool on the floor outside and a glowing frame
-local function doorSpill(layout: any, config: any, hall: any, door: any, tone: string)
+local function doorSpill(layout: any, config: any, hall: any, door: any, tone: string, width: number)
 	local spill = config.InstallationSpill
 	local x, z, nx, nz = doorway(hall, door)
-	local half = config.HallDoorWidth / 2
+	local half = width / 2
 	local px, pz = math.abs(nz), math.abs(nx) -- along the wall
 	local glow = `spill_{tone}`
 	piece(layout, {
@@ -2589,9 +2590,9 @@ local function doorSpill(layout: any, config: any, hall: any, door: any, tone: s
 		x = x + nx * t / 2,
 		y = spill.frameHeight + t / 2,
 		z = z + nz * t / 2,
-		sx = if px > 0 then config.HallDoorWidth + t * 2 else t,
+		sx = if px > 0 then width + t * 2 else t,
 		sy = t,
-		sz = if pz > 0 then config.HallDoorWidth + t * 2 else t,
+		sz = if pz > 0 then width + t * 2 else t,
 		style = glow,
 		collide = false,
 		spill = true,
@@ -2616,34 +2617,84 @@ local function placeStash(layout: any, config: any, room: any, hall: any)
 	room.stash = { x = x, z = z }
 end
 
--- A dark hall filling the zone, roof to floor, with the lit set inside it
-function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Pieces.Rect, set: string?)
-	local kind = set or rng:weighted(config.InstallationKinds)
-	local hallHeight = config.CeilingHeight
-	local hall: any = { x0 = rect.x0 + 1, z0 = rect.z0 + 1, x1 = rect.x1 - 1, z1 = rect.z1 - 1 }
-	hall.doors = Rooms.doors(hall, rng, config.HallDoorWidth, 1, 2)
-	for _, wall in Rooms.walls(hall, 1, config.HallDoorWidth) do
+-- Top of the tallest piece built since piece number `from`
+local function tallestSince(layout: any, from: number): number
+	local top = 0
+	for index = from, #layout.pieces do
+		local spec = layout.pieces[index]
+		top = math.max(top, (spec.y or 0) + (spec.sy or 0) / 2)
+	end
+	return top
+end
+
+-- A dark box hugging the set from outside: walls with the set's own doorways, a header over each
+-- door so it reads as a plain door from the aisle, and a lid, so the set's world stays hidden
+-- until you step through. Returns the box (the pocket other systems know as the hall).
+local function shell(layout: any, config: any, room: any, height: number): any
+	local box: any = { x0 = room.x0 - 1, z0 = room.z0 - 1, x1 = room.x1 + 1, z1 = room.z1 + 1 }
+	box.doors = {}
+	for _, door in room.doors do
+		table.insert(box.doors, { side = door.side, at = door.at + 1 })
+	end
+	local width = room.doorWidth or 7
+	for _, wall in Rooms.walls(box, 1, width) do
 		piece(layout, {
 			x = (wall.x0 + wall.x1) / 2,
-			y = hallHeight / 2,
+			y = height / 2,
 			z = (wall.z0 + wall.z1) / 2,
 			sx = wall.x1 - wall.x0,
-			sy = hallHeight,
+			sy = height,
 			sz = wall.z1 - wall.z0,
 			style = "dark_wall",
 			solid = true,
 		})
 	end
-	Pieces.floor(layout, hall, "dark_floor", 0.02)
+	local doorTop = config.InstallationSpill.frameHeight + config.InstallationSpill.frame
+	for _, door in box.doors do
+		local x, z, nx, nz = doorway(box, door)
+		piece(layout, {
+			x = x - nx * 0.5,
+			y = (doorTop + height) / 2,
+			z = z - nz * 0.5,
+			sx = if nz ~= 0 then width else 1,
+			sy = height - doorTop,
+			sz = if nx ~= 0 then width else 1,
+			style = "dark_wall",
+			solid = true,
+		})
+	end
+	piece(layout, {
+		x = (box.x0 + box.x1) / 2,
+		y = height + 0.5,
+		z = (box.z0 + box.z1) / 2,
+		sx = box.x1 - box.x0,
+		sy = 1,
+		sz = box.z1 - box.z0,
+		style = "dark_wall",
+		solid = true,
+	})
+	return box
+end
+
+-- A set at a person's scale sitting in its zone with plain doors straight in from the aisles. The
+-- warehouse around it carries the bigness; only the rare giant zone keeps a set that's too big.
+function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Pieces.Rect, set: string?)
+	local kind = set or rng:weighted(config.InstallationKinds)
+	local zone = { x0 = rect.x0 + 1, z0 = rect.z0 + 1, x1 = rect.x1 - 1, z1 = rect.z1 - 1 }
+	local zw, zd = zone.x1 - zone.x0, zone.z1 - zone.z0
+	local giant = zw > config.BlockSize
 
 	local shape = SHAPES[kind]
-	local hw, hd = hall.x1 - hall.x0, hall.z1 - hall.z0
-	local w, d = math.floor(hw * shape[1]), math.floor(hd * shape[2])
+	local scale = config.InstallationRoomScale
+	local minSize = config.InstallationMinSize
+	local w = math.max(minSize, math.floor(zw * shape[1] * scale))
+	local d = math.max(minSize, math.floor(zd * shape[2] * scale))
 	if rng:next() < 0.5 and shape[1] ~= shape[2] then
-		w, d = math.floor(hw * shape[2]), math.floor(hd * shape[1])
+		w = math.max(minSize, math.floor(zw * shape[2] * scale))
+		d = math.max(minSize, math.floor(zd * shape[1] * scale))
 	end
-	local x0 = math.floor(hall.x0 + (hw - w) / 2 + rng:range(-1, 1) * (hw - w) * 0.3)
-	local z0 = math.floor(hall.z0 + (hd - d) / 2 + rng:range(-1, 1) * (hd - d) * 0.3)
+	local x0 = math.floor(zone.x0 + (zw - w) / 2 + rng:range(-1, 1) * (zw - w) * 0.3)
+	local z0 = math.floor(zone.z0 + (zd - d) / 2 + rng:range(-1, 1) * (zd - d) * 0.3)
 	local room: any = {
 		id = #layout.rooms + 1,
 		kind = kind,
@@ -2671,7 +2722,7 @@ function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Piece
 		d = d,
 		cx = room.cx,
 		cz = room.cz,
-		h = if hw > config.BlockSize
+		h = if giant
 			then config.MegaHeight
 			elseif shape[3] == "tall" then config.InstallationTallHeight
 			else 16,
@@ -2683,32 +2734,35 @@ function Installations.build(layout: any, config: any, rng: Rng.Rng, rect: Piece
 		Weird[picks[n]](ctx)
 	end
 	room.tone = mainTone(layout, firstPiece, config.InstallationSpill.fallback)
-	room.giant = hw > config.BlockSize
+	room.giant = giant
 	local doorways = {}
 	for _, door in room.doors do
 		local x, z = doorway(room, door)
 		table.insert(doorways, { x, z })
 	end
-	Fill.room(layout, config, room, firstPiece, ctx.h, doorways)
+	local height = math.min(math.max(ctx.h, tallestSince(layout, firstPiece)) + 1, config.CeilingHeight - 1)
+	local hall = shell(layout, config, room, height)
 	placeStash(layout, config, room, hall)
 	local entrances = {}
 	for _, door in hall.doors do
 		local x, z = doorway(hall, door)
 		table.insert(entrances, { x, z })
 	end
+	-- Prize chests pick their floor before the furniture groups fill the rest of a small set
 	Prizes.place(layout, config, room, firstPiece, doorways, entrances)
+	Fill.room(layout, config, room, firstPiece, ctx.h, doorways)
 	for _, door in hall.doors do
-		doorSpill(layout, config, hall, door, room.tone)
+		doorSpill(layout, config, hall, door, room.tone, room.doorWidth or 7)
 	end
 	table.insert(layout.rooms, room)
-	layout.addSolid({ x0 = room.x0, x1 = room.x1, z0 = room.z0, z1 = room.z1, room = true })
+	layout.addSolid({ x0 = hall.x0, x1 = hall.x1, z0 = hall.z0, z1 = hall.z1, room = true })
 	table.insert(layout.pockets, {
 		kind = kind,
 		x0 = hall.x0,
 		z0 = hall.z0,
 		x1 = hall.x1,
 		z1 = hall.z1,
-		height = hallHeight,
+		height = height,
 		doors = hall.doors,
 	})
 end

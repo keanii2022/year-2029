@@ -48,7 +48,7 @@ local settings = {
 		empty = true,
 	},
 	RackRunChance = 0.4, -- racking with racking both left and above only stays this often
-	MegaChance = 0.18, -- an installation that swallows 2 by 2 zones
+	MegaChance = 0.06, -- a rare giant set that swallows 2 by 2 zones; the rest are people sized
 	MegaInstallationKinds = {
 		cloud_hill = 3,
 		light_grid = 3,
@@ -76,7 +76,6 @@ local settings = {
 	ClutterSkipZones = {
 		racking = true,
 		showroom = true,
-		installation = true,
 		neighborhood = true,
 		hall = true,
 	},
@@ -268,10 +267,10 @@ local settings = {
 	-- The open floor of every installation set gets furniture groups, robot hoards and study
 	-- benches, each under a bare bulb (see Logic/WarehouseGenFill)
 	InstallationFill = {
-		AreaPerGroup = 1800, -- square studs of set floor per group
+		AreaPerGroup = 700, -- square studs of set floor per group (cover to sneak between)
 		Groups = { 3, 22 },
-		GroupRadius = 8,
-		GroupGap = 4, -- walking room between two groups
+		GroupRadius = 5,
+		GroupGap = 3, -- walking room between two groups
 		DoorClearance = 8,
 		TriesPerGroup = 25,
 		BulbHeight = 10,
@@ -343,8 +342,7 @@ local settings = {
 	-- Pillar halls: giant round pillars
 	HallPillar = 12,
 
-	-- Installations: a pitch dark hall up to the roof with a lit dreamcore set inside, where a robot
-	-- lives. One of each set, weighted; tall sets reach InstallationTallHeight.
+	-- Installations: a people-sized dreamcore set with plain doors straight in, where robots live. One of each set, weighted; tall sets reach InstallationTallHeight.
 	InstallationKinds = {
 		catwalk_void = 3,
 		black_sun = 2,
@@ -374,8 +372,10 @@ local settings = {
 		grass_store = 3,
 		window_court = 2,
 	},
-	InstallationTallHeight = 50,
-	HallDoorWidth = 10,
+	InstallationTallHeight = 28,
+	-- Sets are this fraction of their zone times their shape, never smaller than InstallationMinSize
+	InstallationRoomScale = 0.5,
+	InstallationMinSize = 28,
 	WeirdDetails = { 3, 5 }, -- extra wrong things scattered through each set
 	-- The set's light leaking out of each hall doorway: a ceiling glow `reach` studs outside it
 	-- (lamp tone spill_<set tone>) and a faint frame round the opening, frameHeight tall
