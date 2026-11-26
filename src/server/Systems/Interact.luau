@@ -358,11 +358,29 @@ local function leave(player: Player, stepOut: boolean)
 	end
 	if stepOut and entry.model:IsDescendantOf(workspace) then
 		local box, size = entry.model:GetBoundingBox()
-		local front = entry.model:GetPivot().ZVector -- models face +z
-		local spot = box.Position
-			+ front * (size.Z / 2 + Settings.EjectDistance)
-			+ Vector3.new(0, 3 - size.Y / 2, 0)
-		character:PivotTo(CFrame.lookAt(spot, spot + front))
+		local pivot = entry.model:GetPivot()
+		-- out the front (models face +z), unless that's into a wall: then the first clear side
+		local params = OverlapParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { character, entry.model }
+		params.RespectCanCollide = true
+		local spot, facing = nil, pivot.ZVector
+		for _, side in { pivot.ZVector, pivot.XVector, -pivot.XVector, -pivot.ZVector } do
+			local reach = math.abs(side:Dot(pivot.ZVector)) * size.Z / 2
+				+ math.abs(side:Dot(pivot.XVector)) * size.X / 2
+			local at = box.Position
+				+ side * (reach + Settings.EjectDistance)
+				+ Vector3.new(0, 3 - size.Y / 2, 0)
+			if #workspace:GetPartBoundsInBox(CFrame.new(at), Vector3.new(2.5, 5, 2.5), params) == 0 then
+				spot, facing = at, side
+				break
+			end
+		end
+		spot = spot
+			or box.Position
+				+ pivot.ZVector * (size.Z / 2 + Settings.EjectDistance)
+				+ Vector3.new(0, 3 - size.Y / 2, 0)
+		character:PivotTo(CFrame.lookAt(spot, spot + facing))
 		tweenPose(entry.model, entry.parts, 1, Settings.OpenTime)
 		task.delay(
 			Settings.OpenTime + Settings.RevealHold,

@@ -334,6 +334,7 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any, a
 		alive = humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
 		cuffed = player:GetAttribute("Cuffed") == true,
+		hidden = player:GetAttribute("Hidden") == true,
 		hasGun = true,
 		reloading = state.reloadStartedAt ~= nil,
 		ammo = mag,

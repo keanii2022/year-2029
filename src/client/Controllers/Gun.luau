@@ -635,6 +635,7 @@ local function fireCheck(
 		alive = humanoid ~= nil and humanoid.Health > 0,
 		carrying = player:GetAttribute("CarrySpeedMultiplier") ~= nil,
 		cuffed = player:GetAttribute("Cuffed") == true,
+		hidden = player:GetAttribute("Hidden") == true,
 		hasGun = true,
 		reloading = reloadStartedAt ~= nil,
 		ammo = if player:GetAttribute("InfiniteAmmo") == true

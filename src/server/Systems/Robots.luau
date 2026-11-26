@@ -112,6 +112,7 @@ export type Robot = {
 	callAt: number, -- no new alert before this
 	shareAt: number, -- next time it tells the others where its target is
 	lastTarget: any?, -- who it last chased, for searching hiding spots after losing them
+	sawHide: Model?, -- the hiding spot it watched its target climb into: it goes straight there
 	searchFrom: Vector3?, -- where it lost them; its searches circle this spot
 	lungeUntil: number, -- bursting forward at Hunt.Lunge.Speed until then
 	lungeReadyAt: number,
@@ -1404,13 +1405,42 @@ local function tryReveal(robot: Robot, alive: { Alive })
 	for _, target in alive do
 		local spot = Interact.isHidden(target.player) and Interact.hidingSpot(target.player)
 		if spot and flatDistance(spot:GetPivot().Position, robot.position) <= settings.RevealRange then
-			local chance = settings.RevealChance
-			if target.player:GetAttribute("HoldingBreath") == true then
+			-- watched you go in: no amount of holding your breath helps
+			local chance = if robot.sawHide == spot then 1 else settings.RevealChance
+			if robot.sawHide ~= spot and target.player:GetAttribute("HoldingBreath") == true then
 				chance *= settings.HoldingBreathRevealFactor
 			end
 			if random:NextNumber() < chance then
 				Interact.reveal(spot)
+				robot.sawHide = nil
 			end
+		end
+	end
+end
+
+-- Someone just climbed into a hiding spot: any robot that had eyes on them a moment ago saw it.
+-- Hiding works when you break line of sight first.
+local function onHid(player: Player?, model: Model, key: string, open: boolean)
+	if key ~= "Hide" then
+		return
+	end
+	if not open then
+		-- they're out: the next one to hide there starts with a clean slate
+		for _, robot in robots do
+			if robot.sawHide == model then
+				robot.sawHide = nil
+			end
+		end
+		return
+	end
+	if not player then
+		return
+	end
+	local now = os.clock()
+	for _, robot in robots do
+		local brain = robot.brain
+		if brain.targetId == player and now - brain.lastSeenAt <= settings.SawHideSeconds then
+			robot.sawHide = model
 		end
 	end
 end
@@ -1512,6 +1542,9 @@ local function searchSpot(robot: Robot, alive: { Alive }): Vector3?
 			local toward = flat(from - at)
 			local front = if toward.Magnitude > 0.01 then at + toward.Unit * 3.5 else at
 			hiding = { x = front.X, z = front.Z }
+			if robot.sawHide == spot then
+				return onFloor(front)
+			end
 		end
 	end
 	local around = { x = from.X, z = from.Z }
@@ -3193,6 +3226,7 @@ function Robots.Init()
 	fxRemote = Net.event("RobotFx")
 	mimicRemote = Net.event("RobotMimic")
 	Net.event("Callout").OnServerEvent:Connect(heardCallout)
+	Interact.onOpenChanged(onHid)
 end
 
 function Robots.Start()

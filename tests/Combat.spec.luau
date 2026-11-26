@@ -57,6 +57,8 @@ return {
 		expect(reason).toBe("hands full")
 		_, reason = fire({ cuffed = true })
 		expect(reason).toBe("cuffed")
+		_, reason = fire({ hidden = true })
+		expect(reason).toBe("hidden")
 		_, reason = fire({ hasGun = false })
 		expect(reason).toBe("no gun")
 		_, reason = fire({ reloading = true })

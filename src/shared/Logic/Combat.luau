@@ -41,6 +41,7 @@ export type FireCheck = {
 	alive: boolean,
 	carrying: boolean,
 	cuffed: boolean?,
+	hidden: boolean?, -- tucked in a hiding spot: no shooting out of a locker
 	hasGun: boolean,
 	reloading: boolean?,
 	ammo: number,
@@ -82,6 +83,9 @@ function Combat.canFire(check: FireCheck): (boolean, string?)
 	end
 	if check.cuffed then
 		return false, "cuffed"
+	end
+	if check.hidden then
+		return false, "hidden"
 	end
 	if not check.hasGun then
 		return false, "no gun"

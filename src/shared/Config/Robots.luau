@@ -461,7 +461,8 @@ return {
 	PickupRange = 5,
 	MaxHaulSize = 14, -- longest side of a prop a robot will carry
 	RevealRange = 10,
-	RevealChance = 0.4,
+	RevealChance = 0.4, -- checking a spot it only suspects
+	SawHideSeconds = 1.5, -- had eyes on you this recently when you hid: it saw you go in
 	HoldingBreathRevealFactor = 0.25, -- step 12: holding your breath while hidden
 
 	-- Pathfinding: kept cheap on a giant map
