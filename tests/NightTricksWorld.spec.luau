@@ -4,6 +4,7 @@ local expect = require("./expect")
 local pa = {
 	RightChance = 0.5,
 	RecordedAisle = 32,
+	AisleVoice = "pa_remain_still",
 	AisleLine = "Shopper in aisle %d, please remain still.",
 	Lines = { { voice = "pa_closed", text = "Closed." }, { voice = "pa_thank_you", text = "Thanks." } },
 }
@@ -24,13 +25,13 @@ return {
 		expect((World.nearestSign(signs, 30, 30) :: any).number).toBe(3)
 		expect(World.nearestSign({}, 0, 0)).toBe(nil)
 	end,
-	["the aisle line only has a voice for the recorded aisle"] = function()
+	["the aisle line is always spoken, with the aisle in the subtitle"] = function()
 		local recorded = World.aisleLine(32, pa)
 		expect(recorded.text).toBe("Shopper in aisle 32, please remain still.")
-		expect(recorded.voice).toBe("pa_aisle")
+		expect(recorded.voice).toBe("pa_remain_still")
 		local other = World.aisleLine(7, pa)
 		expect(other.text).toBe("Shopper in aisle 7, please remain still.")
-		expect(other.voice).toBe(nil)
+		expect(other.voice).toBe("pa_remain_still")
 	end,
 	["sometimes the announcer is right"] = function()
 		local line = World.announcement(12, rolls({ 0.1 }), pa)
@@ -39,7 +40,7 @@ return {
 	["otherwise it picks a canned line or the recorded aisle"] = function()
 		expect(World.announcement(12, rolls({ 0.9, 0 }), pa).voice).toBe("pa_closed")
 		expect(World.announcement(nil, rolls({ 0.5 }), pa).voice).toBe("pa_thank_you")
-		expect(World.announcement(nil, rolls({ 0.99 }), pa).voice).toBe("pa_aisle")
+		expect(World.announcement(nil, rolls({ 0.99 }), pa).voice).toBe("pa_remain_still")
 	end,
 	["reverb follows hiding, rooms, installations and aisles"] = function()
 		local reverb =

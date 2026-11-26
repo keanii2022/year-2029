@@ -22,6 +22,7 @@ local Files = require(script.Parent.Files)
 local Interact = require(script.Parent.Interact)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
+local PaEvents = require(script.Parent.PaEvents)
 local Warehouse = require(script.Parent.Warehouse)
 
 local Settings = Config.NightTricks
@@ -505,9 +506,18 @@ end
 
 local function realAisle(): number?
 	local outside = {}
+	local half = Warehouse.layout().half
 	for _, player in Players:GetPlayers() do
 		local root = rootOf(player)
-		if root and not Interact.isHidden(player) then
+		local here = root and root.Position - Config.Warehouse.Origin
+		-- only someone actually out on the warehouse floor (not the lobby or test room)
+		if
+			root
+			and here
+			and math.abs(here.X) < half
+			and math.abs(here.Z) < half
+			and not Interact.isHidden(player)
+		then
 			table.insert(outside, root.Position)
 		end
 	end
@@ -528,6 +538,11 @@ local function stepNight(now: number)
 		stormRemote:FireAllClients(roll() < Settings.Storm.NearChance, random:NextInteger(1, 2 ^ 30))
 	end
 	if now >= nextAnnouncementAt then
+		-- the speakers are busy with an event call: try again shortly instead of talking over it
+		if not PaEvents.claimAir(Settings.PA.ChimeToLine + Settings.PA.SubtitleTime) then
+			nextAnnouncementAt = now + 10
+			return
+		end
 		nextAnnouncementAt = now + World.between(Settings.PA.Gap, roll())
 		local line = World.announcement(realAisle(), roll, Settings.PA)
 		paRemote:FireAllClients(line.text, line.voice, roll() < Settings.PA.GlitchChance)

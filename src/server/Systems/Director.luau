@@ -33,9 +33,10 @@ end
 
 local function gatherPeople(): { DirectorLogic.Point }
 	local points = {}
-	local function add(position: Vector3)
+	local function add(position: Vector3, id: any?)
 		local point = toLayout(position)
 		if point then
+			point.id = id
 			table.insert(points, point)
 		end
 	end
@@ -44,7 +45,7 @@ local function gatherPeople(): { DirectorLogic.Point }
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if humanoid and humanoid.Health > 0 and root and root:IsA("BasePart") then
-			add(root.Position)
+			add(root.Position, player.UserId)
 		end
 	end
 	for _, entry in SimPlayers.alive() do
@@ -64,6 +65,7 @@ local function gatherForts(): { DirectorLogic.Point }
 		then
 			local point = toLayout(prop:GetPivot().Position)
 			if point then
+				point.id = prop:GetAttribute("PlacedBy")
 				table.insert(placed, point)
 			end
 		end
@@ -71,7 +73,7 @@ local function gatherForts(): { DirectorLogic.Point }
 	local found = {}
 	for _, pile in DirectorLogic.cluster(placed, Settings.FortRadius) do
 		if pile.count >= Settings.FortMinProps then
-			table.insert(found, { x = pile.x, z = pile.z })
+			table.insert(found, { x = pile.x, z = pile.z, ids = pile.ids })
 		end
 	end
 	return found

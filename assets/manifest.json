@@ -23086,10 +23086,34 @@
    "assetId": 123367309700811
   },
   {
+   "name": "pa_bait_1",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_bait_1.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_bait_2",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_bait_2.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_bait_3",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_bait_3.mp3",
+   "assetId": null
+  },
+  {
    "name": "pa_closed",
    "group": "voice",
    "file": "art/sounds/voice/pa_closed.mp3",
    "assetId": 135727238231431
+  },
+  {
+   "name": "pa_delivery",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_delivery.mp3",
+   "assetId": null
   },
   {
    "name": "pa_exit_elsewhere",
@@ -23116,10 +23140,28 @@
    "assetId": 85345248353435
   },
   {
+   "name": "pa_lastcall_1",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_lastcall_1.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_lastcall_2",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_lastcall_2.mp3",
+   "assetId": null
+  },
+  {
    "name": "pa_lost_children",
    "group": "voice",
    "file": "art/sounds/voice/pa_lost_children.mp3",
    "assetId": 132247928049901
+  },
+  {
+   "name": "pa_lost_item",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_lost_item.mp3",
+   "assetId": null
   },
   {
    "name": "pa_never_close",
@@ -23128,10 +23170,52 @@
    "assetId": 104190504143215
   },
   {
+   "name": "pa_open",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_open.mp3",
+   "assetId": null
+  },
+  {
    "name": "pa_parents",
    "group": "voice",
    "file": "art/sounds/voice/pa_parents.mp3",
    "assetId": 72014182750555
+  },
+  {
+   "name": "pa_remain_still",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_remain_still.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_rumor_1",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_rumor_1.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_rumor_2",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_rumor_2.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_rumor_3",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_rumor_3.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_rumor_place_1",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_rumor_place_1.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_rumor_place_2",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_rumor_place_2.mp3",
+   "assetId": null
   },
   {
    "name": "pa_smiling_mandatory",
@@ -23144,6 +23228,18 @@
    "group": "voice",
    "file": "art/sounds/voice/pa_special_everything.mp3",
    "assetId": 108672133751528
+  },
+  {
+   "name": "pa_sweep_1",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_sweep_1.mp3",
+   "assetId": null
+  },
+  {
+   "name": "pa_sweep_2",
+   "group": "voice",
+   "file": "art/sounds/voice/pa_sweep_2.mp3",
+   "assetId": null
   },
   {
    "name": "pa_thank_you",

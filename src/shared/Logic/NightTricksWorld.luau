@@ -15,11 +15,12 @@ function NightTricksWorld.nearestSign(signs: { Sign }, x: number, z: number): Si
 	return best
 end
 
--- The aisle line. The recorded voice only says one aisle number, so other numbers are subtitle only.
+-- The aisle line. The voice says it without a number ("Shopper, please remain still"); the subtitle
+-- names the aisle, so it's never text only.
 function NightTricksWorld.aisleLine(aisle: number, settings: any): Announcement
 	return {
 		text = string.format(settings.AisleLine, aisle),
-		voice = if aisle == settings.RecordedAisle then "pa_aisle" else nil,
+		voice = settings.AisleVoice,
 	}
 end
 

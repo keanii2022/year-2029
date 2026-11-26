@@ -86,6 +86,14 @@ return {
 		expect(found[1].x).toBeNear(345)
 		expect(found[1].z).toBeNear(0)
 	end,
+	["never a spot past the group's own fort: that only pulls them home"] = function()
+		local groups = Director.cluster({ { x = 0, z = 0, id = 7 } }, 50)
+		local own = Director.cluster({ { x = 300, z = 0, id = 7 }, { x = 302, z = 0, id = 7 } }, 50)
+		local forts = { { x = own[1].x, z = own[1].z, ids = own[1].ids } }
+		expect(count(Director.candidates(groups, forts, {}, SETTINGS), "pastFort")).toBe(0)
+		forts[1].ids = { [8] = true }
+		expect(count(Director.candidates(groups, forts, {}, SETTINGS), "pastFort")).toBe(1)
+	end,
 	["an installation between two groups counts, one off to the side doesn't"] = function()
 		local groups = { { x = 0, z = 0, count = 1 }, { x = 600, z = 0, count = 1 } }
 		local halls = {

@@ -98,7 +98,8 @@ return {
 	PA = {
 		Gap = { 70, 150 }, -- seconds between night announcements
 		RightChance = 0.35, -- the aisle line uses a real player's aisle
-		RecordedAisle = 32, -- the aisle number said in the recorded pa_aisle line
+		RecordedAisle = 32, -- the aisle the canned version of the aisle line names
+		AisleVoice = "pa_remain_still", -- spoken without a number; the subtitle has the aisle
 		ChimeToLine = 1.2,
 		SubtitleTime = 5,
 		AisleLine = "Shopper in aisle %d, please remain still.",

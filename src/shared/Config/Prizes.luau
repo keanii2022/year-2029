@@ -116,25 +116,25 @@ return {
 		Volume = 0.6,
 
 		-- text: {spot} becomes the aisle number or installation name (a list picks one line at random).
-		-- voice: a recorded clip name (Music.playVoiceLine) once Keani records one; nil plays only the
-		-- chime and subtitle. Where each one lands is up to the director (Config.Director).
+		-- voice: the clip for each text line, in the same order (one name when there's one line). The
+		-- clips say it without the aisle number (art/_kit/voice_lines.py); the subtitle names the spot. Where each one lands is up to the director (Config.Director).
 		Events = {
 			delivery = {
 				weight = 3,
 				text = "Attention shoppers, a delivery has arrived in aisle {spot}.",
-				voice = nil,
+				voice = "pa_delivery",
 				value = 0.7,
 				loot = { headline = HEADLINE, fill = FILL, rolls = { 3, 5 } },
 			},
 			open = {
 				weight = 2,
 				text = "Attention shoppers, the {spot} is now open.",
-				voice = nil,
+				voice = "pa_open",
 			},
 			lost = {
 				weight = 1,
 				text = "Lost item at the front desk. Lost item at the front desk.",
-				voice = nil,
+				voice = "pa_lost_item",
 				value = 1,
 				loot = { headline = RARE, fill = {}, rolls = { 0, 0 } },
 			},
@@ -147,7 +147,7 @@ return {
 					"Lucky shopper giveaway in aisle {spot}. Lucky shopper giveaway in aisle {spot}.",
 					"Attention shoppers, one lucky winner awaits in aisle {spot}.",
 				},
-				voice = nil,
+				voice = { "pa_bait_1", "pa_bait_2", "pa_bait_3" },
 				value = 0.85,
 				loot = { headline = HEADLINE, fill = FILL, rolls = { 3, 5 } },
 				jackpot = {
@@ -180,7 +180,8 @@ return {
 					"*crackle* ...the robots dropped something by the {spot}...",
 					"*crackle* ...heard a crate land outside the {spot}...",
 				},
-				voice = nil,
+				voice = { "pa_rumor_1", "pa_rumor_2", "pa_rumor_3" },
+				placeVoice = { "pa_rumor_place_1", "pa_rumor_place_2" },
 				value = 0.55,
 				loot = { headline = HEADLINE, fill = FILL, rolls = { 1, 2 } },
 			},
@@ -193,7 +194,7 @@ return {
 					"Last call, shoppers. One final prize in aisle {spot}. The store closes soon.",
 					"Attention shoppers, last chance savings in aisle {spot}. Hurry, we're closing.",
 				},
-				voice = nil,
+				voice = { "pa_lastcall_1", "pa_lastcall_2" },
 				value = 0.9,
 				loot = { headline = HEADLINE, fill = FILL, rolls = { 3, 5 } },
 				jackpot = {
@@ -228,7 +229,7 @@ return {
 				"Cleanup crew to aisle {spot}. All units. Cleanup crew to aisle {spot}.",
 				"Attention staff: mess reported in aisle {spot}. All helpers respond.",
 			},
-			voice = nil,
+			voice = { "pa_sweep_1", "pa_sweep_2" },
 			beam = {
 				Width = 4,
 				Height = 120,

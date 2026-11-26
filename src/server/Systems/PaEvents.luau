@@ -225,7 +225,9 @@ local function openSite(target: DirectorLogic.Candidate?): (Site?, any)
 		return { name = name, x = room.cx, z = room.cz }, room
 	end
 	local x, z, nx, nz = Installations.doorway(hall, hall.doors[1])
-	return { name = name, x = x + nx * 6, z = z + nz * 6 }, room
+	-- out in front of the door on clear floor, never inside a rack or the shell
+	local cx, cz = PrizesLogic.clearNear(clearAt(3), x + nx * 6, z + nz * 6, 0, 20, 20, rng)
+	return { name = name, x = cx or x + nx * 6, z = cz or z + nz * 6 }, room
 end
 
 local function frontDeskSite(): Site?
@@ -263,8 +265,37 @@ local function siteFor(name: string, target: DirectorLogic.Candidate?): (Site?, 
 	return aisleSite(target), nil
 end
 
-local function lineFrom(options: string | { string }): string
-	return if type(options) == "table" then rng:pick(options) else options
+-- One line at random, and its clip: voices is one name, or a list in the same order as the lines
+local function lineFrom(options: string | { string }, voices: (string | { string })?): (string, string?)
+	if type(options) ~= "table" then
+		return options, if type(voices) == "string" then voices else nil
+	end
+	local index = rng:int(1, #options)
+	local voice = if type(voices) == "table"
+		then voices[index]
+		elseif type(voices) == "string" then voices
+		else nil
+	return options[index], voice
+end
+
+-- The store has one set of speakers: an announcement waits for the one before it to finish
+local airFreeAt = 0
+
+-- Claims the speakers for `seconds` if they're free. NightTricks asks before its night lines.
+function PaEvents.claimAir(seconds: number): boolean
+	local now = os.clock()
+	if now < airFreeAt then
+		return false
+	end
+	airFreeAt = now + seconds
+	return true
+end
+
+-- Waits for the speakers, then holds them for this announcement
+local function waitForAir()
+	while not PaEvents.claimAir(Settings.SubtitleSeconds) do
+		task.wait(airFreeAt - os.clock() + 0.2)
+	end
 end
 
 local function crateAt(site: Site, value: number, loot: PrizesLogic.ChestLoot): PrizeChests.Chest?
@@ -303,13 +334,19 @@ local function run(name: string, site: Site, room: any)
 	local look = event.beam or Settings.Beam
 	local marker = if event.rumor then nil else beam(position, look, folder)
 	task.spawn(expire, marker, chest, look.Seconds)
-	local text = if site.place and event.place then lineFrom(event.place) else lineFrom(event.text)
+	local text, voice
+	if site.place and event.place then
+		text, voice = lineFrom(event.place, event.placeVoice)
+	else
+		text, voice = lineFrom(event.text, event.voice)
+	end
+	waitForAir()
 	eventRemote:FireAllClients({
 		text = PrizesLogic.line(text, site.name),
 		position = if event.rumor then nil else position,
 		rumor = event.rumor == true,
 		glitch = not event.rumor and rng:next() < Settings.GlitchChance,
-		voice = event.voice,
+		voice = voice,
 	})
 	SimPlayers.lure(position, Steering.BotPull[name] or 0, Steering.BotLureRange)
 end
@@ -365,16 +402,23 @@ local function sweep(token: number)
 	if not spot or #layout.signs == 0 then
 		return
 	end
+	-- the loudest zone can be inside a room's shell or a rack: move it to clear aisle floor
+	local site = aisleSite(spot)
+	if site then
+		spot = { x = site.x, z = site.z }
+	end
 	local sign = DirectorLogic.nearest(layout.signs, spot)
 	local position = Warehouse.toWorld(spot.x, spot.z)
 	local marker = beam(position, look.beam, folder)
 	task.delay(look.beam.Seconds, marker.Destroy, marker)
+	local text, voice = lineFrom(look.text, look.voice)
+	waitForAir()
 	eventRemote:FireAllClients({
-		text = PrizesLogic.line(lineFrom(look.text), tostring(sign.number)),
+		text = PrizesLogic.line(text, tostring(sign.number)),
 		position = position,
 		rumor = false,
 		glitch = rng:next() < Settings.GlitchChance,
-		voice = look.voice,
+		voice = voice,
 	})
 	Robots.converge(position, look.Seconds, look.Every)
 end

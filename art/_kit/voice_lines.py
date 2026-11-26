@@ -38,6 +38,24 @@ EXTRA = {
         "Is this thing on? If you can hear me, hide when the lights go out. "
         "When they come back on, the robots freeze. Over.",
     ),
+    # PA event calls (Config.Prizes) and the night aisle line, said without the aisle number: the
+    # subtitle names the spot, so one clip covers every aisle
+    "pa_remain_still": ("pa_night", "Shopper. Please remain still."),
+    "pa_delivery": ("pa", "Attention shoppers. A delivery has arrived."),
+    "pa_open": ("pa", "Attention shoppers. A new department is now open."),
+    "pa_lost_item": ("pa", "Lost item at the front desk. Lost item at the front desk."),
+    "pa_bait_1": ("pa", "Attention shoppers. A special prize has been left for you."),
+    "pa_bait_2": ("pa", "Lucky shopper giveaway. Lucky shopper giveaway."),
+    "pa_bait_3": ("pa", "Attention shoppers. One lucky winner awaits."),
+    "pa_rumor_1": ("walkie", "Heard someone crying for help out there. Nobody was there. Found a crate though."),
+    "pa_rumor_2": ("walkie", "Left a stash behind. Couldn't carry it all."),
+    "pa_rumor_3": ("walkie", "Anyone out there? Something fell off a robot cart."),
+    "pa_rumor_place_1": ("walkie", "The robots dropped something by one of the rooms."),
+    "pa_rumor_place_2": ("walkie", "Heard a crate land outside one of the rooms."),
+    "pa_lastcall_1": ("pa", "Last call, shoppers. One final prize. The store closes soon."),
+    "pa_lastcall_2": ("pa", "Attention shoppers. Last chance savings. Hurry, we're closing."),
+    "pa_sweep_1": ("pa_night", "Cleanup crew. All units. Cleanup crew."),
+    "pa_sweep_2": ("pa_night", "Attention staff. Mess reported. All helpers respond."),
     "kid_found_you": ("kid", "Found you."),
     "kid_come_find_me": ("kid", "Come find me."),
 }

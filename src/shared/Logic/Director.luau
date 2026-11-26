@@ -3,9 +3,10 @@
 -- Flat x/z numbers only, no Roblox. Settings: Config.Director.
 local Director = {}
 
-export type Point = { x: number, z: number }
+-- id: who a point belongs to (a player standing there, or the placer of a fort prop), when known
+export type Point = { x: number, z: number, id: any?, ids: { [any]: boolean }? }
 -- members: indexes into the clustered points, so a caller can tell which ones made the group
-export type Group = { x: number, z: number, count: number, members: { number }? }
+export type Group = { x: number, z: number, count: number, members: { number }?, ids: { [any]: boolean }? }
 export type Installation = { x: number, z: number, room: any }
 export type Candidate = { x: number, z: number, kind: string, weight: number, room: any? }
 
@@ -39,7 +40,7 @@ function Director.cluster(points: { Point }, radius: number): { Group }
 		local key = root(index)
 		local group = byRoot[key]
 		if not group then
-			group = { x = 0, z = 0, count = 0, members = {} }
+			group = { x = 0, z = 0, count = 0, members = {}, ids = {} }
 			byRoot[key] = group
 			table.insert(groups, group)
 		end
@@ -47,6 +48,9 @@ function Director.cluster(points: { Point }, radius: number): { Group }
 		group.z += point.z
 		group.count += 1
 		table.insert(group.members :: { number }, index)
+		if point.id ~= nil then
+			(group.ids :: any)[point.id] = true
+		end
 	end
 	for _, group in groups do
 		group.x /= group.count
@@ -131,10 +135,18 @@ function Director.candidates(
 		end
 	end
 	-- Just beyond a fort, seen from a group that doesn't own it, so their walk passes the fort
+	local function owns(group: Group, fort: Point): boolean
+		for id in fort.ids or {} do
+			if group.ids and group.ids[id] then
+				return true
+			end
+		end
+		return false
+	end
 	for _, group in groups do
 		for _, fort in forts do
 			local gap = distance(group, fort)
-			if gap >= settings.MinGap and gap <= settings.MaxGap then
+			if gap >= settings.MinGap and gap <= settings.MaxGap and not owns(group, fort) then
 				local past = settings.PastFort / gap
 				add({
 					x = fort.x + (fort.x - group.x) * past,

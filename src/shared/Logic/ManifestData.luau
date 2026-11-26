@@ -10663,9 +10663,25 @@ return {
 			assetId = 123367309700811,
 		},
 		{
+			name = "pa_bait_1",
+			group = "voice",
+		},
+		{
+			name = "pa_bait_2",
+			group = "voice",
+		},
+		{
+			name = "pa_bait_3",
+			group = "voice",
+		},
+		{
 			name = "pa_closed",
 			group = "voice",
 			assetId = 135727238231431,
+		},
+		{
+			name = "pa_delivery",
+			group = "voice",
 		},
 		{
 			name = "pa_exit_elsewhere",
@@ -10688,9 +10704,21 @@ return {
 			assetId = 85345248353435,
 		},
 		{
+			name = "pa_lastcall_1",
+			group = "voice",
+		},
+		{
+			name = "pa_lastcall_2",
+			group = "voice",
+		},
+		{
 			name = "pa_lost_children",
 			group = "voice",
 			assetId = 132247928049901,
+		},
+		{
+			name = "pa_lost_item",
+			group = "voice",
 		},
 		{
 			name = "pa_never_close",
@@ -10698,9 +10726,37 @@ return {
 			assetId = 104190504143215,
 		},
 		{
+			name = "pa_open",
+			group = "voice",
+		},
+		{
 			name = "pa_parents",
 			group = "voice",
 			assetId = 72014182750555,
+		},
+		{
+			name = "pa_remain_still",
+			group = "voice",
+		},
+		{
+			name = "pa_rumor_1",
+			group = "voice",
+		},
+		{
+			name = "pa_rumor_2",
+			group = "voice",
+		},
+		{
+			name = "pa_rumor_3",
+			group = "voice",
+		},
+		{
+			name = "pa_rumor_place_1",
+			group = "voice",
+		},
+		{
+			name = "pa_rumor_place_2",
+			group = "voice",
 		},
 		{
 			name = "pa_smiling_mandatory",
@@ -10711,6 +10767,14 @@ return {
 			name = "pa_special_everything",
 			group = "voice",
 			assetId = 108672133751528,
+		},
+		{
+			name = "pa_sweep_1",
+			group = "voice",
+		},
+		{
+			name = "pa_sweep_2",
+			group = "voice",
 		},
 		{
 			name = "pa_thank_you",
