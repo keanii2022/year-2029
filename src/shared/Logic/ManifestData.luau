@@ -203,6 +203,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 109403878942569,
+			textureId = 76710378792952,
 		},
 		{
 			name = "canned_food",
@@ -359,6 +361,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 129003595683792,
+			textureId = 84370903134286,
 		},
 		{
 			name = "juice_box",
@@ -374,6 +378,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 87793354866154,
+			textureId = 114075333418510,
 		},
 		{
 			name = "lunchbox",
@@ -445,6 +451,8 @@ return {
 					does = "Peels back. Better refill with hot water from the stove.",
 				},
 			},
+			assetId = 125330209960320,
+			textureId = 111910330049444,
 		},
 		{
 			name = "peanut_butter",
@@ -555,6 +563,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 128239386990525,
+			textureId = 130537230380586,
 		},
 		{
 			name = "snack_bar",
@@ -570,6 +580,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 80381734792295,
+			textureId = 140541371291059,
 		},
 		{
 			name = "water_bottle",
@@ -607,6 +619,8 @@ return {
 					does = "Heavy, two hands. Hit it to split it into watermelon slices.",
 				},
 			},
+			assetId = 93376858069999,
+			textureId = 85361747300692,
 		},
 		{
 			name = "watermelon_slice",
@@ -2705,6 +2719,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 83603619781976,
+			textureId = 131388552889091,
 		},
 		{
 			name = "battery",
@@ -3284,6 +3300,8 @@ return {
 			},
 			clips = {},
 			moves = {},
+			assetId = 114801561131636,
+			textureId = 98814999585627,
 		},
 		{
 			name = "nail_gun",
@@ -5805,6 +5823,8 @@ return {
 				"walk",
 			},
 			moves = {},
+			assetId = 136666279461110,
+			textureId = 136163324353663,
 		},
 		{
 			name = "sorter_decoy",
@@ -5892,6 +5912,8 @@ return {
 				"turn",
 			},
 			moves = {},
+			assetId = 80576942279474,
+			textureId = 120434072289596,
 		},
 		{
 			name = "blueprint",
