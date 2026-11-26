@@ -15,3 +15,6 @@ roblox.yml
 .claude/launch.json
 art/sounds/voice_raw/
 art/sounds/recorded_raw/
+
+# Meshy source downloads (big, cut into parts by art/_kit/meshy_split.py)
+art/_meshy/
