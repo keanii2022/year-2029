@@ -43,6 +43,7 @@ local states: { [Player]: PlayerState } = {}
 local lastKills: { [Player]: { [number]: number } } = {}
 local hitRemote: RemoteEvent
 local fxRemote: UnreliableRemoteEvent
+local resyncRemote: RemoteEvent
 local whizRemote: UnreliableRemoteEvent
 local viewmodels: Folder
 
@@ -70,6 +71,7 @@ local function excludeParams(character: Model): RaycastParams
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character }
+	params.CollisionGroup = Config.Grab.ShotGroup
 	return params
 end
 
@@ -320,8 +322,9 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any, a
 	local now = os.clock()
 	local state = stateOf(player)
 	settleReload(player, state, now)
-	-- Firing another gun drops the reload that was under way.
-	if state.reloadGun and state.reloadGun ~= id then
+	-- Still reloading after the slack: the client never fires mid-reload, so it dropped that reload
+	-- (swapped guns and back, say). Drop it here too, or every shot is refused until it runs out.
+	if state.reloadStartedAt then
 		cancelReload(player, state)
 	end
 	local held = gunState(state, id)
@@ -342,6 +345,10 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any, a
 		minInterval = CombatModes.minGap(gun, held.burstShots) * settings.FireIntervalSlack,
 	})
 	if not ok then
+		-- the client already spent the round: put its count back in step
+		publishMag(player, state, id)
+		resyncRemote:FireClient(player, id, held.mag)
+		Inventory.resend(player)
 		return
 	end
 	ok = CombatLogic.checkShot({
@@ -387,7 +394,23 @@ local function onFire(player: Player, origin: any, direction: any, gunId: any, a
 		-- simulated players have no Player but take hits like one
 		local simPlayer = targetHumanoid ~= nil
 			and CollectionService:HasTag(targetHumanoid.Parent :: Instance, Config.SimPlayers.Tag)
-		if (target or simPlayer) and targetHumanoid and target ~= player and targetHumanoid.Health > 0 then
+		-- a spawn-shielded or hidden player can't be hurt, so no hit marker or blood-free sparks either
+		local untouchable = target ~= nil
+			and (
+				target:GetAttribute("SpawnGrace") == true
+				or target:GetAttribute("Hidden") == true
+				or (
+					targetHumanoid ~= nil
+					and (targetHumanoid.Parent :: Instance):FindFirstChildOfClass("ForceField") ~= nil
+				)
+			)
+		if
+			(target or simPlayer)
+			and targetHumanoid
+			and target ~= player
+			and targetHumanoid.Health > 0
+			and not untouchable
+		then
 			local damage = CombatLogic.damageAt(gun, (hitPosition - origin).Magnitude)
 			damageTo[targetHumanoid] = (damageTo[targetHumanoid] or 0) + damage
 			victims[targetHumanoid] = target
@@ -528,6 +551,7 @@ end
 function Combat.Init()
 	Players.RespawnTime = settings.RespawnDelay
 	hitRemote = Net.event("GunHit")
+	resyncRemote = Net.event("GunResync")
 	fxRemote = Net.unreliable("GunFx")
 	whizRemote = Net.unreliable("GunWhiz")
 	Net.event("GunFire").OnServerEvent:Connect(onFire)

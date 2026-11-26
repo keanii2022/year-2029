@@ -1,5 +1,9 @@
 return {
 	Tag = "Grabbable",
+	-- Placed props get an invisible box (robot pathing). Bullets cast in ShotGroup pass through
+	-- BlockerGroup, so a shot over a couch seat doesn't stop on thin air.
+	BlockerGroup = "FortBlocker",
+	ShotGroup = "Shots",
 
 	-- Reach, in studs from the player's root part.
 	GrabReach = 12,

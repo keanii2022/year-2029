@@ -692,7 +692,9 @@ local function assistTarget(origin: Vector3, look: Vector3, coneDegrees: number,
 	local character = player.Character
 	local bodies: { Instance } = CollectionService:GetTagged(Config.SimPlayers.Tag)
 	for _, other in Players:GetPlayers() do
-		if other ~= player and other.Character then
+		-- never pull onto someone tucked in a hiding spot or spawn-shielded: that gives them away
+		local untouchable = other:GetAttribute("Hidden") == true or other:GetAttribute("SpawnGrace") == true
+		if other ~= player and other.Character and not untouchable then
 			table.insert(bodies, other.Character)
 		end
 	end
@@ -705,6 +707,7 @@ local function assistTarget(origin: Vector3, look: Vector3, coneDegrees: number,
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character :: Instance, fxFolder }
+	params.CollisionGroup = Config.Grab.ShotGroup
 	local best: Vector3? = nil
 	local bestAngle = coneDegrees
 	for _, body in bodies do
@@ -788,6 +791,7 @@ local function fireOnce(minInterval: number?, shotInPull: number?): boolean
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character, fxFolder }
+	params.CollisionGroup = Config.Grab.ShotGroup
 	Viewmodel.kick(feel.weight)
 	local pattern = gun.burstKick and gun.burstKick[shotInPull or 1]
 	local kickUp, kickSide
@@ -1101,6 +1105,13 @@ function Gun.Start()
 		end
 	end
 	player.AttributeChanged:Connect(adoptServerMag)
+	-- a shot the server refused: take its mag count even when the attribute didn't change
+	Net.event("GunResync").OnClientEvent:Connect(function(id: string, mag: number)
+		if settings.Blasters[id] and type(mag) == "number" then
+			mags[id] = mag
+			notifyChanged()
+		end
+	end)
 	for attribute in player:GetAttributes() do
 		adoptServerMag(attribute)
 	end

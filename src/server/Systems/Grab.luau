@@ -5,6 +5,7 @@
 -- longer when the piece is fortified (Logic/FortLink). Placed props get a plain box blocker so
 -- robot paths and crawlers can't find gaps in mesh collision.
 local CollectionService = game:GetService("CollectionService")
+local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -146,6 +147,7 @@ local function addBlocker(prop: PVInstance)
 	blocker.CanTouch = false
 	blocker.CastShadow = false
 	blocker.Transparency = 1
+	blocker.CollisionGroup = Settings.BlockerGroup
 	blocker.Size = size
 	blocker.CFrame = boxCFrame
 	blocker.Parent = prop
@@ -726,6 +728,9 @@ local function spawnTestProps()
 end
 
 function Grab:Init()
+	PhysicsService:RegisterCollisionGroup(Settings.BlockerGroup)
+	PhysicsService:RegisterCollisionGroup(Settings.ShotGroup)
+	PhysicsService:CollisionGroupSetCollidable(Settings.ShotGroup, Settings.BlockerGroup, false)
 	requestRemote = Net.event("GrabRequest")
 	dropRemote = Net.event("GrabDrop")
 	stateRemote = Net.event("GrabState")

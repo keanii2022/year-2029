@@ -100,6 +100,11 @@ function Inventory.onAdded(listener: (Player, string) -> ())
 end
 
 -- Removes up to count (default 1). Returns how many were removed.
+-- Sends the player their bag again (a refused shot leaves the client a round short otherwise)
+function Inventory.resend(player: Player)
+	sync(player)
+end
+
 function Inventory.remove(player: Player, itemId: string, count: number?): number
 	local removed = InventoryLogic.remove(bagOf(player), itemId, count or 1)
 	if removed > 0 then
