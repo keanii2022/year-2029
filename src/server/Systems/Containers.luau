@@ -16,6 +16,7 @@ local Rng = require(ReplicatedStorage.Shared.Logic.WarehouseGenRng)
 local Interact = require(script.Parent.Interact)
 local Inventory = require(script.Parent.Inventory)
 local Loudness = require(script.Parent.Loudness)
+local DayNight = require(script.Parent.DayNight)
 local Warehouse = require(script.Parent.Warehouse)
 
 local Settings = Config.Containers
@@ -257,6 +258,18 @@ function Containers.Init()
 	Net.event("ContainerClose").OnServerEvent:Connect(onClose)
 	Interact.onOpenChanged(onOpenChanged)
 	Interact.setUseFilter(lookInside)
+	-- the guarded crate in every robot room fills back up each morning (left alone while someone
+	-- has it open)
+	DayNight.onPhaseChanged(function(phase)
+		if phase ~= "Day" then
+			return
+		end
+		for _, box in boxes do
+			if box.guarded and next(box.viewers) == nil then
+				box.stacks = guardedLoot(box.rule, Rng.new(random:NextInteger(1, 2 ^ 31 - 1)))
+			end
+		end
+	end)
 	Players.PlayerRemoving:Connect(function(player)
 		unview(player, false)
 	end)

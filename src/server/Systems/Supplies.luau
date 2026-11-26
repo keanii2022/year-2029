@@ -251,7 +251,7 @@ local function buildPickup(roll: Loot.Roll, spot: Loot.Spot, turn: number)
 	prompt.RequiresLineOfSight = true -- no looting through a wall
 	prompt.Parent = root
 	prompt.Triggered:Connect(function(player)
-		if remaining <= 0 or not bodyOf(player) then
+		if remaining <= 0 or not bodyOf(player) or player:GetAttribute("Cuffed") == true then
 			return
 		end
 		local added = Inventory.add(player, roll.item, remaining)

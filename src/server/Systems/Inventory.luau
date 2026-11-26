@@ -138,7 +138,7 @@ local function onPickup(pile: Model, prompt: ProximityPrompt, player: Player)
 	local contents = piles[pile]
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not contents or not humanoid or humanoid.Health <= 0 then
+	if not contents or not humanoid or humanoid.Health <= 0 or player:GetAttribute("Cuffed") == true then
 		return
 	end
 	local offered = {}

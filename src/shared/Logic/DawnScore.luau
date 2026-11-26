@@ -78,6 +78,29 @@ function DawnScore.banked(before: { Stack }, after: { Stack }): { Stack }
 	return added
 end
 
+-- The higher of two locker snapshots, item by item. Banked-tonight counts from this, so taking the
+-- stash out before the siren and putting it back during it earns nothing.
+function DawnScore.highest(a: { Stack }, b: { Stack }): { Stack }
+	local most, order = {}, {}
+	for _, list in { a, b } do
+		local here = {}
+		for _, stack in list do
+			here[stack.id] = (here[stack.id] or 0) + stack.count
+		end
+		for id, count in here do
+			if most[id] == nil then
+				table.insert(order, id)
+			end
+			most[id] = math.max(most[id] or 0, count)
+		end
+	end
+	local result = {}
+	for _, id in order do
+		table.insert(result, { id = id, count = most[id] })
+	end
+	return result
+end
+
 -- The most valuable stacks first (value x count), as names for the card
 function DawnScore.topLines(stacks: { Stack }, items: Inventory.Items, shown: number): { Line }
 	local known = {}

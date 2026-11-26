@@ -36,6 +36,7 @@ local Dawn = {}
 local streaks: { [Player]: number } = {}
 local aliveAtLightsOut: { [Player]: boolean } = {}
 local lockerAtSiren: { [Player]: { Stack } } = {}
+local lockerAtDayStart: { [Player]: { Stack } } = {}
 local bankedTonight: { [Player]: { Stack } } = {}
 local placedAtLightsOut: { Placed } = {}
 local joinedAtNight: { [Player]: boolean } = {}
@@ -77,7 +78,16 @@ local function onSiren()
 	end
 	table.clear(lockerAtSiren)
 	for _, player in Players:GetPlayers() do
-		lockerAtSiren[player] = lockerTotals(player)
+		local now = lockerTotals(player)
+		local morning = lockerAtDayStart[player]
+		lockerAtSiren[player] = if now and morning then DawnScore.highest(morning, now) else now
+	end
+end
+
+local function onDayStart()
+	table.clear(lockerAtDayStart)
+	for _, player in Players:GetPlayers() do
+		lockerAtDayStart[player] = lockerTotals(player)
 	end
 end
 
@@ -223,6 +233,9 @@ local function onPhaseChanged(phase: string, previous: string, day: number)
 	elseif phase == "Day" and previous == "Night" then
 		onDawn(day)
 	end
+	if phase == "Day" then
+		onDayStart()
+	end
 end
 
 -- A new body is a new life
@@ -244,6 +257,7 @@ local function onPlayerRemoving(player: Player)
 	streaks[player] = nil
 	aliveAtLightsOut[player] = nil
 	lockerAtSiren[player] = nil
+	lockerAtDayStart[player] = nil
 	bankedTonight[player] = nil
 	joinedAtNight[player] = nil
 	hadLife[player] = nil

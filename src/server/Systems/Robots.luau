@@ -397,7 +397,12 @@ local function placeStash(roomKey: number, itemId: string, count: number, positi
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		local left = pickup:GetAttribute("Count") :: number
-		if not humanoid or humanoid.Health <= 0 or not Inventory.Items[itemId] then
+		if
+			not humanoid
+			or humanoid.Health <= 0
+			or not Inventory.Items[itemId]
+			or player:GetAttribute("Cuffed") == true
+		then
 			return
 		end
 		left -= Inventory.add(player, itemId, left)
@@ -2959,13 +2964,18 @@ function Robots.destroy(robot: Robot, byPlayer: Player?)
 	-- the last one down: the room's loot spills out where it fell
 	if room and robot.role == "chore" and (roomWant[room.id] or 0) <= 0 then
 		destroyedRooms[room.id] = true
+		-- spilled crates belong to the wreck now: cleared at dawn like it, never merged into or
+		-- trimmed off the room's shelf once the room fills back up
+		stash[0] = stash[0] or {}
 		for _, pickup in table.clone(stash[room.id] or {}) do
 			local angle = random:NextNumber(0, math.pi * 2)
 			setDown(
 				pickup,
 				position + Vector3.new(math.cos(angle), 0, math.sin(angle)) * random:NextNumber(2, 5)
 			)
+			table.insert(stash[0], pickup)
 		end
+		stash[room.id] = {}
 		for _, pile in CollectionService:GetTagged(Config.Guns.LootPileTag) do
 			if pile:IsA("Model") and insideRoom(room, pile:GetPivot().Position, 0) then
 				local angle = random:NextNumber(0, math.pi * 2)

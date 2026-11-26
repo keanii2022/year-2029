@@ -451,6 +451,10 @@ local function onDown(player: Player, character: Model)
 	local spot = if root then root.Position else character:GetPivot().Position
 	player:SetAttribute("DownBy", downCause(character, spot))
 	player:SetAttribute("DownUntil", workspace:GetServerTimeNow() + settings.RespawnDelay)
+	-- the spawn kit comes back next life, so it never goes in the pile (resetting farmed it)
+	for _, item in settings.StartingLoadout do
+		Inventory.remove(player, item.id, math.min(item.count, Inventory.count(player, item.id)))
+	end
 	local pile = Inventory.dropAll(player, spot)
 	player:SetAttribute("DownAt", if pile then pile:GetPivot().Position else nil)
 end

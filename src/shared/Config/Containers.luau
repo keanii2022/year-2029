@@ -71,7 +71,7 @@ return {
 		locker = "LOCKER",
 	},
 
-	-- The crate in every installation (Config.Warehouse.InstallationStash): always full, rolled from
+	-- The crate in every installation (Config.Warehouse.InstallationStash): refilled every morning from
 	-- Config.Supplies.InstallationLoot. Taking from it makes a takeLoudness sound the robots hear.
 	InstallationStash = { rolls = { 3, 5 }, takeLoudness = "normal" },
 

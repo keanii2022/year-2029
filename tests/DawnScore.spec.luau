@@ -86,4 +86,14 @@ return {
 		expect(DawnScore.payout(night(1), robotRules).robot).toBe(0)
 		expect(DawnScore.payout(withRobot, rules).robot).toBe(0)
 	end,
+	["re-banking the stash you took out that day earns nothing"] = function()
+		local morning = { { id = "Rifle", count = 1 }, { id = "Snack", count = 4 } }
+		local siren = { { id = "Snack", count = 4 } } -- took the rifle out before the siren
+		local after = { { id = "Rifle", count = 1 }, { id = "Snack", count = 6 } }
+		local base = DawnScore.highest(morning, siren)
+		local banked = DawnScore.banked(base, after)
+		expect(#banked).toBe(1)
+		expect(banked[1].id).toBe("Snack")
+		expect(banked[1].count).toBe(2)
+	end,
 }
